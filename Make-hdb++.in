@@ -1,0 +1,19 @@
+
+#LIBHDB_INC = /runtime/include
+LIBHDB_INC = ../libhdb++/src
+#LIBHDB_LIB = /runtime/lib
+LIBHDB_LIB = ../libhdb++/lib
+#LIBHDBIMPL_LIB = /runtime/lib
+#LIBHDBIMPL_LIB = ../libhdbmysql/lib
+#LIBHDBIMPL = hdbmysql
+LIBHDBIMPL_LIB = ../libhdb++mysql/lib
+LIBHDBIMPL = hdb++mysql
+#SQLIMPL_INC = /usr/local/mysql-5.5.22/include
+SQLIMPL_INC = /usr/include/mysql
+#SQLIMPL_LIB = /usr/local/mysql-5.5.22/lib
+SQLIMPL_LIB = /usr/lib/mysql
+SQLIMPL = mysqlclient
+
+OMNI_INC = /usr/local/omniorb-4.1.6/include
+TANGO_INC = /usr/local/tango-8.1.2.c/include/tango
+
