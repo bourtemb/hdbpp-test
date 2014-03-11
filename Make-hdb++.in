@@ -1,12 +1,12 @@
 
 #LIBHDB_INC = /runtime/include
-LIBHDB_INC = ../libhdb++/src
+LIBHDB_INC = ../../libhdb++/trunk/src
 #LIBHDB_LIB = /runtime/lib
-LIBHDB_LIB = ../libhdb++/lib
+LIBHDB_LIB = ../../libhdb++/trunk/lib
 #LIBHDBIMPL_LIB = /runtime/lib
 #LIBHDBIMPL_LIB = ../libhdbmysql/lib
 #LIBHDBIMPL = hdbmysql
-LIBHDBIMPL_LIB = ../libhdb++mysql/lib
+LIBHDBIMPL_LIB = ../../libhdb++mysql/trunk/lib
 LIBHDBIMPL = hdb++mysql
 #SQLIMPL_INC = /usr/local/mysql-5.5.22/include
 SQLIMPL_INC = /usr/include/mysql
