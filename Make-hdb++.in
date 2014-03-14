@@ -1,13 +1,23 @@
+ELETTRA = 1
+HDB++MYSQL = 0
 
-#LIBHDB_INC = /runtime/include
+ifeq ($(ELETTRA),1)
+  CXXFLAGS += -std=gnu++98 -D_USE_FERMI_DB_RW
+else
+  CXXFLAGS += -std=gnu++0x
+endif
+
+ifeq ($(HDB++MYSQL),1)
+  LIBHDBIMPL_LIB = ../../libhdb++mysql/trunk/lib
+  LIBHDBIMPL = hdb++mysql
+else
+  LIBHDBIMPL_LIB = ../../libhdbmysql/trunk/lib
+  LIBHDBIMPL = hdbmysql
+endif
+
 LIBHDB_INC = ../../libhdb++/trunk/src
-#LIBHDB_LIB = /runtime/lib
 LIBHDB_LIB = ../../libhdb++/trunk/lib
-#LIBHDBIMPL_LIB = /runtime/lib
-#LIBHDBIMPL_LIB = ../libhdbmysql/lib
-#LIBHDBIMPL = hdbmysql
-LIBHDBIMPL_LIB = ../../libhdb++mysql/trunk/lib
-LIBHDBIMPL = hdb++mysql
+
 #SQLIMPL_INC = /usr/local/mysql-5.5.22/include
 SQLIMPL_INC = /usr/include/mysql
 #SQLIMPL_LIB = /usr/local/mysql-5.5.22/lib
