@@ -1,4 +1,4 @@
-ELETTRA = 1
+ELETTRA = 0
 HDB++MYSQL = 0
 
 ifeq ($(ELETTRA),1)
