@@ -1,4 +1,3 @@
-CXXFLAGS += -std=gnu++98
 
 TANGO_DIR ?= /usr/local/tango-8.1.2.c
 OMNIORB_DIR ?= /usr/local/omniorb-4.1.6
