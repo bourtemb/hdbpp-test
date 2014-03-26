@@ -1,0 +1,36 @@
+HDB++
+
+* Directory structure
+
+  doc
+     -> Documentation
+  etc
+     -> SQL for the creation of MySQL tables
+  hdb++cm
+     -> Configuration Manager Tango Device Server
+  hdb++es
+     -> Event Subscriber Tango Device Server
+  libhdb++
+     -> Abstraction library for DB interface
+  libhdbmysql
+     -> Implementation library for MySQL actual HDB interface
+  libhdb++mysql
+     -> Implementation library for MySQL new HDB++ interface
+
+* Compilation
+
+  hdb++es and hdb++cm needs to be compiled against libhdb++ and libhdbmysql
+  to use actual hdb MySQL DB structure, or against libhdb++ and libhdb++mysql
+  to use new sperimental MySQL DB structure.
+  Set HDB++MYSQL = 0 in Make-hdb++.in in the first case, HDB++MYSQL = 1 in
+  the second.
+
+  Path adjustments:
+
+  Makefiles refers to Make-hdb++.in and Make-8.1.2.c.in.
+  In Make-hdb++.in adjust SQLIMPL_INC and SQLIMPL_LIB with MySQL paths,
+  OMNI_INC and TANGO_INC with OmniORB and Tango include paths.
+  In Make-8.1.2.c.in adjust TANGO_DIR and OMNIORB_DIR with Tango and
+  OmniORB base paths.
+
+
