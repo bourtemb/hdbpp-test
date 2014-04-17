@@ -1,4 +1,4 @@
-ELETTRA = 0
+ELETTRA = 1
 HDB++MYSQL = 0
 
 ifeq ($(ELETTRA),1)
@@ -18,11 +18,9 @@ endif
 LIBHDB_INC = ../../libhdb++/trunk/src
 LIBHDB_LIB = ../../libhdb++/trunk/lib
 
-#SQLIMPL_INC = /usr/local/mysql-5.5.22/include
-SQLIMPL_INC = /usr/include/mysql
-#SQLIMPL_LIB = /usr/local/mysql-5.5.22/lib
-SQLIMPL_LIB = /usr/lib/mysql
-SQLIMPL = mysqlclient
+SQLIMPL_INC = `mysql_config --include`
+SQLIMPL_LIB = `mysql_config --libs_r`
+#SQLIMPL = mysqlclient
 
 OMNI_INC = /usr/local/omniorb-4.1.6/include
 TANGO_INC = /usr/local/tango-8.1.2.c/include/tango
