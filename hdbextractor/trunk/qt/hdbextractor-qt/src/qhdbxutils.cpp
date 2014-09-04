@@ -86,7 +86,7 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
                                              QVector<double> &timestamps,
                                              QVector<double> &rdata,
                                              QVector<double> &wdata,
-                                             bool *ok = NULL)
+                                             bool *ok)
 {
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
