@@ -20,6 +20,11 @@ class HdbExtractorListener;
  *
  * \image html qhdbextractor.png
  *
+ * \par Important note
+ * Even if the HdbExtractor library is tailored to deal with Tango data (as far as data type,
+ * writable property and data format are concerned), it is <em>not dependent</em> from Tango
+ * specific data types and libraries at any rate.
+ *
  * <h3>Usage</h3>
  *  The use of the Hdbextractor is very simple.
  *  The class that makes use of the Hdbextractor must implement the HdbExtractorListener interface in order

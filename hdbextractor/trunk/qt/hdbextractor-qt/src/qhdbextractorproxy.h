@@ -93,7 +93,7 @@ signals:
      */
     void sourceExtractionFinished(const QString& source, int sourceStep, int totalSources, double timeElapsed);
 
-    /** \brief This signal is emitted when new scalar data is available
+    /** \brief This signal is emitted when new <em>read only or write only</em> scalar data is available
      *
      * @param source the tango point extracted from the database (domain/family/member/attribute_name)
      * @param timestamps vector of timestamps to be used in X axis (time)
@@ -105,6 +105,27 @@ signals:
      * The signal is delivered from the main thread and can be safely used in the UI thread.
      */
     void dataReady(const QString& source, const QVector<double>& timestamps, const QVector<double> & data);
+
+
+    /** \brief This signal is emitted when new <em>read write</em> scalar data is available
+     *
+     * @param source the tango point extracted from the database (domain/family/member/attribute_name)
+     * @param timestamps vector of timestamps to be used in X axis (time)
+     * @param read_data vector of data aligned with the timestamps (Tango read value)
+     * @param write_data vector of data aligned with the timestamps (Tango write value)
+     *
+     * \note
+     * Since the underlying Hdbextractor is thread-safe, there is no need to queue connection between
+     * QHdbextractorThread::dataReady and your slot.
+     * The signal is delivered from the main thread and can be safely used in the UI thread.
+     *
+     * Read data and write data are fetched together for each source, so they are sent
+     * conjoined by this signal.
+     */
+    void dataReady(const QString& source, const QVector<double>& timestamps,
+                   const QVector<double> & read_data,
+                   const QVector<double> & write_data);
+
 
     /** \brief This signal is emitted when new vector of data is available
      *

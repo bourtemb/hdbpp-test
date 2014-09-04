@@ -51,11 +51,18 @@ public:
 private:
     Ui::MainWindow *ui;
 
+    void mAddCurve(const QString& source, const QColor& c, bool read = true);
+
 private slots:
     void slotViewClicked();
     void slotConfigureClicked();
 
     void onNewDataAvailable(const QString& source, const QVector<double>& timestamp, const QVector<double>& data);
+
+    void onNewDataAvailable(const QString& source,
+                            const QVector<double>& timestamps,
+                            const QVector<double>& read_data,
+                            const QVector<double>& write_data);
 
     void onExtractionProgress(const QString& source, int step, int total);
 

@@ -74,9 +74,20 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     hdbxp->setUpdateProgressStep(20);
 
     /* signal/slot connections */
-    /* 1. data ready */
+    /* 1a. data ready (RO) */
     connect(hdbxp, SIGNAL(dataReady(const QString &, const QVector<double>&, const QVector<double>&)),
             this, SLOT(onNewDataAvailable(const QString&, const QVector<double>&, const QVector<double>&)));
+
+    /* 1b. data ready (RO) */
+    connect(hdbxp, SIGNAL(dataReady(const QString &,
+                                    const QVector<double>&,
+                                    const QVector<double>&,
+                                    const QVector<double>&)),
+            this, SLOT(onNewDataAvailable(const QString&,
+                                          const QVector<double>&,
+                                          const QVector<double>&,
+                                          const QVector<double>&)));
+
     /* 2. progress */
     connect(hdbxp, SIGNAL(sourceExtractionProgress(QString, int, int)),
             this, SLOT(onExtractionProgress(QString, int, int)));
@@ -129,37 +140,79 @@ void QHdbExtractor::onError(const QString& message)
     QMessageBox::critical(this, "An error occurred", message);
 }
 
+void QHdbExtractor::mAddCurve(const QString& source, const QColor& color, bool read)
+{
+    PlotSceneWidget *plot = findChild<PlotSceneWidget *>();
+    SceneCurve * c = plot->addCurve(source);
+    CurveItem *curveItem = new CurveItem(c);
+    curveItem->setObjectName("CurveItem_" + source);
+    plot->scene()->addItem(curveItem);
+    c->installCurveChangeListener(curveItem);
+    LinePainter *lp = new LinePainter(curveItem);
+    lp->setLineColor(color);
+    if(!read)
+        lp->setLinePen(QPen(color, 0, Qt::DashLine));
+
+}
+
+void QHdbExtractor::onNewDataAvailable(const QString& source,
+                                       const QVector<double>& timestamps,
+                                       const QVector<double>& read_data,
+                                       const QVector<double>& write_data)
+{
+    qDebug() << __FUNCTION__ << "size " << read_data.size() << "w " << write_data.size();
+    QList<QColor> palette =
+            QList<QColor> ()
+            << Qt::darkRed
+            << Qt::blue
+            << Qt::green
+            << Qt::gray
+            << Qt::darkYellow
+            << Qt::cyan << Qt::darkGreen
+            << Qt::magenta
+            << Qt::darkBlue << Qt::darkGreen
+            << Qt::yellow;
+
+    PlotSceneWidget *plot = findChild<PlotSceneWidget *>();
+    /* divide by 2 curves size because in read/write case we add two curves at time
+     */
+    QColor color = palette.at((plot->getCurves().size() / 2) % palette.size());
+    if(!plot->findCurve(source))
+        mAddCurve(source, color, true);
+    if(!plot->findCurve(source + "_WRI"))
+        mAddCurve(source + "_WRI", color.darker(), false);
+
+    plot->appendData(source, timestamps, read_data);
+    plot->appendData(source + "_WRI", timestamps, write_data);
+    qDebug() << "writable data size " << write_data.size() << "read data sz " << read_data.size() << write_data;
+}
+
 void QHdbExtractor::onNewDataAvailable(const QString& source,
                                        const QVector<double>& timestamps,
                                        const QVector<double>& data)
 {
+    qDebug() << __FUNCTION__ << "size " << data.size();
+    QList<QColor> palette =
+            QList<QColor> ()
+            << Qt::darkRed
+            << Qt::blue
+            << Qt::green
+            << Qt::gray
+            << Qt::darkYellow
+            << Qt::cyan << Qt::darkGreen
+            << Qt::magenta
+            << Qt::darkBlue << Qt::darkGreen
+            << Qt::yellow;
+
     PlotSceneWidget *plot = findChild<PlotSceneWidget *>();
+    /* divide by 2 curves size because in read/write case we add two curves at time
+     */
+    QColor color = palette.at((plot->getCurves().size() / 2) % palette.size());
     if(!plot->findCurve(source))
-    {
-        QList<QColor> palette =
-                QList<QColor> ()
-                << Qt::darkRed
-                << Qt::blue
-                << Qt::green
-                << Qt::gray
-                << Qt::darkYellow
-                << Qt::cyan << Qt::darkGreen
-                << Qt::magenta
-                << Qt::darkBlue << Qt::darkGreen
-                << Qt::yellow;
-
-        SceneCurve * c = plot->addCurve(source);
-        CurveItem *curveItem = new CurveItem(c);
-        curveItem->setObjectName("CurveItem_" + source);
-        plot->scene()->addItem(curveItem);
-        c->installCurveChangeListener(curveItem);
-        LinePainter *lp = new LinePainter(curveItem);
-        lp->setLineColor(palette.at(plot->getCurves().size() % palette.size()));
-    }
-
+        mAddCurve(source, color, true);
     plot->appendData(source, timestamps, data);
-
 }
+
 
 void QHdbExtractor::onExtractionFinished(const QString& source, int srcStep, int srcTotal, double elapsed)
 {

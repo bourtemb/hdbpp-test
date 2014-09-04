@@ -289,20 +289,27 @@ void QHdbextractorProxy::dataNotify(QHdbNewDataEvent *e)
         XVariant::DataType dt = data[0].getType();
         XVariant::Writable w = data[0].getWritable();
         XVariant::DataFormat fmt = data[0].getFormat();
-        if((dt == XVariant::Double || dt == XVariant::Int) && fmt == XVariant::Scalar)
+        if((dt == XVariant::Double || dt == XVariant::Int || dt == XVariant::UInt)
+                && fmt == XVariant::Scalar)
         {
-            if(w == XVariant::RO || w == XVariant::RW)
+            if(w == XVariant::RO || w == XVariant::WO)
             {
                 QVector<double> timestamps, out_data;
                 utils.toTimestampDataDoubleVector(data, timestamps, out_data);
                 emit dataReady(source, timestamps, out_data);
-
-                /* progress update signals */
-                if(e->updateType == QHdbNewDataEvent::Progress)
-                    emit sourceExtractionProgress(source, e->step, e->totalSteps);
-                else if(e->updateType == QHdbNewDataEvent::Finish)
-                    emit sourceExtractionFinished(source, e->sourceStep, e->totalSources, e->elapsed);
             }
+            else if(w == XVariant::RW)
+            {
+                QVector<double> timestamps, out_read_data, out_write_data;
+                utils.toTimestampDataDoubleVector(data, timestamps, out_read_data, out_write_data);
+                emit dataReady(source, timestamps, out_read_data, out_write_data);
+            }
+
+            /* progress update signals */
+            if(e->updateType == QHdbNewDataEvent::Progress)
+                emit sourceExtractionProgress(source, e->step, e->totalSteps);
+            else if(e->updateType == QHdbNewDataEvent::Finish)
+                emit sourceExtractionFinished(source, e->sourceStep, e->totalSources, e->elapsed);
         }
     }
 }
