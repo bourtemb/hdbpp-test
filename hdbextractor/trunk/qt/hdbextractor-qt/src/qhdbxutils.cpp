@@ -7,6 +7,24 @@ QHdbXUtils::QHdbXUtils()
 
 }
 
+/** \brief Converts input data into a vector of timestamps (converted to double)
+ *         and a vector of values. Optionally, checks if the required conversion is
+ *         in concert with the type of data stored by the XVariants.
+ *         This method is tailored for read only or write only data (one data column
+ *         into the database).
+ *
+ * @param indata the input data fetched from the database by Hdbextractor
+ * @param timestamps the output vector of timestamps (converted to double)
+ * @param data the output data as vector of double
+ *
+ * \note indata is passed as the const reference to a std:vector, while timestamps
+ * and data are references to QVector<double> defined in the caller.
+ *
+ * \note timestamps and data vectors are not cleared by this method.
+ *       Instead, data is appended to their end.
+ *
+ *
+ */
 void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata,
                                              QVector<double> &timestamps,
                                              QVector<double> &data, bool *ok)
@@ -45,6 +63,25 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
     }
 }
 
+/** \brief Converts input data into a vector of timestamps (converted to double)
+ *         and, a vector of read values and a vector of write values.
+ *         Optionally, checks if the required conversion is
+ *         in concert with the type of data stored by the XVariants.
+ *         This method is tailored for read write data (two data columns
+ *         into the database, read and write).
+ *
+ * @param indata the input data fetched from the database by Hdbextractor
+ * @param timestamps the output vector of timestamps (converted to double)
+ * @param data the output data as vector of double
+ *
+ * \note indata is passed as the const reference to a std:vector, while timestamps
+ * and data are references to QVector<double> defined in the caller.
+ *
+ * \note timestamps and data vectors are not cleared by this method.
+ *       Instead, data is appended to their end.
+ *
+ *
+ */
 void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata,
                                              QVector<double> &timestamps,
                                              QVector<double> &rdata,

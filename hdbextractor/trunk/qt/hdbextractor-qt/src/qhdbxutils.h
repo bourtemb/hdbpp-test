@@ -19,15 +19,6 @@ public:
 
 public:
 
-    /** \brief Converts input data into a vector of timestamps (converted to double)
-     *         and a vector of values. Optionally, checks if the required conversion is
-     *         in concert with the type of data stored by the XVariants.
-     *
-     * @param indata the input data fetched from the database by Hdbextractor
-     * @param timestamps the output vector of timestamps (converted to double)
-     * @param data the output data as vector of double
-     *
-     * \note
     void toTimestampDataDoubleVector(const std::vector<XVariant> &indata,
                                      QVector<double> &timestamps,
                                      QVector<double> &data, bool *ok = NULL);
