@@ -1,5 +1,4 @@
 #include "qhdbconfigwidget.h"
-#include <hdbxmacros.h>
 #include <QTimer>
 #include <QtDebug>
 #include <QSettings>
