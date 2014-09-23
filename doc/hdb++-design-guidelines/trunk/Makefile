@@ -1,4 +1,6 @@
 #
+# $ID: $
+#
 LATEX = latex
 DVIPS = dvips
 DVIPDF = dvipdf
