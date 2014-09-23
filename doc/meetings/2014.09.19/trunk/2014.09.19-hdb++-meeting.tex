@@ -1,0 +1,312 @@
+\documentclass[11pt,a4paper]{article}
+\title{hdb++}
+\author{Lorenzo Pivetta}
+\date{\today}
+
+\usepackage{svn-multi}
+\svnRegisterAuthor{pivetta}{Lorenzo Pivetta}
+\svnid{$Id: }
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage[dvips]{graphicx}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{hangcaption}
+\usepackage{latexsym}
+% \usepackage[none]{hyphenat}
+
+\topmargin			0mm
+\textheight 		220mm
+\textwidth			160mm
+\evensidemargin 0mm
+\oddsidemargin  0mm
+\headheight 		10mm
+% \footheight 		10mm
+
+\pagestyle{fancyplain}
+
+\newcommand{\data}{19.09.2014}
+\newcommand{\titolo}{\bf HDB++}
+
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\sectionmark}[1]{\markright{\thesection \ \ #1}}
+
+% \lhead[\fancyplain{}{\rm\thepage}]{\fancyplain{}{\it\rightmark}}
+% \rhead[\fancyplain{}{\it\leftmark}]{\fancyplain{}{\rm\thepage}}
+
+\renewcommand{\headheight}{1.5cm}
+\setlength{\headwidth}{\textwidth}
+\fancyhead[L]{ % left
+	\includegraphics[height=0.53in]{logo_elettra_medium.ps}
+}
+\fancyhead[C]{ % center
+	\includegraphics[height=0.53in]{logo_tango.ps}
+}
+\fancyhead[R]{ % right
+  \includegraphics[height=0.53in]{logo_esrf.ps}
+}
+\pagestyle{fancy}
+
+\lfoot[\fancyplain{}{\footnotesize}]{\fancyplain{}{\textit{
+	HDB++ meeting - \data{} - Rev. \svnrev
+}}}
+\rfoot[\fancyplain{}{\footnotesize}]{\fancyplain{}{\textit{
+	\thepage
+}}}
+\cfoot{}
+
+\begin{document}
+
+% \maketitle
+
+\begin{table}[htb]
+	\center
+	\begin{tabular}{|p{2.5cm}|p{12.5cm}|}
+		\hline
+		\bf{Meeting} & \bf{HDB++} \\
+		\hline
+		\bf{Date} & \data \\
+		\hline
+		\bf{Time/Place} & Teleconf \\
+		\hline		
+		\bf{Contact} & \parbox[][1.5cm][c]{10cm}{
+			Lorenzo Pivetta \\
+			lorenzo.pivetta@elettra.eu \\
+			++39 040 3758361
+		} \\
+		\hline
+		\bf{Partecipants} &  \parbox[][4cm][c]{10cm}{
+			R. Bourtembourg - RB - ESRF \\
+			JM.Chaize - JMC - ESRF \\
+			L.Pivetta - LP - ELETTRA \\
+			C.Scafuri - CS - ELETTRA \\
+			G.Scalamera - GSC - ELETTRA \\
+			G.Strangolino - GS - ELETTRA \\
+			P. Verdier - PV - ESRF \\
+			L. Zambon - LZ - ELETTRA \\
+		} \\
+		\hline
+		\bf{Agenda} & HDB++ design guidelines revision \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\tableofcontents
+% \listoffigures
+\listoftables
+
+\newpage
+
+\section{Requirements/developments for the next future}
+
+\begin{table}[htb]
+	\center
+	\begin{tabular}{|c|p{6.1cm}|p{6.1cm}|p{1.1cm}|}
+		\hline
+		\bf{Item} & \bf{Request} & \bf{To do} & \bf{Who} \\
+		\hline
+		1 &
+		In case of error, store the error description &
+		Add varchar column to the data\_type tables and related code
+		to EventSubscriber &
+		Elettra\\
+		\hline
+		2 &
+		Store quality factor in addition to data value &
+		Add column to the data\_type tables and related code
+		to EventSubscriber &
+		Elettra \\
+		\hline
+		3 &
+		Make some attribute configuration parameters available
+		in the historical database &
+		Add a table to store \emph{display-unit}, \emph{format-string}
+		and \emph{label}. The table will also contain att\_conf\_id and
+		the three timestamps.
+		Add a fifo and producer/consumer threads to subscribe
+		to attribute-configuration-change events into EventSubscriber &
+		Elettra \\
+		\hline
+		4 &
+		Multiple TANGO host support &
+		Whenever multiple TANGO host are specified, the configuration
+		manager stores attributes with the TANGO\_HOST env variable prefix;
+		EventSubscribers subscribe events from both TANGO domains and
+		stores the data using the TANGO\_HOST prefix &
+		Elettra \\
+		\hline
+		5 &
+		Support for write-only attribute &
+		Most probably a bugfix &
+		Elettra \\
+		\hline
+		6 &
+		Additional indexing on att\_name varchar in att\_conf table
+		for faster search &
+		Modify att\_conf table &
+		Elettra \\
+		\hline
+		7 &
+		Historical database data extraction library &
+		Core library written in C in order to be used also with
+		php and python; C++ wrapping. Define the list of interface methods
+		and send to ESRF ASAP &
+		Elettra \\
+		\hline
+		8 &
+		GUI for Configuration Manager &
+		java based GUI tool &
+		ESRF \\
+		\hline
+	\end{tabular}
+	\caption{Requirements/developments for the next future}
+	\label{tab:next-future}
+\end{table}
+
+The developments/prototypes for the items contained into
+Table~\ref{tab:next-future} are expected to be ready by the
+end of August 2014.
+
+\newpage
+
+\section{Requirements/developments for the not-so-near future}
+
+\begin{table}[htb]
+	\center
+	\begin{tabular}{|c|p{6.1cm}|p{6.1cm}|p{1.1cm}|}
+		\hline
+		\bf{Item} & \bf{Request} & \bf{To do} & \bf{Who} \\
+		\hline
+		9 &
+		Monitor on periodic event based archiving &
+		Provide timeout on periodic event subscriptions; can be
+		implemented as an alarm timer in the configuration change
+		event thread &
+		Elettra \\
+		\hline
+		10 &
+		Array support. Currently arrays are stored as fixed length
+		strings into varchar; this may lead to loss of precision.
+		Alternate approaches:
+		\begin{itemize}
+			\item store into native data type using an additional index to
+		    		reconstruct the array
+			\item store in binary form
+			\item use native array support
+		\end{itemize} &
+		Test postgres native array support &
+		Elettra, ESRF \\
+		\hline
+		11 &
+		Device locking mechanism to avoid concurrent setups &
+		Collaborative client/server locking mechanism &
+		ESRF, Elettra \\
+		\hline
+		12 &
+		java-based extraction library &
+		Pure java implementation of the same API as the C/C++ extraction
+		library; depends on the C API &
+		ESRF \\
+		\hline
+		13 &
+		Addititonal database table to store data statistics for scalar
+		values &
+		New table with start\_time, stop\_time, min, max, average;
+		additional statistics may be useful; write a tango device server,
+		based on the extraction library, to calculate and store the
+		statistics; depends on the extraction library &
+		ESRF, Elettra \\
+		\hline
+		14 &
+		Extraction library data format support &
+		Attribute history data format, json data format, both?!? &
+		Elettra, ESRF \\
+		\hline
+		15 &
+		NoSQL databases &
+		NoSQL databases evaluation &
+		ESRF \\
+		\hline
+		16 &
+		Data stream management system (DSMS) &
+		InfluxDB evaluation &
+		Elettra \\
+		\hline
+	\end{tabular}
+	\caption{Requirements/developments for the not-so-near future}
+	\label{tab:next-but-future}
+\end{table}
+
+\newpage
+
+\section{Pending stuff}
+
+\begin{table}[htb]
+	\center
+	\begin{tabular}{|c|p{6.1cm}|p{6.1cm}|p{1.1cm}|}
+		\hline
+		\bf{Item} & \bf{Request} & \bf{To do} & \bf{Who} \\
+		\hline
+		17 &
+		Polling thread often/always late on last attribute of the poller
+		configuration &
+		&
+		\\
+		\hline
+		18 &
+		dev\_enum: dedicated data table to store value and label; both value
+		and configuration change event subscription &
+		&
+		\\
+		\hline
+		19 &
+		Archiving support for device server commands (TANGO core releated) &
+		&
+		\\
+		\hline
+	\end{tabular}
+	\caption{Pending stuff}
+	\label{tab:pending}
+\end{table}
+
+\section{Best practices}
+
+\begin{table}[htb]
+	\center
+	\begin{tabular}{|c|p{6.1cm}|p{6.1cm}|p{1.1cm}|}
+		\hline
+		\bf{Item} & \bf{Request} & \bf{To do} & \bf{Who} \\
+		\hline
+		20 &
+		Run/Shutdown support &
+		Separate attributes that have to be archived all the time from
+		those that aren't (e.g. during shutdown) using different dedicated 
+		EventSubscriber instances; this allows for straightforward
+		start/stop archiving on per-instance basis (e.g. from a higher layer
+		Tango device implementing some sort of machine shifts calendar) &
+		\\
+		\hline
+		21 &
+		Data filtering &
+		Rely on stop\_date column to filter old data &
+		\\
+		\hline
+	\end{tabular}
+	\caption{Best practices}
+	\label{tab:best-practice}
+\end{table}
+
+
+\end{document}
+
+
+
+
+
+
+
+
