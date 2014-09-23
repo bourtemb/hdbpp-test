@@ -3,6 +3,10 @@
 \author{Lorenzo Pivetta}
 \date{\today}
 
+\usepackage{svn-multi}
+\svnRegisterAuthor{pivetta}{Lorenzo Pivetta}
+\svnid{$Id$}
+
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amsfonts}
@@ -22,13 +26,13 @@
 	breaklines=true
 }
 \usepackage{pdfpages}
-\usepackage{draftwatermark}
-\SetWatermarkText{Draft}
-% \SetWatermarkFontSize{4cm}
-\SetWatermarkScale{6}
+% \usepackage{draftwatermark}
+% \SetWatermarkText{Draft}
+%% \SetWatermarkFontSize{4cm}
+% \SetWatermarkScale{6}
 
-\topmargin			0mm 
-\textheight 		210mm
+\topmargin			0mm
+\textheight 		230mm
 \textwidth			145mm
 \evensidemargin 0mm
 \oddsidemargin  10mm
@@ -63,7 +67,7 @@
 	\hdb{} \tango{} Device Server Design And Implementation
 }}}
 \rfoot[\fancyplain{}{\footnotesize}]{\fancyplain{}{\textit{
-	\rev
+	Rev. \svnrev
 }}}
 \cfoot{}
 
@@ -89,6 +93,11 @@
 	\vspace{1cm}
 	lorenzo.pivetta@elettra.eu \\
 	\date{today}
+	\vspace{10cm}
+	Last changed by: \svnFullAuthor{\svnauthor} \\
+	Last changed date: \svndate \\
+	Last changed revision: \svnrev \\
+	Document URL: \svnmainurl \\
 \end{center}
 
 \newpage
