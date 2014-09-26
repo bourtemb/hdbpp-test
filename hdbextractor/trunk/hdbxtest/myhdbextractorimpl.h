@@ -15,9 +15,12 @@ public:
 
     void getData(const char* source, const char* start_date, const char *stop_date);
 
-    virtual void onSourceProgressUpdate(int step, int total);
+    virtual void onSourceProgressUpdate(const char *name, int step, int totalSteps);
 
-    virtual void onSourceExtracted(int totalRows);
+    virtual void onSourceExtracted(const char * name, int sourceStep, int sourcesTotal, double elapsed);
+
+
+
 
 private:
     Hdbextractor *mExtractor;

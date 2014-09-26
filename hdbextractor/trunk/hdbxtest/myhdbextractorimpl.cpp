@@ -1,7 +1,6 @@
 #include "myhdbextractorimpl.h"
 
 #include "../src/hdbextractor.h"
-#include "../src/hdbxexception.h"
 #include "../src/xvariant.h"
 
 MyHdbExtractorImpl::MyHdbExtractorImpl()
@@ -14,26 +13,25 @@ MyHdbExtractorImpl::MyHdbExtractorImpl()
     printf("\033[0;37mtrying to connect to host: \"%s\" db name: \"%s\" user: \"%s\"\033[0m\t", dbhost, dbnam, dbuser);
 
     mExtractor = new Hdbextractor(this);
-    try{
-        mExtractor->connect(Hdbextractor::HDBMYSQL, dbhost, dbnam, dbuser, dbpass);
+    bool res = mExtractor->connect(Hdbextractor::HDBMYSQL, dbhost, dbnam, dbuser, dbpass);
+    if(res)
+    {
         printf("\e[1;32mOK\e[0m\n");
         mExtractor->setUpdateProgressStep(20);
     }
-    catch(const HdbXException &e)
-    {
-        printf("\e[1;31merror connecting to host: %s\e[0m\n", e.getMessage());
+    else {
+        printf("\e[1;31merror connecting to host: %s\e[0m\n", dbhost);
     }
 
 }
 
 void MyHdbExtractorImpl::getData(const char* source, const char* start_date, const char *stop_date)
 {
-    try{
-        mExtractor->getData(source, start_date, stop_date);
-    }
-    catch(const HdbXException &e)
+
+    bool res = mExtractor->getData(source, start_date, stop_date);
+    if(!res)
     {
-        printf("\e[1;31merror fetching data: %s\e[0m\n", e.getMessage());
+        printf("\e[1;31merror fetching data: %s\e[0m\n", source);
     }
 }
 
@@ -45,9 +43,9 @@ void MyHdbExtractorImpl::getData(const char* source, const char* start_date, con
  *
  * @see onFinished
  */
-void MyHdbExtractorImpl::onSourceProgressUpdate(int step, int total)
+void MyHdbExtractorImpl::onSourceProgressUpdate(const char *name, int step, int total)
 {
-    printf("data extraction: %.2f%% [%d/%d]\n", (float)step / total * 100.0, step, total);
+    printf("\"%s\" data extraction: %.2f%% [%d/%d]\n", name, (float)step / total * 100.0, step, total);
     std::vector<XVariant> valuelist;
     mExtractor->get(valuelist);
 
@@ -65,7 +63,7 @@ void MyHdbExtractorImpl::onSourceProgressUpdate(int step, int total)
             std::vector<double> values = valuelist[i].toDoubleVector();
             printf("\e[1;33m[ \e[0m");
             for(size_t j = 0; j < values.size(); j++)
-                printf("\e[0;35m%d:\e[1;32m %g\e[0m ,", j, values[j]);
+                printf("\e[0;35m%ld:\e[1;32m %g\e[0m ,", j, values[j]);
             printf(" \e[1;33m]\e[0m\n");
 
         }
@@ -76,8 +74,8 @@ void MyHdbExtractorImpl::onSourceProgressUpdate(int step, int total)
 /** \brief this method is invoked when data extraction is fully accomplished.
  *
  */
-void MyHdbExtractorImpl::onSourceExtracted(int totalRows)
+void MyHdbExtractorImpl::onSourceExtracted(const char * name, int sourceStep, int sourcesTotal, double elapsed)
 {
-    printf("extraction completed: got %d rows\n", totalRows);
+    printf("extraction completed: got %d rows from \"%s\" in %fs\n", sourceStep, name, elapsed);
 }
 
