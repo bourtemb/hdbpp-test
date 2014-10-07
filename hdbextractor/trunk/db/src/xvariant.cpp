@@ -55,6 +55,19 @@ XVariant::~XVariant()
  * A validity flag is also used to indicate that the data memorized by XVariant has been correctly detected
  * when XVariant was constructed from the data stored into the database.
  *
+ * A null flag indicates whether the value stored into the database is a NULL value or not.
+ * NULL values are legitimate values and  they are normally stored by the archiver when a read error
+ * occurs. In principle, if the attribute is read/write, both read and write values are NULL or not NULL,
+ * due to an unsuccessful or successful read. The isNull and isWNull methods indicate this condition, for
+ * the read and write data independently.
+ *
+ * \note
+ * For a read only source, isWNull always returns true.
+ *
+ * \note
+ * A NULL value into the database does not imply isValid returns false.
+ * isValid returns false if either a parse error occurred or the data type, format or writable are invalid.
+ *
  * @param source domain/family/member/attribute_name
  * @param timestam a timestamp in the format "2014-07-10 10:00:00"
  * @param strdataR a string representing the data read from the database
@@ -120,6 +133,7 @@ XVariant::XVariant(const XVariant &other)
     d->mType = other.getType();
     d->mSize = other.getSize();
     d->mIsValid = other.isValid();
+    d->mIsNull = other.isNull();
 
     strncpy(d->mSource, other.getSource(), SRCLEN);
     strncpy(d->mError, other.getError(), ERRMSGLEN);
@@ -233,11 +247,66 @@ XVariant::Writable XVariant::getWritable() const
  * @return false the data contained by XVariant is not valid (see getError)
  *
  * @see getError
+ * @see isNull
+ *
+ * \note
+ * isValid returns true if data is NULL. In other words, NULL values in the database
+ * are deemed valid.
+ *
  */
 bool XVariant::isValid() const
 {
     return d->mIsValid;
 }
+
+/** \brief Returns whether the read part of the data stored by XVariant is NULL or not
+ *
+ * @return true the data contained by XVariant is NULL
+ * @return false the data contained by XVariant is not NULL (see isValid)
+ *
+ * \note
+ * If isNull is true, then isValid will be true also, because a NULL XVariant represents
+ * a NULL value stored into the database, which is perfectly legit.
+ *
+ * \note
+ * In principle, read or write data parts can be NULL independently of each other,
+ * even if it is unlikely in the context of the historical database archiver,
+ * where NULL values in data indicate a read error. So in everyday's life both read and write data
+ * are NULL or not NULL.
+ *
+ * @see getError
+ * @see isValid
+ * @see isWNull
+ */
+bool XVariant::isNull() const
+{
+    return d->mIsNull;
+}
+
+/** \brief Returns whether the write part of the data stored by XVariant is NULL or not
+ *
+ * @return true the write part of the data contained by XVariant is NULL
+ * @return false the write part of the data contained by XVariant is not NULL (see isValid)
+ *
+ * \note
+ * If isNull is true, then isValid will be true also, because a NULL XVariant represents
+ * a NULL value stored into the database, which is perfectly legit.
+ *
+ * \note
+ * In principle, read or write data parts can be NULL independently of each other,
+ * even if it is unlikely in the context of the historical database archiver,
+ * where NULL values in data indicate a read error. So in everyday's life both read and write data
+ * are NULL or not NULL.
+ *
+ * @see getError
+ * @see isValid
+ * @see isNull
+ */
+bool XVariant::isWNull() const
+{
+    return d->mIsWNull;
+}
+
 
 /** \brief Returns the description of the error reported by the last operation.
  *
@@ -268,9 +337,11 @@ void XVariant::parse(const char *s)
 {
     errno = 0;
     d->mIsValid = true;
+    d->mIsWNull = true;
+    d->mIsNull = (s == NULL);
 
     //   QHdbextractorThread("PARSING %s\n", s);
-    if(d->mFormat == Scalar && d->mWritable == RO)
+    if(d->mFormat == Scalar && d->mWritable == RO && !d->mIsNull)
     {
 
         if(d->mType == Double)
@@ -303,7 +374,7 @@ void XVariant::parse(const char *s)
         else
             d->mIsValid = false;
     }
-    else if(d->mFormat == Vector && d->mWritable == RO)
+    else if(d->mFormat == Vector && d->mWritable == RO && !d->mIsNull)
     {
         size_t i = 0;
         d->mSize = 0;
@@ -386,14 +457,14 @@ void XVariant::parse(const char *s)
     }
 
     /* Check for errors */
-    if (errno != 0)
+    if (errno != 0 &&  s != NULL)
     {
         perr("XVariant.parse: error converting \"%s\" -> \"%s\": \"%s\"", d->mSource, s, strerror(errno));
         mMakeError(errno);
         d->mIsValid = false;
     }
 
-    if(!d->mIsValid)
+    if(!d->mIsValid &&  s != NULL)
         perr("XVariant.parse(s): \"%s\": format %d writable %d type %d not supported",
              d->mSource, d->mFormat, d->mWritable, d->mType);
 }
@@ -402,168 +473,120 @@ void XVariant::parse(const char *sr, const char *sw)
 {
     errno = 0;
     d->mIsValid = true;
+    d->mIsNull = (sr == NULL);
+    d->mIsWNull = (sw == NULL);
 
     //   QHdbextractorThread("PARSING %s\n", s);
-    if(d->mFormat == Scalar && d->mWritable == RW)
+    if(d->mFormat == Scalar && d->mWritable == RW && (!d->mIsNull || !d->mIsWNull))
     {
         if(d->mType == Double)
         {
-            double *v = new double[1];
-            double *wv = new double[1];
-            *v  = strtod(sr, NULL);
-            *wv = strtod(sw, NULL);
-            d->val = v;
-            d->w_val = wv;
+            if(!d->mIsNull)
+            {
+                double *v = new double[1];
+                *v  = strtod(sr, NULL);
+                d->val = v;
+            }
+            if(!d->mIsWNull)
+            {
+                double *wv = new double[1];
+                d->w_val = wv;
+            }
             d->mSize = 1;
         }
         else if(d->mType == Int)
         {
-            long int *i = new long int[1];
-            long int *wi = new long int[1];
-            *i = strtol(sr, NULL, 10);
-            *wi = strtol(sw, NULL, 10);
-            d->val = i;
-            d->w_val = wi;
+            if(!d->mIsNull)
+            {
+                long int *i = new long int[1];
+                *i = strtol(sr, NULL, 10);
+                d->val = i;
+            }
+            if(!d->mIsWNull)
+            {
+                long int *wi = new long int[1];
+                *wi = strtol(sw, NULL, 10);
+                d->w_val = wi;
+            }
             d->mSize = 1;
         }
         else if(d->mType == UInt)
         {
-            unsigned long int *ui = new unsigned long int[1];
-            unsigned long int *wui = new unsigned long int[1];
-            *ui = strtoul(sr, NULL, 10);
-            *wui = strtoul(sw, NULL, 10);
-            d->val = ui;
-            d->w_val = wui;
+            if(!d->mIsNull)
+            {
+                unsigned long int *ui = new unsigned long int[1];
+                *ui = strtoul(sr, NULL, 10);
+                d->val = ui;
+            }
+            if(!d->mIsWNull)
+            {
+                unsigned long int *wui = new unsigned long int[1];
+                *wui = strtoul(sw, NULL, 10);
+                d->w_val = wui;
+            }
             d->mSize = 1;
         }
         else if(d->mType == Boolean)
         {
-            bool *b = new bool[1];
-            bool *wb = new bool[1];
-            *b = (strcasecmp(sr, "true") == 0 || strtol(sr, NULL, 10) != 0);
-            *wb = (strcasecmp(sw, "true") == 0 || strtol(sw, NULL, 10) != 0);
-            d->val = b;
-            d->w_val = wb;
+            if(!d->mIsNull)
+            {
+                bool *b = new bool[1];
+                *b = (strcasecmp(sr, "true") == 0 || strtol(sr, NULL, 10) != 0);
+                d->val = b;
+            }
+            if(!d->mIsWNull)
+            {
+                bool *wb = new bool[1];
+                *wb = (strcasecmp(sw, "true") == 0 || strtol(sw, NULL, 10) != 0);
+                d->w_val = wb;
+            }
             d->mSize = 1;
         }
         else if(d->mType == String)
         {
+            if(!d->mIsNull)
+            {
 
+            }
+            if(!d->mIsWNull)
+            {
+
+            }
             d->mSize = 1;
         }
         else
             d->mIsValid = false;
     }
-    else if(d->mFormat == Vector && d->mWritable == RO)
+    else if(d->mFormat == Vector && d->mWritable == RW && (!d->mIsNull || !d->mIsWNull) )
     {
         size_t i = 0;
         d->mSize = 0;
 
-        /* 1. read part */
-
-        char *saveptr;
         char *copy = NULL;
-        char *val = NULL;
         const char *delim = ", ";
+        char *saveptr;
+        char *val = NULL;
 
-        /* make a copy of s cuz strtok_r wants char * not const char *.
+        /* 1. read part */
+        if(!d->mIsNull)
+        {
+            /* make a copy of s cuz strtok_r wants char * not const char *.
          * It will be deleted at the end
          */
-        copy = new char[strlen(sr) + 1];
-        strncpy(copy, sr, strlen(sr) + 1);
-        /* count the number of separators in the data */
-        val = strtok_r(copy, delim, &saveptr);
-        while(val != NULL)
-        {
-            d->mSize++;
-            val = strtok_r(NULL, delim, &saveptr);
-        }
-        strncpy(copy, sr, strlen(sr) + 1);
-
-        if(d->mType == Double)
-        {
-            double *d_array = new double[d->mSize];
+            copy = new char[strlen(sr) + 1];
+            strncpy(copy, sr, strlen(sr) + 1);
+            /* count the number of separators in the data */
             val = strtok_r(copy, delim, &saveptr);
-            /* split result returned by hdb (comma separated doubles) */
-            while(val != NULL && errno == 0 && i < d->mSize)
+            while(val != NULL)
             {
-                *(d_array + i) = strtod(val, NULL);
-                i++;
+                d->mSize++;
                 val = strtok_r(NULL, delim, &saveptr);
             }
-            d->val = d_array;
-        }
-        else if(d->mType == Int)
-        {
-            long int *li_array = new long int[d->mSize];
-            val = strtok_r(copy, delim, &saveptr);
-            /* split result returned by hdb (comma separated doubles) */
-            while(val != NULL && errno == 0 && i < d->mSize)
-            {
-                *(li_array + i) = strtol(val, NULL, 10);
-                i++;
-                val = strtok_r(NULL, delim, &saveptr);
-            }
-            d->val = li_array;
-        }
-        else if(d->mType == UInt)
-        {
-            unsigned long int *uli_array = new unsigned long int[d->mSize];
-            val = strtok_r(copy, delim, &saveptr);
-            /* split result returned by hdb (comma separated doubles) */
-            while(val != NULL && errno == 0 && i < d->mSize)
-            {
-                *(uli_array + i) = strtoul(val, NULL, 10);
-                i++;
-                val = strtok_r(NULL, delim, &saveptr);
-            }
-            d->val = uli_array;
-        }
-        else if(d->mType == Boolean)
-        {
-            bool *b_array = new bool[d->mSize];
-            val = strtok_r(copy, delim, &saveptr);
-            /* split result returned by hdb (comma separated doubles) */
-            while(val != NULL && errno == 0 && i < d->mSize)
-            {
-                *(b_array + i) = (strcasecmp(sr, "true") == 0 || strtol(sr, NULL, 10) != 0);
-                i++;
-                val = strtok_r(NULL, delim, &saveptr);
-            }
-            d->val = b_array;
-        }
-        else if(d->mType == String)
-        {
+            strncpy(copy, sr, strlen(sr) + 1);
 
-        }
-
-        /* delete the copy of the string */
-        delete copy;
-
-        /* =========================================================================
-         * 2. write part
-         * =========================================================================
-         */
-        copy = new char[strlen(sw) + 1];
-        size_t wri_size = 0;
-
-        /* make a copy of s cuz strtok_r wants char * not const char *.
-         * It will be deleted at the end
-         */
-        strncpy(copy, sw, strlen(sw) + 1);
-        /* count the number of separators in the data */
-        val = strtok_r(copy, delim, &saveptr);
-        while(val != NULL)
-        {
-            wri_size++;
-            val = strtok_r(NULL, delim, &saveptr);
-        }
-        strncpy(copy, sw, strlen(sw) + 1);
-        if(wri_size == d->mSize)
-        {
             if(d->mType == Double)
             {
-                double *d_array = new double[wri_size];
+                double *d_array = new double[d->mSize];
                 val = strtok_r(copy, delim, &saveptr);
                 /* split result returned by hdb (comma separated doubles) */
                 while(val != NULL && errno == 0 && i < d->mSize)
@@ -572,7 +595,7 @@ void XVariant::parse(const char *sr, const char *sw)
                     i++;
                     val = strtok_r(NULL, delim, &saveptr);
                 }
-                d->w_val = d_array;
+                d->val = d_array;
             }
             else if(d->mType == Int)
             {
@@ -585,7 +608,7 @@ void XVariant::parse(const char *sr, const char *sw)
                     i++;
                     val = strtok_r(NULL, delim, &saveptr);
                 }
-                d->w_val = li_array;
+                d->val = li_array;
             }
             else if(d->mType == UInt)
             {
@@ -598,7 +621,7 @@ void XVariant::parse(const char *sr, const char *sw)
                     i++;
                     val = strtok_r(NULL, delim, &saveptr);
                 }
-                d->w_val = uli_array;
+                d->val = uli_array;
             }
             else if(d->mType == Boolean)
             {
@@ -607,27 +630,114 @@ void XVariant::parse(const char *sr, const char *sw)
                 /* split result returned by hdb (comma separated doubles) */
                 while(val != NULL && errno == 0 && i < d->mSize)
                 {
-                    *(b_array + i) = (strcasecmp(sw, "true") == 0 || strtol(sw, NULL, 10) != 0);
+                    *(b_array + i) = (strcasecmp(sr, "true") == 0 || strtol(sr, NULL, 10) != 0);
                     i++;
                     val = strtok_r(NULL, delim, &saveptr);
                 }
-                d->w_val = b_array;
+                d->val = b_array;
             }
             else if(d->mType == String)
             {
 
             }
-        } /* if(wri_size == d->mSize) */
-        else
+
+            /* delete the copy of the string */
+            delete copy;
+
+        } /* if(!d->mIsNull) */
+
+        /* =========================================================================
+         * 2. write part
+         * =========================================================================
+         */
+        if(!d->mIsWNull)
         {
-            perr("XVariant.parse: error converting \"%s\":\n read and write sizes are different!", d->mSource);
-            d->mIsValid = false;
-        }
+            copy = new char[strlen(sw) + 1];
+            size_t wri_size = 0;
 
-        /* delete the copy of the string */
-        delete copy;
+            /* make a copy of s cuz strtok_r wants char * not const char *.
+             * It will be deleted at the end
+             */
+            strncpy(copy, sw, strlen(sw) + 1);
+            /* count the number of separators in the data */
+            val = strtok_r(copy, delim, &saveptr);
+            while(val != NULL)
+            {
+                wri_size++;
+                val = strtok_r(NULL, delim, &saveptr);
+            }
+            strncpy(copy, sw, strlen(sw) + 1);
+            if(wri_size == d->mSize)
+            {
+                if(d->mType == Double)
+                {
+                    double *d_array = new double[wri_size];
+                    val = strtok_r(copy, delim, &saveptr);
+                    /* split result returned by hdb (comma separated doubles) */
+                    while(val != NULL && errno == 0 && i < d->mSize)
+                    {
+                        *(d_array + i) = strtod(val, NULL);
+                        i++;
+                        val = strtok_r(NULL, delim, &saveptr);
+                    }
+                    d->w_val = d_array;
+                }
+                else if(d->mType == Int)
+                {
+                    long int *li_array = new long int[d->mSize];
+                    val = strtok_r(copy, delim, &saveptr);
+                    /* split result returned by hdb (comma separated doubles) */
+                    while(val != NULL && errno == 0 && i < d->mSize)
+                    {
+                        *(li_array + i) = strtol(val, NULL, 10);
+                        i++;
+                        val = strtok_r(NULL, delim, &saveptr);
+                    }
+                    d->w_val = li_array;
+                }
+                else if(d->mType == UInt)
+                {
+                    unsigned long int *uli_array = new unsigned long int[d->mSize];
+                    val = strtok_r(copy, delim, &saveptr);
+                    /* split result returned by hdb (comma separated doubles) */
+                    while(val != NULL && errno == 0 && i < d->mSize)
+                    {
+                        *(uli_array + i) = strtoul(val, NULL, 10);
+                        i++;
+                        val = strtok_r(NULL, delim, &saveptr);
+                    }
+                    d->w_val = uli_array;
+                }
+                else if(d->mType == Boolean)
+                {
+                    bool *b_array = new bool[d->mSize];
+                    val = strtok_r(copy, delim, &saveptr);
+                    /* split result returned by hdb (comma separated doubles) */
+                    while(val != NULL && errno == 0 && i < d->mSize)
+                    {
+                        *(b_array + i) = (strcasecmp(sw, "true") == 0 || strtol(sw, NULL, 10) != 0);
+                        i++;
+                        val = strtok_r(NULL, delim, &saveptr);
+                    }
+                    d->w_val = b_array;
+                }
+                else if(d->mType == String)
+                {
 
-    }
+                }
+            } /* if(wri_size == d->mSize) */
+            else
+            {
+                perr("XVariant.parse: error converting \"%s\":\n read and write sizes are different!", d->mSource);
+                d->mIsValid = false;
+            }
+
+            /* delete the copy of the string */
+            delete copy;
+
+        } /* !d->mIsWNull */
+
+    } /* else if(d->mFormat == Vector && d->mWritable == RW && (!d->mIsNull || !d->mIsWNull) ) */
 
     /* Check for string to number conversion errors */
     if (errno != 0)

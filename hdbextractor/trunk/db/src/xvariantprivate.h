@@ -22,6 +22,10 @@ public:
 
     bool mIsValid;
 
+    bool mIsNull;
+
+    bool mIsWNull;
+
     void * val;
 
     void * w_val;

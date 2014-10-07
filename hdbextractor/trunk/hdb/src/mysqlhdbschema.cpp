@@ -220,7 +220,7 @@ bool MySqlHdbSchema::getData(const char *source,
                         }
 
                         XVariant *xvar = NULL;
-                        // printf("+ adding %s %s (row count %d)\n", row->getField(0), row->getField(1), res->getRowCount());
+                        printf("+ adding %s %s (row count %d)\n", row->getField(0), row->getField(1), res->getRowCount());
 
                         xvar = new XVariant(source, row->getField(0), row->getField(1), format, dataType, wri);
 

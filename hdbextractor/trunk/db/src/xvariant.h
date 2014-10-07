@@ -88,6 +88,10 @@ public:
 
     bool isValid() const;
 
+    bool isNull() const;
+
+    bool isWNull() const;
+
     unsigned long int toULongInt(bool read = true, bool *ok = NULL) const;
 
     long int toLongInt(bool read = true, bool *ok = NULL) const;
