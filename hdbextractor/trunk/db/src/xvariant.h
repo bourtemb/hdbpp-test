@@ -58,6 +58,10 @@ public:
              const char* strdataR, DataFormat df,
              DataType dt, Writable wri);
 
+    XVariant(const char* source, const char *timestamp,
+             const size_t size, DataFormat df,
+             DataType dt, Writable wri);
+
     /** \brief The copy constructor
      *
      * @param other The other XVariant whose values have to be copied over the new XVariant.
@@ -126,6 +130,8 @@ private:
     void parse(const char *sr, const char *sw);
 
     void init_data();
+
+    void init_data(size_t size);
 
     void init_common(const char* source, const char *timestamp, DataFormat df, DataType dt);
 

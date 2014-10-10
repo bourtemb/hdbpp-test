@@ -116,6 +116,17 @@ XVariant::XVariant(const char* source, const char *timestamp, const char *strdat
     parse(strdataR, strdataW); /* at the end, after setting up other fields */
 }
 
+XVariant::XVariant(const char* source,
+                   const char *timestamp,
+         const size_t size, DataFormat df,
+         DataType dt, Writable wri)
+{
+    init_common(source, timestamp, df, dt);
+    init_data(size);
+    d->mWritable = wri;
+}
+
+
 /** \brief copy constructor
  *
  * Create a new variant initialized from the values of the other parameter

@@ -4,6 +4,7 @@
 #include "result.h"
 #include "hdbxmacros.h"
 #include "hdb/src/mysqlhdbschema.h"
+#include "hdbpp/src/mysqlhdbppschema.h"
 #include "hdbextractorlistener.h"
 
 #include <string.h>
@@ -33,6 +34,9 @@ void Hdbextractor::setDbType(DbType dbt)
     {
     case HDBMYSQL:
         d_ptr->dbschema = new MySqlHdbSchema(this);
+        break;
+    case HDBPPMYSQL:
+        d_ptr->dbschema = new MySqlHdbppSchema(this);
         break;
     case DBUNDEFINED:
         pfatal("HdbExtractor: db type undefined. Please call setDbType");
@@ -119,6 +123,7 @@ bool Hdbextractor::connect(DbType dbType, const char *host,
     switch(dbType)
     {
     case HDBMYSQL:
+    case HDBPPMYSQL:
         d_ptr->connection = new MySqlConnection();
         success = d_ptr->connection->connect(host, db, user, passwd, port);
         pinfo("HdbExtractor: connected: %d host %s  db %s user %s passwd %s", isConnected(), host, db, user, passwd);

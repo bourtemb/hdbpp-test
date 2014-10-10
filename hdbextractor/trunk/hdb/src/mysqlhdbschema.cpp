@@ -8,7 +8,7 @@
 #include "db/src/result.h"
 #include "mysql/src/mysqlconnection.h"
 #include "../src/hdbxmacros.h"
-#include "mysqlhdbschemaprivate.h"
+#include "db/src/dbschemaprivate.h"
 #include "xvariantlist.h"
 #include <pthread.h>
 #include <assert.h>
@@ -20,7 +20,7 @@ MySqlHdbSchema::MySqlHdbSchema(ResultListener *resultListenerI)
 {
     assert(resultListenerI != NULL);
 
-    d_ptr = new MySqlHdbSchemaPrivate();
+    d_ptr = new DbSchemaPrivate();
     d_ptr->resultListenerI = resultListenerI;
     d_ptr->variantList = NULL;
     d_ptr->sourceStep = 0;

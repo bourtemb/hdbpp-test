@@ -43,7 +43,8 @@ SOURCES += src/hdbextractor.cpp \
     db/src/result.cpp \
     db/src/xvariant.cpp \
     hdb/src/mysqlhdbschema.cpp \
-    db/src/xvariantlist.cpp
+    db/src/xvariantlist.cpp \
+    hdbpp/src/mysqlhdbppschema.cpp
 
 HEADERS += src/hdbextractor.h\
     src/hdbextractorprivate.h \
@@ -56,12 +57,13 @@ HEADERS += src/hdbextractor.h\
     mysql/src/mysqlrow.h \
     db/src/xvariant.h \
     db/src/dbschema.h \
+    db/src/dbschemaprivate.h \
     hdb/src/mysqlhdbschema.h \
     db/src/xvariantlist.h \
     db/src/xvariantprivate.h \
     db/src/resultlistenerinterface.h \
     src/hdbextractorlistener.h \
-    hdb/src/mysqlhdbschemaprivate.h
+    hdbpp/src/mysqlhdbppschema.h
 
 
 lib.path = $${INSTALL_ROOT}/lib

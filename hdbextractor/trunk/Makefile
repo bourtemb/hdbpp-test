@@ -54,7 +54,8 @@ SOURCES       = src/hdbextractor.cpp \
 		db/src/result.cpp \
 		db/src/xvariant.cpp \
 		hdb/src/mysqlhdbschema.cpp \
-		db/src/xvariantlist.cpp 
+		db/src/xvariantlist.cpp \
+		hdbpp/src/mysqlhdbppschema.cpp 
 OBJECTS       = hdbextractor.o \
 		hdbextractorprivate.o \
 		mysqlconnection.o \
@@ -64,7 +65,8 @@ OBJECTS       = hdbextractor.o \
 		result.o \
 		xvariant.o \
 		mysqlhdbschema.o \
-		xvariantlist.o
+		xvariantlist.o \
+		mysqlhdbppschema.o
 DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		/usr/local/qt5/mkspecs/common/shell-unix.conf \
 		/usr/local/qt5/mkspecs/common/unix.conf \
@@ -177,7 +179,8 @@ DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		db/src/result.cpp \
 		db/src/xvariant.cpp \
 		hdb/src/mysqlhdbschema.cpp \
-		db/src/xvariantlist.cpp
+		db/src/xvariantlist.cpp \
+		hdbpp/src/mysqlhdbppschema.cpp
 QMAKE_TARGET  = hdbextractor++
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = libhdbextractor++.so.1.0.0
@@ -536,13 +539,20 @@ mysqlhdbschema.o: hdb/src/mysqlhdbschema.cpp hdb/src/mysqlhdbschema.h \
 		db/src/result.h \
 		mysql/src/mysqlconnection.h \
 		src/hdbxmacros.h \
-		hdb/src/mysqlhdbschemaprivate.h
+		db/src/dbschemaprivate.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mysqlhdbschema.o hdb/src/mysqlhdbschema.cpp
 
 xvariantlist.o: db/src/xvariantlist.cpp db/src/xvariantlist.h \
 		db/src/xvariant.h \
 		src/hdbxmacros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xvariantlist.o db/src/xvariantlist.cpp
+
+mysqlhdbppschema.o: hdbpp/src/mysqlhdbppschema.cpp hdbpp/src/mysqlhdbppschema.h \
+		db/src/dbschema.h \
+		db/src/xvariantlist.h \
+		db/src/xvariant.h \
+		db/src/resultlistenerinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mysqlhdbppschema.o hdbpp/src/mysqlhdbppschema.cpp
 
 ####### Install
 
@@ -569,20 +579,22 @@ install_inc: first FORCE
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/mysql/src/mysqlrow.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/xvariant.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/dbschema.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/dbschemaprivate.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/hdb/src/mysqlhdbschema.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/xvariantlist.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/xvariantprivate.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/resultlistenerinterface.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/src/hdbextractorlistener.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
-	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/hdb/src/mysqlhdbschemaprivate.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/hdbpp/src/mysqlhdbppschema.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 
 uninstall_inc: FORCE
-	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/mysqlhdbschemaprivate.h
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/mysqlhdbppschema.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/hdbextractorlistener.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/resultlistenerinterface.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/xvariantprivate.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/xvariantlist.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/mysqlhdbschema.h
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/dbschemaprivate.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/dbschema.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/xvariant.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/mysqlrow.h

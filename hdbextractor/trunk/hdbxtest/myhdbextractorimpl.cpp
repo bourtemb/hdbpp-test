@@ -5,10 +5,10 @@
 
 MyHdbExtractorImpl::MyHdbExtractorImpl()
 {
-    const char *dbuser = "hdbbrowser";
-    const char *dbpass = "hdbbrowser";
-    const char *dbhost = "fcsproxy";
-    const char *dbnam = "hdb";
+    const char *dbuser = "giacomo";
+    const char *dbpass = "";
+    const char *dbhost = "scw-dev";
+    const char *dbnam = "hdbpp";
 
     printf("\033[0;37mtrying to connect to host: \"%s\" db name: \"%s\" user: \"%s\"\033[0m\t", dbhost, dbnam, dbuser);
 

@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 
-class MySqlHdbSchemaPrivate;
+class DbSchemaPrivate;
 class XVariantList;
 
 /** \brief An implementation of the DbSchema interface specific to MySql. <em>Used internally</em>.
@@ -39,7 +39,7 @@ public:
     virtual bool hasError() const;
 
 private:
-    MySqlHdbSchemaPrivate *d_ptr;
+    DbSchemaPrivate *d_ptr;
 };
 
 #endif // HDBSCHEMA_H
