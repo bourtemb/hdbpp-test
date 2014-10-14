@@ -339,6 +339,143 @@ size_t XVariant::getSize() const
     return d->mSize;
 }
 
+void XVariant::add(const char* readval, size_t index)
+{
+    char *endptr;
+    errno = 0; /* To distinguish success/failure after call */
+    if((d->mWritable == XVariant::RO || d->mWritable == XVariant::WO) && index < d->mSize)
+    {
+        if(d->mType == Double)
+        {
+            double val = strtod(readval, &endptr);
+            if(errno != 0 && val == 0)
+                mMakeError(errno);
+            else
+            {
+                double *dval;
+                if(d->mWritable == XVariant::RO )
+                    dval = (double *) d->val;
+                else
+                    dval = (double *) d->w_val;
+                dval[index] = val;
+            }
+        }
+        else if(d->mType == Int)
+        {
+            long int val = strtol(readval, &endptr, 10);
+            if(errno != 0 && val == 0)
+                mMakeError(errno);
+            else
+            {
+                long int *lval;
+                if(d->mWritable == XVariant::RO )
+                   lval = (long int *) d->val;
+                else
+                    lval = (long int *) d->w_val;
+                lval[index] = val;
+            }
+        }
+        else if(d->mType == UInt)
+        {
+            long unsigned int val = strtoul(readval, &endptr, 10);
+            if(errno != 0 && val == 0)
+                mMakeError(errno);
+            else
+            {
+                long unsigned  int *lval;
+                if(d->mWritable == XVariant::RO )
+                   lval = (long unsigned  int *) d->val;
+                else
+                    lval = (long unsigned  int *) d->w_val;
+                lval[index] = val;
+            }
+        }
+        else if(d->mType == Boolean)
+        {
+            bool booval = (strcasecmp(readval, "true") == 0 || strtol(readval, &endptr, 10) != 0);
+
+            if(errno != 0)
+                mMakeError(errno);
+            else
+            {
+                bool *bval;
+                if(d->mWritable == XVariant::RO )
+                   bval = (bool *) d->val;
+                else
+                    bval = (bool *) d->w_val;
+                bval[index] = booval;
+            }
+        }
+    }
+}
+
+void XVariant::add(const char* readval, const char* writeval, size_t index)
+{
+    if((d->mWritable == XVariant::RW ) && index < d->mSize)
+    {
+        char *endptr;
+        errno = 0; /* To distinguish success/failure after call */
+
+        if(d->mType == Double)
+        {
+            double val = strtod(readval, &endptr);
+            double wval = strtod(writeval, &endptr);
+            if(errno != 0 && (val == 0 || wval == 0) )
+                mMakeError(errno);
+            else
+            {
+                double *dval = (double *) d->val;
+                dval[index] = val;
+                dval = (double *) d->w_val;
+                dval[index] = wval;
+            }
+        }
+        else if(d->mType == Int)
+        {
+            long int ival = strtod(readval, &endptr);
+            long int wival = strtod(writeval, &endptr);
+            if(errno != 0 &&  (ival == 0 || wival == 0) )
+                mMakeError(errno);
+            else
+            {
+                long int *pival = (long int *) d->val;
+                pival[index] = ival;
+                pival = (long int *) d->w_val;
+                pival[index] = wival;
+            }
+        }
+        else if(d->mType == UInt)
+        {
+            long unsigned int uival = strtod(readval, &endptr);
+            long unsigned int wuival = strtod(writeval, &endptr);
+            if(errno != 0 &&  (uival == 0 || wuival == 0) )
+                mMakeError(errno);
+            else
+            {
+                long unsigned int *puival = (long unsigned int *) d->val;
+                puival[index] = uival;
+                puival = (long unsigned int *) d->w_val;
+                puival[index] = wuival;
+            }
+        }
+        else if(d->mType == Boolean)
+        {
+            bool booval = (strcasecmp(readval, "true") == 0 || strtol(readval, &endptr, 10) != 0);
+            bool wbooval = (strcasecmp(writeval, "true") == 0 || strtol(writeval, &endptr, 10) != 0);
+
+            if(errno != 0)
+                mMakeError(errno);
+            else
+            {
+                bool *bval = (bool *) d->val;
+                bval[index] = booval;
+                bval = (bool *) d->w_val;
+                bval[index] = wbooval;
+            }
+        }
+    }
+}
+
 /** \brief This method parses a string in order to extract the data and convert it to the
  *         correct internal representation. This is <em>used internally</em>.
  *
@@ -781,6 +918,52 @@ void XVariant::init_common(const char* source, const char *timestamp, DataFormat
     strncpy(d->mSource, source, SRCLEN);
 }
 
+void XVariant::init_data(size_t size)
+{
+    d->w_val = NULL;
+    d->mSize = size;
+    d->mIsValid = true;
+
+
+    if(d->mType == Double)
+    {
+        d->val = (double *) new double[size];
+        if(d->mWritable == RW)
+            d->w_val = (double *) new double[size];
+    }
+    else if(d->mType == Int)
+    {
+        d->val = (long int *) new long int[size];
+        if(d->mWritable == RW)
+            d->w_val = (long int *) new long int[size];
+
+        d->mSize = 1;
+    }
+    else if(d->mType == UInt)
+    {
+        d->val = (long unsigned int *) new long unsigned int[size];
+        if(d->mWritable == RW)
+            d->w_val = (long unsigned int *) new long unsigned int[size];
+    }
+    else if(d->mType == Boolean)
+    {
+        d->val = (bool *) new bool[size];
+        if(d->mWritable == RW)
+            d->w_val = (bool *) new bool[size];
+    }
+    else if(d->mType == String)
+    {
+        d->val = (char *) new char[size];
+        if(d->mWritable == RW)
+            d->w_val = (char *) new char[size];
+    }
+    else
+        d->mIsValid = false;
+
+    d->mIsNull = (d->val != NULL);
+    d->mIsWNull = (d->w_val != NULL);
+}
+
 void XVariant::init_data()
 {
     d->val = NULL;
@@ -837,7 +1020,7 @@ const char *XVariant::getTimestamp() const
 time_t XVariant::getTime_tTimestamp() const
 {
     struct tm mtm;
-    char *p = strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
+    strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
     return mktime(&mtm);
 }
 
@@ -1025,7 +1208,9 @@ bool XVariant::toBool(bool read, bool *ok) const
  */
 std::string XVariant::toString(bool read, bool *ok) const
 {
+    std::string ret;
 
+    return ret;
 }
 
 /** \brief The conversion method that tries to convert the stored data into a vector of strings
@@ -1040,7 +1225,9 @@ std::string XVariant::toString(bool read, bool *ok) const
  */
 std::vector<std::string> XVariant::toStringVector() const
 {
+    std::vector<std::string> ret;
 
+    return ret;
 }
 
 /** \brief Returns a pointer to a double addressing the start of data.

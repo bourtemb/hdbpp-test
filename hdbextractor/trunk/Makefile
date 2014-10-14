@@ -486,6 +486,7 @@ hdbextractor.o: src/hdbextractor.cpp src/hdbextractor.h \
 		src/hdbxmacros.h \
 		hdb/src/mysqlhdbschema.h \
 		db/src/dbschema.h \
+		hdbpp/src/mysqlhdbppschema.h \
 		src/hdbextractorlistener.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o hdbextractor.o src/hdbextractor.cpp
 
@@ -551,7 +552,13 @@ mysqlhdbppschema.o: hdbpp/src/mysqlhdbppschema.cpp hdbpp/src/mysqlhdbppschema.h 
 		db/src/dbschema.h \
 		db/src/xvariantlist.h \
 		db/src/xvariant.h \
-		db/src/resultlistenerinterface.h
+		db/src/resultlistenerinterface.h \
+		db/src/connection.h \
+		db/src/row.h \
+		db/src/result.h \
+		mysql/src/mysqlconnection.h \
+		src/hdbxmacros.h \
+		db/src/dbschemaprivate.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mysqlhdbppschema.o hdbpp/src/mysqlhdbppschema.cpp
 
 ####### Install

@@ -108,7 +108,9 @@ public:
 
     time_t getTime_tTimestamp() const;
 
+    void add(const char* readval, size_t index);
 
+    void add(const char* readval, const char* writeval, size_t index);
 
     std::string toString(bool read = true, bool *ok = NULL) const;
 
