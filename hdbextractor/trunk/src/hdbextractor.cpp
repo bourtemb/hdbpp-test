@@ -39,10 +39,10 @@ void Hdbextractor::setDbType(DbType dbt)
         d_ptr->dbschema = new MySqlHdbppSchema(this);
         break;
     case DBUNDEFINED:
-        pfatal("HdbExtractor: db type undefined. Please call setDbType");
+        pfatal("HdbExtractor.setDbType: db type undefined. Please call setDbType");
         break;
     default:
-        pfatal("HdbExtractor: db type %d unsupported", dbt);
+        pfatal("HdbExtractor.setDbType: db type %d unsupported", dbt);
         break;
     }
 }

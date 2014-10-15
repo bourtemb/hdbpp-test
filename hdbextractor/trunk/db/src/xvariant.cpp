@@ -10,7 +10,7 @@
 
 XVariant::~XVariant()
 {
-    // pinfo("~XVariant destructor: %p", this);
+    pinfo("~XVariant destructor: %p", this);
     if(d->mSize > 0 && d->mType == String && d->val != NULL)
     {
         char **ssi = (char **) d->val;
@@ -121,6 +121,7 @@ XVariant::XVariant(const char* source,
          const size_t size, DataFormat df,
          DataType dt, Writable wri)
 {
+    d = new XVariantPrivate();
     init_common(source, timestamp, df, dt);
     init_data(size);
     d->mWritable = wri;
@@ -343,6 +344,12 @@ void XVariant::add(const char* readval, size_t index)
 {
     char *endptr;
     errno = 0; /* To distinguish success/failure after call */
+    d->mIsNull = (readval == NULL && (d->mWritable == XVariant::RO) );
+    d->mIsWNull = (readval == NULL && (d->mWritable == XVariant::WO) );
+
+    if(d->mIsNull || d->mIsWNull)
+        return;
+
     if((d->mWritable == XVariant::RO || d->mWritable == XVariant::WO) && index < d->mSize)
     {
         if(d->mType == Double)
@@ -411,6 +418,9 @@ void XVariant::add(const char* readval, size_t index)
 
 void XVariant::add(const char* readval, const char* writeval, size_t index)
 {
+    d->mIsNull = (readval == NULL);
+    d->mIsWNull = (writeval == NULL);
+
     if((d->mWritable == XVariant::RW ) && index < d->mSize)
     {
         char *endptr;

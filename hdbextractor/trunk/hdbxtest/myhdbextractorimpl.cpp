@@ -13,7 +13,7 @@ MyHdbExtractorImpl::MyHdbExtractorImpl()
     printf("\033[0;37mtrying to connect to host: \"%s\" db name: \"%s\" user: \"%s\"\033[0m\t", dbhost, dbnam, dbuser);
 
     mExtractor = new Hdbextractor(this);
-    bool res = mExtractor->connect(Hdbextractor::HDBMYSQL, dbhost, dbnam, dbuser, dbpass);
+    bool res = mExtractor->connect(Hdbextractor::HDBPPMYSQL, dbhost, dbnam, dbuser, dbpass);
     if(res)
     {
         printf("\e[1;32mOK\e[0m\n");
@@ -54,14 +54,15 @@ void MyHdbExtractorImpl::onSourceProgressUpdate(const char *name, int step, int 
         XVariant::DataFormat format = valuelist[i].getFormat();
         if(format == XVariant::Scalar)
         {
-            printf("%.2f, ", valuelist[i].toDouble());
+            printf("%s: %.2f, ", valuelist[i].getTimestamp(), valuelist[i].toDouble());
             if(i > 0 && i % 20 == 0)
                 printf("\n");
         }
         else if(format == XVariant::Vector)
         {
             std::vector<double> values = valuelist[i].toDoubleVector();
-            printf("\e[1;33m[ \e[0m");
+            if(valuelist.size() > 0)
+                printf("\e[1;33m[ %s\e[0m", valuelist[i].getTimestamp());
             for(size_t j = 0; j < values.size(); j++)
                 printf("\e[0;35m%ld:\e[1;32m %g\e[0m ,", j, values[j]);
             printf(" \e[1;33m]\e[0m\n");
