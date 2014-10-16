@@ -13,3 +13,6 @@ LIBS += -L.. -lhdbextractor++
 
 HEADERS += \
     myhdbextractorimpl.h
+
+OTHER_FILES += \
+    hdbxtest_example_usages.txt

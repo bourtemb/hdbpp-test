@@ -54,7 +54,7 @@ void MyHdbExtractorImpl::onSourceProgressUpdate(const char *name, int step, int 
         XVariant::DataFormat format = valuelist[i].getFormat();
         if(format == XVariant::Scalar)
         {
-            printf("%s: %.2f, ", valuelist[i].getTimestamp(), valuelist[i].toDouble());
+            printf("%s -> \e[1;32m%.2f\e[0m], ", valuelist[i].getTimestamp(), valuelist[i].toDouble());
             if(i > 0 && i % 20 == 0)
                 printf("\n");
         }

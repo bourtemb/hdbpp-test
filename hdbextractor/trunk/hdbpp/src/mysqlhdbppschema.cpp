@@ -321,12 +321,12 @@ bool MySqlHdbppSchema::getData(const char *source,
                     /*  */
                     if(format == XVariant::Vector)
                         snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w,dim_x,idx FROM "
-                             " att_%s WHERE att_conf_id=%d event_time >='%s' "
+                             " att_%s WHERE att_conf_id=%d AND event_time >='%s' "
                              " AND event_time <= '%s' ORDER BY event_time,idx ASC",
                              data_type, id, start_date, stop_date);
                     else
-                        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w, FROM "
-                             " att_%s WHERE att_conf_id=%d event_time >='%s' "
+                        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w FROM "
+                             " att_%s WHERE att_conf_id=%d AND  event_time >='%s' "
                              " AND event_time <= '%s' ORDER BY event_time ASC",
                              data_type, id, start_date, stop_date);
 

@@ -122,9 +122,9 @@ XVariant::XVariant(const char* source,
          DataType dt, Writable wri)
 {
     d = new XVariantPrivate();
+    d->mWritable = wri;
     init_common(source, timestamp, df, dt);
     init_data(size);
-    d->mWritable = wri;
 }
 
 
@@ -937,34 +937,39 @@ void XVariant::init_data(size_t size)
 
     if(d->mType == Double)
     {
-        d->val = (double *) new double[size];
-        if(d->mWritable == RW)
+        if(d->mWritable == RW ||d->mWritable == RO)
+            d->val = (double *) new double[size];
+        if(d->mWritable == RW || d->mWritable == WO)
             d->w_val = (double *) new double[size];
     }
     else if(d->mType == Int)
     {
-        d->val = (long int *) new long int[size];
-        if(d->mWritable == RW)
+        if(d->mWritable == RW ||d->mWritable == RO)
+            d->val = (long int *) new long int[size];
+        if(d->mWritable == RW || d->mWritable == WO)
             d->w_val = (long int *) new long int[size];
 
         d->mSize = 1;
     }
     else if(d->mType == UInt)
     {
-        d->val = (long unsigned int *) new long unsigned int[size];
-        if(d->mWritable == RW)
+        if(d->mWritable == RW ||d->mWritable == RO)
+            d->val = (long unsigned int *) new long unsigned int[size];
+        if(d->mWritable == RW || d->mWritable == WO)
             d->w_val = (long unsigned int *) new long unsigned int[size];
     }
     else if(d->mType == Boolean)
     {
-        d->val = (bool *) new bool[size];
-        if(d->mWritable == RW)
+        if(d->mWritable == RW ||d->mWritable == RO)
+            d->val = (bool *) new bool[size];
+        if(d->mWritable == RW || d->mWritable == WO)
             d->w_val = (bool *) new bool[size];
     }
     else if(d->mType == String)
     {
-        d->val = (char *) new char[size];
-        if(d->mWritable == RW)
+        if(d->mWritable == RW ||d->mWritable == RO)
+            d->val = (char *) new char[size];
+        if(d->mWritable == RW || d->mWritable == WO)
             d->w_val = (char *) new char[size];
     }
     else
