@@ -3,13 +3,9 @@
 #include "../src/hdbextractor.h"
 #include "../src/xvariant.h"
 
-MyHdbExtractorImpl::MyHdbExtractorImpl()
+MyHdbExtractorImpl::MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
+                                       const char *dbhost, const char *dbnam)
 {
-    const char *dbuser = "giacomo";
-    const char *dbpass = "";
-    const char *dbhost = "scw-dev";
-    const char *dbnam = "hdbpp";
-
     printf("\033[0;37mtrying to connect to host: \"%s\" db name: \"%s\" user: \"%s\"\033[0m\t", dbhost, dbnam, dbuser);
 
     mExtractor = new Hdbextractor(this);

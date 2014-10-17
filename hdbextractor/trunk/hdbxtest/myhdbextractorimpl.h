@@ -11,7 +11,8 @@ class Hdbextractor;
 class MyHdbExtractorImpl : public HdbExtractorListener
 {
 public:
-    MyHdbExtractorImpl();
+    MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
+                       const char *dbhost, const char *dbnam);
 
     void getData(const char* source, const char* start_date, const char *stop_date);
 
