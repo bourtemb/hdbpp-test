@@ -4,6 +4,7 @@
 #define MAXERRORLEN 128
 
 #include <map>
+#include <string>
 
 class ConfigurationParser
 {

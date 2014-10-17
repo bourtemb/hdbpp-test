@@ -1,0 +1,11 @@
+# This file is parsed by the ConfigurationParser class.
+# Lines are ignored after the '#' character.
+# key - value pairs must be separated by a '=' character.
+# White spaces and tabs are ignored.
+#
+#
+
+dbuser  = giacomo
+dbpass =  
+dbhost =	scw-dev
+dbname	=	hdbpp
