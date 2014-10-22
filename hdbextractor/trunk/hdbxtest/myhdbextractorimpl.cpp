@@ -1,5 +1,6 @@
 #include "myhdbextractorimpl.h"
-
+#include <stdio.h>
+#include <string.h>
 #include "../src/hdbextractor.h"
 #include "../src/xvariant.h"
 
@@ -9,7 +10,13 @@ MyHdbExtractorImpl::MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
     printf("\033[0;37mtrying to connect to host: \"%s\" db name: \"%s\" user: \"%s\"\033[0m\t", dbhost, dbnam, dbuser);
 
     mExtractor = new Hdbextractor(this);
-    bool res = mExtractor->connect(Hdbextractor::HDBPPMYSQL, dbhost, dbnam, dbuser, dbpass);
+    Hdbextractor::DbType type;
+    if(strcmp(dbnam, "hdb") == 0)
+        type = Hdbextractor::HDBMYSQL;
+    else if(strcmp(dbnam, "hdbpp") == 0)
+        type = Hdbextractor::HDBMYSQL;
+
+    bool res = mExtractor->connect(type, dbhost, dbnam, dbuser, dbpass);
     if(res)
     {
         printf("\e[1;32mOK\e[0m\n");
@@ -27,7 +34,7 @@ void MyHdbExtractorImpl::getData(const char* source, const char* start_date, con
     bool res = mExtractor->getData(source, start_date, stop_date);
     if(!res)
     {
-        printf("\e[1;31merror fetching data: %s\e[0m\n", source);
+        printf("\e[1;31merror fetching data: %s: %s\e[0m\n", source, mExtractor->getErrorMessage());
     }
 }
 
