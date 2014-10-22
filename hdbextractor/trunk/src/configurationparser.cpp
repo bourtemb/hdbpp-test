@@ -25,16 +25,18 @@ bool ConfigurationParser::read(const char *filepath, std::map<std::string, std::
     {
         char *line = NULL;
         char *conf = NULL;
-        char *delim = NULL;
         char *param = NULL;
         char *conf_save = NULL;
         char *line_save = NULL;
+        char key[32];
+        int res;
         size_t len = 0;
         ssize_t read;
         int conf_len;
 
         while ((read = getline(&line, &len, fp)) != -1)
         {
+            param = NULL;
             line_save = line; /* save pointer to buffer allocated by getline() */
             if(strchr(line, '#') == NULL)
                 conf_len = read;
@@ -43,49 +45,46 @@ bool ConfigurationParser::read(const char *filepath, std::map<std::string, std::
 
             if(conf_len > 0)
             {
-                conf = (char *) realloc(conf, conf_len + 1);
+                conf = (char *) realloc(conf_save, conf_len + 1);
                  /* save pointer to buffer allocated by realloc() */
                 conf_save = conf;
 
                 memset(conf, 0, conf_len + 1);
 
                 /* in conf, put a copy of line without any space, tab, \n, \r */
-                while(*line++)
+                while(*line)
                 {
                     if (!isspace(*line))
                     {
                         *conf = *line;
                         conf++;
                     }
+                    line++;
                 }
                 line = line_save;
-                /* restore start of conf pointer */
                 conf = conf_save;
-                printf("parsing line \"%s\" -> trimmed \"%s\"\n", line, conf);
+                // printf("parsing line \"%s\" -> trimmed \"%s\"\n", line, conf);
                 if(strlen(conf) > 1)
                 {
                     for (std::map<std::string,std::string>::iterator it = params.begin(); it != params.end(); ++it)
                     {
-                        std::string key = it->first;
-                        delim = (char *) realloc(delim, strlen(key.c_str()) + 1);
-                        sprintf(delim, "%s=", key.c_str());
-
-                        param = strtok(conf, delim);
-                        if(param != NULL)
+                        param = (char *) realloc(param, conf_len + 1);
+                        //printf("SCANF on \"%s\"\n", conf);
+                        //snprintf(format, 32, "%s=%%s", key.c_str());
+                        res = sscanf(conf, "%[^=]=%s", key, param);
+                        if(strcmp(key, it->first.c_str()) == 0)
                         {
-                            printf("line %s: %s -> %s\n", conf, delim, param);
+                            printf("ConfigurationParser.read: \e[1;32m\"%s\" -> \"%s\"\e[0m\n",  key, param);
                             it->second = std::string(param);
                         }
                     }
+                    if(param != NULL)
+                        free(param);
                 }
-
                 conf = conf_save;
             }
-
         }
 
-        if(delim)
-            free(delim);
         if(conf)
             free(conf);
         if(line)

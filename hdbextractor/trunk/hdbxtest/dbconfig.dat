@@ -5,7 +5,8 @@
 #
 #
 
-dbuser  = giacomo
-dbpass =  
-dbhost =	scw-dev
-dbname	=	hdbpp
+dbuser	  = hdbbrowser
+	
+dbpass =hdbbrowser  
+dbhost = fcsproxy
+dbname=hdb
