@@ -69,6 +69,7 @@ bool ConfigurationParser::read(const char *filepath, std::map<std::string, std::
                     for (std::map<std::string,std::string>::iterator it = params.begin(); it != params.end(); ++it)
                     {
                         param = (char *) realloc(param, conf_len + 1);
+                        memset(param, 0, conf_len + 1);
                         //printf("SCANF on \"%s\"\n", conf);
                         //snprintf(format, 32, "%s=%%s", key.c_str());
                         res = sscanf(conf, "%[^=]=%s", key, param);

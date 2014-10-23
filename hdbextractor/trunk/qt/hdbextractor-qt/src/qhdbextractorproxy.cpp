@@ -219,6 +219,8 @@ void QHdbextractorProxy::onUpdate(const QString &srcname, int step,
         QHdbNewDataEvent *nd = new QHdbNewDataEvent(data, srcname, step, totalSteps);
         /* make just one copy */
         hdbx->get(nd->data);
+        for(size_t i = 0; i < nd->data.size(); i++)
+            printf("%s\n", nd->data.at(i).getTimestamp());
         qApp->postEvent(this, nd);
      //   printData(data);
 
@@ -259,12 +261,12 @@ bool QHdbextractorProxy::event(QEvent *e)
         /* extract data according to the type/format/writable and then emit the apt signals */
         dataNotify(nde);
 
-        QHdbXUtils utils;
-        QVector<double> timestamps, out_data;
-        utils.toTimestampDataDoubleVector(nde->data, timestamps, out_data);
-        QVector<QDateTime> dtv;
-        foreach(double ts, timestamps)
-            dtv << QDateTime::fromTime_t((uint) ts);
+//        QHdbXUtils utils;
+//        QVector<double> timestamps, out_data;
+//        utils.toTimestampDataDoubleVector(nde->data, timestamps, out_data);
+//        QVector<QDateTime> dtv;
+//        foreach(double ts, timestamps)
+//            dtv << QDateTime::fromTime_t((uint) ts);
 
        // if(nde->data.size() > 0)
        //     qDebug() << "chunk" << nde->data[0].getSource() << dtv;
@@ -295,7 +297,15 @@ void QHdbextractorProxy::dataNotify(QHdbNewDataEvent *e)
             if(w == XVariant::RO || w == XVariant::WO)
             {
                 QVector<double> timestamps, out_data;
+                qDebug() << "prima di utils";
                 utils.toTimestampDataDoubleVector(data, timestamps, out_data);
+                foreach(double ts, timestamps)
+                {
+
+                    printf("timestamp: %f\n", ts);
+                    qDebug() << "* ->" << QDateTime::fromTime_t(ts) << ts;
+                }
+                qDebug() << "dopo di utils";
                 emit dataReady(source, timestamps, out_data);
             }
             else if(w == XVariant::RW)

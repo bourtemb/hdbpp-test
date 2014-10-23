@@ -71,6 +71,7 @@ int MySqlHdbppSchema::get(std::vector<XVariant>& variantlist)
         {
             //            printf("copying variant %d over %d\n", i, size);
             variantlist.push_back(XVariant(*(d_ptr->variantList->get(i))));
+            printf("last timestamp %s\n", variantlist.at(variantlist.size() - 1).getTimestamp());
         }
         delete d_ptr->variantList;
         d_ptr->variantList = NULL;
@@ -96,10 +97,10 @@ int MySqlHdbppSchema::get(std::vector<XVariant>& variantlist)
  * @return true if the call was successful, false otherwise.
  */
 bool MySqlHdbppSchema::getData(const char *source,
-                             const char *start_date,
-                             const char *stop_date,
-                             Connection *connection,
-                             int notifyEveryNumRows)
+                               const char *start_date,
+                               const char *stop_date,
+                               Connection *connection,
+                               int notifyEveryNumRows)
 {
     bool success;
     char query[MAXQUERYLEN];
@@ -206,14 +207,14 @@ bool MySqlHdbppSchema::getData(const char *source,
                 {
                     if(format == XVariant::Vector)
                         snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,dim_x,idx FROM "
-                             " att_%s WHERE att_conf_id=%d AND event_time >='%s' "
-                             " AND event_time <= '%s' ORDER BY event_time,idx ASC",
-                             data_type, id, start_date, stop_date);
+                                                     " att_%s WHERE att_conf_id=%d AND event_time >='%s' "
+                                                     " AND event_time <= '%s' ORDER BY event_time,idx ASC",
+                                 data_type, id, start_date, stop_date);
                     else if(format == XVariant::Scalar)
                         snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r FROM "
-                             " att_%s WHERE att_conf_id=%d AND event_time >='%s' "
-                             " AND event_time <= '%s' ORDER BY event_time ASC",
-                             data_type, id, start_date, stop_date);
+                                                     " att_%s WHERE att_conf_id=%d AND event_time >='%s' "
+                                                     " AND event_time <= '%s' ORDER BY event_time ASC",
+                                 data_type, id, start_date, stop_date);
                     
                     pinfo("query: %s\n", query);
 
@@ -244,10 +245,11 @@ bool MySqlHdbppSchema::getData(const char *source,
                         if(strcmp(timestamp, row->getField(0)) != 0)
                         {
 
-                            if(timestampCnt > 0 &&
+                            if(format != XVariant::Scalar && timestampCnt > 0 &&
                                     d_ptr->notifyEveryNumRows > 0 &&
                                     (timestampCnt % d_ptr->notifyEveryNumRows == 0))
                             {
+                                printf("\e[1;33mnotrifying vector!!\e[0m\n");
                                 d_ptr->resultListenerI->onProgressUpdate(source,
                                                                          timestampCnt,
                                                                          res->getRowCount() / datasiz);
@@ -268,8 +270,8 @@ bool MySqlHdbppSchema::getData(const char *source,
                             timestampCnt++;
 
                             printf("+ xvar 0x%p: new source %s %s %s arr.cnt: %d data siz: %d entries cnt: %d)\n", xvar,
-                                                           source, row->getField(0), row->getField(1),
-                                                           timestampCnt, datasiz, res->getRowCount()/datasiz);
+                                   source, row->getField(0), row->getField(1),
+                                   timestampCnt, datasiz, res->getRowCount()/datasiz);
 
                             /*
                              * LOCK!
@@ -280,33 +282,47 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                             if(d_ptr->variantList == NULL)
                                 d_ptr->variantList = new XVariantList();
-
+                            if(format == XVariant::Scalar)
+                            {
+                                xvar->add(row->getField(1), 0);
+                            }
                             d_ptr->variantList->add(xvar);
+
 
                             /* UNLOCK
                              */
                             pthread_mutex_unlock(&d_ptr->mutex);
 
+                            if(format == XVariant::Scalar && timestampCnt > 0 &&
+                                    d_ptr->notifyEveryNumRows > 0 &&
+                                    (timestampCnt % d_ptr->notifyEveryNumRows == 0))
+                            {
+                                d_ptr->resultListenerI->onProgressUpdate(source,
+                                                                         timestampCnt,
+                                                                         res->getRowCount() / datasiz);
+                            }
                         }
 
                         if(format == XVariant::Vector)
+                        {
                             index = atoi(row->getField(3));
-                        else
-                            index = 0; /* scalar */
-
-//                        printf("\e[1;33m+ xvar 0x%p: adding %s %s %s (%d/%d[%d])\e[0m\n", xvar,
-//                               source, row->getField(0), row->getField(1),
-//                               index, datasiz, res->getRowCount()/datasiz);
 
 
-                        ///        printf("\e[1;35mMySqlHdbppSchema.getData: locking xvarlist for writing... \e[0m");
-                        pthread_mutex_lock(&d_ptr->mutex);
+                            //                        printf("\e[1;33m+ xvar 0x%p: adding %s %s %s (%d/%d[%d])\e[0m\n", xvar,
+                            //                               source, row->getField(0), row->getField(1),
+                            //                               index, datasiz, res->getRowCount()/datasiz);
 
-                        xvar->add(row->getField(1), index);
 
-                        pthread_mutex_unlock(&d_ptr->mutex);
+                            ///        printf("\e[1;35mMySqlHdbppSchema.getData: locking xvarlist for writing... \e[0m");
+                            pthread_mutex_lock(&d_ptr->mutex);
 
-           ///             printf("\t\e[1;32munlocked\e[0m\n");
+                            xvar->add(row->getField(1), index);
+
+                            pthread_mutex_unlock(&d_ptr->mutex);
+                        }
+
+
+                        ///             printf("\t\e[1;32munlocked\e[0m\n");
 
                         row->close();
 
@@ -321,14 +337,14 @@ bool MySqlHdbppSchema::getData(const char *source,
                     /*  */
                     if(format == XVariant::Vector)
                         snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w,dim_x,idx FROM "
-                             " att_%s WHERE att_conf_id=%d AND event_time >='%s' "
-                             " AND event_time <= '%s' ORDER BY event_time,idx ASC",
-                             data_type, id, start_date, stop_date);
+                                                     " att_%s WHERE att_conf_id=%d AND event_time >='%s' "
+                                                     " AND event_time <= '%s' ORDER BY event_time,idx ASC",
+                                 data_type, id, start_date, stop_date);
                     else
                         snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w FROM "
-                             " att_%s WHERE att_conf_id=%d AND  event_time >='%s' "
-                             " AND event_time <= '%s' ORDER BY event_time ASC",
-                             data_type, id, start_date, stop_date);
+                                                     " att_%s WHERE att_conf_id=%d AND  event_time >='%s' "
+                                                     " AND event_time <= '%s' ORDER BY event_time ASC",
+                                 data_type, id, start_date, stop_date);
 
                     pinfo("query: %s\n", query);
 
@@ -405,7 +421,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                         xvar->add(row->getField(1), row->getField(2), index);
 
                         pthread_mutex_unlock(&d_ptr->mutex);
-           ///             printf("\t\e[1;32munlocked\e[0m\n");
+                        ///             printf("\t\e[1;32munlocked\e[0m\n");
 
                         row->close();
                     }
@@ -445,10 +461,10 @@ bool MySqlHdbppSchema::getData(const char *source,
 }
 
 bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
-                                 const char *start_date,
-                                 const char *stop_date,
-                                 Connection *connection,
-                                 int notifyEveryNumRows)
+                               const char *start_date,
+                               const char *stop_date,
+                               Connection *connection,
+                               int notifyEveryNumRows)
 {
     bool success = true;
     d_ptr->totalSources = sources.size();
@@ -457,7 +473,7 @@ bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
         d_ptr->sourceStep = i + 1;
         printf("MySqlHdbppSchema.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
         success = getData(sources.at(i).c_str(), start_date, stop_date,
-                                           connection, notifyEveryNumRows);
+                          connection, notifyEveryNumRows);
         if(!success)
             break;
     }

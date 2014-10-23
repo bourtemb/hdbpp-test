@@ -1,6 +1,7 @@
 #include "qhdbxutils.h"
 #include <math.h>
 #include <QtDebug>
+#include <QDateTime>
 
 QHdbXUtils::QHdbXUtils()
 {
@@ -32,6 +33,8 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
     XVariant::DataFormat fmt = XVariant::FormatInvalid;
+ //   qDebug() << "*** " << timestamps.size();
+   // timestamps.clear();
     if(indata.size() > 0)
     {
         dt = indata[0].getType();
@@ -54,7 +57,12 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
     {
         const XVariant &v = indata[i];
         /* append timestamp */
-        timestamps.append(v.getTime_tTimestamp());
+        struct timeval tv = v.getTimevalTimestamp();
+        double timestamp = (double) tv.tv_sec;
+        timestamp += ((double) tv.tv_usec) * 1e-6;
+        timestamps.append(timestamp);
+        printf("timestamp: %f\n", timestamps.last());
+        qDebug() << QDateTime::fromTime_t(v.getTime_tTimestamp()) << (double) v.getTime_tTimestamp();
         /* append data */
         if(dt == XVariant::Double)
             data.append(v.toDouble(true));
@@ -115,7 +123,10 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
     {
         const XVariant &v = indata[i];
         /* append timestamp */
-        timestamps.append(v.getTime_tTimestamp());
+        struct timeval tv = v.getTimevalTimestamp();
+        double timestamp = (double) tv.tv_sec;
+        timestamp += ((double) tv.tv_usec) * 1e-6;
+        timestamps.append(timestamp);
 
         /* append data */
         if(dt == XVariant::Double)

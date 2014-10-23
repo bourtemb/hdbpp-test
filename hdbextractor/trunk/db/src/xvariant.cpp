@@ -1039,6 +1039,22 @@ time_t XVariant::getTime_tTimestamp() const
     return mktime(&mtm);
 }
 
+/** \brief Returns the timestamp associated to the data stored by XVariant, in the form
+ *         of a struct timeval data type
+ *
+ * @return A struct timeval value containing the date/time associated to the data: seconds and microsecs.
+ */
+struct timeval XVariant::getTimevalTimestamp() const
+{
+    struct tm mtm;
+    struct timeval tv;
+    strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
+    /* get usecs if specified */
+    tv.tv_usec = 0;
+    tv.tv_sec = mktime(&mtm);
+    return tv;
+}
+
 /** \brief The conversion method that tries to convert the stored data into a vector of double
  *
  * @return a std vector of double representing the data saved into XVariant

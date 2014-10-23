@@ -564,7 +564,8 @@ mysqlhdbppschema.o: hdbpp/src/mysqlhdbppschema.cpp hdbpp/src/mysqlhdbppschema.h 
 		db/src/dbschemaprivate.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mysqlhdbppschema.o hdbpp/src/mysqlhdbppschema.cpp
 
-configurationparser.o: src/configurationparser.cpp src/configurationparser.h
+configurationparser.o: src/configurationparser.cpp src/configurationparser.h \
+		src/hdbxmacros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurationparser.o src/configurationparser.cpp
 
 ####### Install

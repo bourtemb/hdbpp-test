@@ -108,6 +108,8 @@ public:
 
     time_t getTime_tTimestamp() const;
 
+    struct timeval getTimevalTimestamp() const;
+
     void add(const char* readval, size_t index);
 
     void add(const char* readval, const char* writeval, size_t index);
