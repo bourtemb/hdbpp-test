@@ -27,8 +27,8 @@ QHdbXUtils::QHdbXUtils()
  *
  */
 void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata,
-                                             QVector<double> &timestamps,
-                                             QVector<double> &data, bool *ok)
+                                             QVector<double> *timestamps,
+                                             QVector<double> *data, bool *ok)
 {
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
@@ -52,6 +52,8 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         else
             *ok = false;
     }
+//    for(size_t i = 0; i < indata.size(); i++)
+//        printf("\e[1;35mQHdbXUtils.toTimestampDataDoubleVector: %s\e[0m\n", indata.at(i).getTimestamp());
     /* try to extract data */
     for(size_t i = 0; i < indata.size(); i++)
     {
@@ -60,15 +62,18 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         struct timeval tv = v.getTimevalTimestamp();
         double timestamp = (double) tv.tv_sec;
         timestamp += ((double) tv.tv_usec) * 1e-6;
-        timestamps.append(timestamp);
-        printf("timestamp: %f\n", timestamps.last());
-        qDebug() << QDateTime::fromTime_t(v.getTime_tTimestamp()) << (double) v.getTime_tTimestamp();
+        timestamps->append(timestamp);
+
+        printf("QHdbXUtils.toTimestampDataDoubleVector: timestamp calculated %f from \"%s\" timestamp in vector: %f \n", timestamp,
+               v.getTimestamp(), timestamps->last());
+        qDebug() << QDateTime::fromTime_t(timestamp) << (double) timestamp;
         /* append data */
         if(dt == XVariant::Double)
-            data.append(v.toDouble(true));
+            data->append(v.toDouble(true));
         else if(dt == XVariant::Int)
-            data.append((double) v.toLongInt());
+            data->append((double) v.toLongInt());
     }
+
 }
 
 /** \brief Converts input data into a vector of timestamps (converted to double)

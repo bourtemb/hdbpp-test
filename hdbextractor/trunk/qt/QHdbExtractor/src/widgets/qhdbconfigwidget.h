@@ -28,6 +28,12 @@ public:
 
     void setSources(const QStringList& src);
 
+    void updateHistory();
+
+    void setConfig(const QString& host, const QString& db, const QString& user);
+
+    void setState(const QString& state);
+
 signals:
 
     void sourceRemoved(const QString& src);
@@ -41,9 +47,13 @@ protected slots:
 
     void removeSourceClicked();
 
+    void removeFromHistory();
+
     void addSourceClicked();
 
     void lastDaysHoursChanged();
+
+    void historySelectionChanged();
 
     void init();
 

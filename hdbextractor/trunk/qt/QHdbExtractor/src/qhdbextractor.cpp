@@ -108,6 +108,9 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     hdbxp->connect(dbt, host, db, u, pass, port);
     hdbxp->setUpdateProgressStep(20);
 
+    ui->configWidget->setConfig(host, db, u);
+
+
     /* signal/slot connections */
     /* 1a. data ready (RO) */
     connect(hdbxp, SIGNAL(dataReady(const QString &, const QVector<double>&, const QVector<double>&)),
@@ -168,11 +171,14 @@ void QHdbExtractor::slotViewClicked()
     /* switch stacked widget index */
     ui->stackedWidget->setCurrentIndex(0);
 
+    ui->configWidget->updateHistory();
+
 }
 
 void QHdbExtractor::onError(const QString& message)
 {
     QMessageBox::critical(this, "An error occurred", message);
+    ui->configWidget->setState("An error occurred");
 }
 
 void QHdbExtractor::mAddCurve(const QString& source, const QColor& color, bool read)

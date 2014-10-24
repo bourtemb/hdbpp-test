@@ -15,6 +15,8 @@ QHdbConfigWidget::~QHdbConfigWidget()
         items << it->text(0);
     s.setValue("SourcesList", items);
 
+    /* history entries are saved/updated when the user presses the View button */
+
     QDate ds = ui.calStart->selectedDate();
     QTime ts = ui.teStart->time();
     QDateTime dts(ds, ts);
@@ -48,6 +50,9 @@ void QHdbConfigWidget::init()
     connect(ui.pbView, SIGNAL(clicked()), this, SIGNAL(viewClicked()));
     connect(ui.pbCancel, SIGNAL(clicked()), this, SIGNAL(cancelClicked()));
 
+    connect(ui.pbAddToViewSources, SIGNAL(clicked()), this, SLOT(historySelectionChanged()));
+    connect(ui.pbRemoveFromHistory, SIGNAL(clicked()), this, SLOT(removeFromHistory()));
+
     ui.cbLastDaysHours->setChecked(false);
 
     QDateTime dt = QDateTime::currentDateTime();
@@ -76,6 +81,11 @@ void QHdbConfigWidget::init()
     ui.teStart->setTime(dts.time());
     ui.teStop->setTime(dte.time());
 
+    /* restore history */
+    QStringList historyEntries = s.value("HISTORY_ENTRIES").toStringList();
+    foreach(QString he, historyEntries)
+        new QTreeWidgetItem(ui.twHistory, QStringList() << he);
+
     m_viewSourcesListChanged();
 }
 
@@ -93,6 +103,19 @@ QDateTime QHdbConfigWidget::stopDateTime() const
     dt.setDate(ui.calStop->selectedDate());
     dt.setTime(ui.teStop->time());
     return dt;
+}
+
+void QHdbConfigWidget::setConfig(const QString& host, const QString& db, const QString& user)
+{
+
+    ui.labelHost->setText("Host: " + host);
+    ui.labelDb->setText("Database: " + db);
+    ui.labelUser->setText("User: " + user);
+}
+
+void QHdbConfigWidget::setState(const QString& state)
+{
+    ui.labelState->setText(state);
 }
 
 QStringList QHdbConfigWidget::m_sourcesFromTree(QTreeWidget *tree) const
@@ -116,6 +139,78 @@ QStringList QHdbConfigWidget::sources() const
 {
     qDebug() << "sources() " << m_sourcesFromTree(ui.twSelected);
     return m_sourcesFromTree(ui.twSelected);
+}
+
+void QHdbConfigWidget::updateHistory()
+{
+    QSettings s;
+    QList<QTreeWidgetItem *> viewList = ui.twSelected->findItems("*", Qt::MatchWildcard, 0);
+    foreach(QTreeWidgetItem *viewIt, viewList)
+    {
+        QList<QTreeWidgetItem*> inHistoryIts = ui.twHistory->findItems(viewIt->text(0), Qt::MatchExactly);
+        if(inHistoryIts.isEmpty())
+        {
+            new QTreeWidgetItem(ui.twHistory, QStringList() << viewIt->text(0));
+        }
+        /* save/update  settings */
+        QDateTime startDt(ui.calStart->selectedDate(), ui.teStart->time());
+        QDateTime stopDt(ui.calStop->selectedDate(), ui.teStop->time());
+        s.setValue(viewIt->text(0) + "_START", startDt);
+        s.setValue(viewIt->text(0) + "_STOP", stopDt);
+        QStringList historyEntries = s.value("HISTORY_ENTRIES", QStringList()).toStringList();
+        if(!historyEntries.contains(viewIt->text(0)))
+            historyEntries << viewIt->text(0);
+        s.setValue("HISTORY_ENTRIES", historyEntries);
+    }
+}
+
+void QHdbConfigWidget::historySelectionChanged()
+{
+    QList<QTreeWidgetItem*> srcs = ui.twHistory->selectedItems();
+    if(srcs.size() == 1)
+    {
+        QString src = srcs.first()->text(0);
+
+        QList<QTreeWidgetItem*> itemsInView = ui.twSelected->findItems(src, Qt::MatchExactly);
+        if(itemsInView.size() == 0) /* not existing, create it */
+        {
+            QTreeWidgetItem *newIt = new QTreeWidgetItem(ui.twSelected, QStringList() << src);
+            newIt->setFlags(newIt->flags()|Qt::ItemIsEditable);
+        }
+        else
+            itemsInView.first()->setSelected(true);
+
+        /* restore date time associated to selected item */
+        if(ui.cbRestoreDateTime->isChecked())
+        {
+            QSettings s;
+            QDateTime startdt = s.value(src + "_START").toDateTime();
+            QDateTime stopdt = s.value(src + "_STOP").toDateTime();
+            ui.calStart->setSelectedDate(startdt.date());
+            ui.calStop->setSelectedDate(stopdt.date());
+            ui.teStart->setTime(startdt.time());
+            ui.teStop->setTime(stopdt.time());
+        }
+    }
+}
+
+void QHdbConfigWidget::removeFromHistory()
+{
+    QSettings s;
+    QList<QTreeWidgetItem* > srcs = ui.twHistory->selectedItems();
+    foreach(QTreeWidgetItem * it, srcs)
+    {
+        QString src = it->text(0);
+        QStringList historyEntries = s.value("HISTORY_ENTRIES", QStringList()).toStringList();
+
+        if(historyEntries.contains(it->text(0)))
+            historyEntries.removeAll(src);
+        s.setValue("HISTORY_ENTRIES", historyEntries);
+
+        s.remove(src + "_START");
+        s.remove(src + "_STOP");
+        delete it;
+    }
 }
 
 void QHdbConfigWidget::removeSourceClicked()

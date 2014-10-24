@@ -1048,10 +1048,13 @@ struct timeval XVariant::getTimevalTimestamp() const
 {
     struct tm mtm;
     struct timeval tv;
-    strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
+    memset(&mtm, 0, sizeof(struct tm));
+    char *remain = strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
     /* get usecs if specified */
     tv.tv_usec = 0;
     tv.tv_sec = mktime(&mtm);
+    printf("\e[1;31mXVariant::getTimevalTimestamp: %f from \"%s\" -- remainder -- \"%s\"\e[0m\n",
+           (double) tv.tv_sec, d->mTimestamp, remain);
     return tv;
 }
 
