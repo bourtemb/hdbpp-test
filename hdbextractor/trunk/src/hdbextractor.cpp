@@ -6,6 +6,7 @@
 #include "hdb/src/mysqlhdbschema.h"
 #include "hdbpp/src/mysqlhdbppschema.h"
 #include "hdbextractorlistener.h"
+#include "queryconfiguration.h"
 
 #include <string.h>
 
@@ -104,6 +105,7 @@ Hdbextractor::Hdbextractor(HdbExtractorListener *hdbxlistener) : ResultListener(
     d_ptr->dbschema = NULL;
     d_ptr->dbType = DBUNDEFINED;
     d_ptr->hdbXListenerI = hdbxlistener;
+    d_ptr->queryConfiguration = NULL;
     /* by default, trigger data available on listener only when data fetch is complete */
     d_ptr->updateEveryRows = -1;
 }
@@ -172,6 +174,31 @@ bool  Hdbextractor::hasError() const
     return (strlen(d_ptr->errorMessage) > 0);
 }
 
+/** \brief Start fetching data from the database. When data is available, you can get it
+ *         with the HdbExtractor::get method inside onFinished or onProgressUpdate, if
+ *         partial data updates are preferred.
+ *
+ * @param source the name of a tango device attribute, full name, e.g. domain/family/member/attName
+ * @param start_date the start date in the form "2014-07-10 10:00:04"
+ * @param stop_date  the stop date in the form "2014-07-10 10:20:04"
+ *
+ * @see XVariant
+ * @see get
+ * @see setUpdateProgressStep
+ *
+ * @return true if the data fetch was successful, false otherwise.
+ *
+ * \par Query options.
+ * See setQueryConfiguration and the QueryConfiguration object to see what options can be
+ * applied to the database queries. For example, it is possible to choose the desired behaviour
+ * when no data is available between start_date and stop_date.
+ *
+ * If this call was not successful, you can call getErrorMessage to get the error message
+ *
+ * @see getErrorMessage
+ * @see setQueryConfiguration
+ *
+ */
 bool Hdbextractor::getData(const char *source,
                            const char *start_date,
                            const char *stop_date)
@@ -194,12 +221,17 @@ bool Hdbextractor::getData(const char *source,
  *
  * @param sources a vector of chars each one is the name of the attribute
  *
- *
  * @return true if the data fetch was successful, false otherwise.
  *
  * If this call was not successful, you can call getErrorMessage to get the error message
  *
+ * \par Query options.
+ * See setQueryConfiguration and the QueryConfiguration object to see what options can be
+ * applied to the database queries. For example, it is possible to choose the desired behaviour
+ * when no data is available between start_date and stop_date.
+ *
  * @see getErrorMessage
+ * @see setQueryConfiguration
  */
 bool Hdbextractor::getData(const std::vector<std::string> sources,
                            const char *start_date,
@@ -213,6 +245,7 @@ bool Hdbextractor::getData(const std::vector<std::string> sources,
         for(size_t i = 0; i < sources.size(); i++)
         {
             printf("HdbExtractor.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
+            d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
             success = d_ptr->dbschema->getData(sources.at(i).c_str(), start_date, stop_date,
                                                d_ptr->connection, d_ptr->updateEveryRows);
             if(!success)
@@ -261,6 +294,19 @@ int Hdbextractor::updateProgressStep()
     return d_ptr->updateEveryRows;
 }
 
+/** \brief This method allows to configure various options before querying the database
+ *
+ * @param qc The QueryConfiguration object with the desired options set.
+ *
+ * This method is used to configure the way data is fetched by getData.
+ *
+ * @see QueryConfiguration
+ * @see getData
+ */
+void Hdbextractor::setQueryConfiguration(QueryConfiguration *qc)
+{
+    d_ptr->queryConfiguration = qc;
+}
 
 /** \brief set the number of rows after which a progress update must be triggered on the listener.
  *

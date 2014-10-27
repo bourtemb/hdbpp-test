@@ -9,6 +9,7 @@
 
 class HdbExtractorPrivate;
 class HdbExtractorListener;
+class QueryConfiguration;
 
 /** \mainpage The Hdbextractor++ historical database data extractor
  *
@@ -323,30 +324,13 @@ public:
      */
     void disconnect();
 
-    /** \brief Start fetching data from the database. When data is available, you can get it
-     *         with the HdbExtractor::get method inside onFinished or onProgressUpdate, if
-     *         partial data updates are preferred.
-     *
-     * @param source the name of a tango device attribute, full name, e.g. domain/family/member/attName
-     * @param start_date the start date in the form "2014-07-10 10:00:04"
-     * @param stop_date  the stop date in the form "2014-07-10 10:20:04"
-     *
-     * @see XVariant
-     * @see get
-     * @see setUpdateProgressStep
-     *
-     * @return true if the data fetch was successful, false otherwise.
-     *
-     * If this call was not successful, you can call getErrorMessage to get the error message
-     *
-     * @see getErrorMessage
-     *
-     */
     bool getData(const char* source, const char* start_date, const char *stop_date);
 
     bool getData(const std::vector<std::string> sources,
                                           const char *start_date,
                                           const char *stop_date);
+
+    void setQueryConfiguration(QueryConfiguration *qc);
 
     /** \brief Get a copy of the partial or complete data fetched from the database up to this moment
      *

@@ -180,30 +180,62 @@
       <string>Edit Sources</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pbRemoveFromHistory">
-        <property name="text">
-         <string>Remove from History</string>
+      <item row="0" column="0" colspan="4">
+       <widget class="QTreeWidget" name="twHistory">
+        <property name="rootIsDecorated">
+         <bool>false</bool>
         </property>
+        <column>
+         <property name="text">
+          <string>History</string>
+         </property>
+        </column>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QPushButton" name="pbRemoveSrc">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
+      <item row="0" column="4" colspan="3">
+       <widget class="QTreeWidget" name="twSelected">
+        <property name="rootIsDecorated">
+         <bool>false</bool>
         </property>
-        <property name="toolTip">
-         <string>Remove Selected Source</string>
-        </property>
+        <column>
+         <property name="text">
+          <string notr="true">View Sources</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="pbRemoveFromHistory">
         <property name="text">
          <string>Remove</string>
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="2">
+       <widget class="QCheckBox" name="cbRestoreDateTime">
+        <property name="text">
+         <string>Restore interval on add</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="pbAddToViewSources">
+        <property name="text">
+         <string>&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -216,7 +248,7 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="3">
+      <item row="1" column="5">
        <widget class="QPushButton" name="pbAdd">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -229,47 +261,19 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0" colspan="5">
-       <widget class="QSplitter" name="splitter">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="1" column="6">
+       <widget class="QPushButton" name="pbRemoveSrc">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
         </property>
-        <widget class="QTreeWidget" name="twHistory">
-         <property name="rootIsDecorated">
-          <bool>false</bool>
-         </property>
-         <column>
-          <property name="text">
-           <string>History</string>
-          </property>
-         </column>
-        </widget>
-        <widget class="QTreeWidget" name="twSelected">
-         <property name="rootIsDecorated">
-          <bool>false</bool>
-         </property>
-         <column>
-          <property name="text">
-           <string notr="true">View Sources</string>
-          </property>
-         </column>
-        </widget>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="pbAddToViewSources">
+        <property name="toolTip">
+         <string>Remove Selected Source</string>
+        </property>
         <property name="text">
-         <string>Add to View Sources</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="cbRestoreDateTime">
-        <property name="text">
-         <string>Restore start stop date time</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
+         <string>Remove</string>
         </property>
        </widget>
       </item>

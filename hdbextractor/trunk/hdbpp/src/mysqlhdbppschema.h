@@ -35,6 +35,8 @@ public:
 
     virtual bool hasError() const;
 
+    virtual bool setQueryConfiguration(QueryConfiguration *queryConfiguration);
+
 private:
     DbSchemaPrivate *d_ptr;
 };

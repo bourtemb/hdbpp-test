@@ -20,8 +20,8 @@ public:
 public:
 
     void toTimestampDataDoubleVector(const std::vector<XVariant> &indata,
-                                     QVector<double> *timestamps,
-                                     QVector<double> *data, bool *ok = NULL);
+                                     QVector<double> &timestamps,
+                                     QVector<double> &data, bool *ok = NULL);
 
     void toTimestampDataDoubleVector(const std::vector<XVariant> &indata,
                                      QVector<double> &timestamps,

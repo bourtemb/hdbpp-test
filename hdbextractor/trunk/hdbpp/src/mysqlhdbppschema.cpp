@@ -48,6 +48,10 @@ MySqlHdbppSchema::~MySqlHdbppSchema()
     pthread_mutex_destroy(&d_ptr->mutex);
 }
 
+bool MySqlHdbppSchema::setQueryConfiguration(QueryConfiguration *queryConfiguration)
+{
+    d_ptr->queryConfiguration = queryConfiguration;
+}
 
 /** \brief empties the queue of partial or complete data already fetched from the database.
  *
@@ -418,6 +422,7 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                         pthread_mutex_lock(&d_ptr->mutex);
 
+                       // printf("\e[1;35m adding %s: %s %s\e[0m\n", timestamp, row->getField(1), row->getField(2));
                         xvar->add(row->getField(1), row->getField(2), index);
 
                         pthread_mutex_unlock(&d_ptr->mutex);
@@ -468,7 +473,7 @@ bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
 {
     bool success = true;
     d_ptr->totalSources = sources.size();
-    for(int i = 0; i < d_ptr->totalSources; i++)
+    for(size_t i = 0; i < d_ptr->totalSources; i++)
     {
         d_ptr->sourceStep = i + 1;
         printf("MySqlHdbppSchema.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);

@@ -146,6 +146,7 @@ XVariant::XVariant(const XVariant &other)
     d->mSize = other.getSize();
     d->mIsValid = other.isValid();
     d->mIsNull = other.isNull();
+    d->mIsWNull = other.isWNull();
 
     strncpy(d->mSource, other.getSource(), SRCLEN);
     strncpy(d->mError, other.getError(), ERRMSGLEN);
@@ -319,7 +320,6 @@ bool XVariant::isWNull() const
     return d->mIsWNull;
 }
 
-
 /** \brief Returns the description of the error reported by the last operation.
  *
  * \note All errors occurred before the last operation are discarded.
@@ -420,6 +420,9 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
 {
     d->mIsNull = (readval == NULL);
     d->mIsWNull = (writeval == NULL);
+
+    if(d->mIsNull || d->mIsWNull)
+        return;
 
     if((d->mWritable == XVariant::RW ) && index < d->mSize)
     {
@@ -1053,8 +1056,6 @@ struct timeval XVariant::getTimevalTimestamp() const
     /* get usecs if specified */
     tv.tv_usec = 0;
     tv.tv_sec = mktime(&mtm);
-    printf("\e[1;31mXVariant::getTimevalTimestamp: %f from \"%s\" -- remainder -- \"%s\"\e[0m\n",
-           (double) tv.tv_sec, d->mTimestamp, remain);
     return tv;
 }
 

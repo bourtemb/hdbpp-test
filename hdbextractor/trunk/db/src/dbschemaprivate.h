@@ -7,6 +7,7 @@
 
 class ResultListener;
 class XVariantList;
+class QueryConfiguration;
 
 class DbSchemaPrivate
 {
@@ -21,9 +22,11 @@ public:
 
     XVariantList *variantList;
 
+    QueryConfiguration *queryConfiguration;
+
     char errorMessage[MAXERRORLEN];
 
-    int sourceStep, totalSources;
+    size_t sourceStep, totalSources;
 };
 
 #endif // MYSQLHDBSCHEMAPRIVATE_H

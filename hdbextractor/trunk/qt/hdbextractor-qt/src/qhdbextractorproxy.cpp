@@ -298,18 +298,8 @@ void QHdbextractorProxy::dataNotify(QHdbNewDataEvent *e)
         {
             if(w == XVariant::RO || w == XVariant::WO)
             {
-//                for(size_t i = 0; i < e->data.size(); i++)
-//                    printf("\e[1;36mQHdbextractorProxy::event: %s\e[0m\n", e->data.at(i).getTimestamp());
                 QVector<double> timestamps, out_data;
-                qDebug() << "prima di utils";
-                utils.toTimestampDataDoubleVector(e->data, &timestamps, &out_data);
-                for(int i =0; i< timestamps.size(); i++)
-                {
-                    double ts = timestamps[i];
-                    printf("timestamp from data: %f, timestamp from vector: %f\n", (double) e->data.at(i).getTimevalTimestamp().tv_sec, ts);
-                    qDebug() << "* ->" << QDateTime::fromTime_t(ts) << ts;
-                }
-                qDebug() << "dopo di utils";
+                utils.toTimestampDataDoubleVector(e->data, timestamps, out_data);
                 emit dataReady(source, timestamps, out_data);
             }
             else if(w == XVariant::RW)

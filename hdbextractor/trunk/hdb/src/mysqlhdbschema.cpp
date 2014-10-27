@@ -47,6 +47,10 @@ MySqlHdbSchema::~MySqlHdbSchema()
     pthread_mutex_destroy(&d_ptr->mutex);
 }
 
+bool MySqlHdbSchema::setQueryConfiguration(QueryConfiguration *queryConfiguration)
+{
+    d_ptr->queryConfiguration = queryConfiguration;
+}
 
 /** \brief empties the queue of partial or complete data already fetched from the database.
  *

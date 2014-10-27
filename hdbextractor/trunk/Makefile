@@ -56,7 +56,8 @@ SOURCES       = src/hdbextractor.cpp \
 		hdb/src/mysqlhdbschema.cpp \
 		db/src/xvariantlist.cpp \
 		hdbpp/src/mysqlhdbppschema.cpp \
-		src/configurationparser.cpp 
+		src/configurationparser.cpp \
+		src/queryconfiguration.cpp 
 OBJECTS       = hdbextractor.o \
 		hdbextractorprivate.o \
 		mysqlconnection.o \
@@ -68,7 +69,8 @@ OBJECTS       = hdbextractor.o \
 		mysqlhdbschema.o \
 		xvariantlist.o \
 		mysqlhdbppschema.o \
-		configurationparser.o
+		configurationparser.o \
+		queryconfiguration.o
 DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		/usr/local/qt5/mkspecs/common/shell-unix.conf \
 		/usr/local/qt5/mkspecs/common/unix.conf \
@@ -183,7 +185,8 @@ DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		hdb/src/mysqlhdbschema.cpp \
 		db/src/xvariantlist.cpp \
 		hdbpp/src/mysqlhdbppschema.cpp \
-		src/configurationparser.cpp
+		src/configurationparser.cpp \
+		src/queryconfiguration.cpp
 QMAKE_TARGET  = hdbextractor++
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = libhdbextractor++.so.1.0.0
@@ -490,7 +493,8 @@ hdbextractor.o: src/hdbextractor.cpp src/hdbextractor.h \
 		hdb/src/mysqlhdbschema.h \
 		db/src/dbschema.h \
 		hdbpp/src/mysqlhdbppschema.h \
-		src/hdbextractorlistener.h
+		src/hdbextractorlistener.h \
+		src/queryconfiguration.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o hdbextractor.o src/hdbextractor.cpp
 
 hdbextractorprivate.o: src/hdbextractorprivate.cpp src/hdbextractorprivate.h \
@@ -568,6 +572,10 @@ configurationparser.o: src/configurationparser.cpp src/configurationparser.h \
 		src/hdbxmacros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurationparser.o src/configurationparser.cpp
 
+queryconfiguration.o: src/queryconfiguration.cpp src/queryconfiguration.h \
+		src/hdbxmacros.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o queryconfiguration.o src/queryconfiguration.cpp
+
 ####### Install
 
 install_lib: first FORCE
@@ -601,8 +609,10 @@ install_inc: first FORCE
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/src/hdbextractorlistener.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/hdbpp/src/mysqlhdbppschema.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/src/configurationparser.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/src/queryconfiguration.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 
 uninstall_inc: FORCE
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/queryconfiguration.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/configurationparser.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/mysqlhdbppschema.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/hdbextractorlistener.h

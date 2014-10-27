@@ -27,14 +27,13 @@ QHdbXUtils::QHdbXUtils()
  *
  */
 void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata,
-                                             QVector<double> *timestamps,
-                                             QVector<double> *data, bool *ok)
+                                             QVector<double> &timestamps,
+                                             QVector<double> &data, bool *ok)
 {
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
     XVariant::DataFormat fmt = XVariant::FormatInvalid;
- //   qDebug() << "*** " << timestamps.size();
-   // timestamps.clear();
+
     if(indata.size() > 0)
     {
         dt = indata[0].getType();
@@ -52,8 +51,6 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         else
             *ok = false;
     }
-//    for(size_t i = 0; i < indata.size(); i++)
-//        printf("\e[1;35mQHdbXUtils.toTimestampDataDoubleVector: %s\e[0m\n", indata.at(i).getTimestamp());
     /* try to extract data */
     for(size_t i = 0; i < indata.size(); i++)
     {
@@ -62,16 +59,17 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         struct timeval tv = v.getTimevalTimestamp();
         double timestamp = (double) tv.tv_sec;
         timestamp += ((double) tv.tv_usec) * 1e-6;
-        timestamps->append(timestamp);
+        timestamps.append(timestamp);
 
-        printf("QHdbXUtils.toTimestampDataDoubleVector: timestamp calculated %f from \"%s\" timestamp in vector: %f \n", timestamp,
-               v.getTimestamp(), timestamps->last());
-        qDebug() << QDateTime::fromTime_t(timestamp) << (double) timestamp;
         /* append data */
-        if(dt == XVariant::Double)
-            data->append(v.toDouble(true));
+        if((v.isNull() && w == XVariant::RO) || !v.isValid())
+            data.append(nan("NaN"));
+        else if(v.isWNull() && w == XVariant::WO)
+            data.append(nan("NaN"));
+        else if(dt == XVariant::Double)
+            data.append(v.toDouble(true));
         else if(dt == XVariant::Int)
-            data->append((double) v.toLongInt());
+            data.append((double) v.toLongInt());
     }
 
 }
@@ -136,23 +134,51 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         /* append data */
         if(dt == XVariant::Double)
         {
-            rdata.append(v.toDouble(true));
-            wdata.append(v.toDouble(false));
+            if(!v.isNull() && v.isValid())
+                rdata.append(v.toDouble(true));
+            else
+                rdata.append(nan("NaN"));
+
+            if(!v.isWNull() && v.isValid())
+                wdata.append(v.toDouble(false));
+            else
+                wdata.append(nan("NaN"));
         }
         else if(dt == XVariant::Int)
         {
-            rdata.append((double) v.toLongInt());
-            wdata.append((double) v.toLongInt(false));
+            if(!v.isNull() && v.isValid())
+                rdata.append((double) v.toLongInt());
+            else
+                rdata.append(nan("NaN"));
+
+            if(!v.isWNull() && v.isValid())
+                wdata.append((double) v.toLongInt(false));
+            else
+                wdata.append(nan("NaN"));
         }
         else if(dt == XVariant::UInt)
         {
-            rdata.append((double) v.toULongInt());
-            wdata.append((double) v.toULongInt(false));
+            if(!v.isNull() && v.isValid())
+                rdata.append((double) v.toULongInt());
+            else
+                rdata.append(nan("NaN"));
+
+            if(!v.isWNull() && v.isValid())
+                wdata.append((double) v.toULongInt(false));
+            else
+                wdata.append(nan("NaN"));
         }
         else if(dt == XVariant::Boolean)
         {
-            rdata.append((double) v.toBool());
-            wdata.append((double) v.toBool(false));
+            if(!v.isNull() && v.isValid())
+                rdata.append((double) v.toBool());
+            else
+                rdata.append(nan("NaN"));
+
+            if(!v.isWNull() && v.isValid())
+                wdata.append((double) v.toBool(false));
+            else
+                wdata.append(nan("NaN"));
         }
     }
 }

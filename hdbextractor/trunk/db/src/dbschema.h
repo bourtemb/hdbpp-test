@@ -7,6 +7,7 @@
 class Connection;
 class XVariantList;
 class XVariant;
+class QueryConfiguration;
 
 /** \brief The interface representing a database schema. <em>Used internally</em>.
  *
@@ -77,6 +78,14 @@ public:
      * @see getError
      */
     virtual bool hasError() const = 0;
+
+    /** \brief Personalize queries.
+     *
+     * @param queryConfiguration a QueryConfiguration object.
+     *
+     */
+    virtual bool setQueryConfiguration(QueryConfiguration *queryConfiguration) = 0;
+
 };
 
 #endif // DBSCHEMA_H
