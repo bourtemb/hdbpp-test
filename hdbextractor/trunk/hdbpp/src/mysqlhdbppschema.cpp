@@ -10,6 +10,7 @@
 #include "mysql/src/mysqlconnection.h"
 #include "../src/hdbxmacros.h"
 #include "db/src/dbschemaprivate.h"
+#include "helpers/configurabledbschemahelper.h"
 #include "xvariantlist.h"
 #include <pthread.h>
 #include <assert.h>
@@ -17,11 +18,11 @@
 
 #define MAXQUERYLEN 4096
 
-MySqlHdbppSchema::MySqlHdbppSchema(ResultListener *resultListenerI)
+MySqlHdbppSchema::MySqlHdbppSchema(ResultListener *resultListenerI) : ConfigurableDbSchema()
 {
     assert(resultListenerI != NULL);
 
-    d_ptr = new DbSchemaPrivate();
+    /* d_ptr is created inside ConfigurableDbSchema */
     d_ptr->resultListenerI = resultListenerI;
     d_ptr->variantList = NULL;
     d_ptr->sourceStep = 0;
@@ -46,11 +47,6 @@ bool MySqlHdbppSchema::hasError() const
 MySqlHdbppSchema::~MySqlHdbppSchema()
 {
     pthread_mutex_destroy(&d_ptr->mutex);
-}
-
-bool MySqlHdbppSchema::setQueryConfiguration(QueryConfiguration *queryConfiguration)
-{
-    d_ptr->queryConfiguration = queryConfiguration;
 }
 
 /** \brief empties the queue of partial or complete data already fetched from the database.
@@ -205,6 +201,9 @@ bool MySqlHdbppSchema::getData(const char *source,
             }
             else
             {
+                const ConfigurableDbSchemaHelper *configHelper = new ConfigurableDbSchemaHelper();
+                ConfigurableDbSchemaHelper::FillFromThePastMode fillMode = ConfigurableDbSchemaHelper::None;
+
                 /* now get data */
                 id = atoi(ch_id);
                 if(wri == XVariant::RO)
@@ -248,7 +247,6 @@ bool MySqlHdbppSchema::getData(const char *source,
                          */
                         if(strcmp(timestamp, row->getField(0)) != 0)
                         {
-
                             if(format != XVariant::Scalar && timestampCnt > 0 &&
                                     d_ptr->notifyEveryNumRows > 0 &&
                                     (timestampCnt % d_ptr->notifyEveryNumRows == 0))
@@ -261,6 +259,20 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                             /* get timestamp */
                             strncpy(timestamp, row->getField(0), 32);
+
+                            if(timestampCnt == 0)
+                            {
+                                fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                                                      start_date, stop_date, timestamp);
+                                if(fillMode != ConfigurableDbSchemaHelper::None)
+                                {
+                                    /* must fetch the first data ahead of the start_date, create a
+                                     * XVariant and insert it as first element, according to the
+                                     * fillMode
+                                     */
+
+                                }
+                            }
 
                             /* get data size of array */
                             if(format == XVariant::Vector)
@@ -385,6 +397,20 @@ bool MySqlHdbppSchema::getData(const char *source,
                             }
                             /* get timestamp */
                             strncpy(timestamp, row->getField(0), 32);
+
+                            if(timestampCnt == 0)
+                            {
+                                fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                                                      start_date, stop_date, timestamp);
+                                if(fillMode != ConfigurableDbSchemaHelper::None)
+                                {
+                                    /* must fetch the first data ahead of the start_date, create a
+                                     * XVariant and insert it as first element, according to the
+                                     * fillMode
+                                     */
+
+                                }
+                            }
 
                             /* get data size of array */
                             if(format == XVariant::Vector)

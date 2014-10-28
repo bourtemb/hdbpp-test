@@ -16,11 +16,10 @@
 
 #define MAXQUERYLEN 4096
 
-MySqlHdbSchema::MySqlHdbSchema(ResultListener *resultListenerI)
+MySqlHdbSchema::MySqlHdbSchema(ResultListener *resultListenerI) : ConfigurableDbSchema()
 {
     assert(resultListenerI != NULL);
-
-    d_ptr = new DbSchemaPrivate();
+    /* d_ptr is created inside ConfigurableDbSchema */
     d_ptr->resultListenerI = resultListenerI;
     d_ptr->variantList = NULL;
     d_ptr->sourceStep = 0;
@@ -45,11 +44,6 @@ bool MySqlHdbSchema::hasError() const
 MySqlHdbSchema::~MySqlHdbSchema()
 {
     pthread_mutex_destroy(&d_ptr->mutex);
-}
-
-bool MySqlHdbSchema::setQueryConfiguration(QueryConfiguration *queryConfiguration)
-{
-    d_ptr->queryConfiguration = queryConfiguration;
 }
 
 /** \brief empties the queue of partial or complete data already fetched from the database.

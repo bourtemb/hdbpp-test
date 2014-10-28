@@ -245,7 +245,10 @@ bool Hdbextractor::getData(const std::vector<std::string> sources,
         for(size_t i = 0; i < sources.size(); i++)
         {
             printf("HdbExtractor.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
-            d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
+
+            if(d_ptr->queryConfiguration != NULL)
+                d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
+
             success = d_ptr->dbschema->getData(sources.at(i).c_str(), start_date, stop_date,
                                                d_ptr->connection, d_ptr->updateEveryRows);
             if(!success)

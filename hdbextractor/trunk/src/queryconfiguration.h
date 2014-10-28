@@ -21,7 +21,7 @@ public:
 
     bool getBool(const char *key) const;
 
-    double getDouble(const char* key) const;
+    double getDouble(const char* key, bool *ok) const;
 
 private:
     std::map<std::string, std::string> mMap;

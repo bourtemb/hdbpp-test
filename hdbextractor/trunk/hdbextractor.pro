@@ -46,7 +46,9 @@ SOURCES += src/hdbextractor.cpp \
     db/src/xvariantlist.cpp \
     hdbpp/src/mysqlhdbppschema.cpp \
     src/configurationparser.cpp \
-    src/queryconfiguration.cpp
+    src/queryconfiguration.cpp \
+    db/src/configurabledbschema.cpp \
+    db/src/helpers/configurabledbschemahelper.cpp
 
 HEADERS += src/hdbextractor.h\
     src/hdbextractorprivate.h \
@@ -67,7 +69,9 @@ HEADERS += src/hdbextractor.h\
     src/hdbextractorlistener.h \
     hdbpp/src/mysqlhdbppschema.h \
     src/configurationparser.h \
-    src/queryconfiguration.h
+    src/queryconfiguration.h \
+    db/src/configurabledbschema.h \
+    db/src/helpers/configurabledbschemahelper.h
 
 
 lib.path = $${INSTALL_ROOT}/lib

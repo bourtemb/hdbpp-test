@@ -6,7 +6,7 @@
 #define MAXERRORLEN 512
 
 class Connection;
-class DbSchema;
+class ConfigurableDbSchema;
 class HdbExtractorListener;
 class QueryConfiguration;
 
@@ -19,7 +19,7 @@ public:
 
     Connection * connection;
 
-    DbSchema *dbschema;
+    ConfigurableDbSchema *dbschema;
 
     HdbExtractorListener* hdbXListenerI;
 

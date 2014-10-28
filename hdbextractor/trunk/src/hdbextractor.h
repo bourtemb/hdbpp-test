@@ -271,8 +271,38 @@ int main(int argc, char **argv)
  * @see QHdbExtractor (Qt application example)
  *
  *
- */
+ * \par Manage your own configuration files.
+ * The ConfigurationParser class can be used to store couples key/value in form of
+ * strings. The ConfigurationParser reads a text file to load the settings. The
+ * file is a plain text one, whose lines are of the kind
+ *
+  \code
+  # Comments start after a # character
+  #
+  # Empty lines are allowed:
 
+  #
+  mykey = myvalue # inline comments
+  # Each key / value couple is treated as string by the ConfigurationParser
+  mynumeric_key = 10.0
+
+  \endcode
+ *
+ * The ConfigurationParser can be used to store the connection parameters.
+ *
+ * @see ConfigurationParser
+ *
+ * \par Customize queries and data fetch
+ * Through the QueryConfiguration class it is possible to customize queries according to
+ * specific needs. For example, if no data is stored in a given period of time, QueryConfiguration
+ * can be told to retrieve the first valid data from the past or to simply return an empty result.
+ * QueryConfiguration stores string key/value couples, and converts it to booleans, integers or
+ * doubles if requested. QueryConfiguration can load settings from a file, with the same format as
+ * ConfigurationParser's. Moreover, the same configuration file can be shared by QueryConfiguration
+ * and your own ConfigurationParser.
+ * The ConfigurationParser can be used to store the connection parameters.
+ *
+ */
 class Hdbextractor :  ResultListener
 {
 

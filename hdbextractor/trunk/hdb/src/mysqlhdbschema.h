@@ -1,7 +1,7 @@
 #ifndef HDBSCHEMA_H
 #define HDBSCHEMA_H
 
-#include <dbschema.h>
+#include <configurabledbschema.h>
 #include <xvariantlist.h>
 #include <resultlistenerinterface.h>
 #include <vector>
@@ -13,7 +13,7 @@ class XVariantList;
 /** \brief An implementation of the DbSchema interface specific to MySql. <em>Used internally</em>.
  *
  */
-class MySqlHdbSchema : public DbSchema
+class MySqlHdbSchema : public ConfigurableDbSchema
 {
 public:
     MySqlHdbSchema(ResultListener *resultListenerI);
@@ -38,10 +38,6 @@ public:
 
     virtual bool hasError() const;
 
-    virtual bool setQueryConfiguration(QueryConfiguration *queryConfiguration);
-
-private:
-    DbSchemaPrivate *d_ptr;
 };
 
 #endif // HDBSCHEMA_H

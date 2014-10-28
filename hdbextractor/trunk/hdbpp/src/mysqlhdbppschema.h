@@ -1,8 +1,7 @@
 #ifndef MYSQLHDBPPSCHEMA_H
 #define MYSQLHDBPPSCHEMA_H
 
-#include <dbschema.h>
-#include <dbschema.h>
+#include <configurabledbschema.h>
 #include <xvariantlist.h>
 #include <resultlistenerinterface.h>
 #include <vector>
@@ -10,7 +9,7 @@
 
 class DbSchemaPrivate;
 
-class MySqlHdbppSchema : public DbSchema
+class MySqlHdbppSchema : public ConfigurableDbSchema
 {
 public:
     MySqlHdbppSchema(ResultListener *resultListenerI);
@@ -35,10 +34,6 @@ public:
 
     virtual bool hasError() const;
 
-    virtual bool setQueryConfiguration(QueryConfiguration *queryConfiguration);
-
-private:
-    DbSchemaPrivate *d_ptr;
 };
 
 #endif // MYSQLHDBPPSCHEMA_H

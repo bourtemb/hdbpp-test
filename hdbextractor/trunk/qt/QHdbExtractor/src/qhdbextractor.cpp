@@ -8,6 +8,7 @@
 #include <scenecurve.h>
 #include <qhdbextractorproxy.h>
 #include <configurationparser.h>
+#include <queryconfiguration.h>
 #include <QMessageBox>
 #include <QtDebug>
 
@@ -15,8 +16,7 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-
-
+    QueryConfiguration *queryConf = NULL;
     QString host = "-", db = "-", u = "-", pass = "-";
     unsigned short port = 3306;
     ui->setupUi(this);
@@ -66,7 +66,7 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
 
         bool ok;
         ConfigurationParser cp;
-        printf("reading config from %s\n", qApp->arguments().first().toStdString().c_str());
+        printf("reading config from %s\n", qApp->arguments().at(1).toStdString().c_str());
         cp.read(qApp->arguments().at(1).toStdString().c_str(), confmap);
         printf("read\n");
         host = QString::fromStdString(confmap["dbhost"]);
@@ -75,6 +75,9 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
         pass = QString::fromStdString(confmap["dbpass"]);
         if(QString::fromStdString(confmap["dbport"]).toInt(&ok) > 0 && ok)
             port = QString::fromStdString(confmap["dbport"]).toInt();
+
+        queryConf = new QueryConfiguration();
+        queryConf->loadFromFile(qApp->arguments().at(1).toStdString().c_str());
     }
     else if(qApp->arguments().count() > 4)
     {
@@ -107,6 +110,7 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     }
     hdbxp->connect(dbt, host, db, u, pass, port);
     hdbxp->setUpdateProgressStep(20);
+    hdbxp->getHdbExtractor()->setQueryConfiguration(queryConf);
 
     ui->configWidget->setConfig(host, db, u);
 

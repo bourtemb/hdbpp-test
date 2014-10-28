@@ -57,7 +57,9 @@ SOURCES       = src/hdbextractor.cpp \
 		db/src/xvariantlist.cpp \
 		hdbpp/src/mysqlhdbppschema.cpp \
 		src/configurationparser.cpp \
-		src/queryconfiguration.cpp 
+		src/queryconfiguration.cpp \
+		db/src/configurabledbschema.cpp \
+		db/src/helpers/configurabledbschemahelper.cpp 
 OBJECTS       = hdbextractor.o \
 		hdbextractorprivate.o \
 		mysqlconnection.o \
@@ -70,7 +72,9 @@ OBJECTS       = hdbextractor.o \
 		xvariantlist.o \
 		mysqlhdbppschema.o \
 		configurationparser.o \
-		queryconfiguration.o
+		queryconfiguration.o \
+		configurabledbschema.o \
+		configurabledbschemahelper.o
 DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		/usr/local/qt5/mkspecs/common/shell-unix.conf \
 		/usr/local/qt5/mkspecs/common/unix.conf \
@@ -186,7 +190,9 @@ DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		db/src/xvariantlist.cpp \
 		hdbpp/src/mysqlhdbppschema.cpp \
 		src/configurationparser.cpp \
-		src/queryconfiguration.cpp
+		src/queryconfiguration.cpp \
+		db/src/configurabledbschema.cpp \
+		db/src/helpers/configurabledbschemahelper.cpp
 QMAKE_TARGET  = hdbextractor++
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = libhdbextractor++.so.1.0.0
@@ -491,6 +497,7 @@ hdbextractor.o: src/hdbextractor.cpp src/hdbextractor.h \
 		db/src/row.h \
 		src/hdbxmacros.h \
 		hdb/src/mysqlhdbschema.h \
+		db/src/configurabledbschema.h \
 		db/src/dbschema.h \
 		hdbpp/src/mysqlhdbppschema.h \
 		src/hdbextractorlistener.h \
@@ -538,6 +545,7 @@ xvariant.o: db/src/xvariant.cpp db/src/xvariant.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xvariant.o db/src/xvariant.cpp
 
 mysqlhdbschema.o: hdb/src/mysqlhdbschema.cpp hdb/src/mysqlhdbschema.h \
+		db/src/configurabledbschema.h \
 		db/src/dbschema.h \
 		db/src/xvariantlist.h \
 		db/src/xvariant.h \
@@ -556,6 +564,7 @@ xvariantlist.o: db/src/xvariantlist.cpp db/src/xvariantlist.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xvariantlist.o db/src/xvariantlist.cpp
 
 mysqlhdbppschema.o: hdbpp/src/mysqlhdbppschema.cpp hdbpp/src/mysqlhdbppschema.h \
+		db/src/configurabledbschema.h \
 		db/src/dbschema.h \
 		db/src/xvariantlist.h \
 		db/src/xvariant.h \
@@ -573,8 +582,17 @@ configurationparser.o: src/configurationparser.cpp src/configurationparser.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurationparser.o src/configurationparser.cpp
 
 queryconfiguration.o: src/queryconfiguration.cpp src/queryconfiguration.h \
+		src/configurationparser.h \
 		src/hdbxmacros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o queryconfiguration.o src/queryconfiguration.cpp
+
+configurabledbschema.o: db/src/configurabledbschema.cpp db/src/configurabledbschema.h \
+		db/src/dbschema.h \
+		db/src/dbschemaprivate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurabledbschema.o db/src/configurabledbschema.cpp
+
+configurabledbschemahelper.o: db/src/helpers/configurabledbschemahelper.cpp db/src/helpers/configurabledbschemahelper.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurabledbschemahelper.o db/src/helpers/configurabledbschemahelper.cpp
 
 ####### Install
 
@@ -610,8 +628,12 @@ install_inc: first FORCE
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/hdbpp/src/mysqlhdbppschema.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/src/configurationparser.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/src/queryconfiguration.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/configurabledbschema.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/helpers/configurabledbschemahelper.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 
 uninstall_inc: FORCE
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/configurabledbschemahelper.h
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/configurabledbschema.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/queryconfiguration.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/configurationparser.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/mysqlhdbppschema.h
