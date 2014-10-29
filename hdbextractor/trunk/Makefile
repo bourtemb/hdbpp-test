@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DHDBEXTRACTOR_VERSION_STR="\"1.0.0\"" -DHDBEXTRACTOR_VERSION=0x010000 -DVER_MAJ=1 -DVER_MIN=0 -DVER_FIX=0 -DHDBEXTRACTORLIB_PRINTINFO -DHDBEXTRACTOR_LIBRARY
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I/usr/local/qt5/mkspecs/linux-g++ -I. -Imysql/src -Idb/src -Idb -Isrc -I../src
+INCPATH       = -I/usr/local/qt5/mkspecs/linux-g++ -I. -Imysql/src -Idb/src -Idb -Isrc -I../src -Idb/src/helpers
 LINK          = g++
 LFLAGS        = -shared -Wl,-soname,libhdbextractor++.so.1
 LIBS          = $(SUBLIBS) -lmysqlclient -lpthread 
@@ -500,6 +500,7 @@ hdbextractor.o: src/hdbextractor.cpp src/hdbextractor.h \
 		db/src/configurabledbschema.h \
 		db/src/dbschema.h \
 		hdbpp/src/mysqlhdbppschema.h \
+		db/src/helpers/configurabledbschemahelper.h \
 		src/hdbextractorlistener.h \
 		src/queryconfiguration.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o hdbextractor.o src/hdbextractor.cpp
@@ -566,6 +567,7 @@ xvariantlist.o: db/src/xvariantlist.cpp db/src/xvariantlist.h \
 mysqlhdbppschema.o: hdbpp/src/mysqlhdbppschema.cpp hdbpp/src/mysqlhdbppschema.h \
 		db/src/configurabledbschema.h \
 		db/src/dbschema.h \
+		db/src/helpers/configurabledbschemahelper.h \
 		db/src/xvariantlist.h \
 		db/src/xvariant.h \
 		db/src/resultlistenerinterface.h \
@@ -591,7 +593,9 @@ configurabledbschema.o: db/src/configurabledbschema.cpp db/src/configurabledbsch
 		db/src/dbschemaprivate.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurabledbschema.o db/src/configurabledbschema.cpp
 
-configurabledbschemahelper.o: db/src/helpers/configurabledbschemahelper.cpp db/src/helpers/configurabledbschemahelper.h
+configurabledbschemahelper.o: db/src/helpers/configurabledbschemahelper.cpp db/src/helpers/configurabledbschemahelper.h \
+		src/queryconfiguration.h \
+		src/hdbxmacros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurabledbschemahelper.o db/src/helpers/configurabledbschemahelper.cpp
 
 ####### Install

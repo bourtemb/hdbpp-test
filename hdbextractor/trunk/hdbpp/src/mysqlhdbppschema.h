@@ -2,6 +2,7 @@
 #define MYSQLHDBPPSCHEMA_H
 
 #include <configurabledbschema.h>
+#include <configurabledbschemahelper.h>
 #include <xvariantlist.h>
 #include <resultlistenerinterface.h>
 #include <vector>
@@ -15,6 +16,17 @@ public:
     MySqlHdbppSchema(ResultListener *resultListenerI);
 
     virtual ~MySqlHdbppSchema();
+
+    virtual bool fetchInThePast(const char *source,
+                                const char *start_date,
+                                const char *table_name,
+                                const int att_id,
+                                XVariant::DataType dataType,
+                                XVariant::DataFormat format,
+                                XVariant::Writable writable,
+                                Connection *connection,
+                                double *ptime_elapsed,
+                                ConfigurableDbSchemaHelper::FillFromThePastMode mode);
 
     virtual bool getData(const char *source,
                                     const char *start_date,

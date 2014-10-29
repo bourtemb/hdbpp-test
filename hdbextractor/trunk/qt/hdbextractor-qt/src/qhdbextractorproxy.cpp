@@ -231,7 +231,7 @@ void QHdbextractorProxy::onFinish(const QString &srcname, int srcStep, int totSr
 {
     qDebug() << __FUNCTION__ << QThread::currentThread() << srcStep;
     Hdbextractor *hdbx = d_ptr->thread->getHdbExtractor();
-    if(hdbx->updateProgressStep() <= 0)
+  //  if(hdbx->updateProgressStep() <= 0) /* WHY? */
     {
         /* copy whole data */
         std::vector<XVariant> data;
@@ -257,8 +257,8 @@ bool QHdbextractorProxy::event(QEvent *e)
         QHdbNewDataEvent *nde = static_cast<QHdbNewDataEvent *>(e);
         // qDebug() << __FUNCTION__ << QThread::currentThread() << nde->step << nde->total;
 
-        for(size_t i = 0; i < nde->data.size(); i++)
-            printf("\e[1;33mQHdbextractorProxy::event: %s\e[0m\n", nde->data.at(i).getTimestamp());
+//        for(size_t i = 0; i < nde->data.size(); i++)
+//            printf("\e[1;33mQHdbextractorProxy::event: %s\e[0m\n", nde->data.at(i).getTimestamp());
 
        // printData(nde->data);
         /* extract data according to the type/format/writable and then emit the apt signals */

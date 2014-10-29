@@ -21,7 +21,7 @@ VER_MAJ = 1
 VER_MIN = 0
 VER_FIX = 0
 
-unix:INCLUDEPATH += mysql/src db/src db src ../src
+unix:INCLUDEPATH += mysql/src db/src db src ../src db/src/helpers
 
 DEFINES += HDBEXTRACTOR_VERSION_STR=\"\\\"$${VERSION}\\\"\" \
     HDBEXTRACTOR_VERSION=$${VERSION_HEX} \

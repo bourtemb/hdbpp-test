@@ -26,7 +26,7 @@ ConfigurableDbSchemaHelper::ConfigurableDbSchemaHelper()
 ConfigurableDbSchemaHelper::FillFromThePastMode ConfigurableDbSchemaHelper::fillFromThePastMode(const QueryConfiguration* queryConfiguration,
                                                      const char *start_date,
                                                      const char *stop_date,
-                                                     const char *window_start_date) const
+                                                     const char *first_value_date) const
 {
     FillFromThePastMode mode = None;
     if(!queryConfiguration->hasKey("FillFromThePastMode"))
@@ -56,7 +56,7 @@ ConfigurableDbSchemaHelper::FillFromThePastMode ConfigurableDbSchemaHelper::fill
         }
 
         struct tm mtm;
-        time_t start_time_t, stop_time_t, window_start_time_t, first_required_data_time_t;
+        time_t start_time_t, stop_time_t, first_value_time_t, first_required_data_time_t;
         double delta_time_t;
         memset(&mtm, 0, sizeof(struct tm));
         strptime(start_date, "%Y-%m-%d %H:%M:%S", &mtm);
@@ -67,23 +67,26 @@ ConfigurableDbSchemaHelper::FillFromThePastMode ConfigurableDbSchemaHelper::fill
         stop_time_t = mktime(&mtm);
 
         memset(&mtm, 0, sizeof(struct tm));
-        if(strptime(window_start_date, "%Y-%m-%d %H:%M:%S", &mtm) != NULL)
-            window_start_time_t = mktime(&mtm);
+        if(strptime(first_value_date, "%Y-%m-%d %H:%M:%S", &mtm) != NULL)
+            first_value_time_t = mktime(&mtm);
         else /* no data at all */
-            window_start_time_t = 0;
+            first_value_time_t = 0;
 
         delta_time_t = difftime(stop_time_t, start_time_t);
 
         first_required_data_time_t = start_time_t + (time_t) (delta_time_t * windowPercent / 100.0);
 
-        printf("\e[0;7;36m t1 %s (%ld) t2 %s (%ld) delta %f percent %f required %s (%ld) win starts at %s (%ld)\e[0m\n",
+        printf("ConfigurableDbSchemaHelper.fillFromThePastMode: \e[0;7;36m t1 %s (%ld) "
+               "\nt2 %s (%ld) delta %f percent %f required %s (%ld)\n"
+               "first value at %s (%ld) ===> mode %d\e[0m\n",
                start_date, start_time_t, stop_date, stop_time_t, delta_time_t,   windowPercent,
-              ctime(&first_required_data_time_t), first_required_data_time_t, ctime(&window_start_time_t),
-               window_start_time_t);
+              ctime(&first_required_data_time_t), first_required_data_time_t, ctime(&first_value_time_t),
+               first_value_time_t, mode);
 
-        if(window_start_time_t == 0 || first_required_data_time_t < window_start_time_t)
+        if(first_value_time_t == 0 || first_required_data_time_t < first_value_time_t)
             return mode;
     }
 
+    printf("ConfigurableDbSchemaHelper.fillFromThePastMode: \e[0;7;36m returnin' None!\e[0m\n");
     return None;
 }

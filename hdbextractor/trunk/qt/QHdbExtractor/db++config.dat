@@ -20,7 +20,7 @@ dbname	=	hdbpp
 # WidenWindow: look in the past for the most recent valid data and put it in as the first result with its
 #              preserving its original timestamp.
 #
-FillFromThePastMode = KeepWindow
+FillFromThePastMode = WidenWindow
 
 # The FillFromThePastThresholdPercent instructs the extractor to look in the past for the most recent
 # valid value, if FillFromThePastMode is not set to None.
