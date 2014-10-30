@@ -49,6 +49,20 @@ void MyHdbExtractorImpl::getData(const char* source, const char* start_date, con
 void MyHdbExtractorImpl::onSourceProgressUpdate(const char *name, int step, int total)
 {
     printf("\"%s\" data extraction: %.2f%% [%d/%d]\n", name, (float)step / total * 100.0, step, total);
+    extractData();
+}
+
+/** \brief this method is invoked when data extraction is fully accomplished.
+ *
+ */
+void MyHdbExtractorImpl::onSourceExtracted(const char * name, int sourceStep, int sourcesTotal, double elapsed)
+{
+    printf("extraction completed: got %d rows from \"%s\" in %fs\n", sourceStep, name, elapsed);
+    extractData();
+}
+
+void MyHdbExtractorImpl::extractData()
+{
     std::vector<XVariant> valuelist;
     mExtractor->get(valuelist);
 
@@ -73,13 +87,5 @@ void MyHdbExtractorImpl::onSourceProgressUpdate(const char *name, int step, int 
         }
     }
     printf("\n\n");
-}
-
-/** \brief this method is invoked when data extraction is fully accomplished.
- *
- */
-void MyHdbExtractorImpl::onSourceExtracted(const char * name, int sourceStep, int sourcesTotal, double elapsed)
-{
-    printf("extraction completed: got %d rows from \"%s\" in %fs\n", sourceStep, name, elapsed);
 }
 

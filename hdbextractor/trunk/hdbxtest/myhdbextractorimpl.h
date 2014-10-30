@@ -20,7 +20,9 @@ public:
 
     virtual void onSourceExtracted(const char * name, int sourceStep, int sourcesTotal, double elapsed);
 
+    Hdbextractor* getHdbExtractor() const { return mExtractor; }
 
+    void extractData();
 
 
 private:

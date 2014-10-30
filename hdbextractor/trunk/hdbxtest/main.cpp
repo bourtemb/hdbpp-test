@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "myhdbextractorimpl.h"
+#include "queryconfiguration.h"
 #include "../src/hdbextractor.h"
 #include "../src/configurationparser.h"
 #include <map>
@@ -28,10 +29,16 @@ int main(int argc, char **argv)
         ConfigurationParser cp;
         cp.read(argv[1], confmap);
 
+        QueryConfiguration *qc = new QueryConfiguration();
+        qc->loadFromFile(argv[1]);
+
         MyHdbExtractorImpl *hdbxi = new MyHdbExtractorImpl(confmap["dbuser"].c_str(),
                 confmap["dbpass"].c_str(), confmap["dbhost"].c_str(), confmap["dbname"].c_str());
 
+        hdbxi->getHdbExtractor()->setQueryConfiguration(qc);
         hdbxi->getData(argv[2], argv[3], argv[4]);
+
+        delete qc;
     }
     return 0;
 }
