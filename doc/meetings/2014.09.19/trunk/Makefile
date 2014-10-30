@@ -20,6 +20,6 @@ ${TARGET}.dvi : ${TARGET}.tex
 	${LATEX} ${TARGET}.tex
 
 clean :
-	rm -f *.dvi *.aux *.lot *.log *.toc ${TARGET}.ps ${TARGET}.pdf
+	rm -f *.dvi *.aux *.lot *.log *.toc ${TARGET}.ps
 
 # EOF

@@ -1,0 +1,19 @@
+% SVN Keyword cache
+
+% Global values:
+\def \svnrev {26537}
+\def \svndate {2014-09-23 15:38:14Z}
+\def \svnauthor {pivetta}
+\def \svnyear {2014}
+\def \svnmonth {09}
+\def \svnday {23}
+\def \svnhour {15}
+\def \svnminute {38}
+\def \svnsecond {14}
+\def \svntimezonehour {+00}
+\def \svntimezoneminute {00}
+\svn@gdefverb \svnurl {2014.09.19-hdb++-meeting.tex}
+\svn@gdefverb \svnfname {2014.09.19-hdb++-meeting.tex}
+
+
+
