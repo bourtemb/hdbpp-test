@@ -1,0 +1,42 @@
+#+======================================================================
+# $Source:  $
+#
+# Project:      Tango Application
+#
+# Description:  Hdb++ Configurator and Diagnostics
+#
+# $Author: verdier $
+#
+# $Revision: 1.2 $
+#
+# copyright :    European Synchrotron Radiation Facility
+#               BP 220, Grenoble 38043
+#               FRANCE
+#
+#-======================================================================
+
+
+
+
+jblvac-1.6 - 30/10/14:
+	Display event frequency added.
+
+jblvac-1.5 - 13/10/14:
+	Display error message on failed attribute list.
+	Display HDB name if property set.
+
+jblvac-1.4 - 24/09/14:
+	Diag viewers are now in a JTable object.
+	A double click on table cell displays attribute list.
+
+jblvac-1.3 - 22/09/14:
+	Fix a bug in archiver device creation
+
+jblvac-1.2 - 05/09/14:
+	Add a graph chart to display distribution.
+
+jblvac-1.1 - 28/08/14:
+	Add/Remove subscriber added.
+
+jblvac-1.0 - 06/08/14:
+	Initial Revision
