@@ -70,6 +70,7 @@ public class HdbDiagnostics extends JFrame {
     private ArrayList<String> labels;
     private TableScalarViewer tableViewer;
     private JFrame parent;
+    private int statisticsTimeWindow;
 
 
     private static final String[] ATTRIBUTES = {
@@ -134,8 +135,8 @@ public class HdbDiagnostics extends JFrame {
         if (labels.size()>0) {
             //  Get the duration from first subscriber
             Subscriber subscriber = subscriberMap.getSubscriber(labels.get(0));
-            int duration = subscriber.getStatisticsTimeWindow();
-            columnNames[4] = "ev/"+Utils.strPeriod(duration);
+            statisticsTimeWindow = subscriber.getStatisticsTimeWindow();
+            columnNames[4] = "ev/"+Utils.strPeriod(statisticsTimeWindow);
         }
 
         //  A list of lines (a line per device)
@@ -251,7 +252,7 @@ public class HdbDiagnostics extends JFrame {
         viewMenu.setMnemonic('V');
         viewMenu.setText("View");
 
-        statisticsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, 0));
+        statisticsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
         statisticsItem.setText("Statistics");
         statisticsItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -372,7 +373,7 @@ public class HdbDiagnostics extends JFrame {
     //=======================================================
     private void statisticsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_statisticsItemActionPerformed
         try {
-            new StatisticsDialog(this, subscriberMap).setVisible(true);
+            new StatisticsDialog(this, subscriberMap, statisticsTimeWindow).setVisible(true);
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this,
@@ -444,7 +445,7 @@ public class HdbDiagnostics extends JFrame {
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Pending");
                     break;
                 case RECORD_FREQUENCY:
-                    new StatisticsDialog(this, subscriber).setVisible(true);
+                    new StatisticsDialog(this, subscriber,statisticsTimeWindow).setVisible(true);
                     return;
 
                 default:

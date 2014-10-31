@@ -39,6 +39,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
+import fr.esrf.tangoatk.widget.util.ErrorPane;
 import jive3.MainPanel;
 import org.tango.hdbcpp.common.Subscriber;
 import org.tango.hdbcpp.common.SubscriberMap;
@@ -70,18 +71,27 @@ import java.util.List;
 @SuppressWarnings("MagicConstant")
 public class StatisticsDialog extends JDialog {
 
-    private ArrayList<HdbAttribute> filteredHdbAttributes = new ArrayList<HdbAttribute>();
-    private ArrayList<HdbAttribute> hdbAttributes = new ArrayList<HdbAttribute>();
+    private ArrayList<HdbAttribute> filteredHdbAttributes;
+    private ArrayList<HdbAttribute> hdbAttributes;
     private JTable table;
     private DataTableModel model;
     private TablePopupMenu popupMenu = new TablePopupMenu();
     private MainPanel jive = null;
+    private ArrayList<Subscriber> subscribers;
+    private int selectedRow    = -1;
+    private int selectedColumn = PERIOD_STAT;
+
     private static List<String> defaultTangoHosts;
 
-    private static final int columnWidth[] = { 200, 40, 60 };
+    private static final int columnWidth[] = { 300, 80, 80, 80 };
     private static final  String[] columnNames = {
-            "Attribute Names", "Events", "Av.Period." };
+            "Attribute Names", "Events", "Av.Period.", "Ev. since reset" };
 
+    private static final int ATTRIBUTE_NAME = 0;
+    private static final int EVENTS_STAT    = 1;
+    private static final int PERIOD_STAT    = 2;
+    private static final int EVENTS_RESET   = 3;
+    //private static final int PERIOD_RESET   = 4;
     private static final Color selectionBackground   = new Color(0xe0e0ff);
     private static final Color firstColumnBackground = new Color(0xe0e0e0);
 	//===============================================================
@@ -89,15 +99,16 @@ public class StatisticsDialog extends JDialog {
 	 *	Creates new form StatisticsDialog for several subscribers
 	 */
 	//===============================================================
-    public StatisticsDialog(JFrame parent, SubscriberMap subscriberMap) throws DevFailed {
+    public StatisticsDialog(JFrame parent, SubscriberMap subscriberMap, int statisticsTimeWindow) throws DevFailed {
         super(parent, false);
         SplashUtils.startSplash();
         try {
             defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
             initComponents();
-            List<Subscriber> subscribers = subscriberMap.getSubscriberList();
+            subscribers = (ArrayList<Subscriber>) subscriberMap.getSubscriberList();
 
-            buildRecords(subscribers);
+            buildRecords();
+            updateColumnNames(statisticsTimeWindow);
             buildTableComponent();
             setTitle("All Subscribers ");
             displayTitle();
@@ -111,23 +122,28 @@ public class StatisticsDialog extends JDialog {
         }
         SplashUtils.stopSplash();
     }
-	//===============================================================
+
+    //===============================================================
 	/**
 	 *	Creates new form StatisticsDialog for one subscriber
 	 */
 	//===============================================================
-	public StatisticsDialog(JFrame parent, Subscriber subscriber) throws DevFailed {
+	public StatisticsDialog(JFrame parent, Subscriber subscriber, int statisticsTimeWindow) throws DevFailed {
 		super(parent, false);
         SplashUtils.startSplash();
         try {
             defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
             initComponents();
-            ArrayList<Subscriber>   subscribers = new ArrayList<Subscriber>(1);
+            subscribers = new ArrayList<Subscriber>(1);
             subscribers.add(subscriber);
-            buildRecords(subscribers);
+            buildRecords();
+            updateColumnNames(statisticsTimeWindow);
             buildTableComponent();
             setTitle("Subscriber " + subscriber.getLabel());
             displayTitle();
+
+            //  Do not allow for one subscriber
+            resetItem.setVisible(false);
 
             pack();
             ATKGraphicsUtils.centerDialog(this);
@@ -138,6 +154,11 @@ public class StatisticsDialog extends JDialog {
         }
         SplashUtils.stopSplash();
 	}
+    //===============================================================
+    //===============================================================
+    private void updateColumnNames(int statisticsTimeWindow) {
+        columnNames[EVENTS_STAT] = "Ev./" + Utils.strPeriod(statisticsTimeWindow);
+    }
     //===============================================================
     //===============================================================
     private void displayTitle() {
@@ -151,10 +172,11 @@ public class StatisticsDialog extends JDialog {
     }
     //===============================================================
     //===============================================================
-    private void buildRecords(List<Subscriber> subscribers) throws DevFailed {
+    private void buildRecords() throws DevFailed {
         String[] statAttributeNames = {
                 "AttributeList", "AttributeRecordFreqList", "AttributeEventNumberList" };
 
+        hdbAttributes = new ArrayList<HdbAttribute>();
         for (Subscriber subscriber : subscribers) {
             //  Read statistic attributes
             SplashUtils.increaseSplashProgressForLoop(
@@ -177,7 +199,6 @@ public class StatisticsDialog extends JDialog {
 
             //  Duration is passed to have just one DB read per subscriber
             int duration = subscriber.getStatisticsTimeWindow();
-            //System.out.println(subscriber.getLabel()+":\t"+duration);
 
             //  Build filteredHdbAttributes and store in a list
             for (int x=0 ; x<hdbAttributeNames.length &&
@@ -189,6 +210,7 @@ public class StatisticsDialog extends JDialog {
         Collections.sort(hdbAttributes, new AttributeComparator());
 
         //  Copy to filtered (no filter at start up)
+        filteredHdbAttributes = new ArrayList<HdbAttribute>();
         for (HdbAttribute hdbAttribute : hdbAttributes) {
             filteredHdbAttributes.add(hdbAttribute);
         }
@@ -212,6 +234,11 @@ public class StatisticsDialog extends JDialog {
                     tableActionPerformed(evt);
                 }
             });
+            table.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent evt) {
+                    tableHeaderActionPerformed(evt);
+                }
+            });
 
             //	Put it in scrolled pane
             JScrollPane scrollPane = new JScrollPane(table);
@@ -221,15 +248,16 @@ public class StatisticsDialog extends JDialog {
             //  Set column width
             final Enumeration columnEnum = table.getColumnModel().getColumns();
             int i = 0;
+            int width = 0;
             TableColumn tableColumn;
             while (columnEnum.hasMoreElements()) {
+                width += columnWidth[i];
                 tableColumn = (TableColumn) columnEnum.nextElement();
                 tableColumn.setPreferredWidth(columnWidth[i++]);
             }
 
             //  Compute size to display
             pack();
-            int width  = table.getWidth();
             int height = table.getHeight();
             if (height>800) height = 800;
             scrollPane.setPreferredSize(new Dimension(width, height+20));
@@ -241,7 +269,13 @@ public class StatisticsDialog extends JDialog {
     }
     //===============================================================
     //===============================================================
-    private int selectedRow = -1;
+    private void tableHeaderActionPerformed(java.awt.event.MouseEvent event) {
+        //	Get specified column
+        selectedColumn = table.getTableHeader().columnAtPoint(new Point(event.getX(), event.getY()));
+        Collections.sort(filteredHdbAttributes, new AttributeComparator());
+    }
+    //===============================================================
+    //===============================================================
     private void tableActionPerformed(java.awt.event.MouseEvent event) {
 
         //	get selected signal
@@ -280,7 +314,10 @@ public class StatisticsDialog extends JDialog {
         javax.swing.JButton applyButton = new javax.swing.JButton();
         javax.swing.JMenuBar jMenuBar1 = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
+        resetItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem dismissItem = new javax.swing.JMenuItem();
+        javax.swing.JMenu viewMenu = new javax.swing.JMenu();
+        javax.swing.JMenuItem updateItem = new javax.swing.JMenuItem();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -318,6 +355,14 @@ public class StatisticsDialog extends JDialog {
 
         fileMenu.setText("File");
 
+        resetItem.setText("Reset Event Counters");
+        resetItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(resetItem);
+
         dismissItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         dismissItem.setText("Dismiss");
         dismissItem.addActionListener(new java.awt.event.ActionListener() {
@@ -328,6 +373,19 @@ public class StatisticsDialog extends JDialog {
         fileMenu.add(dismissItem);
 
         jMenuBar1.add(fileMenu);
+
+        viewMenu.setText("View");
+
+        updateItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
+        updateItem.setText("Update");
+        updateItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(updateItem);
+
+        jMenuBar1.add(viewMenu);
 
         setJMenuBar(jMenuBar1);
 
@@ -360,6 +418,44 @@ public class StatisticsDialog extends JDialog {
         applyFilter();
     }//GEN-LAST:event_filterTextFieldActionPerformed
 
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void resetItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetItemActionPerformed
+        if (JOptionPane.showConfirmDialog(this, "Reset event counter on all archivers ?",
+                "Reset Counters", JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION) {
+            String errorMessage = "";
+            for (Subscriber subscriber : subscribers) {
+                try {
+                    subscriber.command_inout("ResetStatistics");
+                }
+                catch (DevFailed e) {
+                    errorMessage += subscriber.getLabel() + ": "+e.errors[0].desc+"\n";
+                }
+            }
+
+            //  If at least one failed, display message
+            if (!errorMessage.isEmpty()) {
+                JOptionPane.showMessageDialog(this, errorMessage, "Reset Failed", JOptionPane.ERROR_MESSAGE);
+            }
+            updateItemActionPerformed(null);
+        }
+    }//GEN-LAST:event_resetItemActionPerformed
+
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void updateItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateItemActionPerformed
+        try {
+            buildRecords();
+            model.fireTableDataChanged();
+            displayTitle();
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, "Update", e);
+        }
+    }//GEN-LAST:event_updateItemActionPerformed
+
 	//===============================================================
 	//===============================================================
     private void applyFilter() {
@@ -388,6 +484,7 @@ public class StatisticsDialog extends JDialog {
     //===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField filterTextField;
+    private javax.swing.JMenuItem resetItem;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
 	//===============================================================
@@ -403,7 +500,7 @@ public class StatisticsDialog extends JDialog {
     private class HdbAttribute {
         private String name;
         private String shortName;
-        private double nbStatistics;
+        private int nbStatistics;
         private int nbEvents;
         private int duration;
         private String averagePeriodString;
@@ -411,12 +508,14 @@ public class StatisticsDialog extends JDialog {
         private Subscriber subscriber;
         private String deviceName;
         private String tangoHost;
+
+        /** if use another one, cannot cofigure with Jive */
         private boolean useDefaultTangoHost = false;
         //===========================================================
         private HdbAttribute(String name, double frequency, int nbEvents, Subscriber subscriber, int duration) {
             this.name = name;
             this.shortName = TangoUtils.getOnlyDeviceName(name);
-            this.nbStatistics = frequency;
+            this.nbStatistics = (int)frequency;
             this.nbEvents  = nbEvents;
             this.subscriber = subscriber;
             this.duration = duration;
@@ -438,7 +537,8 @@ public class StatisticsDialog extends JDialog {
         private String getInfo() {
             return name + ":\n\n" + "Archived by " + subscriber.getLabel() +
                     "    (" + subscriber.getName() + "\n" +
-                    nbStatistics + " events during " + Utils.strPeriod(duration);
+                    nbStatistics + " events during " + Utils.strPeriod(duration) + "\n"+
+                    nbEvents + " Since last reset (time not available)" + "\n";
         }
         //===========================================================
         private void configureEvent() {
@@ -545,15 +645,17 @@ public class StatisticsDialog extends JDialog {
                 int row, int column) {
             setBackground(getBackground(row, column));
             switch (column) {
-                case 0:
+                case ATTRIBUTE_NAME:
                     setText(filteredHdbAttributes.get(row).shortName);
                     break;
-                case 1:
-                    setText(Double.toString(filteredHdbAttributes.get(row).nbStatistics));
-                    //setText(Double.toString(filteredHdbAttributes.get(row).nbEvents));
+                case EVENTS_STAT:
+                    setText(Integer.toString(filteredHdbAttributes.get(row).nbStatistics));
                     break;
-                case 2:
+                case PERIOD_STAT:
                     setText(filteredHdbAttributes.get(row).averagePeriodString);
+                    break;
+                case EVENTS_RESET:
+                    setText(Integer.toString(filteredHdbAttributes.get(row).nbEvents));
                     break;
             }
             return this;
@@ -653,16 +755,29 @@ public class StatisticsDialog extends JDialog {
 
         //======================================================
         public int compare(HdbAttribute hdbAttribute1, HdbAttribute hdbAttribute2) {
-            if (hdbAttribute1.averagePeriod==hdbAttribute2.averagePeriod)
-                return 0;
-            else
-            if (hdbAttribute1.averagePeriod<0)
-                return 1;
-            else
-            if (hdbAttribute2.averagePeriod<0)
-                return -1;
-            else
-                return ((hdbAttribute1.averagePeriod > hdbAttribute2.averagePeriod)? 1 : -1);
+            switch (selectedColumn) {
+                case EVENTS_STAT:
+                    return valueSort(hdbAttribute2.nbStatistics, hdbAttribute1.nbStatistics);
+                case PERIOD_STAT:
+                    return valueSort(hdbAttribute1.averagePeriod, hdbAttribute2.averagePeriod);
+                case EVENTS_RESET:
+                    return valueSort(hdbAttribute2.nbEvents, hdbAttribute1.nbEvents);
+                default:
+                    return alphabeticalSort(hdbAttribute1.shortName, hdbAttribute2.shortName);
+            }
+        }
+        //======================================================
+        private int alphabeticalSort(String s1, String s2) {
+            if (s1==null)      return 1;
+            else if (s2==null) return -1;
+            else return s1.compareTo(s2);
+        }
+        //======================================================
+        private int valueSort(double d1, double d2) {
+            if (d1==d2)    return 0;
+            else if (d1<0) return  1;   // Not initialized
+            else if (d2<0) return -1;   // Not initialized
+            else return ((d1 > d2)? 1 : -1);
         }
         //======================================================
     }
