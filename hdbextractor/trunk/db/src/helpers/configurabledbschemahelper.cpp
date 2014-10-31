@@ -29,6 +29,9 @@ ConfigurableDbSchemaHelper::FillFromThePastMode ConfigurableDbSchemaHelper::fill
                                                      const char *first_value_date) const
 {
     FillFromThePastMode mode = None;
+    if(!queryConfiguration)
+        return mode;
+
     if(!queryConfiguration->hasKey("FillFromThePastMode"))
         ; /* nothing to do: mode is None */
     else if(queryConfiguration->get("FillFromThePastMode").compare("KeepWindow") == 0)
@@ -67,6 +70,7 @@ ConfigurableDbSchemaHelper::FillFromThePastMode ConfigurableDbSchemaHelper::fill
         stop_time_t = mktime(&mtm);
 
         memset(&mtm, 0, sizeof(struct tm));
+        printf("\e[0;33mfirst value date time %s\e[0m\n", first_value_date);
         if(strptime(first_value_date, "%Y-%m-%d %H:%M:%S", &mtm) != NULL)
             first_value_time_t = mktime(&mtm);
         else /* no data at all */
@@ -82,6 +86,7 @@ ConfigurableDbSchemaHelper::FillFromThePastMode ConfigurableDbSchemaHelper::fill
                start_date, start_time_t, stop_date, stop_time_t, delta_time_t,   windowPercent,
               ctime(&first_required_data_time_t), first_required_data_time_t, ctime(&first_value_time_t),
                first_value_time_t, mode);
+        printf("\e[1;33m fist value date time %s\e[0m\n", ctime(&first_value_time_t));
 
         if(first_value_time_t == 0 || first_required_data_time_t < first_value_time_t)
             return mode;

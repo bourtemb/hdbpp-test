@@ -499,8 +499,8 @@ hdbextractor.o: src/hdbextractor.cpp src/hdbextractor.h \
 		hdb/src/mysqlhdbschema.h \
 		db/src/configurabledbschema.h \
 		db/src/dbschema.h \
-		hdbpp/src/mysqlhdbppschema.h \
 		db/src/helpers/configurabledbschemahelper.h \
+		hdbpp/src/mysqlhdbppschema.h \
 		src/hdbextractorlistener.h \
 		src/queryconfiguration.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o hdbextractor.o src/hdbextractor.cpp
@@ -548,6 +548,7 @@ xvariant.o: db/src/xvariant.cpp db/src/xvariant.h \
 mysqlhdbschema.o: hdb/src/mysqlhdbschema.cpp hdb/src/mysqlhdbschema.h \
 		db/src/configurabledbschema.h \
 		db/src/dbschema.h \
+		db/src/helpers/configurabledbschemahelper.h \
 		db/src/xvariantlist.h \
 		db/src/xvariant.h \
 		db/src/resultlistenerinterface.h \

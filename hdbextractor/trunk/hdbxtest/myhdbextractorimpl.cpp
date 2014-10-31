@@ -14,7 +14,7 @@ MyHdbExtractorImpl::MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
     if(strcmp(dbnam, "hdb") == 0)
         type = Hdbextractor::HDBMYSQL;
     else if(strcmp(dbnam, "hdbpp") == 0)
-        type = Hdbextractor::HDBMYSQL;
+        type = Hdbextractor::HDBPPMYSQL;
 
     bool res = mExtractor->connect(type, dbhost, dbnam, dbuser, dbpass);
     if(res)

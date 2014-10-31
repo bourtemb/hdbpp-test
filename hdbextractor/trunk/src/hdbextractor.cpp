@@ -207,8 +207,12 @@ bool Hdbextractor::getData(const char *source,
     strcpy(d_ptr->errorMessage, "");
     printf("HdbExtractor.getData %s %s %s\n", source, start_date, stop_date);
     if(d_ptr->connection != NULL && d_ptr->dbschema != NULL && d_ptr->connection->isConnected())
+    {
+        if(d_ptr->queryConfiguration != NULL)
+            d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
         success = d_ptr->dbschema->getData(source, start_date, stop_date,
                                            d_ptr->connection, d_ptr->updateEveryRows);
+    }
     /* error message, if necessary */
     if(!success)
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.getData: %s", d_ptr->dbschema->getError());
@@ -242,13 +246,12 @@ bool Hdbextractor::getData(const std::vector<std::string> sources,
 
     if(d_ptr->connection != NULL && d_ptr->dbschema != NULL && d_ptr->connection->isConnected())
     {
+        if(d_ptr->queryConfiguration != NULL)
+            d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
+
         for(size_t i = 0; i < sources.size(); i++)
         {
             printf("HdbExtractor.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
-
-            if(d_ptr->queryConfiguration != NULL)
-                d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
-
             success = d_ptr->dbschema->getData(sources.at(i).c_str(), start_date, stop_date,
                                                d_ptr->connection, d_ptr->updateEveryRows);
             if(!success)

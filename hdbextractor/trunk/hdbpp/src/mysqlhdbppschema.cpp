@@ -271,10 +271,6 @@ bool MySqlHdbppSchema::getData(const char *source,
                                 if(fillMode != ConfigurableDbSchemaHelper::None)
                                 {
                                     printf("RO: calling fetchInThePast\n");
-                                    /* must fetch the first data ahead of the start_date, create a
-                                     * XVariant and insert it as first element, according to the
-                                     * fillMode
-                                     */
                                     from_the_past_success = fetchInThePast(source, start_date, table_name, id,
                                                                            dataType, format, wri, connection,
                                                                            &from_the_past_elapsed, fillMode);
@@ -327,27 +323,11 @@ bool MySqlHdbppSchema::getData(const char *source,
                         }
                         row->close();
 
-                    } /* end while(res->next) */
-
-                    if(res->getRowCount() == 0)
-                    {
-                        fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                                     start_date, stop_date, timestamp);
-                        if(fillMode != ConfigurableDbSchemaHelper::None)
-                        {
-                            printf("RO: calling fetchInThePast\n");
-                            from_the_past_success = fetchInThePast(source, start_date, table_name, id,
-                                                                   dataType, format, wri, connection,
-                                                                   &from_the_past_elapsed, fillMode);
-                            if(from_the_past_success)
-                               timestampCnt++;
-                        }
-                    }
-
-                    res->close();
+                    } /* end while(res->next) res is closed after else wri == XVariant::RW */
 
                     success = from_the_past_success;
-                }
+
+                }  /* end else if(wri == XVariant::RO) */
                 else if(wri == XVariant::RW)
                 {
                     /*  */
@@ -447,27 +427,31 @@ bool MySqlHdbppSchema::getData(const char *source,
                         pthread_mutex_unlock(&d_ptr->mutex);
 
                         row->close();
-                    }
+                    } /* end while(res->next() > 0) */
 
-                    if(res->getRowCount() == 0)
-                    {
-                        fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                                     start_date, stop_date, timestamp);
-                        if(fillMode != ConfigurableDbSchemaHelper::None)
-                        {
-                            printf("RO: calling fetchInThePast\n");
-                            from_the_past_success = fetchInThePast(source, start_date, table_name, id,
-                                                                   dataType, format, wri, connection,
-                                                                   &from_the_past_elapsed, fillMode);
-                            if(from_the_past_success)
-                               timestampCnt++;
-                        }
-                    }
-
-                    res->close();
-
+                    /* res->close() is called after RW else */
                     success = from_the_past_success;
+                } /* else if(wri == XVariant::RW) */
+
+                if(res->getRowCount() == 0)
+                {
+                    fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                                                 start_date, stop_date, timestamp);
+                    if(fillMode != ConfigurableDbSchemaHelper::None)
+                    {
+                        printf("RO: calling fetchInThePast\n");
+                        from_the_past_success = fetchInThePast(source, start_date, table_name, id,
+                                                               dataType, format, wri, connection,
+                                                               &from_the_past_elapsed, fillMode);
+                        if(from_the_past_success)
+                           timestampCnt++;
+                    }
                 }
+
+                res->close();
+
+                delete configHelper;
+
             } /* else: valid data type, format, writable */
 
             if(timestampCnt > 0 &&
@@ -534,78 +518,81 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
                                       ConfigurableDbSchemaHelper::FillFromThePastMode mode)
 {
     char query[MAXQUERYLEN];
+    char timestamp[MAXTIMESTAMPLEN];
     int datasiz = 1;
     int index = 0;
-    char timestamp[MAXTIMESTAMPLEN];
     struct timeval tv1, tv2;
     Result *res = NULL;
     Row *row = NULL;
 
     gettimeofday(&tv1, NULL);
 
-    snprintf(query, MAXQUERYLEN, "SELECT event_time FROM %s WHERE att_conf_id=%d AND "
+    if(format != XVariant::Scalar)
+    {
+        snprintf(query, MAXQUERYLEN, "SELECT event_time FROM %s WHERE att_conf_id=%d AND "
              " event_time <= '%s' ORDER BY event_time DESC LIMIT 1", table_name, att_id, start_date);
 
-    printf("\e[1;32mquery: %s\e[0m\n", query);
-    res = connection->query(query);
-    if(!res)
-    {
-        snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: bad query \"%s\": \"%s\"",
-                 query, connection->getError());
-        return false;
-    }
-    else if(res->getRowCount() == 1)
-    {
-        while(res->next() > 0)
+        printf("\e[1;32mquery: %s\e[0m\n", query);
+        res = connection->query(query);
+        if(!res)
         {
-            row = res->getCurrentRow();
-            if(!row)
-            {
-                snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: error getting row");
-                return false;
-            }
-            else
-                    strncpy(timestamp, row->getField(0), MAXTIMESTAMPLEN);
-
-            row->close();
+            snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: bad query \"%s\": \"%s\"",
+                     query, connection->getError());
+            return false;
         }
-        res->close();
-    }
-    else if(res->getRowCount() == 0)
-    {
-        pinfo("MySqlHdbppSchema.fetchInThePast: no data before \"%s\"", start_date);
-        res->close();
-        return false;
-    }
+        else if(res->getRowCount() == 1)
+        {
+            while(res->next() > 0)
+            {
+                row = res->getCurrentRow();
+                if(!row)
+                {
+                    snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: error getting row");
+                    return false;
+                }
+                else
+                        strncpy(timestamp, row->getField(0), MAXTIMESTAMPLEN);
+
+                row->close();
+            }
+            res->close();
+        }
+        else if(res->getRowCount() == 0)
+        {
+            pinfo("MySqlHdbppSchema.fetchInThePast: no data before \"%s\"", start_date);
+            res->close();
+            return false;
+        }
+    } /* if format not scalar */
 
     printf("\e[1;4;35mfetching in the past \"%s\" before %s\e[0m\n", source, start_date);
     if(writable == XVariant::RO && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT value_r,dim_x,idx FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT event_time,dim_x,idx,value_r FROM "
                                      " %s WHERE att_conf_id=%d AND event_time = "
                                      " '%s' ORDER BY idx ASC",
                  table_name, att_id, timestamp);
     }
     else if(writable == XVariant::RO)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT value_r FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT event_time, 1 AS dim_x, 0 AS idx,value_r FROM "
                                      " %s WHERE att_conf_id=%d AND event_time <= "
                                      " '%s' ORDER BY event_time DESC LIMIT 1",
-                 table_name, att_id, table_name, att_id, start_date);
+                 table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w,dim_x,idx FROM "
-                                     " %s WHERE att_conf_id=%d AND event_time  <= "
-                                     " '%s' ORDER BY event_time DESC LIMIT 1",
-                 table_name, att_id, table_name, att_id, start_date);
+        snprintf(query, MAXQUERYLEN, "SELECT event_time,dim_x,idx,value_r,value_w FROM "
+                                     " %s WHERE att_conf_id=%d AND event_time = "
+                                     " '%s' ORDER BY idx ASC",
+                 table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT event_time, 1 AS dim_x, 0 AS idx,value_r,value_w FROM "
                                      " %s WHERE att_conf_id=%d AND event_time  <= "
                                      " '%s' ORDER BY event_time DESC LIMIT 1",
-                 table_name, att_id, table_name, att_id, start_date);
+                 table_name, att_id, start_date);
     }
 
     printf("\e[1;32mquery: %s\e[0m\n", query);
@@ -629,12 +616,9 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
         }
         else
         {
-            if(format == XVariant::Vector)
-                datasiz = atoi(row->getField(3));
-
             /* get data size of array */
-            if(format == XVariant::Vector)
-                datasiz = atoi(row->getField(3));
+            datasiz = atoi(row->getField(1));
+            index = atoi(row->getField(2));
 
             /* create new XVariant */
             if(!xvar)
@@ -655,16 +639,19 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
                     d_ptr->variantList = new XVariantList();
                 d_ptr->variantList->add(xvar);
                 if(writable == XVariant::RW)
-                    xvar->add(row->getField(1), row->getField(2), index);
+                    xvar->add(row->getField(3), row->getField(4), index);
                 else
-                    xvar->add(row->getField(1), index);
+                    xvar->add(row->getField(3), index);
 
                 pthread_mutex_unlock(&d_ptr->mutex);
             }
             else
             {
                 pthread_mutex_lock(&d_ptr->mutex);
-                xvar->add(row->getField(1), row->getField(2), index);
+                if(writable == XVariant::RW)
+                    xvar->add(row->getField(3), row->getField(4), index);
+                else
+                    xvar->add(row->getField(3), index);
                 pthread_mutex_unlock(&d_ptr->mutex);
             }
         }
