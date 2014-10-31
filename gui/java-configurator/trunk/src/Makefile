@@ -36,6 +36,8 @@ TANGO_LIB	=	$(TANGO_HOME)/lib/java
 PACK_HOME	=	$(TANGO_HOME)/tools
 JAR_DIR 	=	$(TANGO_JAR_HOME)/appli
 
+SVN_CONFIGURATOR_PATH = $(SVN_TCS)/archiving/hdb++/gui/java-configurator
+SVN_TAG_REV =	Release-$(MAJOR_RELEASE).$(MINOR_RELEASE)
 # -----------------------------------------------------------------
 #
 #		The compiler flags
@@ -153,4 +155,7 @@ doc:
 
 
 tag:
-	cvs rtag $(TAG_VERS)  $(PACKAGE)
+	@echo "Tagging  $(PACKAGE)  for $(SVN_TAG_REV)"
+	svn copy  $(SVN_CONFIGURATOR_PATH)/trunk \
+	          $(SVN_CONFIGURATOR_PATH)/tags/$(JAR_NAME)-$(SVN_TAG_REV)
+
