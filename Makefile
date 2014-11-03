@@ -5,8 +5,12 @@ default: trunk
 trunk:
 ifeq ($(HDB++MYSQL),1)
 	cd libhdb++mysql/trunk ; $(MAKE)
-else
+endif
+ifeq ($(HDBMYSQL),1)
 	cd libhdbmysql/trunk ; $(MAKE)  
+endif
+ifeq ($(HDB++CASSANDRA),1)
+	cd libhdb++cassandra/trunk ; $(MAKE)  
 endif
 	cd libhdb++/trunk ; $(MAKE)
 	cd hdb++es/trunk ; $(MAKE)
@@ -20,8 +24,12 @@ clean_trunk:
 	cd libhdb++/trunk ; $(MAKE) clean
 ifeq ($(HDB++MYSQL),1)
 	cd libhdb++mysql/trunk ; $(MAKE) clean
-else
+endif
+ifeq ($(HDBMYSQL),1)
 	cd libhdbmysql/trunk ; $(MAKE) clean 
+endif
+ifeq ($(HDB++CASSANDRA),1)
+	cd libhdb++cassandra/trunk ; $(MAKE) clean
 endif
 
 

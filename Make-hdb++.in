@@ -1,5 +1,7 @@
 ELETTRA = 1
+HDBMYSQL = 0
 HDB++MYSQL = 0
+HDB++CASSANDRA = 0
 
 ifeq ($(ELETTRA),1)
   CXXFLAGS += -std=gnu++98 -D_USE_FERMI_DB_RW
@@ -10,17 +12,29 @@ endif
 ifeq ($(HDB++MYSQL),1)
   LIBHDBIMPL_LIB = ../../libhdb++mysql/trunk/lib
   LIBHDBIMPL = hdb++mysql
-else
+endif
+ifeq ($(HDBMYSQL),1)
   LIBHDBIMPL_LIB = ../../libhdbmysql/trunk/lib
   LIBHDBIMPL = hdbmysql
+endif
+ifeq ($(HDB++CASSANDRA),1)
+  LIBHDBIMPL_LIB = ../../libhdb++cassandra/trunk/lib
+  LIBHDBIMPL = hdb++cassandra
 endif
 
 LIBHDB_INC = ../../libhdb++/trunk/src
 LIBHDB_LIB = ../../libhdb++/trunk/lib
 
+ifneq ($(HDB++CASSANDRA),1)
 SQLIMPL_INC = `mysql_config --include`
 SQLIMPL_LIB = `mysql_config --libs_r`
+endif
 #SQLIMPL = mysqlclient
+
+CASSANDRA_INC = ../../cassandra/cppDriver/cpp-driver/include
+CASSANDRA_LIB = -L../../cassandra/cppDriver/cpp-driver/lib/libuv/lib \
+                -L../../cassandra/cppDriver/cpp-driver \
+		-lcassandra
 
 OMNI_INC = /usr/local/omniorb-4.1.6/include
 TANGO_INC = /usr/local/tango-8.1.2.c/include/tango
