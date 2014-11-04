@@ -312,10 +312,10 @@ void QHdbextractorProxy::dataNotify(QHdbNewDataEvent *e)
             /* progress update signals */
             if(e->updateType == QHdbNewDataEvent::Progress)
                 emit sourceExtractionProgress(source, e->step, e->totalSteps);
-            else if(e->updateType == QHdbNewDataEvent::Finish)
-                emit sourceExtractionFinished(source, e->sourceStep, e->totalSources, e->elapsed);
         }
     }
+    if(e->updateType == QHdbNewDataEvent::Finish)
+        emit sourceExtractionFinished(source, e->sourceStep, e->totalSources, e->elapsed);
 }
 
 void QHdbextractorProxy::printData(const std::vector<XVariant> &data)

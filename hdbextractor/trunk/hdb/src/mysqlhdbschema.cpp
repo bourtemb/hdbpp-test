@@ -24,7 +24,7 @@ MySqlHdbSchema::MySqlHdbSchema(ResultListener *resultListenerI) : ConfigurableDb
     /* d_ptr is created inside ConfigurableDbSchema */
     d_ptr->resultListenerI = resultListenerI;
     d_ptr->variantList = NULL;
-    d_ptr->sourceStep = 0;
+    d_ptr->sourceStep = 1;
     d_ptr->totalSources = 1;
     pthread_mutex_init(&d_ptr->mutex, NULL);
 }
@@ -375,11 +375,28 @@ bool MySqlHdbSchema::getData(const char *source,
      * represents seconds and the decimal microseconds.
      */
     elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec);
+    /* source step is initialized to 1. It's changed by the std::vector<std::string> getData
+     * method below.
+     */
     d_ptr->resultListenerI->onFinished(source, d_ptr->sourceStep, d_ptr->totalSources, elapsed);
 
     return success;
 }
 
+/** \brief Fetch attribute data from the mysql hdb database between a start and stop date/time.
+ *
+ * Fetch data from the MySql hdb database.
+ * \note This method is used by HdbExtractor and it is not meant to be directly used by the library user.
+ *
+ * @param source A the tango attribute in the form domain/family/member/AttributeName
+ * @param start_date the start date (begin of the requested data interval) as string, such as "2014-07-10 10:00:00"
+ * @param stop_date the stop date (end of the requested data interval) as string, such as "2014-07-10 12:00:00"
+ * @param connection the database Connection specific object
+ * @param notifyEveryRows the number of rows that make up a block of data. Every time a block of data is complete
+ *        notifications are sent to the listener of type ResultListener (HdbExtractor)
+ *
+ * @return true if the call was successful, false otherwise.
+ */
 bool MySqlHdbSchema::getData(const std::vector<std::string> sources,
                              const char *start_date,
                              const char *stop_date,

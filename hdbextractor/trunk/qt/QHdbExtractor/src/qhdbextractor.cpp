@@ -268,10 +268,12 @@ void QHdbExtractor::onExtractionFinished(const QString& source, int srcStep, int
     ui->pbSrcs->setFormat(source + " %p ");
     ui->pbSrcs->setValue(srcStep);
     ui->pbSrcs->setMaximum(srcTotal);
+    ui->statusBar->showMessage(QString("Extracted %1 sources in %2s").arg(srcTotal).arg(elapsed));
 }
 
 void QHdbExtractor::onExtractionProgress(const QString& source, int step, int total)
 {
+    qDebug() << __FUNCTION__ << source << source << step << total;
     ui->progressBar->setVisible(step != total);
     ui->progressBar->setFormat(source + " %p ");
     ui->progressBar->setMaximum(total);

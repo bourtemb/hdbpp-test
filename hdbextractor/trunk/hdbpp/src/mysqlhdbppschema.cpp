@@ -27,7 +27,7 @@ MySqlHdbppSchema::MySqlHdbppSchema(ResultListener *resultListenerI) : Configurab
     /* d_ptr is created inside ConfigurableDbSchema */
     d_ptr->resultListenerI = resultListenerI;
     d_ptr->variantList = NULL;
-    d_ptr->sourceStep = 0;
+    d_ptr->sourceStep = 1;
     d_ptr->totalSources = 1;
     pthread_mutex_init(&d_ptr->mutex, NULL);
 }
@@ -84,9 +84,10 @@ int MySqlHdbppSchema::get(std::vector<XVariant>& variantlist)
     return size;
 }
 
-/** \brief Fetch attribute data from the database between a start and stop date/time.
+/** \brief Fetch attribute data from the MySql hdb++ database between a start and stop date/time.
  *
- * Fetch data from the database.
+ * Fetch data from the  MySql hdb++ database.
+ *
  * \note This method is used by HdbExtractor and it is not meant to be directly used by the library user.
  *
  * @param source A the tango attribute in the form domain/family/member/AttributeName
@@ -461,8 +462,6 @@ bool MySqlHdbppSchema::getData(const char *source,
                                                          res->getRowCount() / datasiz,
                                                          res->getRowCount() / datasiz);
             }
-
-            d_ptr->sourceStep++;
         }
     }
     else
@@ -478,6 +477,7 @@ bool MySqlHdbppSchema::getData(const char *source,
      * represents seconds and the decimal microseconds.
      */
     elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec) + from_the_past_elapsed;
+    /* sourceStep is managed by the const std::vector<std::string> input version of getData */
     d_ptr->resultListenerI->onFinished(source, d_ptr->sourceStep, d_ptr->totalSources, elapsed);
 
     return success;
@@ -502,7 +502,7 @@ bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
     }
 
     d_ptr->totalSources = 1;
-
+    d_ptr->sourceStep = 1;
     return success;
 
 }
@@ -561,7 +561,7 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
         {
             pinfo("MySqlHdbppSchema.fetchInThePast: no data before \"%s\"", start_date);
             res->close();
-            return false;
+            return true; /* no error actually */
         }
     } /* if format not scalar */
 
