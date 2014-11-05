@@ -21,7 +21,7 @@ VER_MAJ = 1
 VER_MIN = 0
 VER_FIX = 0
 
-unix:INCLUDEPATH += mysql/src db/src db src ../src db/src/helpers
+unix:INCLUDEPATH += mysql/src db/src db src ../src db/src/helpers utils utils/private
 
 DEFINES += HDBEXTRACTOR_VERSION_STR=\"\\\"$${VERSION}\\\"\" \
     HDBEXTRACTOR_VERSION=$${VERSION_HEX} \
@@ -48,7 +48,9 @@ SOURCES += src/hdbextractor.cpp \
     src/configurationparser.cpp \
     src/queryconfiguration.cpp \
     db/src/configurabledbschema.cpp \
-    db/src/helpers/configurabledbschemahelper.cpp
+    db/src/helpers/configurabledbschemahelper.cpp \
+    utils/datasiever.cpp \
+    utils/private/datasieverprivate.cpp
 
 HEADERS += src/hdbextractor.h\
     src/hdbextractorprivate.h \
@@ -71,7 +73,9 @@ HEADERS += src/hdbextractor.h\
     src/configurationparser.h \
     src/queryconfiguration.h \
     db/src/configurabledbschema.h \
-    db/src/helpers/configurabledbschemahelper.h
+    db/src/helpers/configurabledbschemahelper.h \
+    utils/private/datafillerprivate.h \
+    utils/datasiever.h
 
 
 lib.path = $${INSTALL_ROOT}/lib
