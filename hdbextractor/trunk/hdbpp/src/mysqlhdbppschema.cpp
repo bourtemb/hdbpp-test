@@ -597,7 +597,7 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
 
     printf("\e[1;32mquery: %s\e[0m\n", query);
     res = connection->query(query);
-    if(!res)
+     if(!res)
     {
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: bad query \"%s\": \"%s\"",
                  query, connection->getError());
