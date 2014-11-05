@@ -28,13 +28,14 @@ MyHdbExtractorImpl::MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
 
 }
 
-void MyHdbExtractorImpl::getData(const char* source, const char* start_date, const char *stop_date)
+void MyHdbExtractorImpl::getData(std::vector<std::string> sources, const char* start_date, const char *stop_date)
 {
 
-    bool res = mExtractor->getData(source, start_date, stop_date);
+    bool res = mExtractor->getData(sources, start_date, stop_date);
     if(!res)
     {
-        printf("\e[1;31merror fetching data: %s: %s\e[0m\n", source, mExtractor->getErrorMessage());
+        for(int i = 0; i < sources.size(); i++)
+            printf("\e[1;31merror fetching data: %s: %s\e[0m\n", sources[i].c_str(), mExtractor->getErrorMessage());
     }
 }
 
@@ -63,29 +64,33 @@ void MyHdbExtractorImpl::onSourceExtracted(const char * name, int sourceStep, in
 
 void MyHdbExtractorImpl::extractData()
 {
-    std::vector<XVariant> valuelist;
-    mExtractor->get(valuelist);
+    mExtractor->get(d_valuelist);
 
-    for(size_t i = 0; i < valuelist.size(); i++)
-    {
-        XVariant::DataFormat format = valuelist[i].getFormat();
-        if(format == XVariant::Scalar)
-        {
-            printf("%s -> \e[1;32m%.2f\e[0m], ", valuelist[i].getTimestamp(), valuelist[i].toDouble());
-            if(i > 0 && i % 20 == 0)
-                printf("\n");
-        }
-        else if(format == XVariant::Vector)
-        {
-            std::vector<double> values = valuelist[i].toDoubleVector();
-            if(valuelist.size() > 0)
-                printf("\e[1;33m[ %s\e[0m", valuelist[i].getTimestamp());
-            for(size_t j = 0; j < values.size(); j++)
-                printf("\e[0;35m%ld:\e[1;32m %g\e[0m ,", j, values[j]);
-            printf(" \e[1;33m]\e[0m\n");
+//    for(size_t i = 0; i < valuelist.size(); i++)
+//    {
+//        XVariant::DataFormat format = valuelist[i].getFormat();
+//        if(format == XVariant::Scalar)
+//        {
+//            printf("%s -> \e[1;32m%.2f\e[0m], ", valuelist[i].getTimestamp(), valuelist[i].toDouble());
+//            if(i > 0 && i % 20 == 0)
+//                printf("\n");
+//        }
+//        else if(format == XVariant::Vector)
+//        {
+//            std::vector<double> values = valuelist[i].toDoubleVector();
+//            if(valuelist.size() > 0)
+//                printf("\e[1;33m[ %s\e[0m", valuelist[i].getTimestamp());
+//            for(size_t j = 0; j < values.size(); j++)
+//                printf("\e[0;35m%ld:\e[1;32m %g\e[0m ,", j, values[j]);
+//            printf(" \e[1;33m]\e[0m\n");
 
-        }
-    }
-    printf("\n\n");
+//        }
+//    }
+//    printf("\n\n");
+}
+
+const std::vector<XVariant> &MyHdbExtractorImpl::getValuelistRef() const
+{
+    return d_valuelist;
 }
 

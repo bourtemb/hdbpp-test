@@ -74,8 +74,8 @@ HEADERS += src/hdbextractor.h\
     src/queryconfiguration.h \
     db/src/configurabledbschema.h \
     db/src/helpers/configurabledbschemahelper.h \
-    utils/private/datafillerprivate.h \
-    utils/datasiever.h
+    utils/datasiever.h \
+    utils/private/datasieverprivate.h
 
 
 lib.path = $${INSTALL_ROOT}/lib

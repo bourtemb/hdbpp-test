@@ -5,6 +5,9 @@
 
 class Hdbextractor;
 
+#include <vector>
+#include <xvariant.h>
+
 /** \brief an <em>example</em> of an implementation of the HdbExtractorListener
  *
  */
@@ -14,7 +17,7 @@ public:
     MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
                        const char *dbhost, const char *dbnam);
 
-    void getData(const char* source, const char* start_date, const char *stop_date);
+    void getData(std::vector<std::string> sources, const char* start_date, const char *stop_date);
 
     virtual void onSourceProgressUpdate(const char *name, int step, int totalSteps);
 
@@ -24,9 +27,12 @@ public:
 
     void extractData();
 
+    const std::vector<XVariant> &getValuelistRef() const;
 
 private:
     Hdbextractor *mExtractor;
+
+    std::vector<XVariant> d_valuelist;
 };
 
 #endif // MYHDBEXTRACTORIMPL_H

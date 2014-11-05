@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DHDBEXTRACTOR_VERSION_STR="\"1.0.0\"" -DHDBEXTRACTOR_VERSION=0x010000 -DVER_MAJ=1 -DVER_MIN=0 -DVER_FIX=0 -DHDBEXTRACTORLIB_PRINTINFO -DHDBEXTRACTOR_LIBRARY
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I/usr/local/qt5/mkspecs/linux-g++ -I. -Imysql/src -Idb/src -Idb -Isrc -I../src -Idb/src/helpers
+INCPATH       = -I/usr/local/qt5/mkspecs/linux-g++ -I. -Imysql/src -Idb/src -Idb -Isrc -I../src -Idb/src/helpers -Iutils -Iutils/private
 LINK          = g++
 LFLAGS        = -shared -Wl,-soname,libhdbextractor++.so.1
 LIBS          = $(SUBLIBS) -lmysqlclient -lpthread 
@@ -59,7 +59,9 @@ SOURCES       = src/hdbextractor.cpp \
 		src/configurationparser.cpp \
 		src/queryconfiguration.cpp \
 		db/src/configurabledbschema.cpp \
-		db/src/helpers/configurabledbschemahelper.cpp 
+		db/src/helpers/configurabledbschemahelper.cpp \
+		utils/datasiever.cpp \
+		utils/private/datasieverprivate.cpp 
 OBJECTS       = hdbextractor.o \
 		hdbextractorprivate.o \
 		mysqlconnection.o \
@@ -74,7 +76,9 @@ OBJECTS       = hdbextractor.o \
 		configurationparser.o \
 		queryconfiguration.o \
 		configurabledbschema.o \
-		configurabledbschemahelper.o
+		configurabledbschemahelper.o \
+		datasiever.o \
+		datasieverprivate.o
 DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		/usr/local/qt5/mkspecs/common/shell-unix.conf \
 		/usr/local/qt5/mkspecs/common/unix.conf \
@@ -192,7 +196,9 @@ DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		src/configurationparser.cpp \
 		src/queryconfiguration.cpp \
 		db/src/configurabledbschema.cpp \
-		db/src/helpers/configurabledbschemahelper.cpp
+		db/src/helpers/configurabledbschemahelper.cpp \
+		utils/datasiever.cpp \
+		utils/private/datasieverprivate.cpp
 QMAKE_TARGET  = hdbextractor++
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = libhdbextractor++.so.1.0.0
@@ -599,6 +605,17 @@ configurabledbschemahelper.o: db/src/helpers/configurabledbschemahelper.cpp db/s
 		src/hdbxmacros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o configurabledbschemahelper.o db/src/helpers/configurabledbschemahelper.cpp
 
+datasiever.o: utils/datasiever.cpp utils/datasiever.h \
+		db/src/xvariant.h \
+		utils/private/datasieverprivate.h \
+		src/hdbxmacros.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasiever.o utils/datasiever.cpp
+
+datasieverprivate.o: utils/private/datasieverprivate.cpp utils/private/datasieverprivate.h \
+		utils/datasiever.h \
+		db/src/xvariant.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasieverprivate.o utils/private/datasieverprivate.cpp
+
 ####### Install
 
 install_lib: first FORCE
@@ -635,8 +652,12 @@ install_inc: first FORCE
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/src/queryconfiguration.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/configurabledbschema.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/helpers/configurabledbschemahelper.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/datasiever.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/private/datasieverprivate.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 
 uninstall_inc: FORCE
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/datasieverprivate.h
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/datasiever.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/configurabledbschemahelper.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/configurabledbschema.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/queryconfiguration.h

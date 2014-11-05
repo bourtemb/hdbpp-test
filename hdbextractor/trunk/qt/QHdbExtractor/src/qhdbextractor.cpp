@@ -1,6 +1,7 @@
 #include "qhdbextractor.h"
 #include "ui_mainwindow.h"
 #include <plotscenewidget.h>
+#include <datasiever.h>
 #include <timescalelabel.h>
 #include <markeritem.h>
 #include <curveitem.h>
