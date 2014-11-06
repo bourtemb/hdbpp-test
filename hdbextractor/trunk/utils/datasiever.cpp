@@ -2,6 +2,8 @@
 #include "datasieverprivate.h"
 
 #include <string.h>
+#include <set>
+#include <time.h>
 #include <hdbxmacros.h>
 
 #define MAXSRCLEN 256
@@ -70,17 +72,96 @@ void DataSiever::divide(const std::vector<XVariant> &rawdata)
 void DataSiever::fill()
 {
     size_t srcCount = d_ptr->dataMap.size();
-    size_t filledDataSize = 0;
+    size_t i, si, tstamps_size, ts_i;
     double nextTimestamp = d_ptr->minTimestamp;
+    double timestamp, data_timestamp_0, data_timestamp_1;
+    struct timeval tv;
+
+    /* create a std set (always sorted following a specific strict weak
+     * ordering criterion indicated by its internal comparison object)
+     * with all the required timestamps that will fill the n vectors of
+     * data.
+     */
+    std::set<double> timestamp_set;
     for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
         it != d_ptr->dataMap.end(); ++it)
     {
         std::vector<XVariant> data = it->second;
-        if(data.size() > filledDataSize)
-            filledDataSize = it->second.size();
+        for(i = 0; i < data.size(); i++)
+        {
+            tv = data[i].getTimevalTimestamp();
+            timestamp = tv.tv_sec + tv.tv_usec * 1e-6;
+            /* insert timestamp in the set. If timestamp is duplicate, it's not inserted */
+            timestamp_set.insert(timestamp);
+        }
+    }
+
+    tstamps_size = timestamp_set.size();
+
+    /* for each data row */
+    for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
+        it != d_ptr->dataMap.end(); ++it)
+    {
+        std::set<double>::iterator ts_set_iterator = timestamp_set.begin();
+        ts_i = 0;
+        /* take data from the map */
+        std::vector<XVariant> &data = it->second;
+        std::vector<XVariant>::iterator datait = data.begin();
+        datait = datait + 1; /* start with second element */
+        while(datait != data.end())
+        {
+            tv = datait->getTimevalTimestamp();
+            data_timestamp_1 = tv.tv_sec + tv.tv_usec * 1e-6;
+            /* get previous data timestamp */
+            tv = (datait - 1)->getTimevalTimestamp();
+            data_timestamp_0 = tv.tv_sec + tv.tv_usec * 1e-6;
+
+            /* iterate over the timestamps stored in the timestamp set. As we walk the set, avoid
+             * searching the same interval multiple times. For this, keep ts_set_iterator as
+             * start and update it in the last else if branch.
+             */
+            for(std::set<double>::iterator tsiter = ts_set_iterator; tsiter != timestamp_set.end(); tsiter++)
+            {
+                time_t tt = (time_t) (*tsiter);
+                if((*tsiter) >  data_timestamp_0 && (*tsiter) < data_timestamp_1)
+                {
+                    printf("\e[0;32mfilling %s with %s\e[0m\n", datait->getSource(), ctime(&tt));
+                    /* insert before the position of the iterator datait */
+                    data.insert(datait, XVariant(*datait));
+                }
+                else if((*tsiter) == data_timestamp_1) /* simply skip */
+                {
+                    printf("\e[1;35mskipping element cuz equal to timestamp_1 (%s)", ctime(&tt));
+                }
+                else if((*tsiter) > data_timestamp_1)
+                {
+                    ts_set_iterator = tsiter; /* save to optimize next for */
+                    printf("\e[1;35m going to next point after %s\e[0m\n", ctime(&tt));
+                    break;
+                }
+
+            }
+
+            datait++;
+        }
+
+
+
     }
 
 
+//    for(si = 0; si < timestamp_set.size(); si++)
+//    {
+//        timestamp = timestamp_set[si];
+//        for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
+//            it != d_ptr->dataMap.end(); ++it)
+//        {
+//            std::vector<XVariant> data = it->second;
+//            tv = data[i].
+//            data_timestamp_0 = tv.tv_sec + tv.tv_usec * 1e-6;
+//            tv = data[i - 1];
+//        }
+//    }
 }
 
 size_t DataSiever::getSize() const
