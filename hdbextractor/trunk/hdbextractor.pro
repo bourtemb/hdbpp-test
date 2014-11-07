@@ -50,7 +50,8 @@ SOURCES += src/hdbextractor.cpp \
     db/src/configurabledbschema.cpp \
     db/src/helpers/configurabledbschemahelper.cpp \
     utils/datasiever.cpp \
-    utils/private/datasieverprivate.cpp
+    utils/private/datasieverprivate.cpp \
+    utils/xvariantprinter.cpp
 
 HEADERS += src/hdbextractor.h\
     src/hdbextractorprivate.h \
@@ -75,7 +76,8 @@ HEADERS += src/hdbextractor.h\
     db/src/configurabledbschema.h \
     db/src/helpers/configurabledbschemahelper.h \
     utils/datasiever.h \
-    utils/private/datasieverprivate.h
+    utils/private/datasieverprivate.h \
+    utils/xvariantprinter.h
 
 
 lib.path = $${INSTALL_ROOT}/lib

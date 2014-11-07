@@ -12,6 +12,8 @@ HDB, spectrum, same start-stop date will fetch the first available data in the p
 HDBPP, scalar, same start-stop date will fetch the first available data in the past
 ./hdbxtest db++config.dat kg10/mod/llrf_kg10.01/RfReverse  "2011-11-07 21:05:43.000000" "2011-11-07 21:05:43.000000"
 
+HDB, two sources, short time window, to use to check data filling.
+/hdbxtest  dbconfig.dat f/radiation_protection/blm_master_linac.01/BlmIntData f/radiation_protection/blm_master_uh.01/BlmIntData "2013-01-19 19:07:10" "2013-01-19 19:08:10"
 
 
 

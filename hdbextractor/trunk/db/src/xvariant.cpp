@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <time.h>
+#include <math.h> /* round */
 #include <string.h> /* strerror */
 #include "hdbxmacros.h"
 #include "xvariantprivate.h"
@@ -127,6 +128,11 @@ XVariant::XVariant(const char* source,
     init_data(size);
 }
 
+XVariant::XVariant()
+{
+    d = new XVariantPrivate();
+    init_data();
+}
 
 /** \brief copy constructor
  *
@@ -1020,10 +1026,56 @@ void XVariant::delete_wdata()
     }
 }
 
+/** \brief This method allows changing the timestamp of the XVariant
+ *
+ * @param ts the new timestamp.
+ *
+ * @see getTimestamp
+ * @see getTime_tTimestamp
+ * @see getTimevalTimestamp
+ */
+void XVariant::setTimestamp(const char* ts)
+{
+    strncpy(d->mTimestamp, ts, TIMESTAMPLEN);
+}
+
+/** \brief Changes the XVariant timestamp according to the time expressed in a double format,
+ *  seconds.microseconds.
+ *
+ * @param tsmicro the new timestamp as a double value, where the integer part represents seconds
+ * and the decimal one microseconds.
+ *
+ */
+void XVariant::setTimestamp(double tsmicro)
+{
+    struct timeval tv;
+    tv.tv_sec = (time_t) tsmicro;
+    tv.tv_usec = (tsmicro - tv.tv_sec) * 1e6;
+    setTimestamp(&tv);
+}
+
+/** \brief Changes the XVariant timestamp according to the timeval passed as argument.
+ *
+ * @param tv the new timestamp as a struct timeval, passed in as a pointer to a user
+ * allocated structure.
+ *
+ */
+void XVariant::setTimestamp(const struct timeval* tv)
+{
+    struct tm result;
+    char timestamp[TIMESTAMPLEN];
+    localtime_r(&(tv->tv_sec), &result);
+    strftime(timestamp, TIMESTAMPLEN, "%Y-%m-%d %H:%M:%S", &result);
+    /* concat milliseconds */
+    snprintf(d->mTimestamp, TIMESTAMPLEN, "%s.%03.0f", timestamp, round(tv->tv_usec/1e3));
+}
+
 /** \brief Returns the timestamp associated to the data stored by XVariant, in the form
  *         of a string.
  *
  * @return A string representation of the timestamp associated to the data.
+ *
+ * @see setTimestamp
  */
 const char *XVariant::getTimestamp() const
 {

@@ -5,34 +5,10 @@
 #include "queryconfiguration.h"
 #include "../src/hdbextractor.h"
 #include "../src/configurationparser.h"
+#include "../utils/xvariantprinter.h"
 #include <map>
 
 using namespace std;
-
-void printValueList(const std::vector<XVariant > &valuelist)
-{
-    for(size_t i = 0; i < valuelist.size(); i++)
-    {
-        XVariant::DataFormat format = valuelist[i].getFormat();
-        if(format == XVariant::Scalar)
-        {
-            printf("\"%s\": %s -> \e[1;32m%.2f\e[0m], ", valuelist[i].getSource(),  valuelist[i].getTimestamp(), valuelist[i].toDouble());
-            if(i > 0 && i % 20 == 0)
-                printf("\n");
-        }
-        else if(format == XVariant::Vector)
-        {
-            std::vector<double> values = valuelist[i].toDoubleVector();
-            if(valuelist.size() > 0)
-                printf("\e[1;33m[ \"%s\": %s\e[0m", valuelist[i].getSource(), valuelist[i].getTimestamp());
-            for(size_t j = 0; j < values.size(); j++)
-                printf("\e[0;35m%ld:\e[1;32m %g\e[0m ,", j, values[j]);
-            printf(" \e[1;33m]\e[0m\n");
-
-        }
-    }
-    printf("\n\n");
-}
 
 int main(int argc, char **argv)
 {
@@ -76,7 +52,9 @@ int main(int argc, char **argv)
 
         DataSiever siever;
         printf("\e[1;36mSIEVING DATA....\e[0m\n");
-        siever.sieve(valuelist);
+        siever.divide(valuelist);
+
+        siever.fill();
 
         printf("\e[1;32msources:\e[0m\n");
         std::vector<std::string> srcs = siever.getSources();
@@ -84,8 +62,8 @@ int main(int argc, char **argv)
         {
             printf("\t* %s\n", srcs.at(i).c_str());
 
-            std::vector<XVariant > values = siever.getData(srcs.at(i));
-            printValueList(values);
+           // std::vector<XVariant > values = siever.getData(srcs.at(i));
+           // XVariantPrinter().printValueList(values);
         }
 
 

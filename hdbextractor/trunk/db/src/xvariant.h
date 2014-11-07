@@ -62,6 +62,8 @@ public:
              const size_t size, DataFormat df,
              DataType dt, Writable wri);
 
+    XVariant();
+
     /** \brief The copy constructor
      *
      * @param other The other XVariant whose values have to be copied over the new XVariant.
@@ -105,6 +107,12 @@ public:
     const char *getTimestamp() const;
 
     const char *getError() const;
+
+    void setTimestamp(double tsmicro);
+
+    void setTimestamp(const char* ts);
+
+    void setTimestamp(const struct timeval* tv);
 
     time_t getTime_tTimestamp() const;
 

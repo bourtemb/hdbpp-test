@@ -61,7 +61,8 @@ SOURCES       = src/hdbextractor.cpp \
 		db/src/configurabledbschema.cpp \
 		db/src/helpers/configurabledbschemahelper.cpp \
 		utils/datasiever.cpp \
-		utils/private/datasieverprivate.cpp 
+		utils/private/datasieverprivate.cpp \
+		utils/xvariantprinter.cpp 
 OBJECTS       = hdbextractor.o \
 		hdbextractorprivate.o \
 		mysqlconnection.o \
@@ -78,7 +79,8 @@ OBJECTS       = hdbextractor.o \
 		configurabledbschema.o \
 		configurabledbschemahelper.o \
 		datasiever.o \
-		datasieverprivate.o
+		datasieverprivate.o \
+		xvariantprinter.o
 DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		/usr/local/qt5/mkspecs/common/shell-unix.conf \
 		/usr/local/qt5/mkspecs/common/unix.conf \
@@ -198,7 +200,8 @@ DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		db/src/configurabledbschema.cpp \
 		db/src/helpers/configurabledbschemahelper.cpp \
 		utils/datasiever.cpp \
-		utils/private/datasieverprivate.cpp
+		utils/private/datasieverprivate.cpp \
+		utils/xvariantprinter.cpp
 QMAKE_TARGET  = hdbextractor++
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = libhdbextractor++.so.1.0.0
@@ -608,6 +611,7 @@ configurabledbschemahelper.o: db/src/helpers/configurabledbschemahelper.cpp db/s
 datasiever.o: utils/datasiever.cpp utils/datasiever.h \
 		db/src/xvariant.h \
 		utils/private/datasieverprivate.h \
+		utils/xvariantprinter.h \
 		src/hdbxmacros.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasiever.o utils/datasiever.cpp
 
@@ -615,6 +619,10 @@ datasieverprivate.o: utils/private/datasieverprivate.cpp utils/private/datasieve
 		utils/datasiever.h \
 		db/src/xvariant.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasieverprivate.o utils/private/datasieverprivate.cpp
+
+xvariantprinter.o: utils/xvariantprinter.cpp utils/xvariantprinter.h \
+		db/src/xvariant.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xvariantprinter.o utils/xvariantprinter.cpp
 
 ####### Install
 
@@ -654,8 +662,10 @@ install_inc: first FORCE
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/helpers/configurabledbschemahelper.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/datasiever.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/private/datasieverprivate.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/xvariantprinter.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 
 uninstall_inc: FORCE
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/xvariantprinter.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/datasieverprivate.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/datasiever.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/configurabledbschemahelper.h
