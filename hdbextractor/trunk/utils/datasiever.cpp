@@ -72,7 +72,7 @@ void DataSiever::divide(const std::vector<XVariant> &rawdata)
 
 void DataSiever::fill()
 {
-    size_t i, tstamps_size, ts_i, datasiz;
+    size_t i, tstamps_size, ts_i;
     double timestamp, data_timestamp_0, data_timestamp_1;
     struct timeval timeva, tv1, tv0;
 
@@ -96,7 +96,7 @@ void DataSiever::fill()
     }
 
     tstamps_size = timestamp_set.size();
-    size_t tsidx = 0;
+    size_t tsidx = 0, dataidx;
 
     XVariantPrinter printer;
 
@@ -104,20 +104,21 @@ void DataSiever::fill()
     for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
         it != d_ptr->dataMap.end(); ++it)
     {
+
+        bool done = false;
         tsidx = 0;
+        dataidx = 1;
         std::set<double>::iterator ts_set_iterator = timestamp_set.begin();
         ts_i = 0;
         /* take the vector of data from the map */
         std::vector<XVariant> &data = it->second;
-        data.resize(tstamps_size);
-        ///std::vector<XVariant> data;
-//        for(i = 0; i < it->second.size(); i++)
-//            data.push_back(it->second[i]);
- //       datasiz = data.size();
+        std::vector<XVariant> tmpdata;
+        /// data.reserve(tstamps_size);
         /* create an iterator over data */
         std::vector<XVariant>::iterator datait = data.begin();
+        std::vector<XVariant>::iterator dataend = data.end();
         datait = datait + 1; /* will start from the second element */
-        while(datait != data.end())
+        while(datait != dataend)
         {
             /* end of interval */
             tv1 = datait->getTimevalTimestamp();
@@ -134,34 +135,46 @@ void DataSiever::fill()
             while(tsiter != timestamp_set.end())
             {
                 time_t tt = (time_t) (*tsiter);
-                printf("set %d/%d: %s %s\n", tsidx, tstamps_size, ctime(&tt), datait->getSource());
+                printf("set %ld/%ld: %s %s\n", tsidx, tstamps_size, ctime(&tt), datait->getSource());
                 tsidx++;
                 if((*tsiter) >  data_timestamp_0 && (*tsiter) < data_timestamp_1)
                 {
-                    XVariant xvariant = XVariant(*datait);
+                    printf("+++ building temp xvariant data siz %ld:\n", (*datait).getSize());
+                    XVariant xvariant(*datait);
                     xvariant.setTimestamp(*tsiter);
                     /* insert before the position of the iterator datait */
-                    printf("\e[0;32m +  data siz %d filled %s[%s] with %s pt. %p data.begin %p datait %p\e[0m",
-                           data.size(), (*datait).getSource(), (*datait).getTimestamp(),
-                           ctime(&tt), &data, data.begin(), datait);
+                    printf("\e[0;32m + %p data idx %ld data siz %ld filled %s[%s] with %s\e[0m",
+                           &data, dataidx, data.size(),
+                           (*datait).getSource(),
+                           (*datait).getTimestamp(),
+                           ctime(&tt));
                     printer.print((*datait), 2);
-                    datait = data.insert(datait, xvariant);
-                   // datait = data.begin() + datasiz - 2;
-                    printf("\e[1;34mrite after insert: pt. %p iterator.begin %p data it %p\e[0m\n",
-                           &data, data.begin(), datait);
-                    printer.print((*datait), 2);
-                    printf("\e[1;34mrite after insert, but from xvariant:\e[0m\n");
+                    printf("++++ inserting into data\n");
+                    data.insert(datait, xvariant);
+                    tmpdata.push_back(xvariant);
+                    printf("src %s size %ld fmt %d ts %s\n", data[dataidx - 1].getSource(),
+                            data[dataidx - 1].getSize(),
+                           data[dataidx -1 ].getFormat(), data[dataidx -1 ].getTimestamp());
+                    printf("src %s size %ld fmt %d ts %s\n", data[dataidx + 1].getSource(),
+                            data[dataidx - 1].getSize(),
+                           data[dataidx -1 ].getFormat(), data[dataidx +1 ].getTimestamp());
+                  //  datait = data.begin() + dataidx;
+                    printf("\e[1;34m %p rite after insert data size %ld:\e[0m\n", &data, data.size());
+                    for(int k =0 ; k < data.size(); k++)
+                        printer.print(data[k], 2);
+                    printf("\e[1;34m %p rite after insert, but from xvariant:\e[0m\n", &data);
                     printer.print(xvariant, 2);
-                    /* the iterator returned by insert points to the first of the newly inserted data.
-                     * So we must skip it.
-                     */
-                    datait++;
-                    printf("\e[1;32m +  data siz %d filled %s[%s] with %s data.begin %p datait %p\e[0m",
-                           data.size(), (*datait).getSource(),
-                           (*datait).getTimestamp(), ctime(&tt),
-                           data.begin(), datait);
+
+                    ///return;
+//                    printf("\e[1;32m + %p data idx %ld data siz %ld filled %s [%s] with %s\e[0m",
+//                           &data, dataidx, data.size(), (*datait).getSource(), (*datait).getTimestamp(), ctime(&tt));
+
+                    printf("\e[1;32m + %p data idx %ld data siz %ld filled  with %s\e[0m",
+                            &data, dataidx, data.size(), /*(*datait). getSource(),*/
+                            ctime(&tt));
                     printer.print((*datait), 2);
-                    //datasiz += 1;
+                    dataidx++;
+                    datait = data.begin() + dataidx;
                 }
                 else if((*tsiter) == data_timestamp_1) /* simply skip */
                 {
@@ -169,6 +182,7 @@ void DataSiever::fill()
                  //   tsiter++;
                     tsiter++;
                     ts_set_iterator = tsiter; /* point to next */
+                    tmpdata.push_back((*datait));
                     break;
                 }
                 else if((*tsiter) > data_timestamp_1)
@@ -179,11 +193,14 @@ void DataSiever::fill()
                 }
                 tsiter++;
             }
-
-            datait++;
+            dataidx++;
+            printf("\e[1;34m data index %ld data size %ld data %p\e[0m\n", dataidx, data.size(), &data);
+            datait = data.begin() + dataidx;
+            dataend = data.end();
+            //// datait++;
         }
-        printf("\e[1;34m printing data AFTER, pt %p\e[0m\n", &data);
-        printer.printValueList(data, 2);
+        d_ptr->dataMap[it->first] = tmpdata;
+        printer.printValueList(d_ptr->dataMap[it->first], 2);
     }
 }
 

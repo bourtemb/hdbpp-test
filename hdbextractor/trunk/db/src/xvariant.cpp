@@ -11,7 +11,7 @@
 
 XVariant::~XVariant()
 {
-    pinfo("~XVariant destructor: %p", this);
+    printf("~XVariant destructor: %p\n", this);
     if(d->mSize > 0 && d->mType == String && d->val != NULL)
     {
         char **ssi = (char **) d->val;
@@ -128,11 +128,12 @@ XVariant::XVariant(const char* source,
     init_data(size);
 }
 
-XVariant::XVariant()
-{
-    d = new XVariantPrivate();
-    init_data();
-}
+//XVariant::XVariant()
+//{
+//    d = new XVariantPrivate();
+//    init_data();
+//    d->mFormat = FormatInvalid;
+//}
 
 /** \brief copy constructor
  *
@@ -153,6 +154,7 @@ XVariant::XVariant(const XVariant &other)
     d->mIsValid = other.isValid();
     d->mIsNull = other.isNull();
     d->mIsWNull = other.isWNull();
+    printf("\e[0;33mXVariant %p copy: format %d wri %d size %ld\e[0m \n", this, d->mFormat, d->mWritable, d->mSize);
 
     strncpy(d->mSource, other.getSource(), SRCLEN);
     strncpy(d->mError, other.getError(), ERRMSGLEN);
@@ -163,6 +165,7 @@ XVariant::XVariant(const XVariant &other)
         if(d->mType == XVariant::Double)
         {
             double *vd = new double[d->mSize];
+            printf("\e[0;33mXVariant %p Double size %ld\e[0m\n", this, d->mSize);
             for(size_t i = 0; i < d->mSize; i++)
                 vd[i] =  other.toDoubleP()[i];
             d->val = vd;
@@ -224,6 +227,8 @@ XVariant::XVariant(const XVariant &other)
             d->w_val = vb;
         }
     }
+
+    printf("\e[1;33mXVariant copy (EXIT): format %d\e[0m\n", d->mFormat);
 }
 
 /** \brief Returns the source name (tango full attribute name)

@@ -26,7 +26,7 @@ void XVariantPrinter::print(const XVariant &xv, int maxVectorElements)
         printf(" \e[1;33m]\e[0m\n");
     }
     else
-        printf("\e[1;31m format %d unrecognized\e[0m\n", format);
+        printf("\e[1;31m format %d unrecognized data type %d\e[0m\n", format, xv.getType());
 }
 
 void XVariantPrinter::printValueList(const std::vector<XVariant > &valuelist, int maxVectorElements)

@@ -62,7 +62,7 @@ public:
              const size_t size, DataFormat df,
              DataType dt, Writable wri);
 
-    XVariant();
+//    XVariant();
 
     /** \brief The copy constructor
      *
