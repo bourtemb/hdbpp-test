@@ -34,8 +34,8 @@ XVariant::~XVariant()
         }
     }
     delete_wdata();
-
-    delete d;
+  //  delete d;
+  //  d = NULL;
 }
 
 /** \brief The XVariant object is the Hdbextractor data container.
@@ -93,6 +93,9 @@ XVariant::XVariant(const char* source, const char *timestamp, const char *strdat
     init_data();
     d->mWritable = wri;
     parse(strdata); /* at the end, after setting up other fields */
+    if(d->val == NULL)
+        printf("\e[1;31m ***********************\n"
+               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
 }
 
 /** \brief The constructor for read write data.
@@ -115,6 +118,9 @@ XVariant::XVariant(const char* source, const char *timestamp, const char *strdat
     init_data();
     d->mWritable = RW;
     parse(strdataR, strdataW); /* at the end, after setting up other fields */
+    if(d->val == NULL)
+        printf("\e[1;31m ***********************\n"
+               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
 }
 
 XVariant::XVariant(const char* source,
@@ -126,8 +132,15 @@ XVariant::XVariant(const char* source,
     d->mWritable = wri;
     init_common(source, timestamp, df, dt);
     init_data(size);
+    if(d->val == NULL)
+        printf("\e[1;31m ***********************\n"
+               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
 }
 
+/** \brief Creates an empty (invalid) XVariant
+ *
+ * The XVariant created is invalid.
+ */
 //XVariant::XVariant()
 //{
 //    d = new XVariantPrivate();
@@ -154,7 +167,8 @@ XVariant::XVariant(const XVariant &other)
     d->mIsValid = other.isValid();
     d->mIsNull = other.isNull();
     d->mIsWNull = other.isWNull();
-    printf("\e[0;33mXVariant %p copy: format %d wri %d size %ld\e[0m \n", this, d->mFormat, d->mWritable, d->mSize);
+    printf("\e[0;33mXVariant %p copy from %p d: %p: format %d wri %d size %ld\e[0m \n", this, &other, d,
+           d->mFormat, d->mWritable, d->mSize);
 
     strncpy(d->mSource, other.getSource(), SRCLEN);
     strncpy(d->mError, other.getError(), ERRMSGLEN);
@@ -165,10 +179,10 @@ XVariant::XVariant(const XVariant &other)
         if(d->mType == XVariant::Double)
         {
             double *vd = new double[d->mSize];
-            printf("\e[0;33mXVariant %p Double size %ld\e[0m\n", this, d->mSize);
             for(size_t i = 0; i < d->mSize; i++)
                 vd[i] =  other.toDoubleP()[i];
             d->val = vd;
+            printf("XVariant %p d->val %p  double size %ld\e[0m\n", this, d->val, d->mSize);
         }
         else if(d->mType == XVariant::Int)
         {
@@ -229,6 +243,9 @@ XVariant::XVariant(const XVariant &other)
     }
 
     printf("\e[1;33mXVariant copy (EXIT): format %d\e[0m\n", d->mFormat);
+    if(d->val == NULL)
+        printf("\e[1;31m ***********************\n"
+               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
 }
 
 /** \brief Returns the source name (tango full attribute name)
@@ -945,6 +962,7 @@ void XVariant::init_common(const char* source, const char *timestamp, DataFormat
 void XVariant::init_data(size_t size)
 {
     d->w_val = NULL;
+    d->val = NULL;
     d->mSize = size;
     d->mIsValid = true;
 
@@ -962,8 +980,6 @@ void XVariant::init_data(size_t size)
             d->val = (long int *) new long int[size];
         if(d->mWritable == RW || d->mWritable == WO)
             d->w_val = (long int *) new long int[size];
-
-        d->mSize = 1;
     }
     else if(d->mType == UInt)
     {
@@ -1011,6 +1027,7 @@ void XVariant::delete_rdata()
             delete (bool *) d->val;
         else if(d->mType == String)
             delete (char *) d->val;
+        printf("delete_rdata: deleted d %p d->val %p\n", d, d->val);
         d->val = NULL;
     }
 }
@@ -1035,13 +1052,16 @@ void XVariant::delete_wdata()
  *
  * @param ts the new timestamp.
  *
+ * @return A reference to the same object with the timestamp changed.
+ *
  * @see getTimestamp
  * @see getTime_tTimestamp
  * @see getTimevalTimestamp
  */
-void XVariant::setTimestamp(const char* ts)
+XVariant &XVariant::setTimestamp(const char* ts)
 {
     strncpy(d->mTimestamp, ts, TIMESTAMPLEN);
+    return *this;
 }
 
 /** \brief Changes the XVariant timestamp according to the time expressed in a double format,
@@ -1050,13 +1070,15 @@ void XVariant::setTimestamp(const char* ts)
  * @param tsmicro the new timestamp as a double value, where the integer part represents seconds
  * and the decimal one microseconds.
  *
+ * @return A reference to the same object with the timestamp changed.
+ *
  */
-void XVariant::setTimestamp(double tsmicro)
+XVariant & XVariant::setTimestamp(double tsmicro)
 {
     struct timeval tv;
     tv.tv_sec = (time_t) tsmicro;
     tv.tv_usec = (tsmicro - tv.tv_sec) * 1e6;
-    setTimestamp(&tv);
+    return setTimestamp(&tv);
 }
 
 /** \brief Changes the XVariant timestamp according to the timeval passed as argument.
@@ -1064,8 +1086,10 @@ void XVariant::setTimestamp(double tsmicro)
  * @param tv the new timestamp as a struct timeval, passed in as a pointer to a user
  * allocated structure.
  *
+ * @return A reference to the same object with the timestamp changed.
+ *
  */
-void XVariant::setTimestamp(const struct timeval* tv)
+XVariant &XVariant::setTimestamp(const struct timeval* tv)
 {
     struct tm result;
     char timestamp[TIMESTAMPLEN];
@@ -1073,6 +1097,7 @@ void XVariant::setTimestamp(const struct timeval* tv)
     strftime(timestamp, TIMESTAMPLEN, "%Y-%m-%d %H:%M:%S", &result);
     /* concat milliseconds */
     snprintf(d->mTimestamp, TIMESTAMPLEN, "%s.%03.0f", timestamp, round(tv->tv_usec/1e3));
+    return *this;
 }
 
 /** \brief Returns the timestamp associated to the data stored by XVariant, in the form
@@ -1095,6 +1120,7 @@ const char *XVariant::getTimestamp() const
 time_t XVariant::getTime_tTimestamp() const
 {
     struct tm mtm;
+    memset(&mtm, 0, sizeof(struct tm));
     strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
     return mktime(&mtm);
 }
@@ -1338,6 +1364,8 @@ std::vector<std::string> XVariant::toStringVector() const
  */
 double *XVariant::toDoubleP(bool read) const
 {
+       if(d->val == NULL)
+        printf("\e[1;33mtoDoubleP this %p read %d d %p d->val %p\e[0m\n", this, read, d, d->val);
     if(read)
         return (double *) d->val ;
     return (double *) d->w_val;

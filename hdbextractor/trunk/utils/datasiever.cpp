@@ -104,29 +104,30 @@ void DataSiever::fill()
     for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
         it != d_ptr->dataMap.end(); ++it)
     {
-
-        bool done = false;
         tsidx = 0;
         dataidx = 1;
         std::set<double>::iterator ts_set_iterator = timestamp_set.begin();
         ts_i = 0;
         /* take the vector of data from the map */
-        std::vector<XVariant> &data = it->second;
-        std::vector<XVariant> tmpdata;
-        /// data.reserve(tstamps_size);
+        std::vector<XVariant> data = it->second;
+        printf("\e[1;35mbefore processin'\e[0m\n");
+        printer.printValueList(data, 2);
+
         /* create an iterator over data */
-        std::vector<XVariant>::iterator datait = data.begin();
-        std::vector<XVariant>::iterator dataend = data.end();
-        datait = datait + 1; /* will start from the second element */
-        while(datait != dataend)
+        std::vector<XVariant>::iterator datait;
+
+        while(1)
         {
-            /* end of interval */
-            tv1 = datait->getTimevalTimestamp();
+            if(dataidx == data.size())
+                break;
+
+            tv1 = data[dataidx].getTimevalTimestamp();
             data_timestamp_1 = tv1.tv_sec + tv1.tv_usec * 1e-6;
             /* start of interval */
-            tv0 = (datait - 1)->getTimevalTimestamp();
+            tv0 = data[dataidx - 1].getTimevalTimestamp();
             data_timestamp_0 = tv0.tv_sec + tv0.tv_usec * 1e-6;
 
+            printf("---> inserting at %ld size %ld\n", dataidx, data.size());
             /* iterate over the timestamps stored in the timestamp set. As we walk the set, avoid
              * searching the same interval multiple times. For this, keep ts_set_iterator as
              * start and update it in the last else if branch.
@@ -135,72 +136,91 @@ void DataSiever::fill()
             while(tsiter != timestamp_set.end())
             {
                 time_t tt = (time_t) (*tsiter);
-                printf("set %ld/%ld: %s %s\n", tsidx, tstamps_size, ctime(&tt), datait->getSource());
-                tsidx++;
                 if((*tsiter) >  data_timestamp_0 && (*tsiter) < data_timestamp_1)
                 {
-                    printf("+++ building temp xvariant data siz %ld:\n", (*datait).getSize());
-                    XVariant xvariant(*datait);
-                    xvariant.setTimestamp(*tsiter);
-                    /* insert before the position of the iterator datait */
-                    printf("\e[0;32m + %p data idx %ld data siz %ld filled %s[%s] with %s\e[0m",
-                           &data, dataidx, data.size(),
-                           (*datait).getSource(),
-                           (*datait).getTimestamp(),
-                           ctime(&tt));
-                    printer.print((*datait), 2);
-                    printf("++++ inserting into data\n");
-                    data.insert(datait, xvariant);
-                    tmpdata.push_back(xvariant);
-                    printf("src %s size %ld fmt %d ts %s\n", data[dataidx - 1].getSource(),
-                            data[dataidx - 1].getSize(),
-                           data[dataidx -1 ].getFormat(), data[dataidx -1 ].getTimestamp());
-                    printf("src %s size %ld fmt %d ts %s\n", data[dataidx + 1].getSource(),
-                            data[dataidx - 1].getSize(),
-                           data[dataidx -1 ].getFormat(), data[dataidx +1 ].getTimestamp());
-                  //  datait = data.begin() + dataidx;
-                    printf("\e[1;34m %p rite after insert data size %ld:\e[0m\n", &data, data.size());
-                    for(int k =0 ; k < data.size(); k++)
-                        printer.print(data[k], 2);
-                    printf("\e[1;34m %p rite after insert, but from xvariant:\e[0m\n", &data);
-                    printer.print(xvariant, 2);
-
-                    ///return;
-//                    printf("\e[1;32m + %p data idx %ld data siz %ld filled %s [%s] with %s\e[0m",
-//                           &data, dataidx, data.size(), (*datait).getSource(), (*datait).getTimestamp(), ctime(&tt));
-
-                    printf("\e[1;32m + %p data idx %ld data siz %ld filled  with %s\e[0m",
-                            &data, dataidx, data.size(), /*(*datait). getSource(),*/
-                            ctime(&tt));
-                    printer.print((*datait), 2);
-                    dataidx++;
                     datait = data.begin() + dataidx;
+                    printf("+++ inserting data siz %ld:\n", data.size());
+                    //                    XVariant xvariant(*datait);
+                    //                    printf("crated new, ");
+                    //                    xvariant.setTimestamp((*tsiter));
+                    printf("timestamp changed. Really inserting now\n");
+                    data.insert(datait, XVariant(data[dataidx - 1]).setTimestamp((*tsiter)));
+                    printf("+++ inserted data siz %ld address %p:\n", data.size(), datait);
                 }
-                else if((*tsiter) == data_timestamp_1) /* simply skip */
+                else if(*tsiter == data_timestamp_1) /* simply skip */
                 {
                     printf("\e[1;35m - skipping element cuz equal to timestamp_1: %s\e[0m", ctime(&tt));
-                 //   tsiter++;
                     tsiter++;
                     ts_set_iterator = tsiter; /* point to next */
-                    tmpdata.push_back((*datait));
                     break;
                 }
                 else if((*tsiter) > data_timestamp_1)
                 {
+                  //  tsiter++;
                     ts_set_iterator = tsiter; /* save to optimize next for */
                     printf("\e[1;32m > going to next point after %s \e[0m", ctime(&tt));
                     break;
                 }
                 tsiter++;
+                ts_set_iterator = tsiter; /* save to optimize next for */
             }
             dataidx++;
-            printf("\e[1;34m data index %ld data size %ld data %p\e[0m\n", dataidx, data.size(), &data);
-            datait = data.begin() + dataidx;
-            dataend = data.end();
-            //// datait++;
+
+            printf("\e[1;32m============= RESULT FOR %s =================\e[0m\n", it->first.c_str());
+            printer.printValueList(data, 2);
         }
-        d_ptr->dataMap[it->first] = tmpdata;
-        printer.printValueList(d_ptr->dataMap[it->first], 2);
+
+//        while(datait != data.end())
+//        {
+//            /* end of interval */
+//            tv1 = datait->getTimevalTimestamp();
+//            data_timestamp_1 = tv1.tv_sec + tv1.tv_usec * 1e-6;
+//            /* start of interval */
+//            tv0 = (datait - 1)->getTimevalTimestamp();
+//            data_timestamp_0 = tv0.tv_sec + tv0.tv_usec * 1e-6;
+
+//            /* iterate over the timestamps stored in the timestamp set. As we walk the set, avoid
+//             * searching the same interval multiple times. For this, keep ts_set_iterator as
+//             * start and update it in the last else if branch.
+//             */
+//            std::set<double>::iterator tsiter = ts_set_iterator;
+//            while(tsiter != timestamp_set.end())
+//            {
+//                time_t tt = (time_t) (*tsiter);
+//                if((*tsiter) >  data_timestamp_0 && (*tsiter) < data_timestamp_1)
+//                {
+//                    printf("+++ inserting data siz %ld:\n", data.size());
+////                    XVariant xvariant(*datait);
+////                    printf("crated new, ");
+////                    xvariant.setTimestamp((*tsiter));
+//                    printf("timestamp changed. Really inserting now\n");
+//                    datait_tmp = data.insert(datait, XVariant(*datait).setTimestamp((*tsiter)));
+//                    printf("+++ inserted data siz %ld address %p:\n", data.size(), datait);
+//                    datait = datait_tmp;
+//                }
+//                else if(*tsiter == data_timestamp_1) /* simply skip */
+//                {
+//                    printf("\e[1;35m - skipping element cuz equal to timestamp_1: %s\e[0m", ctime(&tt));
+//                    tsiter++;
+//                    ts_set_iterator = tsiter; /* point to next */
+//                    break;
+//                }
+//                else if((*tsiter) > data_timestamp_1)
+//                {
+//                  //  tsiter++;
+//                    ts_set_iterator = tsiter; /* save to optimize next for */
+//                    printf("\e[1;32m > going to next point after %s \e[0m", ctime(&tt));
+//                    break;
+//                }
+//                tsiter++;
+//                ts_set_iterator = tsiter; /* save to optimize next for */
+//            }
+//            datait++;
+//            printf("\e[1;34m data index %ld data size %ld data %p\e[0m\n", dataidx, data.size(), &data);
+//        }
+
+//        printf("\e[1;32m============= RESULT FOR %s =================\e[0m\n", it->first.c_str());
+//        printer.printValueList(data, 2);
     }
 }
 
