@@ -58,12 +58,22 @@ public class SplashUtils {
     private static boolean splashActive = false;
     private static final String packageName = "org.tango.hdbcpp";
     public static final String revNumber =
-            "1.6  -  Thu Oct 30 15:18:14 CET 2014";
+            "1.7a  -  Wed Nov 12 09:27:05 CET 2014";
 
+    private static SplashUtils instance = new SplashUtils();
     private static final String imageFile = "FullTangoLogo.gif";
     //=======================================================
     //=======================================================
-    public static void startSplash() {
+    public static SplashUtils getInstance() {
+        return instance;
+    }
+    //=======================================================
+    //=======================================================
+    public void startSplash() {
+        if (splash!=null) {
+            splash.setVisible(false);
+        }
+        //  Create a new one
         String title = packageName;
         int end = revNumber.indexOf("-");
         if (end > 0)
@@ -89,7 +99,7 @@ public class SplashUtils {
 
     //=======================================================
     //=======================================================
-    public static void increaseSplashProgress(int i, String message) {
+    public void increaseSplashProgress(int i, String message) {
         if (splash == null)
             return;
         splashProgress += i;
@@ -103,7 +113,7 @@ public class SplashUtils {
     }
     //=======================================================
     //=======================================================
-    public static void increaseSplashProgressForLoop(int size, String message) {
+    public void increaseSplashProgressForLoop(int size, String message) {
         if (splash == null)
             return;
         splashProgress += getStep(size);
@@ -117,19 +127,19 @@ public class SplashUtils {
     }
     //=======================================================
     //=======================================================
-    public static void reset() {
+    public void reset() {
         splashProgress = 1;
     }
     //=======================================================
     //=======================================================
-    private static int getStep(int size) {
+    private int getStep(int size) {
         int step = 98/size;
         if (step<1) step = 1;
         return step;
     }
     //=======================================================
     //=======================================================
-    public static void setSplashProgress(int i, String message) {
+    public void setSplashProgress(int i, String message) {
         if (splash == null)
             return;
         splashProgress = i;
@@ -139,19 +149,19 @@ public class SplashUtils {
         if (message!=null)
             splash.setMessage(message);
 
-        //System.out.println(splashProgress);
+        //System.out.println(splashProgress + " - " + message);
     }
 
     //=======================================================
     //=======================================================
-    public static void showSplash(boolean b) {
+    public void showSplash(boolean b) {
         if (splash != null)
             splash.setVisible(b);
     }
 
     //=======================================================
     //=======================================================
-    public static void stopSplash() {
+    public void stopSplash() {
         if (splash != null) {
             splashProgress = 100;
             splash.progress(splashProgress);
@@ -161,13 +171,13 @@ public class SplashUtils {
 
     //=======================================================
     //=======================================================
-    public static boolean getSplashActive() {
+    public boolean getSplashActive() {
         return splashActive;
     }
 
     //=======================================================
     //=======================================================
-    public static void setSplashActive(boolean b) {
+    public void setSplashActive(boolean b) {
         splashActive = b;
     }
     //=======================================================

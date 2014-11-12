@@ -40,7 +40,6 @@ import fr.esrf.TangoApi.*;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import jive.ExecDev;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -328,7 +327,7 @@ public class TangoUtils {
         else
             dialog = new JDialog((JDialog)parent, false);
         dialog.setTitle(deviceName + " Device Panel");
-        dialog.setContentPane(new ExecDev(deviceName));
+        dialog.setContentPane(new jive.ExecDev(deviceName));
         dialog.pack();
         dialog.setVisible(true);
         ATKGraphicsUtils.centerDialog(dialog);

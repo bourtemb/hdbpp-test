@@ -138,14 +138,14 @@ public class Utils {
     /**
      * Open a file and return lines read.
      *
-     * @param filename file to be read.
+     * @param fileName file to be read.
      * @return the file content read as lines.
      * @throws DevFailed in case of failure during read file.
      */
     //===============================================================
-    public static ArrayList<String> readFileLines(String filename) throws DevFailed {
+    public static ArrayList<String> readFileLines(String fileName) throws DevFailed {
         ArrayList<String>   lines = new ArrayList<String>();
-        String code = readFile(filename);
+        String code = readFile(fileName);
         StringTokenizer stringTokenizer = new StringTokenizer(code, "\n");
         while (stringTokenizer.hasMoreTokens())
             lines.add(stringTokenizer.nextToken());
@@ -155,15 +155,15 @@ public class Utils {
     /**
      * Open a file and return text read.
      *
-     * @param filename file to be read.
+     * @param fileName file to be read.
      * @return the file content read.
      * @throws DevFailed in case of failure during read file.
      */
     //===============================================================
-    public static String readFile(String filename) throws DevFailed {
+    public static String readFile(String fileName) throws DevFailed {
         String str = "";
         try {
-            FileInputStream fid = new FileInputStream(filename);
+            FileInputStream fid = new FileInputStream(fileName);
             int nb = fid.available();
             byte[] inStr = new byte[nb];
             nb = fid.read(inStr);
@@ -175,6 +175,17 @@ public class Utils {
             Except.throw_exception(e.getMessage(), e.toString());
         }
         return str;
+    }
+    //===============================================================
+    //===============================================================
+    public static void writeFile(String fileName, String code) throws DevFailed {
+        try {
+            FileOutputStream fid = new FileOutputStream(fileName);
+            fid.write(code.getBytes());
+            fid.close();
+        } catch (Exception e) {
+            Except.throw_exception(e.getMessage(), e.toString());
+        }
     }
     //======================================================================
     //======================================================================
@@ -277,6 +288,11 @@ public class Utils {
                         strPeriod((double) intPeriod - (days * 24 * 3600));
             }
         }
+    }
+    //======================================================================
+    //======================================================================
+    public static void popupError(Component component, String message) {
+        JOptionPane.showMessageDialog(component, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
     //======================================================================
     //======================================================================
