@@ -69,7 +69,7 @@ public class SubscriberMap {
         //  Get Subscriber deviceName
         String[]    archivers = ArchiverUtils.getSubscriberList(configuratorProxy);
         for (String archiver : archivers) {
-            SplashUtils.increaseSplashProgressForLoop(archivers.length, "Building object " + archiver);
+            SplashUtils.getInstance().increaseSplashProgressForLoop(archivers.length, "Building object " + archiver);
             put(archiver, labels);
         }
         StringComparator.sort(labelList);

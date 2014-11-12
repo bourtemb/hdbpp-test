@@ -17,7 +17,11 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Thu Oct 30 15:18:14 CET 2014)</Center><Br>\n" + 
+		"	(Generated Wed Nov 12 09:27:05 CET 2014)</Center><Br>\n" + 
+		"<li><b>jblvac-1.7 - 06/11/14:</b><Br>\n" + 
+		"&nbsp; &nbsp; FQDN event subscriber name to be added to manager.<Br>\n" + 
+		"&nbsp; &nbsp; Events since reset added.<Br>\n" + 
+		"&nbsp; &nbsp; Save statistics addd.<Br>\n" + 
 		"<li><b>jblvac-1.6 - 30/10/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Display event frequency added.<Br>\n" + 
 		"<li><b>jblvac-1.5 - 13/10/14:</b><Br>\n" + 
