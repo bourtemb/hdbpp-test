@@ -93,8 +93,8 @@ public class HdbDiagnostics extends JFrame {
 	//=======================================================
     public HdbDiagnostics(JFrame parent) throws DevFailed {
         this.parent = parent;
-        SplashUtils.startSplash();
-        SplashUtils.increaseSplashProgress(10, "Building GUI");
+        SplashUtils.getInstance().startSplash();
+        SplashUtils.getInstance().increaseSplashProgress(10, "Building GUI");
         setTitle("HdbDiagnostics  - " + SplashUtils.revNumber);
 
         initComponents();
@@ -113,7 +113,7 @@ public class HdbDiagnostics extends JFrame {
 
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
-        SplashUtils.stopSplash();
+        SplashUtils.getInstance().stopSplash();
 	}
     //=======================================================
     //=======================================================
@@ -499,7 +499,7 @@ public class HdbDiagnostics extends JFrame {
       		new HdbDiagnostics(null).setVisible(true);
 		}
 		catch(DevFailed e) {
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
             ErrorPane.showErrorMessage(new Frame(), null, e);
 			System.exit(0);
 		}

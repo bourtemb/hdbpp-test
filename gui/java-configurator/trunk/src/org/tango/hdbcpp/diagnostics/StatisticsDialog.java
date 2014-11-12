@@ -55,6 +55,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -82,6 +83,7 @@ public class StatisticsDialog extends JDialog {
     private int selectedColumn = PERIOD_STAT;
 
     private static List<String> defaultTangoHosts;
+    private static JFileChooser fileChooser = null;
 
     private static final int columnWidth[] = { 300, 80, 80, 80 };
     private static final  String[] columnNames = {
@@ -101,26 +103,18 @@ public class StatisticsDialog extends JDialog {
 	//===============================================================
     public StatisticsDialog(JFrame parent, SubscriberMap subscriberMap, int statisticsTimeWindow) throws DevFailed {
         super(parent, false);
-        SplashUtils.startSplash();
+        SplashUtils.getInstance().startSplash();
         try {
             defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
             initComponents();
             subscribers = (ArrayList<Subscriber>) subscriberMap.getSubscriberList();
-
-            buildRecords();
-            updateColumnNames(statisticsTimeWindow);
-            buildTableComponent();
-            setTitle("All Subscribers ");
-            displayTitle();
-
-            pack();
-            ATKGraphicsUtils.centerDialog(this);
+            finalizeConstruction(statisticsTimeWindow, "All Subscribers ", true);
         }
         catch (DevFailed e) {
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
             throw e;
         }
-        SplashUtils.stopSplash();
+        SplashUtils.getInstance().stopSplash();
     }
 
     //===============================================================
@@ -130,30 +124,42 @@ public class StatisticsDialog extends JDialog {
 	//===============================================================
 	public StatisticsDialog(JFrame parent, Subscriber subscriber, int statisticsTimeWindow) throws DevFailed {
 		super(parent, false);
-        SplashUtils.startSplash();
+        SplashUtils.getInstance().startSplash();
         try {
             defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
             initComponents();
             subscribers = new ArrayList<Subscriber>(1);
             subscribers.add(subscriber);
-            buildRecords();
-            updateColumnNames(statisticsTimeWindow);
-            buildTableComponent();
-            setTitle("Subscriber " + subscriber.getLabel());
-            displayTitle();
-
-            //  Do not allow for one subscriber
-            resetItem.setVisible(false);
-
-            pack();
-            ATKGraphicsUtils.centerDialog(this);
+            finalizeConstruction(statisticsTimeWindow, "Subscriber " + subscriber.getLabel(), false);
         }
         catch (DevFailed e) {
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
             throw e;
         }
-        SplashUtils.stopSplash();
+        SplashUtils.getInstance().stopSplash();
 	}
+    //===============================================================
+    //===============================================================
+    private void finalizeConstruction(int statisticsTimeWindow,
+                                      String title, boolean allowReset) throws DevFailed{
+
+        buildRecords();
+        updateColumnNames(statisticsTimeWindow);
+        buildTableComponent();
+        setTitle(title);
+        displayTitle();
+
+        //  Do not allow for one subscriber
+        resetItem.setVisible(allowReset);
+
+        //  Check if extraction available
+        String s = System.getenv("ExtractionClass");
+        readHdbItem.setVisible(s!=null && !s.isEmpty());
+        viewMenu.setVisible(s!=null && !s.isEmpty());
+
+        pack();
+        ATKGraphicsUtils.centerDialog(this);
+    }
     //===============================================================
     //===============================================================
     private void updateColumnNames(int statisticsTimeWindow) {
@@ -179,7 +185,7 @@ public class StatisticsDialog extends JDialog {
         hdbAttributes = new ArrayList<HdbAttribute>();
         for (Subscriber subscriber : subscribers) {
             //  Read statistic attributes
-            SplashUtils.increaseSplashProgressForLoop(
+            SplashUtils.getInstance().increaseSplashProgressForLoop(
                     subscribers.size(), "Reading " + subscriber.getLabel());
             DeviceAttribute[] deviceAttributes = subscriber.read_attribute(statAttributeNames);
 
@@ -314,10 +320,12 @@ public class StatisticsDialog extends JDialog {
         javax.swing.JButton applyButton = new javax.swing.JButton();
         javax.swing.JMenuBar jMenuBar1 = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
+        javax.swing.JMenuItem saveItem = new javax.swing.JMenuItem();
         resetItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem dismissItem = new javax.swing.JMenuItem();
-        javax.swing.JMenu viewMenu = new javax.swing.JMenu();
+        viewMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem updateItem = new javax.swing.JMenuItem();
+        readHdbItem = new javax.swing.JMenuItem();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -355,6 +363,15 @@ public class StatisticsDialog extends JDialog {
 
         fileMenu.setText("File");
 
+        saveItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        saveItem.setText("Save in text file");
+        saveItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(saveItem);
+
         resetItem.setText("Reset Event Counters");
         resetItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -384,6 +401,15 @@ public class StatisticsDialog extends JDialog {
             }
         });
         viewMenu.add(updateItem);
+
+        readHdbItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
+        readHdbItem.setText("Read attribute from HDB");
+        readHdbItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                readHdbItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(readHdbItem);
 
         jMenuBar1.add(viewMenu);
 
@@ -456,6 +482,66 @@ public class StatisticsDialog extends JDialog {
         }
     }//GEN-LAST:event_updateItemActionPerformed
 
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
+
+        //  Initialize if not already done
+        if (fileChooser==null) {
+            fileChooser = new JFileChooser(new File("").getAbsolutePath());
+            fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+            fileChooser.setDialogTitle("Save as text");
+        }
+
+        //  Start file chooser to select file
+        if (fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            if (file!=null) {
+                String	filename = file.getAbsolutePath();
+                saveDataToFile(filename);
+            }
+        }
+    }
+    //===============================================================
+    //===============================================================
+    private void saveDataToFile(String fileName) {
+        StringBuilder   sb = new StringBuilder();
+        for (String s : columnNames) {
+            sb.append(s).append('\t');
+        }
+        sb.trimToSize();
+        sb.append('\n');
+        for (HdbAttribute hdbAttribute : filteredHdbAttributes) {
+            sb.append(hdbAttribute.shortName).append('\t')
+                    .append(hdbAttribute.nbStatistics).append('\t')
+                    .append(hdbAttribute.averagePeriodString).append('\t')
+                    .append(hdbAttribute.nbEvents).append('\n');
+        }
+
+        //System.out.println(sb);
+        try {
+            Utils.writeFile(fileName, sb.toString());
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, "Saving "+fileName, e);
+        }
+
+    }//GEN-LAST:event_saveItemActionPerformed
+
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void readHdbItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_readHdbItemActionPerformed
+        // TODO add your handling code here:
+        if (selectedRow<0) {
+            Utils.popupError(this, "No attribute selected !");
+            return;
+        }
+        HdbAttribute    attribute = filteredHdbAttributes.get(selectedRow);
+        System.out.println("Will display " + attribute.name);
+    }//GEN-LAST:event_readHdbItemActionPerformed
+
 	//===============================================================
 	//===============================================================
     private void applyFilter() {
@@ -484,8 +570,10 @@ public class StatisticsDialog extends JDialog {
     //===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField filterTextField;
+    private javax.swing.JMenuItem readHdbItem;
     private javax.swing.JMenuItem resetItem;
     private javax.swing.JLabel titleLabel;
+    private javax.swing.JMenu viewMenu;
     // End of variables declaration//GEN-END:variables
 	//===============================================================
 
@@ -685,11 +773,16 @@ public class StatisticsDialog extends JDialog {
      * Popup menu class
      */
     //======================================================
-    private static final int STATUS  = 0;
-    private static final int CONFIGURE   = 1;
+    private static final int STATUS    = 0;
+    private static final int READ_HDB  = 1;
+    private static final int CONFIGURE = 2;
     private static final int OFFSET = 2;    //	Label And separator
 
-    private static String[] menuLabels = { "Status", "Configure Polling/Events" };
+    private static String[] menuLabels = {
+            "Status",
+            "Read attribute from HDB",
+            "Configure Polling/Events",
+    };
     //=======================================================
     //=======================================================
     private class TablePopupMenu extends JPopupMenu {
@@ -715,6 +808,9 @@ public class StatisticsDialog extends JDialog {
                     add(btn);
                 }
             }
+            //  Check if extraction available
+            String s = System.getenv("ExtractionClass");
+            getComponent(OFFSET + READ_HDB).setVisible(s!=null && !s.isEmpty());
         }
         //======================================================
         //======================================================
@@ -739,6 +835,9 @@ public class StatisticsDialog extends JDialog {
                     break;
                 case CONFIGURE:
                     selectedAttribute.configureEvent();
+                    break;
+                case READ_HDB:
+                    readHdbItemActionPerformed(null);
                     break;
             }
         }

@@ -80,7 +80,7 @@ public class DistributionDialog extends JDialog {
 	public DistributionDialog(JFrame parent, SubscriberMap subscriberMap) throws DevFailed {
 		super(parent, true);
 		this.parent = parent;
-        SplashUtils.startSplash();
+        SplashUtils.getInstance().startSplash();
         initComponents();
 
         try {
@@ -97,10 +97,10 @@ public class DistributionDialog extends JDialog {
 
             pack();
             ATKGraphicsUtils.centerDialog(this);
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
         }
         catch (DevFailed e) {
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
             throw e;
         }
 	}
@@ -260,10 +260,10 @@ public class DistributionDialog extends JDialog {
             int index = 0;
             archivers.clear();
             ArrayList<String> labels = subscriberMap.getLabelList();
-            SplashUtils.reset();
+            SplashUtils.getInstance().reset();
             attributeCount = 0;
             for (String label : labels) {
-                SplashUtils.increaseSplashProgressForLoop(labels.size(), "Reading " + label);
+                SplashUtils.getInstance().increaseSplashProgressForLoop(labels.size(), "Reading " + label);
                 Archiver archiver = new Archiver(subscriberMap.getSubscriber(label));
 
                 double x = index;
@@ -279,14 +279,14 @@ public class DistributionDialog extends JDialog {
             String cmd = evt.getActionCommand();
             if (cmd.equals(labels[UPDATE_DATA])) {
                 try {
-                    SplashUtils.startSplash();
+                    SplashUtils.getInstance().startSplash();
                     String  configuratorDeviceName = TangoUtils.getConfiguratorDeviceName();
                     subscriberMap = new SubscriberMap(new DeviceProxy(configuratorDeviceName));
                     distributionChart.updateValues();
-                    SplashUtils.stopSplash();
+                    SplashUtils.getInstance().stopSplash();
                 }
                 catch (DevFailed e) {
-                    SplashUtils.stopSplash();
+                    SplashUtils.getInstance().stopSplash();
                     ErrorPane.showErrorMessage(this, null, e);
                 }
             }
