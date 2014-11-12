@@ -64,7 +64,7 @@ public:
 
     XVariant(const XVariant &other);
 
- //   XVariant();
+    XVariant();
 
     virtual ~XVariant();
 

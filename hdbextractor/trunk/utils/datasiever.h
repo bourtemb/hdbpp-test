@@ -36,6 +36,8 @@ public:
 
 private:
     DataSieverPrivate *d_ptr;
+
+    void mMyAdd(std::vector<XVariant> &data, const XVariant &v, size_t at);
 };
 
 #endif // DATAFILLER_H

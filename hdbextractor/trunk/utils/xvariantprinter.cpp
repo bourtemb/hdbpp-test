@@ -16,8 +16,8 @@ void XVariantPrinter::print(const XVariant &xv, int maxVectorElements)
     else if(format == XVariant::Vector)
     {
         std::vector<double> values = xv.toDoubleVector();
-        printf("\e[1;33m[ \"%s\": %s:\n\e[0m", xv.getSource(), xv.getTimestamp());
-        for(size_t j = 0; j < values.size() || (maxVectorElements > 0 && j < maxVectorElements); j++)
+        printf("\e[1;33mXVariant %p [ \"%s\": %s:\n\e[0m", &xv, xv.getSource(), xv.getTimestamp());
+        for(size_t j = 0; j < values.size(); j++)
         {
             if((maxVectorElements > 0 && j >= maxVectorElements))
                 break;
@@ -31,6 +31,7 @@ void XVariantPrinter::print(const XVariant &xv, int maxVectorElements)
 
 void XVariantPrinter::printValueList(const std::vector<XVariant > &valuelist, int maxVectorElements)
 {
+    return;
     for(size_t i = 0; i < valuelist.size(); i++)
     {
         XVariant::DataFormat format = valuelist[i].getFormat();
