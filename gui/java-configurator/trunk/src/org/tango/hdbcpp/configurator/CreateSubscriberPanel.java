@@ -352,9 +352,10 @@ public class CreateSubscriberPanel extends JDialog {
         //  Get confirmation.
         if (JOptionPane.showConfirmDialog(this,
                 message, "Confirmation", JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION) {
+
             createArchiverDevice(instance, deviceName, serverExists);
             manageArchiveLabels(deviceName, label);
-            addToManager(deviceName);
+            addToManager(TangoUtils.fullName(deviceName));
             if (serverExists)
                 message = exeFile+'/'+instance + "  has been updated.\nYou can re-start it.";
             else

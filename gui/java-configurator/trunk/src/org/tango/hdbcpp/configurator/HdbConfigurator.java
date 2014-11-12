@@ -81,8 +81,8 @@ public class HdbConfigurator extends JFrame {
 	 */
 	//=======================================================
     public HdbConfigurator() throws DevFailed {
-        SplashUtils.startSplash();
-        SplashUtils.increaseSplashProgress(10, "Building GUI");
+        SplashUtils.getInstance().startSplash();
+        SplashUtils.getInstance().increaseSplashProgress(10, "Building GUI");
         setTitle("HdbConfigurator  - " + SplashUtils.revNumber);
         initComponents();
         initOwnComponents();
@@ -90,7 +90,7 @@ public class HdbConfigurator extends JFrame {
 		
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
-        SplashUtils.stopSplash();
+        SplashUtils.getInstance().stopSplash();
 	}
 	//=======================================================
 	//=======================================================
@@ -100,7 +100,7 @@ public class HdbConfigurator extends JFrame {
 	//=======================================================
 	//=======================================================
     private void initOwnComponents() throws DevFailed {
-        SplashUtils.increaseSplashProgress(15, "Reading devices");
+        SplashUtils.getInstance().increaseSplashProgress(15, "Reading devices");
         String  configuratorDeviceName = TangoUtils.getConfiguratorDeviceName();
         configuratorProxy = new DeviceProxy(configuratorDeviceName);
 
@@ -123,7 +123,7 @@ public class HdbConfigurator extends JFrame {
         });
 
         //  Add a tree to select attribute
-        SplashUtils.increaseSplashProgress(50, "Building Tree");
+        SplashUtils.getInstance().increaseSplashProgress(50, "Building Tree");
         attributeTree = new AttributeTree(this, TangoUtils.getEventTangoHost());
         treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(attributeTree);
@@ -260,7 +260,7 @@ public class HdbConfigurator extends JFrame {
 	//=======================================================
     private void moveAttributeToSubscriber(String targetSubscriberLabel, JList selectedList) {
         try {
-            System.out.println("Move tor "+ targetSubscriberLabel);
+            System.out.println("Move for "+ targetSubscriberLabel);
             Object[] attributeNames = selectedList.getSelectedValues();
             ArrayList<String>   attributeList = new ArrayList<String>();
             for (Object attributeName : attributeNames) {
@@ -275,16 +275,16 @@ public class HdbConfigurator extends JFrame {
                 ManageAttributes.stopAttributes(attributeList);
 
             //  Then remove attributes to subscribe and add to another
-            SplashUtils.startSplash();
-            SplashUtils.setSplashProgress(10, "Removing/Adding attributes");
+            SplashUtils.getInstance().startSplash();
+            SplashUtils.getInstance().setSplashProgress(10, "Removing/Adding attributes");
             for (String attributeName : attributeList) {
-                SplashUtils.increaseSplashProgressForLoop(
+                SplashUtils.getInstance().increaseSplashProgressForLoop(
                         attributeList.size(), "Removing/adding "+attributeName);
                 ArchiverUtils.removeAttribute(srcSubscriber, attributeName);
                 ArchiverUtils.addAttribute(targetSubscriber, attributeName);
             }
 
-            //  And restart if tey were started
+            //  And restart if they were started
             if (selectedList==startedAttrJList)
                 ManageAttributes.startAttributes(attributeList);
 
@@ -293,10 +293,10 @@ public class HdbConfigurator extends JFrame {
 
             //  And update lists
             manageSubscriberChanged(targetSubscriberLabel);
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
         }
         catch (DevFailed e) {
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
             ErrorPane.showErrorMessage(this, null, e);
         }
     }
@@ -1000,7 +1000,7 @@ public class HdbConfigurator extends JFrame {
       		new HdbConfigurator().setVisible(true);
 		}
 		catch(DevFailed e) {
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
             ErrorPane.showErrorMessage(new Frame(), null, e);
             System.exit(0);
 		}

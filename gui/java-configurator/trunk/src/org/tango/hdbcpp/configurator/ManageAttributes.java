@@ -147,10 +147,9 @@ public class ManageAttributes {
                                      ArrayList<HdbAttribute> hdbAttributes) throws DevFailed {
         if (hdbAttributes.size()==0)
             return;
-
         if (display) {
-            SplashUtils.startSplash();
-            SplashUtils.setSplashProgress(1, "Adding attributes");
+            SplashUtils.getInstance().startSplash();
+            SplashUtils.getInstance().setSplashProgress(1, "Adding attributes");
         }
         double step = 100.0/hdbAttributes.size();
 
@@ -167,7 +166,7 @@ public class ManageAttributes {
         int cnt = 1;
         for (HdbAttribute hdbAttribute : hdbAttributes) {
             if (display)
-                SplashUtils.setSplashProgress((int) (step*cnt++), "Adding "+hdbAttribute.getName());
+                SplashUtils.getInstance().setSplashProgress((int) (step*cnt++), "Adding "+hdbAttribute.getName());
             else
                 System.out.println("Adding " + hdbAttribute.getName() + "\tto " + subscriberName);
             try {
@@ -187,7 +186,7 @@ public class ManageAttributes {
             }
         }
         if (display)
-            SplashUtils.stopSplash();
+            SplashUtils.getInstance().stopSplash();
         configurator.unlock();
         if (errors.length()>0)
             Except.throw_exception("AddingFailed", errors.toString());
@@ -201,8 +200,8 @@ public class ManageAttributes {
     //===============================================================
     public static void startAttributes(ArrayList<String> attributes) throws DevFailed {
         if (display) {
-            SplashUtils.startSplash();
-            SplashUtils.setSplashProgress(10, "Adding attributes");
+            SplashUtils.getInstance().startSplash();
+            SplashUtils.getInstance().setSplashProgress(10, "Starting attributes");
         }
         int step = 90/attributes.size();
         if (step<1) step = 1;
@@ -213,8 +212,9 @@ public class ManageAttributes {
             String  previous = null;
             DeviceProxy archiver = null;
             for (String attribute : attributes) {
-                if (display)
-                    SplashUtils.increaseSplashProgress(step, "Starting "+attribute);
+                if (display) {
+                    SplashUtils.getInstance().increaseSplashProgress(step, "Starting "+attribute);
+                }
                 else
                     System.out.println("Starting " + attribute);
                 //  Check if archiver is the same or another one.
@@ -226,11 +226,11 @@ public class ManageAttributes {
                 ArchiverUtils.startAttribute(configurator, TangoUtils.fullName(attribute));
             }
             if (display)
-                SplashUtils.stopSplash();
+                SplashUtils.getInstance().stopSplash();
         }
         catch (DevFailed e) {
             if (display)
-                SplashUtils.stopSplash();
+                SplashUtils.getInstance().stopSplash();
             throw e;
         }
     }
@@ -243,8 +243,8 @@ public class ManageAttributes {
     //===============================================================
     public static void stopAttributes(ArrayList<String> attributes) throws DevFailed {
         if (display) {
-            SplashUtils.startSplash();
-            SplashUtils.setSplashProgress(10, "Adding attributes");
+            SplashUtils.getInstance().startSplash();
+            SplashUtils.getInstance().setSplashProgress(10, "Adding attributes");
         }
         int step = 90/attributes.size();
         if (step<1) step = 1;
@@ -257,7 +257,7 @@ public class ManageAttributes {
             DeviceProxy archiver = null;
             for (String attribute : attributes) {
                 if (display)
-                    SplashUtils.increaseSplashProgress(step, "Stopping "+attribute);
+                    SplashUtils.getInstance().increaseSplashProgress(step, "Stopping "+attribute);
                 else
                     System.out.println("Stopping " + attribute);
                 //  Check if archiver is the same or another one.
@@ -269,11 +269,11 @@ public class ManageAttributes {
                 ArchiverUtils.stopAttribute(configurator, TangoUtils.fullName(attribute));
             }
             if (display)
-                SplashUtils.stopSplash();
+                SplashUtils.getInstance().stopSplash();
         }
         catch (DevFailed e) {
             if (display)
-                SplashUtils.stopSplash();
+                SplashUtils.getInstance().stopSplash();
             throw e;
         }
     }
@@ -286,8 +286,8 @@ public class ManageAttributes {
     //===============================================================
     public static void removeAttributes(ArrayList<String> attributes) throws DevFailed {
         if (display) {
-            SplashUtils.startSplash();
-            SplashUtils.setSplashProgress(10, "Adding attributes");
+            SplashUtils.getInstance().startSplash();
+            SplashUtils.getInstance().setSplashProgress(10, "Adding attributes");
         }
         int step = 90/attributes.size();
         if (step<1) step = 1;
@@ -298,17 +298,17 @@ public class ManageAttributes {
 
             for (String attribute : attributes) {
                 if (display)
-                    SplashUtils.increaseSplashProgress(step, "Removing "+attribute);
+                    SplashUtils.getInstance().increaseSplashProgress(step, "Removing "+attribute);
                 else
                     System.out.println("Removing " + attribute);
                 ArchiverUtils.removeAttribute(configurator, TangoUtils.fullName(attribute));
             }
             if (display)
-                SplashUtils.stopSplash();
+                SplashUtils.getInstance().stopSplash();
         }
         catch (DevFailed e) {
             if (display)
-                SplashUtils.stopSplash();
+                SplashUtils.getInstance().stopSplash();
             throw e;
         }
     }

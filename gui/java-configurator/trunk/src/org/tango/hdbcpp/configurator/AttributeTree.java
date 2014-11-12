@@ -440,7 +440,7 @@ public class AttributeTree extends JTree {
         //  Search domain/family/member/attribute node
         for (int i=0 ; i<root.getChildCount() ; i++) {
             DefaultMutableTreeNode  domainNode = (DefaultMutableTreeNode) root.getChildAt(i);
-            System.out.println(domainNode);
+            //System.out.println(domainNode);
             if (domainNode.toString().equalsIgnoreCase(fields[0])) {
                 for (int j=0 ; j<domainNode.getChildCount() ; j++) {
                     DefaultMutableTreeNode  familyNode =
@@ -649,7 +649,7 @@ public class AttributeTree extends JTree {
 			    unselectedIcon = utils.getIcon("unselected.gif", 0.75);
             }
             catch (DevFailed e) {
-                SplashUtils.stopSplash();
+                SplashUtils.getInstance().stopSplash();
                 ErrorPane.showErrorMessage(parent, null, e);
             }
         }
