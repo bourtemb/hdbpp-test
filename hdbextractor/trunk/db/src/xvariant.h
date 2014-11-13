@@ -66,6 +66,8 @@ public:
 
     XVariant();
 
+    XVariant & operator=(const XVariant& other);
+
     virtual ~XVariant();
 
     const char* getSource() const;
@@ -133,6 +135,10 @@ public:
     char **toCharP(bool read = true) const;
 
 private:
+
+    void build_from(const XVariant& other);
+
+    void cleanup();
 
     void parse(const char *s);
 

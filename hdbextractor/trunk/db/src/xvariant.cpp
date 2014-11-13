@@ -9,9 +9,8 @@
 #include "hdbxmacros.h"
 #include "xvariantprivate.h"
 
-XVariant::~XVariant()
+void XVariant::cleanup()
 {
-    printf("~XVariant destructor: %p\n", this);
     if(d->mSize > 0 && d->mType == String && d->val != NULL)
     {
         char **ssi = (char **) d->val;
@@ -34,8 +33,14 @@ XVariant::~XVariant()
         }
     }
     delete_wdata();
-  //  delete d;
-  //  d = NULL;
+    delete d;
+    d = NULL;
+}
+
+XVariant::~XVariant()
+{
+    //printf("~XVariant destructor: calling cleanup %p\n", this);
+    cleanup();
 }
 
 /** \brief The XVariant object is the Hdbextractor data container.
@@ -118,9 +123,6 @@ XVariant::XVariant(const char* source, const char *timestamp, const char *strdat
     init_data();
     d->mWritable = RW;
     parse(strdataR, strdataW); /* at the end, after setting up other fields */
-    if(d->val == NULL)
-        printf("\e[1;31m ***********************\n"
-               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
 }
 
 XVariant::XVariant(const char* source,
@@ -132,9 +134,6 @@ XVariant::XVariant(const char* source,
     d->mWritable = wri;
     init_common(source, timestamp, df, dt);
     init_data(size);
-    if(d->val == NULL)
-        printf("\e[1;31m ***********************\n"
-               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
 }
 
 /** \brief Creates an empty (invalid) XVariant
@@ -143,13 +142,18 @@ XVariant::XVariant(const char* source,
  */
 XVariant::XVariant()
 {
-    printf("\e[1;34mXVariant: EMPTY constructor!");
     d = new XVariantPrivate();
     init_data();
     d->mFormat = FormatInvalid;
     d->mWritable = WritableInvalid;
     d->mType = TypeInvalid;
-    printf("\e[0;31mbuild XVariant %p d %p d->val %p\e[0m\n", this, d, d->val);
+}
+
+XVariant & XVariant::operator=(const XVariant& other)
+{
+    cleanup();
+    build_from(other);
+    return *this;
 }
 
 /** \brief copy constructor
@@ -161,6 +165,11 @@ XVariant::XVariant()
  */
 XVariant::XVariant(const XVariant &other)
 {
+    build_from(other);
+}
+
+void XVariant::build_from(const XVariant& other)
+{
     d = new XVariantPrivate();
     init_data(); /* NULLify all pointers to data */
 
@@ -171,8 +180,9 @@ XVariant::XVariant(const XVariant &other)
     d->mIsValid = other.isValid();
     d->mIsNull = other.isNull();
     d->mIsWNull = other.isWNull();
-    printf("\e[0;33mXVariant %p copy from %p this->d: %p: format %d wri %d size %ld\e[0m \n", this, &other, d,
-           d->mFormat, d->mWritable, d->mSize);
+
+//    printf("\e[0;36mXVariant %p copy from %p this->d: %p: format %d wri %d size %ld\e[0m \n", this, &other, d,
+//           d->mFormat, d->mWritable, d->mSize);
 
     if(d->mWritable == WritableInvalid || d->mType == TypeInvalid ||
             d->mFormat == FormatInvalid)
@@ -186,85 +196,72 @@ XVariant::XVariant(const XVariant &other)
     strncpy(d->mError, other.getError(), ERRMSGLEN);
     strncpy(d->mTimestamp, other.getTimestamp(), TIMESTAMPLEN);
 
-    double *vd = new double[d->mSize];
-    for(size_t i = 0; i < d->mSize; i++)
-        vd[i] =  10.01;
-    d->val = vd;
+    if(d->mWritable != WO)
+    {
+        if(d->mType == XVariant::Double)
+        {
+            double *vd = new double[d->mSize];
+            for(size_t i = 0; i < d->mSize; i++)
+                vd[i] =  other.toDoubleP()[i];
+            d->val = vd;
+        }
+        else if(d->mType == XVariant::Int)
+        {
+            long int *vi =  new long int[d->mSize];
 
+            for(size_t i = 0; i < d->mSize; i++)
+                vi[i] = other.toLongIntP()[i];
+            d->val = vi;
+        }
+        else if(d->mType == XVariant::UInt)
+        {
+            unsigned long int *vi =  new unsigned long int[d->mSize];
 
+            for(size_t i = 0; i < d->mSize; i++)
+                vi[i] = other.toULongIntP()[i];
+            d->val = vi;
+        }
+        else if(d->mType == XVariant::Boolean)
+        {
+            bool *vb = new bool[d->mSize];
+            for(size_t i = 0; i < d->mSize; i++)
+                vb[i] = other.toBoolP()[i];
+            d->val = vb;
+        }
+    }
 
-//    if(d->mWritable != WO)
-//    {
-//        if(d->mType == XVariant::Double)
-//        {
-//            double *vd = new double[d->mSize];
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vd[i] =  other.toDoubleP()[i];
-//            d->val = vd;
-//            printf("XVariant %p d->val %p  double size %ld\e[0m\n", this, d->val, d->mSize);
-//        }
-//        else if(d->mType == XVariant::Int)
-//        {
-//            long int *vi =  new long int[d->mSize];
-
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vi[i] = other.toLongIntP()[i];
-//            d->val = vi;
-//        }
-//        else if(d->mType == XVariant::UInt)
-//        {
-//            unsigned long int *vi =  new unsigned long int[d->mSize];
-
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vi[i] = other.toULongIntP()[i];
-//            d->val = vi;
-//        }
-//        else if(d->mType == XVariant::Boolean)
-//        {
-//            bool *vb = new bool[d->mSize];
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vb[i] = other.toBoolP()[i];
-//            d->val = vb;
-//        }
-//    }
-
-//    /* write part */
-//    if(d->mWritable == XVariant::RW || d->mWritable == XVariant::WO)
-//    {
-//        if(d->mType == XVariant::Double)
-//        {
-//            double *vd = new double[d->mSize];
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vd[i] =  other.toDoubleP()[i];
-//            d->w_val = vd;
-//        }
-//        else if(d->mType == XVariant::Int)
-//        {
-//            long int *vi =  new long int[d->mSize];
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vi[i] = other.toLongIntP()[i];
-//            d->w_val = vi;
-//        }
-//        else if(d->mType == XVariant::UInt)
-//        {
-//            unsigned long int *vi =  new unsigned long int[d->mSize];
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vi[i] = other.toULongIntP()[i];
-//            d->w_val = vi;
-//        }
-//        else if(d->mType == XVariant::Boolean)
-//        {
-//            bool *vb = new bool[d->mSize];
-//            for(size_t i = 0; i < d->mSize; i++)
-//                vb[i] = other.toBoolP()[i];
-//            d->w_val = vb;
-//        }
-//    }
-
-    printf("\e[1;33mXVariant copy (EXIT): format %d\e[0m\n", d->mFormat);
-    if(d->val == NULL)
-        printf("\e[1;31m ***********************\n"
-               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
+    /* write part */
+    if(d->mWritable == XVariant::RW || d->mWritable == XVariant::WO)
+    {
+        if(d->mType == XVariant::Double)
+        {
+            double *vd = new double[d->mSize];
+            for(size_t i = 0; i < d->mSize; i++)
+                vd[i] =  other.toDoubleP()[i];
+            d->w_val = vd;
+        }
+        else if(d->mType == XVariant::Int)
+        {
+            long int *vi =  new long int[d->mSize];
+            for(size_t i = 0; i < d->mSize; i++)
+                vi[i] = other.toLongIntP()[i];
+            d->w_val = vi;
+        }
+        else if(d->mType == XVariant::UInt)
+        {
+            unsigned long int *vi =  new unsigned long int[d->mSize];
+            for(size_t i = 0; i < d->mSize; i++)
+                vi[i] = other.toULongIntP()[i];
+            d->w_val = vi;
+        }
+        else if(d->mType == XVariant::Boolean)
+        {
+            bool *vb = new bool[d->mSize];
+            for(size_t i = 0; i < d->mSize; i++)
+                vb[i] = other.toBoolP()[i];
+            d->w_val = vb;
+        }
+    }
 }
 
 /** \brief Returns the source name (tango full attribute name)
@@ -552,7 +549,6 @@ void XVariant::parse(const char *s)
     //   QHdbextractorThread("PARSING %s\n", s);
     if(d->mFormat == Scalar && d->mWritable == RO && !d->mIsNull)
     {
-        printf("\e[1;31m!!!!!!!!! pARSING SCALAR!!\e[0m\n");
         if(d->mType == Double)
         {
             double *v = new double[1];
@@ -585,106 +581,97 @@ void XVariant::parse(const char *s)
     }
     else if(d->mFormat == Vector && d->mWritable == RO && !d->mIsNull)
     {
-        printf("\e[1;35m ************ FAKE parse for RO vector \e[0m\n");
-        d->mSize = 10;
         size_t i = 0;
-        double *d_array = new double[d->mSize];
-        for(i = 0; i < d->mSize; i++)
-            d_array[i] = (double) rand() * (i + 1) * 10.0 / RAND_MAX;
-        d->val = d_array;
+        d->mSize = 0;
+        char *saveptr;
+        char *copy = new char[strlen(s) + 1];
+        char *val = NULL;
+        const char *delim = ", ";
+        /* make a copy of s cuz strtok_r wants char * not const char *.
+         * It will be deleted at the end
+         */
+        strncpy(copy, s, strlen(s) + 1);
+        /* count the number of separators in the data */
+        val = strtok_r(copy, delim, &saveptr);
+        while(val != NULL)
+        {
+            d->mSize++;
+            val = strtok_r(NULL, delim, &saveptr);
+        }
+        strncpy(copy, s, strlen(s) + 1);
+
+        if(d->mType == Double)
+        {
+            double *d_array = new double[d->mSize];
+            val = strtok_r(copy, delim, &saveptr);
+            /* split result returned by hdb (comma separated doubles) */
+            while(val != NULL && errno == 0 && i < d->mSize)
+            {
+                *(d_array + i) = strtod(val, NULL);
+                i++;
+                val = strtok_r(NULL, delim, &saveptr);
+            }
+            d->val = d_array;
+        }
+        else if(d->mType == Int)
+        {
+            long int *li_array = new long int[d->mSize];
+            val = strtok_r(copy, delim, &saveptr);
+            /* split result returned by hdb (comma separated doubles) */
+            while(val != NULL && errno == 0 && i < d->mSize)
+            {
+                *(li_array + i) = strtol(val, NULL, 10);
+                i++;
+                val = strtok_r(NULL, delim, &saveptr);
+            }
+            d->val = li_array;
+        }
+        else if(d->mType == UInt)
+        {
+            unsigned long int *uli_array = new unsigned long int[d->mSize];
+            val = strtok_r(copy, delim, &saveptr);
+            /* split result returned by hdb (comma separated doubles) */
+            while(val != NULL && errno == 0 && i < d->mSize)
+            {
+                *(uli_array + i) = strtoul(val, NULL, 10);
+                i++;
+                val = strtok_r(NULL, delim, &saveptr);
+            }
+            d->val = uli_array;
+        }
+        else if(d->mType == Boolean)
+        {
+            bool *b_array = new bool[d->mSize];
+            val = strtok_r(copy, delim, &saveptr);
+            /* split result returned by hdb (comma separated doubles) */
+            while(val != NULL && errno == 0 && i < d->mSize)
+            {
+                *(b_array + i) = (strcasecmp(s, "true") == 0 || strtol(s, NULL, 10) != 0);
+                i++;
+                val = strtok_r(NULL, delim, &saveptr);
+            }
+            d->val = b_array;
+        }
+        else if(d->mType == String)
+        {
+
+        }
+
+        /* delete the copy of the string */
+        delete copy;
     }
 
-//        size_t i = 0;
-//        d->mSize = 0;
-//        char *saveptr;
-//        char *copy = new char[strlen(s) + 1];
-//        char *val = NULL;
-//        const char *delim = ", ";
-//        /* make a copy of s cuz strtok_r wants char * not const char *.
-//         * It will be deleted at the end
-//         */
-//        strncpy(copy, s, strlen(s) + 1);
-//        /* count the number of separators in the data */
-//        val = strtok_r(copy, delim, &saveptr);
-//        while(val != NULL)
-//        {
-//            d->mSize++;
-//            val = strtok_r(NULL, delim, &saveptr);
-//        }
-//        strncpy(copy, s, strlen(s) + 1);
+    /* Check for errors */
+    if (errno != 0 &&  s != NULL)
+    {
+        perr("XVariant.parse: error converting \"%s\" -> \"%s\": \"%s\"", d->mSource, s, strerror(errno));
+        mMakeError(errno);
+        d->mIsValid = false;
+    }
 
-//        if(d->mType == Double)
-//        {
-//            double *d_array = new double[d->mSize];
-//            val = strtok_r(copy, delim, &saveptr);
-//            /* split result returned by hdb (comma separated doubles) */
-//            while(val != NULL && errno == 0 && i < d->mSize)
-//            {
-//                *(d_array + i) = strtod(val, NULL);
-//                i++;
-//                val = strtok_r(NULL, delim, &saveptr);
-//            }
-//            d->val = d_array;
-//        }
-//        else if(d->mType == Int)
-//        {
-//            long int *li_array = new long int[d->mSize];
-//            val = strtok_r(copy, delim, &saveptr);
-//            /* split result returned by hdb (comma separated doubles) */
-//            while(val != NULL && errno == 0 && i < d->mSize)
-//            {
-//                *(li_array + i) = strtol(val, NULL, 10);
-//                i++;
-//                val = strtok_r(NULL, delim, &saveptr);
-//            }
-//            d->val = li_array;
-//        }
-//        else if(d->mType == UInt)
-//        {
-//            unsigned long int *uli_array = new unsigned long int[d->mSize];
-//            val = strtok_r(copy, delim, &saveptr);
-//            /* split result returned by hdb (comma separated doubles) */
-//            while(val != NULL && errno == 0 && i < d->mSize)
-//            {
-//                *(uli_array + i) = strtoul(val, NULL, 10);
-//                i++;
-//                val = strtok_r(NULL, delim, &saveptr);
-//            }
-//            d->val = uli_array;
-//        }
-//        else if(d->mType == Boolean)
-//        {
-//            bool *b_array = new bool[d->mSize];
-//            val = strtok_r(copy, delim, &saveptr);
-//            /* split result returned by hdb (comma separated doubles) */
-//            while(val != NULL && errno == 0 && i < d->mSize)
-//            {
-//                *(b_array + i) = (strcasecmp(s, "true") == 0 || strtol(s, NULL, 10) != 0);
-//                i++;
-//                val = strtok_r(NULL, delim, &saveptr);
-//            }
-//            d->val = b_array;
-//        }
-//        else if(d->mType == String)
-//        {
-
-//        }
-
-//        /* delete the copy of the string */
-//        delete copy;
-//    }
-
-//    /* Check for errors */
-//    if (errno != 0 &&  s != NULL)
-//    {
-//        perr("XVariant.parse: error converting \"%s\" -> \"%s\": \"%s\"", d->mSource, s, strerror(errno));
-//        mMakeError(errno);
-//        d->mIsValid = false;
-//    }
-
-//    if(!d->mIsValid &&  s != NULL)
-//        perr("XVariant.parse(s): \"%s\": format %d writable %d type %d not supported",
-//             d->mSource, d->mFormat, d->mWritable, d->mType);
+    if(!d->mIsValid &&  s != NULL)
+        perr("XVariant.parse(s): \"%s\": format %d writable %d type %d not supported",
+             d->mSource, d->mFormat, d->mWritable, d->mType);
 }
 
 void XVariant::parse(const char *sr, const char *sw)
@@ -1056,7 +1043,7 @@ void XVariant::delete_rdata()
             delete (bool *) d->val;
         else if(d->mType == String)
             delete (char *) d->val;
-        printf("delete_rdata: XVariant %p deleted d %p d->val %p type %d\n", this, d, d->val, d->mType);
+//        printf("delete_rdata: XVariant %p deleted d %p d->val %p type %d\n", this, d, d->val, d->mType);
         d->val = NULL;
     }
 }
@@ -1164,7 +1151,7 @@ struct timeval XVariant::getTimevalTimestamp() const
     struct tm mtm;
     struct timeval tv;
     memset(&mtm, 0, sizeof(struct tm));
-    char *remain = strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
+    strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
     /* get usecs if specified */
     tv.tv_usec = 0;
     tv.tv_sec = mktime(&mtm);

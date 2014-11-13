@@ -31,7 +31,6 @@ void XVariantPrinter::print(const XVariant &xv, int maxVectorElements)
 
 void XVariantPrinter::printValueList(const std::vector<XVariant > &valuelist, int maxVectorElements)
 {
-    return;
     for(size_t i = 0; i < valuelist.size(); i++)
     {
         XVariant::DataFormat format = valuelist[i].getFormat();

@@ -12,6 +12,8 @@ unix:INCLUDEPATH += \
 
 QT       += core gui widgets
 
+QMAKE_CXXFLAGS += -std=c++98
+
 contains(QT_VERSION, ^5\\..*\\..*) {
     VER_SUFFIX = -qt5
 } else {
