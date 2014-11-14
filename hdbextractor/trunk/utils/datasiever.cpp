@@ -4,8 +4,9 @@
 
 #include <string.h>
 #include <set>
-#include <time.h>
+#include <sys/time.h>
 #include <hdbxmacros.h>
+#include <unistd.h>
 
 #define MAXSRCLEN 256
 
@@ -16,8 +17,8 @@ DataSiever::DataSiever()
 
 DataSiever::~DataSiever()
 {
-    //d_ptr->dataMap.clear();
-    //delete d_ptr;
+    d_ptr->dataMap.clear();
+    delete d_ptr;
 }
 
 void DataSiever::clear()
@@ -32,7 +33,8 @@ void DataSiever::clear()
  *        after it has previously been completely fetched, or just a partial result. In the latter case,
  *        divide can be called multiple times and the result is equivalent.
  *
- * The only constraint is that rawdata contains data ordered by time for each one of the different sources.
+ * The only constraint is that rawdata contains data ordered by time for each one of the different sources
+ * (i.e. rawdata is the result of Hdbextractor::getData).
  * The internal map used to save source names and their data values is not cleared by divide. For this reason,
  * it is possible to make multiple calls to this method whenever a new chunk of data is available from the
  * database.
@@ -57,30 +59,29 @@ void DataSiever::divide(const std::vector<XVariant> &rawdata)
     }
 }
 
-void DataSiever::mMyAdd(std::vector<XVariant> &data, const XVariant &v, size_t at)
-{
-    XVariantPrinter printer;
-    for(int i = 0; i < data.size(); i++)
-    {
-        printf("variant %p: ", &data[i]);
-        printer.print(data[i], 2);
-    }
-    std::vector<XVariant> *datap = &data;
-    data.resize(data.size() + 1);
-
-    for(size_t i = data.size() - 2; i >= at; i--)
-    {
-        data[i + 1] = data[i];
-    }
-    data[at] = v;
-}
-
+/** \brief This method, that must be invoked after divide, extends the data of the sources so that
+ *         each one has the same points on the time axis.
+ *
+ * Suppose that s and t are the names of the two sources with some data over time.
+ * Let source s have data at t0, t4 and t9 and source t at t1,t3,t4 and t8.
+ * The fill method will make s and t time scales equal. s and t will have points at times t0,t1,t3,t4,t8 and t9.
+ * The values of s in t1,t2 and t3 will be the same as the value at t0 and the value of s in t8 will be the same
+ * as the value in t4, and so on.
+ * This time filling routine is useful if you want to deal with time-aligned results.
+ *
+ * \note divide must be called before fill
+ *
+ * It is possible to attach a DataSieverListener in order to be notified of the progress in data
+ * filling. It may be a time consuming process though.
+ *
+ * @see divide
+ */
 void DataSiever::fill()
 {
-    size_t i, tstamps_size, ts_i, step = 0, steps_to_estimate;
+    size_t i, tstamps_size, step = 0, steps_to_estimate, total_steps;
     double timestamp, data_timestamp_0, data_timestamp_1;
-    double elapsed = 0.0;
-    struct timeval timeva, tv1, tv0;
+    struct timeval timeva, tv1, tv0, started_tv, ended_tv;
+    gettimeofday(&started_tv, NULL);
 
     /* create a std set (always sorted following a specific strict weak
      * ordering criterion indicated by its internal comparison object)
@@ -102,18 +103,16 @@ void DataSiever::fill()
     }
 
     tstamps_size = timestamp_set.size();
-    size_t tsidx = 0, dataidx;
+    total_steps = tstamps_size * d_ptr->dataMap.size();
+    steps_to_estimate = tstamps_size * 0.05;
 
-    printf("\e[1;32m *\e[0m final data size will be %ld for each source...", tstamps_size);
+    printf("\e[1;32m *\e[0m final data size will be %ld for each source...\n", tstamps_size);
 
     /* for each data row */
     for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
         it != d_ptr->dataMap.end(); ++it)
     {
-        tsidx = 0;
-        dataidx = 1;
         std::set<double>::iterator ts_set_iterator = timestamp_set.begin();
-        ts_i = 0;
         /* take the vector of data from the map */
         std::vector<XVariant> &data = it->second;
         /* create an iterator over data */
@@ -136,7 +135,6 @@ void DataSiever::fill()
             std::set<double>::iterator tsiter = ts_set_iterator;
             while(tsiter != timestamp_set.end())
             {
-                time_t tt = (time_t) (*tsiter);
                 if((*tsiter) >  data_timestamp_0 && (*tsiter) < data_timestamp_1)
                 {
                     datait = data.insert(datait, XVariant(*datait).setTimestamp((*tsiter)));
@@ -160,20 +158,53 @@ void DataSiever::fill()
             }
             datait++;
 //            printf("\e[1;34m data index %ld data size %ld data %p\e[0m\n", dataidx, data.size(), &data);
+            if(step % steps_to_estimate == 0)
+            {
+                double time_remaining = mEstimateFillTimeRemaining(&started_tv, step, total_steps);
+                printf("\e[1;32m* \e[0mestimated time remaining: %.3fms\n", time_remaining);
+            }
         }
     }
+    gettimeofday(&ended_tv, NULL);
+    printf("\e[1;32m* \e[0mfilled in: %.3fms\n", ended_tv.tv_sec + ended_tv.tv_usec * 1e-6 -
+           started_tv.tv_sec - started_tv.tv_usec * 1e-6);
+    sleep(3);
 }
 
+/** \brief returns the number of different sources dug out by divide
+ *
+ * @return the number of sources in the data.
+ *
+ * @see getSize
+ * @see getSources
+ */
 size_t DataSiever::getSize() const
 {
     return d_ptr->dataMap.size();
 }
 
+/** \brief tests whether there is data associated to the source specified
+ *
+ * @param source the name of the sought after source (attribute).
+ *
+ * @return true if DataSiever contains data for the source specified, false otherwise.
+ *
+ * @see getSize
+ * @see getSources
+ */
 bool DataSiever::contains(std::string source) const
 {
     return d_ptr->dataMap.count(source) > 0;
 }
 
+/** \brief Returns the list of sources stored by DataSiever
+ *
+ * @return a vector of std::string containing the sources stored by DataSiever.
+ *
+ *
+ * @see getSize
+ * @see getSources
+ */
 std::vector<std::string> DataSiever::getSources() const
 {
     std::vector<std::string> srcs;
@@ -183,6 +214,16 @@ std::vector<std::string> DataSiever::getSources() const
     return srcs;
 }
 
+/** \brief Returns the data associated to the provided source
+ *
+ * @param source the name of the source (attribute) that contains the desired data
+ * @return a vector of XVariant associated to the given source. Each XVariant represents
+ *         data at a certain time.
+ *
+ * \note You can retrieve data multiple times.
+ * \note Data is stored by DataSiever as long as DataSiever is not destroyed.
+ *
+ */
 std::vector<XVariant> DataSiever::getData(std::string source) const
 {
     std::vector<XVariant>  ret;
@@ -191,15 +232,54 @@ std::vector<XVariant> DataSiever::getData(std::string source) const
     return ret;
 }
 
+/** \brief Returns a reference to the internal raw std::map that associates a source to its data
+ *
+ */
 const std::map<std::string, std::vector<XVariant> > & DataSiever::getDataRef() const
 {
     const std::map<std::string, std::vector<XVariant> > &rData = d_ptr->dataMap;
     return rData;
 }
 
+/** \brief Returns the interna raw std::map that associates a source to its data
+ *
+ */
 std::map<std::string, std::vector<XVariant> > DataSiever::getData() const
 {
     return d_ptr->dataMap;
 }
 
+double DataSiever::mEstimateFillTimeRemaining(struct timeval *start, int step, int total)
+{
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    double elapsed = now.tv_sec + now.tv_usec * 1e-6 - (start->tv_sec + start->tv_usec * 1e-6);
+    double needed = ((double)(total - step)) * elapsed / (double) step;
+    printf("elapsed %f step %d total %d\n", elapsed, step, total);
+    /* hypothesis: inserts are the time consuming operations. If vectors are the same size,
+     * the resulting filled vector will be about twice.
+     */
+    return needed / d_ptr->dataMap.size();
+}
 
+/** \brief Add a DataSieverProgressListener in order to be notified when the fill operation
+ *         changes its progress.
+ *
+ * @param a pointer to an object implementing the DataSieverProgressListener interface.
+ *
+ * @see removeDataSieverProgressListener
+ */
+void DataSiever::installDataSieverProgressListener(DataSieverProgressListener *dspl)
+{
+    d_ptr->dataSieverProgressListeners.push_back(dspl);
+}
+
+/** \brief Remove the specified DataSieverProgressListener in order to remove fill progress notifications.
+ *
+ * @param a pointer to DataSieverProgressListener previously inserted with
+ *        installDataSieverProgressListener.
+ */
+void DataSiever::removeDataSieverProgressListener(DataSieverProgressListener *dspl)
+{
+    d_ptr->dataSieverProgressListeners.remove(dspl);
+}

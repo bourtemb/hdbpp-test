@@ -62,8 +62,8 @@ int main(int argc, char **argv)
         {
             printf("\t* %s\n", srcs.at(i).c_str());
 
-           std::vector<XVariant > values = siever.getData(srcs.at(i));
-           XVariantPrinter().printValueList(values);
+     //      std::vector<XVariant > values = siever.getData(srcs.at(i));
+      //     XVariantPrinter().printValueList(values);
         }
 
 

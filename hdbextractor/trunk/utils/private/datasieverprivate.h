@@ -1,12 +1,19 @@
 #ifndef DATAFILLERPRIVATE_H
 #define DATAFILLERPRIVATE_H
 
-#include <datasiever.h>
+#include <map>
+#include <xvariant.h>
+#include <string>
+#include <list>
+
+class DataSieverProgressListener;
 
 class DataSieverPrivate
 {
 public:
     DataSieverPrivate();
+
+    std::list<DataSieverProgressListener *>dataSieverProgressListeners;
 
     std::map<std::string, std::vector<XVariant> > dataMap;
 };

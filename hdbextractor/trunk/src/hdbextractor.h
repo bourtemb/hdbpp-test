@@ -302,6 +302,13 @@ int main(int argc, char **argv)
  * and your own ConfigurationParser.
  * The ConfigurationParser can be used to store the connection parameters.
  *
+ * \par Sieving results of multiple source queries and aligning data in time.
+ * The DataSiever utility class can be used to separate the data of each different source (attribute)
+ * given the vector of XVariant returned by Hdbextractor::getData.
+ * Once organized by source name, each vector of data can be aligned in time, with the DataSiever::fill
+ * method. See the DataSiever documentation for further details.
+ *
+ * @see DataSiever
  */
 class Hdbextractor :  ResultListener
 {
