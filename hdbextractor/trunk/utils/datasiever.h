@@ -2,6 +2,7 @@
 #define DATAFILLER_H
 
 #include <vector>
+#include <list>
 #include <string>
 #include <map>
 #include <xvariant.h>
@@ -59,11 +60,13 @@ public:
 
     std::vector<std::string> getSources() const;
 
+    std::list<XVariant> getDataAsList(std::string source) const;
+
     std::vector<XVariant> getData(std::string source) const;
 
-    const std::map<std::string, std::vector<XVariant> > &getDataRef() const;
+    const std::map<std::string, std::list<XVariant> > &getDataRef() const;
 
-    std::map<std::string, std::vector<XVariant> > getData() const;
+    std::map<std::string, std::list<XVariant> > getData() const;
 
     bool contains(std::string source) const;
 

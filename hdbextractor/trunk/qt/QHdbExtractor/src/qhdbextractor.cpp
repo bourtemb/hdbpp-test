@@ -186,6 +186,8 @@ void QHdbExtractor::onError(const QString& message)
     ui->configWidget->setState("An error occurred");
 }
 
+
+
 void QHdbExtractor::mAddCurve(const QString& source, const QColor& color, bool read)
 {
     PlotSceneWidget *plot = findChild<PlotSceneWidget *>();

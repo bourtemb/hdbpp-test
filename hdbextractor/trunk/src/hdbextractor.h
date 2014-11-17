@@ -313,6 +313,7 @@ int main(int argc, char **argv)
 class Hdbextractor :  ResultListener
 {
 
+
 public:
 
     /** \brief the database type to use. This enum lists the supported combinations of database types

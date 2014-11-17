@@ -15,7 +15,7 @@ public:
 
     std::list<DataSieverProgressListener *>dataSieverProgressListeners;
 
-    std::map<std::string, std::vector<XVariant> > dataMap;
+    std::map<std::string, std::list<XVariant> > dataMap;
 };
 
 #endif // DATAFILLERPRIVATE_H

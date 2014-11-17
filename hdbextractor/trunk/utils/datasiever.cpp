@@ -17,7 +17,7 @@ DataSiever::DataSiever()
 
 DataSiever::~DataSiever()
 {
-    d_ptr->dataMap.clear();
+    clear();
     delete d_ptr;
 }
 
@@ -43,19 +43,16 @@ void DataSiever::clear()
 void DataSiever::divide(const std::vector<XVariant> &rawdata)
 {
     char source[MAXSRCLEN] = "";
-    size_t i;
-    size_t dataSize = rawdata.size();
 
-    for(i = 0; i < dataSize; i++)
+    for(std::vector<XVariant>::const_iterator it = rawdata.begin(); it != rawdata.end(); it++)
     {
-        XVariant xv = rawdata[i];
-        const char *src = xv.getSource();
+        const char *src = it->getSource();
         if(strcmp(src, source) != 0 && d_ptr->dataMap.count(std::string(src)) == 0)
         {
-            d_ptr->dataMap[std::string(src)] = std::vector<XVariant>();
+            d_ptr->dataMap[std::string(src)] = std::list<XVariant>();
             strncpy(source, src, MAXSRCLEN);
         }
-        d_ptr->dataMap[std::string(source)].push_back(xv);
+        d_ptr->dataMap[std::string(source)].push_back(*it);
     }
 }
 
@@ -78,7 +75,7 @@ void DataSiever::divide(const std::vector<XVariant> &rawdata)
  */
 void DataSiever::fill()
 {
-    size_t i, tstamps_size, step = 0, steps_to_estimate, total_steps;
+    size_t tstamps_size, step = 0, steps_to_estimate, total_steps;
     double timestamp, data_timestamp_0, data_timestamp_1;
     struct timeval timeva, tv1, tv0, started_tv, ended_tv;
     gettimeofday(&started_tv, NULL);
@@ -89,13 +86,13 @@ void DataSiever::fill()
      * data.
      */
     std::set<double> timestamp_set;
-    for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
+    for(std::map<std::string, std::list<XVariant> >::iterator it = d_ptr->dataMap.begin();
         it != d_ptr->dataMap.end(); ++it)
     {
-        std::vector<XVariant> &data = it->second;
-        for(i = 0; i < data.size(); i++)
+        std::list<XVariant> &data = it->second;
+        for(std::list<XVariant>::iterator it = data.begin(); it != data.end(); it++)
         {
-            timeva = data[i].getTimevalTimestamp();
+            timeva = it->getTimevalTimestamp();
             timestamp = timeva.tv_sec + timeva.tv_usec * 1e-6;
             /* insert timestamp in the set. If timestamp is duplicate, it's not inserted */
             timestamp_set.insert(timestamp);
@@ -109,14 +106,15 @@ void DataSiever::fill()
     printf("\e[1;32m *\e[0m final data size will be %ld for each source...\n", tstamps_size);
 
     /* for each data row */
-    for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
+    for(std::map<std::string, std::list<XVariant> >::iterator it = d_ptr->dataMap.begin();
         it != d_ptr->dataMap.end(); ++it)
     {
         std::set<double>::iterator ts_set_iterator = timestamp_set.begin();
         /* take the vector of data from the map */
-        std::vector<XVariant> &data = it->second;
+        std::list<XVariant> &data = it->second;
         /* create an iterator over data */
-        std::vector<XVariant>::iterator datait = data.begin() + 1;
+        std::list<XVariant>::iterator datait = data.begin();
+        datait++; /* point to element 1 */
 
         while(datait != data.end())
         {
@@ -125,9 +123,9 @@ void DataSiever::fill()
             tv1 = datait->getTimevalTimestamp();
             data_timestamp_1 = tv1.tv_sec + tv1.tv_usec * 1e-6;
             /* start of interval */
-            tv0 = (datait - 1)->getTimevalTimestamp();
+            tv0 = (--datait)->getTimevalTimestamp();
             data_timestamp_0 = tv0.tv_sec + tv0.tv_usec * 1e-6;
-
+            datait++;
             /* iterate over the timestamps stored in the timestamp set. As we walk the set, avoid
              * searching the same interval multiple times. For this, keep ts_set_iterator as
              * start and update it in the last else if branch.
@@ -161,14 +159,14 @@ void DataSiever::fill()
             if(step % steps_to_estimate == 0)
             {
                 double time_remaining = mEstimateFillTimeRemaining(&started_tv, step, total_steps);
-                printf("\e[1;32m* \e[0mestimated time remaining: %.3fms\n", time_remaining);
+                if(step == steps_to_estimate)
+                    printf("\e[1;32m* \e[0mestimated time remaining: %.3fs\n", time_remaining);
             }
         }
     }
     gettimeofday(&ended_tv, NULL);
-    printf("\e[1;32m* \e[0mfilled in: %.3fms\n", ended_tv.tv_sec + ended_tv.tv_usec * 1e-6 -
+    printf("\e[1;32m* \e[0mfilled in: %.3fs\n", ended_tv.tv_sec + ended_tv.tv_usec * 1e-6 -
            started_tv.tv_sec - started_tv.tv_usec * 1e-6);
-    sleep(3);
 }
 
 /** \brief returns the number of different sources dug out by divide
@@ -208,10 +206,28 @@ bool DataSiever::contains(std::string source) const
 std::vector<std::string> DataSiever::getSources() const
 {
     std::vector<std::string> srcs;
-    for(std::map<std::string, std::vector<XVariant> >::iterator it = d_ptr->dataMap.begin();
+    for(std::map<std::string, std::list<XVariant> >::iterator it = d_ptr->dataMap.begin();
         it != d_ptr->dataMap.end(); ++it)
         srcs.push_back(it->first);
     return srcs;
+}
+
+/** \brief Returns the data associated to the provided source as a std::list
+ *
+ * @param source the name of the source (attribute) that contains the desired data
+ * @return a std::list of XVariant associated to the given source. Each XVariant represents
+ *         data at a certain time.
+ *
+ * \note You can retrieve data multiple times.
+ * \note Data is stored by DataSiever as long as DataSiever is not destroyed.
+ *
+ */
+std::list<XVariant> DataSiever::getDataAsList(std::string source) const
+{
+    std::list<XVariant>  ret;
+    if(d_ptr->dataMap.count(source) > 0)
+        ret = d_ptr->dataMap[source];
+    return ret;
 }
 
 /** \brief Returns the data associated to the provided source
@@ -226,25 +242,31 @@ std::vector<std::string> DataSiever::getSources() const
  */
 std::vector<XVariant> DataSiever::getData(std::string source) const
 {
-    std::vector<XVariant>  ret;
+    struct timeval started_tv, ended_tv;
+    gettimeofday(&started_tv, NULL);
+    std::vector<XVariant> ret;
     if(d_ptr->dataMap.count(source) > 0)
-        ret = d_ptr->dataMap[source];
+        ret.insert(ret.begin(), d_ptr->dataMap[source].begin(), d_ptr->dataMap[source].end());
+    gettimeofday(&ended_tv, NULL);
+
+    printf("\e[1;33m* \e[0mgetData: converted to vector in: %.3fs\n", ended_tv.tv_sec + ended_tv.tv_usec * 1e-6 -
+           started_tv.tv_sec - started_tv.tv_usec * 1e-6);
     return ret;
 }
 
 /** \brief Returns a reference to the internal raw std::map that associates a source to its data
  *
  */
-const std::map<std::string, std::vector<XVariant> > & DataSiever::getDataRef() const
+const std::map<std::string, std::list<XVariant> > & DataSiever::getDataRef() const
 {
-    const std::map<std::string, std::vector<XVariant> > &rData = d_ptr->dataMap;
+    const std::map<std::string, std::list<XVariant> > &rData = d_ptr->dataMap;
     return rData;
 }
 
 /** \brief Returns the interna raw std::map that associates a source to its data
  *
  */
-std::map<std::string, std::vector<XVariant> > DataSiever::getData() const
+std::map<std::string, std::list<XVariant> > DataSiever::getData() const
 {
     return d_ptr->dataMap;
 }
@@ -255,7 +277,7 @@ double DataSiever::mEstimateFillTimeRemaining(struct timeval *start, int step, i
     gettimeofday(&now, NULL);
     double elapsed = now.tv_sec + now.tv_usec * 1e-6 - (start->tv_sec + start->tv_usec * 1e-6);
     double needed = ((double)(total - step)) * elapsed / (double) step;
-    printf("elapsed %f step %d total %d\n", elapsed, step, total);
+    // printf("elapsed %f step %d total %d\n", elapsed, step, total);
     /* hypothesis: inserts are the time consuming operations. If vectors are the same size,
      * the resulting filled vector will be about twice.
      */
