@@ -27,6 +27,7 @@ QHdbextractorThread::QHdbextractorThread(QObject *parent) :
     QThread(parent)
 {
     m_extractor = new Hdbextractor(this);
+    m_queryConfiguration = NULL;
     setObjectName("QHdbExtractorThread");
 }
 

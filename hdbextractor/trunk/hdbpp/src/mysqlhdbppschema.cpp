@@ -12,7 +12,7 @@
 #include "db/src/dbschemaprivate.h"
 #include "helpers/configurabledbschemahelper.h"
 #include "xvariantlist.h"
-#include <pthread.h>
+#include "timeinterval.h"
 #include <assert.h>
 #include <map>
 
@@ -82,6 +82,22 @@ int MySqlHdbppSchema::get(std::vector<XVariant>& variantlist)
     pthread_mutex_unlock(&d_ptr->mutex);
     printf("\e[0;32munlocked: [copied %d]\e[0m\n", size);
     return size;
+}
+
+bool MySqlHdbppSchema::getData(const char *source,
+                                const TimeInterval *time_interval,
+                                Connection *connection,
+                                int notifyEveryRows)
+{
+    return getData(source, time_interval->start(), time_interval->stop(), connection, notifyEveryRows);
+}
+
+bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
+                                const TimeInterval *time_interval,
+                                Connection *connection,
+                                int notifyEveryRows)
+{
+    return getData(sources, time_interval->start(), time_interval->stop(), connection, notifyEveryRows);
 }
 
 /** \brief Fetch attribute data from the MySql hdb++ database between a start and stop date/time.
@@ -505,6 +521,46 @@ bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
     d_ptr->sourceStep = 1;
     return success;
 
+}
+
+bool MySqlHdbppSchema::getSourcesList(Connection *connection, std::list<std::string> result) const
+{
+    return findSource(connection, "", result);
+}
+
+bool MySqlHdbppSchema::findSource(Connection *connection, const char *substring, std::list<std::string> result) const
+{
+
+    bool success = true;
+    char query[MAXQUERYLEN];
+    Row *row;
+
+    snprintf(query, MAXQUERYLEN, "SELECT att_name from att_conf WHERE att_name like '%%%s%%'", substring);
+
+    Result * res = connection->query(query);
+    if(!res)
+    {
+        snprintf(d_ptr->errorMessage, MAXERRORLEN,
+                 "MysqlHdbSchema.getSourcesList: error in query \"%s\": \"%s\"", query, connection->getError());
+        success = false;
+    }
+    else
+    {
+        while(res->next() > 0 && success)
+        {
+            row = res->getCurrentRow();
+            if(!row)
+            {
+                snprintf(d_ptr->errorMessage, MAXERRORLEN, "MysqlHdbSchema.getSourcesList: error getting row");
+                success = false;
+            }
+            else
+            {
+                result.push_back(std::string(row->getField(0)));
+            }
+        }
+    }
+    return success;
 }
 
 bool MySqlHdbppSchema::fetchInThePast(const char *source,

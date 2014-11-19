@@ -89,6 +89,11 @@ void QHdbConfigWidget::init()
     m_viewSourcesListChanged();
 }
 
+bool QHdbConfigWidget::isTimeFillEnabled() const
+{
+    return ui.cbTimeFill->isChecked();
+}
+
 QDateTime QHdbConfigWidget::startDateTime() const
 {
     QDateTime dt;

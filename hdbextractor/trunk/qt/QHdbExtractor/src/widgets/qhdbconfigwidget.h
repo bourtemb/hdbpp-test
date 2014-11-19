@@ -34,6 +34,8 @@ public:
 
     void setState(const QString& state);
 
+    bool isTimeFillEnabled() const;
+
 signals:
 
     void sourceRemoved(const QString& src);

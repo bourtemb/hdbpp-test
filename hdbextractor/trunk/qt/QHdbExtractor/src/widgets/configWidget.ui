@@ -345,6 +345,16 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="cbTimeFill">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fill the time axis so that each attribute has the same time scale&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Time fill</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pbView">
        <property name="toolTip">
         <string>View the Historical Data</string>

@@ -9,6 +9,7 @@
 
 class QHdbXEvent;
 class Hdbextractor;
+class QueryConfiguration;
 
 class QHdbextractorThread : public QThread,
         public HdbExtractorListener
@@ -27,7 +28,6 @@ public:
      *
      */
     virtual void onSourceExtracted(const char * name, int totalRows, int totalSources, double elapsed);
-
 
     Hdbextractor *getHdbExtractor() const;
 
@@ -61,6 +61,8 @@ private:
     QReadWriteLock m_rwLock;
 
     Hdbextractor *m_extractor;
+
+    QueryConfiguration *m_queryConfiguration;
 
 };
 

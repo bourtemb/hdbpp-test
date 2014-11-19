@@ -32,23 +32,53 @@
       </property>
       <widget class="QWidget" name="page">
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0" colspan="3">
-         <widget class="QHistoricalViewWidget" name="historicalViewWidget" native="true"/>
-        </item>
         <item row="1" column="2">
+         <widget class="QRadioButton" name="rbSteps">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Steps style not supported yet&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Steps</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
          <widget class="QPushButton" name="pbConfigure">
           <property name="text">
            <string>Configure</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="0" column="0" colspan="5">
+         <widget class="QHistoricalViewWidget" name="historicalViewWidget" native="true"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QRadioButton" name="rbLines">
+          <property name="text">
+           <string>&amp;Lines</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
          <widget class="QProgressBar" name="progressBar">
           <property name="value">
            <number>24</number>
           </property>
           <property name="format">
            <string>source %p%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QRadioButton" name="rbDots">
+          <property name="text">
+           <string>&amp;Dots</string>
           </property>
          </widget>
         </item>

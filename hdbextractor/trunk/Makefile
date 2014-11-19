@@ -63,7 +63,9 @@ SOURCES       = src/hdbextractor.cpp \
 		utils/datasiever.cpp \
 		utils/private/datasieverprivate.cpp \
 		utils/xvariantprinter.cpp \
-		utils/datasieverprogresslistener.cpp 
+		utils/datasieverprogresslistener.cpp \
+		db/src/timeinterval.cpp \
+		db/src/datetimeutils.cpp 
 OBJECTS       = hdbextractor.o \
 		hdbextractorprivate.o \
 		mysqlconnection.o \
@@ -82,7 +84,9 @@ OBJECTS       = hdbextractor.o \
 		datasiever.o \
 		datasieverprivate.o \
 		xvariantprinter.o \
-		datasieverprogresslistener.o
+		datasieverprogresslistener.o \
+		timeinterval.o \
+		datetimeutils.o
 DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		/usr/local/qt5/mkspecs/common/shell-unix.conf \
 		/usr/local/qt5/mkspecs/common/unix.conf \
@@ -204,7 +208,9 @@ DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		utils/datasiever.cpp \
 		utils/private/datasieverprivate.cpp \
 		utils/xvariantprinter.cpp \
-		utils/datasieverprogresslistener.cpp
+		utils/datasieverprogresslistener.cpp \
+		db/src/timeinterval.cpp \
+		db/src/datetimeutils.cpp
 QMAKE_TARGET  = hdbextractor++
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = libhdbextractor++.so.1.0.0
@@ -554,6 +560,7 @@ result.o: db/src/result.cpp db/src/result.h \
 
 xvariant.o: db/src/xvariant.cpp db/src/xvariant.h \
 		src/hdbxmacros.h \
+		db/src/datetimeutils.h \
 		db/src/xvariantprivate.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xvariant.o db/src/xvariant.cpp
 
@@ -629,6 +636,12 @@ xvariantprinter.o: utils/xvariantprinter.cpp utils/xvariantprinter.h \
 datasieverprogresslistener.o: utils/datasieverprogresslistener.cpp utils/datasieverprogresslistener.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasieverprogresslistener.o utils/datasieverprogresslistener.cpp
 
+timeinterval.o: db/src/timeinterval.cpp db/src/timeinterval.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o timeinterval.o db/src/timeinterval.cpp
+
+datetimeutils.o: db/src/datetimeutils.cpp db/src/datetimeutils.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datetimeutils.o db/src/datetimeutils.cpp
+
 ####### Install
 
 install_lib: first FORCE
@@ -669,8 +682,12 @@ install_inc: first FORCE
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/private/datasieverprivate.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/xvariantprinter.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/utils/datasieverprogresslistener.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/timeinterval.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
+	-$(INSTALL_FILE) /home/giacomo/devel/utils/hdbextractor/trunk/db/src/datetimeutils.h $(INSTALL_ROOT)/runtime/include/hdbextractor/
 
 uninstall_inc: FORCE
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/datetimeutils.h
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/timeinterval.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/datasieverprogresslistener.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/xvariantprinter.h
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/runtime/include/hdbextractor/datasieverprivate.h

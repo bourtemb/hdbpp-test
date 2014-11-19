@@ -7,6 +7,7 @@
 #include <math.h> /* round */
 #include <string.h> /* strerror */
 #include "hdbxmacros.h"
+#include "datetimeutils.h"
 #include "xvariantprivate.h"
 
 void XVariant::cleanup()
@@ -1091,6 +1092,7 @@ XVariant &XVariant::setTimestamp(const char* ts)
  */
 XVariant & XVariant::setTimestamp(double tsmicro)
 {
+
     struct timeval tv;
     tv.tv_sec = (time_t) tsmicro;
     tv.tv_usec = (tsmicro - tv.tv_sec) * 1e6;
@@ -1107,12 +1109,7 @@ XVariant & XVariant::setTimestamp(double tsmicro)
  */
 XVariant &XVariant::setTimestamp(const struct timeval* tv)
 {
-    struct tm result;
-    char timestamp[TIMESTAMPLEN];
-    localtime_r(&(tv->tv_sec), &result);
-    strftime(timestamp, TIMESTAMPLEN, "%Y-%m-%d %H:%M:%S", &result);
-    /* concat milliseconds */
-    snprintf(d->mTimestamp, TIMESTAMPLEN, "%s.%03.0f", timestamp, round(tv->tv_usec/1e3));
+    DateTimeUtils().toString(tv, d->mTimestamp, TIMESTAMPLEN);
     return *this;
 }
 
@@ -1135,10 +1132,7 @@ const char *XVariant::getTimestamp() const
  */
 time_t XVariant::getTime_tTimestamp() const
 {
-    struct tm mtm;
-    memset(&mtm, 0, sizeof(struct tm));
-    strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
-    return mktime(&mtm);
+    return DateTimeUtils().toTime_t(d->mTimestamp);
 }
 
 /** \brief Returns the timestamp associated to the data stored by XVariant, in the form
@@ -1148,14 +1142,7 @@ time_t XVariant::getTime_tTimestamp() const
  */
 struct timeval XVariant::getTimevalTimestamp() const
 {
-    struct tm mtm;
-    struct timeval tv;
-    memset(&mtm, 0, sizeof(struct tm));
-    strptime(d->mTimestamp, "%Y-%m-%d %H:%M:%S", &mtm);
-    /* get usecs if specified */
-    tv.tv_usec = 0;
-    tv.tv_sec = mktime(&mtm);
-    return tv;
+    return DateTimeUtils().toTimeval(d->mTimestamp);
 }
 
 /** \brief The conversion method that tries to convert the stored data into a vector of double

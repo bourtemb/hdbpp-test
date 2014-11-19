@@ -6,7 +6,11 @@
 #include <markeritem.h>
 #include <curveitem.h>
 #include <linepainter.h>
+#include <stepspainter.h>
+#include <dotspainter.h>
 #include <scenecurve.h>
+#include <hdbxmacros.h>
+#include <datasiever.h>
 #include <qhdbextractorproxy.h>
 #include <configurationparser.h>
 #include <queryconfiguration.h>
@@ -139,6 +143,10 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
             SLOT(onExtractionFinished(QString, int, int, double)));
     /* 3. errors */
     connect(hdbxp, SIGNAL(errorOccurred(QString)), this, SLOT(onError(QString)));
+
+    connect(ui->rbDots, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
+    connect(ui->rbLines, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
+    connect(ui->rbSteps, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
 }
 
 QHdbExtractor::~QHdbExtractor()
@@ -186,8 +194,6 @@ void QHdbExtractor::onError(const QString& message)
     ui->configWidget->setState("An error occurred");
 }
 
-
-
 void QHdbExtractor::mAddCurve(const QString& source, const QColor& color, bool read)
 {
     PlotSceneWidget *plot = findChild<PlotSceneWidget *>();
@@ -196,10 +202,27 @@ void QHdbExtractor::mAddCurve(const QString& source, const QColor& color, bool r
     curveItem->setObjectName("CurveItem_" + source);
     plot->scene()->addItem(curveItem);
     c->installCurveChangeListener(curveItem);
-    LinePainter *lp = new LinePainter(curveItem);
-    lp->setLineColor(color);
-    if(!read)
-        lp->setLinePen(QPen(color, 0, Qt::DashLine));
+    if(ui->rbDots->isChecked())
+    {
+        DotsPainter *dp  = new DotsPainter(curveItem);
+        dp->setDotsColor(color);
+        if(!read) /* a darker border for write */
+            dp->setBorderColor(color.darker());
+    }
+    else if(ui->rbLines->isChecked())
+    {
+        LinePainter *lp = new LinePainter(curveItem);
+        lp->setLineColor(color);
+        if(!read)
+            lp->setLinePen(QPen(color, 0, Qt::DashLine));
+    }
+    else if(ui->rbSteps->isChecked())
+    {
+        StepsPainter *sp = new StepsPainter(curveItem);
+        sp->setLineColor(color);
+        if(!read)
+            sp->setLinePen(QPen(color, 0, Qt::DashLine));
+    }
 
 }
 
@@ -263,7 +286,6 @@ void QHdbExtractor::onNewDataAvailable(const QString& source,
     plot->appendData(source, timestamps, data);
 }
 
-
 void QHdbExtractor::onExtractionFinished(const QString& source, int srcStep, int srcTotal, double elapsed)
 {
     qDebug() << __FUNCTION__ << source << srcStep << srcTotal << elapsed;
@@ -282,3 +304,43 @@ void QHdbExtractor::onExtractionProgress(const QString& source, int step, int to
     ui->progressBar->setMaximum(total);
     ui->progressBar->setValue(step);
 }
+
+void QHdbExtractor::radioCurvesStyleToggled(bool t)
+{
+    if(t)
+    {
+        QColor curveColor = Qt::black;
+        PlotSceneWidget *plot = findChild<PlotSceneWidget *>();
+        QList<SceneCurve *> curves = plot->getCurves();
+        foreach(SceneCurve *c, curves)
+        {
+            CurveItem *ci = c->curveItem();
+            ItemPainterInterface *ipi = ci->itemPainter();
+            int type = ipi->type();
+            if(type == ItemPainterInterface::Dot)
+                curveColor = static_cast<DotsPainter *>(ipi)->borderColor();
+            else if(type == ItemPainterInterface::Line || type == ItemPainterInterface::Step)
+                curveColor = static_cast<LinePainter *>(ipi)->lineColor();
+
+            ci->removeItemPainterInterface(ipi);
+            delete ipi;
+
+            if(sender()->objectName() == "rbDots" && type != ItemPainterInterface::Dot)
+            {
+                DotsPainter *dp = new DotsPainter(ci);
+                dp->setBorderColor(curveColor);
+            }
+            else if(sender()->objectName() == "rbLines" && type != ItemPainterInterface::Line)
+            {
+                LinePainter *lp = new LinePainter(ci);
+                lp->setLineColor(curveColor);
+            }
+            else if(sender()->objectName() == "rbSteps" && type != ItemPainterInterface::Step)
+            {
+                StepsPainter *sp = new StepsPainter(ci);
+                sp->setLineColor(curveColor);
+            }
+        }
+    }
+}
+

@@ -40,6 +40,20 @@ public:
                                  Connection *connection,
                                  int notifyEveryNumRows);
 
+    virtual bool getData(const char *source,
+                                    const TimeInterval *time_interval,
+                                    Connection *connection,
+                                    int notifyEveryRows);
+
+    virtual bool getData(const std::vector<std::string> sources,
+                                    const TimeInterval *time_interval,
+                                    Connection *connection,
+                                    int notifyEveryRows);
+
+    virtual bool getSourcesList(Connection *connection, std::list<std::string> result) const;
+
+    virtual bool findSource(Connection *connection, const char *substring, std::list<std::string> result) const;
+
     virtual int get(std::vector<XVariant>& variantlist);
 
     virtual const char *getError() const;

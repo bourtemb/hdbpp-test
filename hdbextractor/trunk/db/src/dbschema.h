@@ -1,13 +1,15 @@
-#ifndef DBSCHEMA_H
+﻿#ifndef DBSCHEMA_H
 #define DBSCHEMA_H
 
 #include <vector>
+#include <list>
 #include <string>
 
 class Connection;
 class XVariantList;
 class XVariant;
 class QueryConfiguration;
+class TimeInterval;
 
 /** \brief The interface representing a database schema. <em>Used internally</em>.
  *
@@ -51,6 +53,46 @@ public:
                                  const char *stop_date,
                                  Connection *connection,
                                  int notifyEveryNumRows) = 0;
+
+    virtual bool getData(const char *source,
+                                    const TimeInterval *time_interval,
+                                    Connection *connection,
+                                    int notifyEveryRows) = 0;
+
+    virtual bool getData(const std::vector<std::string> sources,
+                                    const TimeInterval *time_interval,
+                                    Connection *connection,
+                                    int notifyEveryRows) = 0;
+
+    /** \brief Retrieves the list of archived sources, returning true if the query is successful.
+     *
+     * Retrieve the list of sources archived into the database, sorted alphabetically from a to z.
+     *
+     * @param result a std::list of std::string that will store the result
+     *        of the search.
+     *
+     * @return false if a database error occurred, true otherwise.
+     *
+     * If false is returned, an error occurred: you can get the message through getError.
+     */
+    virtual bool getSourcesList(Connection *connection, std::list<std::string> result) const = 0;
+
+    /** \brief Finds a source containing the provided substring.
+     *
+     * @param substring the search string
+     * @param connection the database connection
+     * @param result a std::list of std::string that will store the result
+     *        of the search.
+     *
+     * @return the number of sources matching the substring provided.
+     *
+     * If false is returned, an error occurred: you can get the message through getError.
+     *
+     * \note For MySql databases, the <em>like</em> keyword is used, with substring as argument.
+     */
+    virtual bool findSource(Connection *connection, const char *substring, std::list<std::string> ) const = 0;
+
+
 
     /** \brief Empties the queue where partial (or complete) data is stored
      *

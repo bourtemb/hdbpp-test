@@ -69,6 +69,8 @@ private slots:
     void onExtractionFinished(const QString& source, int srcStep, int srcTotal, double elapsed);
 
     void onError(const QString& message);
+
+    void radioCurvesStyleToggled(bool);
 };
 
 #endif // MAINWINDOW_H
