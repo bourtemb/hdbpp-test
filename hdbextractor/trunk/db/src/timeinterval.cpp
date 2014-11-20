@@ -34,7 +34,7 @@ TimeInterval::TimeInterval(double start_d, double stop_d)
 {
     DateTimeUtils dtu;
     dtu.toString(start_d, m_start, MAXTIMESTAMPLEN);
-    dtu.toString(stop_d, m_stop, MAXTIMESTAMPLEN);
+    dtu.toString(stop_d,  m_stop, MAXTIMESTAMPLEN);
 }
 
 TimeInterval::TimeInterval(const TimeInterval& other)
@@ -47,6 +47,7 @@ TimeInterval & TimeInterval::operator=(const TimeInterval& other)
 {
     strncpy(m_start, other.start(), MAXTIMESTAMPLEN);
     strncpy(m_stop,  other.stop(), MAXTIMESTAMPLEN);
+    return *this;
 }
 
 bool TimeInterval::operator==(const TimeInterval &other) const
@@ -57,6 +58,51 @@ bool TimeInterval::operator==(const TimeInterval &other) const
 bool TimeInterval::operator!=(const TimeInterval &other) const
 {
     return !(*this == other);
+}
+
+/** \brief returns true if other is contained in this or this is contained into the other
+ *         or if this and other simply intersect.
+ *
+ * @param other another TimeInterval.
+ *
+ * @return false if other is disjoined from this
+ *
+ */
+bool TimeInterval::intersects(const TimeInterval &other) const
+{
+    DateTimeUtils dtu;
+    double start = dtu.toDouble(this->m_start);
+    double stop = dtu.toDouble(this->m_stop);
+    double ostart = dtu.toDouble(other.start());
+    double ostop = dtu.toDouble(other.stop());
+    return other.contains(*this) || this->contains(other) || (ostart >= start && ostart <= stop)
+            || (ostop >= start && ostop <= stop);
+}
+
+/** \brief returns true if other is contained in this
+ *
+ * @param other another TimeInterval.
+ *
+ * @return false if other is not fully contained in this interval.
+ */
+bool TimeInterval::contains(const TimeInterval &other) const
+{
+    DateTimeUtils dtu;
+    double start = dtu.toDouble(this->m_start);
+    double stop = dtu.toDouble(this->m_stop);
+    double ostart = dtu.toDouble(other.start());
+    double ostop = dtu.toDouble(other.stop());
+    return ostart >= start && ostop <= stop;
+}
+
+const char *TimeInterval::start() const
+{
+    return m_start;
+}
+
+const char *TimeInterval::stop() const
+{
+    return m_stop;
 }
 
 time_t TimeInterval::start_time_t() const

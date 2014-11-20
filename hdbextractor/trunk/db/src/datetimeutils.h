@@ -19,6 +19,8 @@ public:
 
     struct timeval toTimeval(const char* timestamp_str) const;
 
+    double toDouble(const char *timestamp_str) const;
+
     bool toString(const struct timeval* tv, char *dest, size_t destlen);
 
     bool toString(const time_t tp, char *dest, size_t destlen);

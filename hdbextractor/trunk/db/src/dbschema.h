@@ -75,7 +75,7 @@ public:
      *
      * If false is returned, an error occurred: you can get the message through getError.
      */
-    virtual bool getSourcesList(Connection *connection, std::list<std::string> result) const = 0;
+    virtual bool getSourcesList(Connection *connection, std::list<std::string>& result) const = 0;
 
     /** \brief Finds a source containing the provided substring.
      *
@@ -90,7 +90,7 @@ public:
      *
      * \note For MySql databases, the <em>like</em> keyword is used, with substring as argument.
      */
-    virtual bool findSource(Connection *connection, const char *substring, std::list<std::string> ) const = 0;
+    virtual bool findSource(Connection *connection, const char *substring, std::list<std::string>& ) const = 0;
 
 
 

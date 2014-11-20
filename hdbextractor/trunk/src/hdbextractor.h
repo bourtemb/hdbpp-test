@@ -4,12 +4,14 @@
 #include <xvariantlist.h>
 #include <vector>
 #include <string>
+#include <list>
 
 #include "resultlistenerinterface.h"
 
 class HdbExtractorPrivate;
 class HdbExtractorListener;
 class QueryConfiguration;
+class TimeInterval;
 
 /** \mainpage The Hdbextractor++ historical database data extractor
  *
@@ -367,6 +369,12 @@ public:
     bool getData(const std::vector<std::string> sources,
                                           const char *start_date,
                                           const char *stop_date);
+
+    bool getData(const char *source, const TimeInterval *time_interval);
+
+    bool getData(const std::vector<std::string> sources, const TimeInterval *time_interval);
+
+    bool getSourcesList(std::list<std::string>& result) const;
 
     void setQueryConfiguration(QueryConfiguration *qc);
 

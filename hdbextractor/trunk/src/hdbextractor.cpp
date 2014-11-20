@@ -7,6 +7,7 @@
 #include "hdbpp/src/mysqlhdbppschema.h"
 #include "hdbextractorlistener.h"
 #include "queryconfiguration.h"
+#include "timeinterval.h"
 
 #include <string.h>
 
@@ -260,6 +261,31 @@ bool Hdbextractor::getData(const std::vector<std::string> sources,
     }
     /* error message, if necessary */
     if(!success)
+        snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.getData: %s", d_ptr->dbschema->getError());
+
+    return success;
+}
+
+bool Hdbextractor::getData(const char *source, const TimeInterval *time_interval)
+{
+    return getData(source, time_interval->start(), time_interval->stop());
+}
+
+bool Hdbextractor::getData(const std::vector<std::string> sources, const TimeInterval *time_interval)
+{
+    return getData(sources, time_interval->start(), time_interval->stop());
+}
+
+bool Hdbextractor::getSourcesList(std::list<std::string>& result) const
+{
+    bool success = false;
+    strcpy(d_ptr->errorMessage, "");
+    printf("HdbExtractor.getSourcesList\n");
+    if(d_ptr->connection != NULL && d_ptr->dbschema != NULL && d_ptr->connection->isConnected())
+        success = d_ptr->dbschema->getSourcesList(d_ptr->connection, result);
+
+    /* error message, if necessary */
+    if(!success && d_ptr->dbschema)
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.getData: %s", d_ptr->dbschema->getError());
 
     return success;

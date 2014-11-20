@@ -36,7 +36,7 @@ class QHdbNewDataEvent;
  */
 class HDBEXTRACTORQTSHARED_EXPORT QHdbextractorProxy : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     QHdbextractorProxy(QObject *parent = NULL);
@@ -50,21 +50,26 @@ public:
     int updateProgressStep() const;
 
     void connect(Hdbextractor::DbType dbType,
-                                     const QString& host,
-                                     const QString& db,
-                                     const QString& user,
-                                     const QString& passwd,
-                                     unsigned short port = 3306);
+                 const QString& host,
+                 const QString& db,
+                 const QString& user,
+                 const QString& passwd,
+                 unsigned short port = 3306);
+
+
+    void printData(const std::vector<XVariant>& data);
+
+public slots:
 
     void getData(const QStringList &sources,
-                                          const QDateTime &start_date,
-                                          const QDateTime &stop_date);
+                 const QDateTime &start_date,
+                 const QDateTime &stop_date);
 
     void getData(const QString& source, const QDateTime& startDate, const QDateTime& stop_date);
 
     void disconnect();
 
-    void printData(const std::vector<XVariant>& data);
+    void getSourcesList();
 
 protected:
 
@@ -148,6 +153,14 @@ signals:
      */
     void errorOccurred(const QString&  message);
 
+    /** \brief This signal is emitted when the list of historical database sources has been retrieved
+     *  from the database.
+     *
+     * @param srclist the list of sources
+     */
+    void sourcesListReady(const QStringList& srclist);
+
+
 private slots:
 
     /** \brief This slot is connected to the QHdbExtractorThread
@@ -161,6 +174,8 @@ private slots:
     /** \brief This slot is connected to the QHdbExtractorThread
      */
     void onError(const QString& message);
+
+    void onSourcesListReady(const QStringList& srcs);
 
 protected:
     bool event(QEvent *e);

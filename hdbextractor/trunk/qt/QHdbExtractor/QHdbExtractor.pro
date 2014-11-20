@@ -32,13 +32,17 @@ SOURCES += src/main.cpp\
     src/widgets/qhdbconfigwidget.cpp \
     src/widgets/qhistoricalviewwidget.cpp \
     src/widgets/qhistoricalviewwidgetprivate.cpp \
-    src/qhdbextractor.cpp
+    src/qhdbextractor.cpp \
+    src/widgets/sourcestreewidget.cpp \
+    src/widgets/sourcestreewidget_p.cpp
 
 HEADERS  += \
     src/widgets/qhdbconfigwidget.h \
     src/widgets/qhistoricalviewwidgetprivate.h \
     src/widgets/qhistoricalviewwidget.h \
-    src/qhdbextractor.h
+    src/qhdbextractor.h \
+    src/widgets/sourcestreewidget.h \
+    src/widgets/sourcestreewidget_p.h
 
 FORMS    += src/mainwindow.ui \
     src/widgets/configWidget.ui

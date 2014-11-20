@@ -71,6 +71,8 @@ private slots:
     void onError(const QString& message);
 
     void radioCurvesStyleToggled(bool);
+
+    void sourcesListReady(const QStringList& srclist);
 };
 
 #endif // MAINWINDOW_H

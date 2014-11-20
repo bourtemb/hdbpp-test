@@ -10,8 +10,9 @@
  * This class stores a couple of date time quantities. They are internally stored
  * in a char buffer, as they are fetched from the database.
  *
- * Conversion utilities are provided, in order to get the start and end of the time
- * interval under the time_t and struct timeval representations.
+ * Conversion utilities and different constructors are provided, in order to handle
+ * the start and end of the time
+ * interval as time_t, struct timeval and double (seconds.microseconds) representations.
  *
  */
 class TimeInterval
@@ -35,15 +36,19 @@ public:
 
     bool operator!=(const TimeInterval &other) const;
 
+    bool intersects(const TimeInterval &other) const;
+
+    bool contains(const TimeInterval &other) const;
+
     time_t start_time_t() const;
     time_t stop_time_t() const;
 
     struct timeval start_timeval() const;
     struct timeval stop_timeval() const;
 
-    char *start() const;
+    const char *start() const;
 
-    char *stop() const;
+    const char *stop() const;
 
 private:
     char m_start[MAXTIMESTAMPLEN];

@@ -45,7 +45,9 @@ SOURCES += \
     src/qhdbextractorproxy.cpp \
     src/qhdbnewdataevent.cpp \
     src/qhdbxutils.cpp \
-    src/qhdbxerrorevent.cpp
+    src/qhdbxerrorevent.cpp \
+    src/qhdbxsourceslistqueryevent.cpp \
+    src/qhdbsourceslistreadyevent.cpp
 
 HEADERS +=\
         src/hdbextractor-qt_global.h \
@@ -57,7 +59,9 @@ HEADERS +=\
     src/qhdbextractorproxyprivate.h \
     src/qhdbnewdataevent.h \
     src/qhdbxutils.h \
-    src/qhdbxerrorevent.h
+    src/qhdbxerrorevent.h \
+    src/qhdbxsourceslistqueryevent.h \
+    src/qhdbsourceslistreadyevent.h
 
 INCLUDEPATH += src/ ../../src ../../db/src ../../hdb/src ../../mysql/src
 

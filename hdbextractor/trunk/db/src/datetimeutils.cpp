@@ -52,6 +52,19 @@ bool DateTimeUtils::toString(const struct timeval* tv, char *dest, size_t destle
     return strfret != 0;
 }
 
+/** \brief Converts a string timestamp in the format YYYY-MM-dd hh:mm:ss to a double
+ *         representing a unix timestamp in the format seconds.microseconds.
+ *
+ * @param timestamp_str a string  in the format "YYYY-MM-dd hh:mm:ss"
+ *
+ * @return a unix timestamp in the format seconds.microseconds.
+ */
+double DateTimeUtils::toDouble(const char *timestamp_str) const
+{
+    struct timeval tv = toTimeval(timestamp_str);
+    return tv.tv_sec + tv.tv_usec * 1e-6;
+}
+
 /** \brief Writes into dest, which must be long at least destlen bytes, the timestamp decoded from
  *         the date/time represented by a double.
  *

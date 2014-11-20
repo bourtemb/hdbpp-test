@@ -36,6 +36,8 @@ public:
 
     bool isTimeFillEnabled() const;
 
+    void updateSourcesList(const QStringList& srcs);
+
 signals:
 
     void sourceRemoved(const QString& src);
@@ -44,6 +46,7 @@ signals:
 
     void cancelClicked();
 
+    void buttonLoadSrcsFromDbClicked();
 
 protected slots:
 
@@ -52,6 +55,8 @@ protected slots:
     void removeFromHistory();
 
     void addSourceClicked();
+
+    void addToViewSourcesFromDbList();
 
     void lastDaysHoursChanged();
 

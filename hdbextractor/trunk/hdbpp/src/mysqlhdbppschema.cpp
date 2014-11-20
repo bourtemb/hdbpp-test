@@ -523,19 +523,24 @@ bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
 
 }
 
-bool MySqlHdbppSchema::getSourcesList(Connection *connection, std::list<std::string> result) const
+bool MySqlHdbppSchema::getSourcesList(Connection *connection,
+                                      std::list<std::string>& result) const
 {
+    printf("\e[1;32mcalling findSource \e[0m\n");
     return findSource(connection, "", result);
 }
 
-bool MySqlHdbppSchema::findSource(Connection *connection, const char *substring, std::list<std::string> result) const
+bool MySqlHdbppSchema::findSource(Connection *connection,
+                                  const char *substring,
+                                  std::list<std::string>& result) const
 {
-
     bool success = true;
     char query[MAXQUERYLEN];
     Row *row;
 
     snprintf(query, MAXQUERYLEN, "SELECT att_name from att_conf WHERE att_name like '%%%s%%'", substring);
+
+    printf("\e[1;34mQUERY %s\e[0m\n", query);
 
     Result * res = connection->query(query);
     if(!res)

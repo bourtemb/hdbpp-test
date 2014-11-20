@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>846</width>
+    <width>962</width>
     <height>645</height>
    </rect>
   </property>
@@ -180,20 +180,14 @@
       <string>Edit Sources</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0" colspan="4">
-       <widget class="QTreeWidget" name="twHistory">
-        <property name="rootIsDecorated">
-         <bool>false</bool>
-        </property>
-        <column>
-         <property name="text">
-          <string>History</string>
-         </property>
-        </column>
-       </widget>
-      </item>
       <item row="0" column="4" colspan="3">
        <widget class="QTreeWidget" name="twSelected">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="rootIsDecorated">
          <bool>false</bool>
         </property>
@@ -204,21 +198,69 @@
         </column>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pbRemoveFromHistory">
-        <property name="text">
-         <string>Remove</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="Line" name="line_4">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="0" column="9">
+       <widget class="QPushButton" name="pbAddSrcFromDb">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add the source to the View Sources list&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>&lt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="10" colspan="2">
+       <widget class="SourcesTreeWidget" name="twSources">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>2</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <column>
+         <property name="text">
+          <string>Sources from Db</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QTreeWidget" name="twHistory">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="rootIsDecorated">
+         <bool>false</bool>
+        </property>
+        <column>
+         <property name="text">
+          <string>History</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="2" column="2">
        <widget class="QCheckBox" name="cbRestoreDateTime">
         <property name="text">
          <string>Restore interval on add</string>
@@ -228,40 +270,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="pbAddToViewSources">
-        <property name="text">
-         <string>&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="5">
-       <widget class="QPushButton" name="pbAdd">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Add</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
+      <item row="2" column="6">
        <widget class="QPushButton" name="pbRemoveSrc">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -274,6 +283,49 @@
         </property>
         <property name="text">
          <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="pbRemoveFromHistory">
+        <property name="text">
+         <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="11">
+       <widget class="QPushButton" name="pbLoadSrcsFromDb">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load/reload sources list from the database&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Refresh</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="pbAddToViewSources">
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QPushButton" name="pbAdd">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Add</string>
         </property>
        </widget>
       </item>
@@ -378,6 +430,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SourcesTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>sourcestreewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

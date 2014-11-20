@@ -437,12 +437,12 @@ bool MySqlHdbSchema::getData(const std::vector<std::string> sources,
 
 }
 
-bool MySqlHdbSchema::getSourcesList(Connection *connection, std::list<std::string> result) const
+bool MySqlHdbSchema::getSourcesList(Connection *connection, std::list<std::string>& result) const
 {
     return findSource(connection, "", result);
 }
 
-bool MySqlHdbSchema::findSource(Connection *connection, const char *substring, std::list<std::string> result) const
+bool MySqlHdbSchema::findSource(Connection *connection, const char *substring, std::list<std::string>& result) const
 {
     bool success = true;
     char query[MAXQUERYLEN];
@@ -450,6 +450,7 @@ bool MySqlHdbSchema::findSource(Connection *connection, const char *substring, s
 
     snprintf(query, MAXQUERYLEN, "SELECT full_name from adt WHERE full_name like '%%%s%%'", substring);
 
+    printf("\e[1;34mQUERY %s\e[0m\n", query);
     Result * res = connection->query(query);
     if(!res)
     {

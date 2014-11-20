@@ -80,6 +80,8 @@ void QHdbextractorThread::run()
 
     connect(this, SIGNAL(processRequest()), processTimer, SIGNAL(timeout()), Qt::QueuedConnection);
     connect(processTimer, SIGNAL(timeout()), this, SLOT(process()), Qt::DirectConnection);
+
+
     /* event loop */
     QThread::currentThread()->setObjectName("QHdbextractorThread Thread");
     qDebug() << this <<  QThread::currentThread() << __FUNCTION__ << "entering main loop";
@@ -134,6 +136,21 @@ void QHdbextractorThread::process()
                                          qe->stopDate.toStdString().c_str()))
                     emit errorMessage(m_extractor->getErrorMessage());
             }
+        }
+        else if(e->getType() == QHdbXEvent::SOURCESLIST)
+        {
+            std::list<std::string> srcs;
+            QStringList ret;
+            bool success = m_extractor->getSourcesList(srcs);
+            if(!success)
+                emit errorMessage(QString("Error fetching sources list from db: %1").
+                                   arg(m_extractor->getErrorMessage()));
+            else
+            {
+                for(std::list<std::string>::iterator it = srcs.begin(); it != srcs.end(); it++)
+                    ret.append(QString::fromStdString(*it));
+            }
+            emit sourcesListReady(ret);
         }
         /* delete the event */
         delete e;

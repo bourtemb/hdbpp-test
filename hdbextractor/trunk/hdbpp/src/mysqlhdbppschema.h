@@ -50,9 +50,9 @@ public:
                                     Connection *connection,
                                     int notifyEveryRows);
 
-    virtual bool getSourcesList(Connection *connection, std::list<std::string> result) const;
+    virtual bool getSourcesList(Connection *connection, std::list<std::string>& result) const;
 
-    virtual bool findSource(Connection *connection, const char *substring, std::list<std::string> result) const;
+    virtual bool findSource(Connection *connection, const char *substring, std::list<std::string> &result) const;
 
     virtual int get(std::vector<XVariant>& variantlist);
 

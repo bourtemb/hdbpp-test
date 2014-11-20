@@ -1,6 +1,7 @@
 #include "qhdbconfigwidget.h"
 #include <QTimer>
 #include <QtDebug>
+#include <QScrollBar>
 #include <QSettings>
 #include <QDateTime>
 
@@ -53,6 +54,11 @@ void QHdbConfigWidget::init()
     connect(ui.pbAddToViewSources, SIGNAL(clicked()), this, SLOT(historySelectionChanged()));
     connect(ui.pbRemoveFromHistory, SIGNAL(clicked()), this, SLOT(removeFromHistory()));
 
+    connect(ui.pbAddToViewSources, SIGNAL(clicked()), this, SLOT(addToViewSourcesFromDbList()));
+
+    connect(ui.pbLoadSrcsFromDb, SIGNAL(clicked()), this, SIGNAL(buttonLoadSrcsFromDbClicked()));
+    connect(ui.pbAddSrcFromDb, SIGNAL(clicked()), this, SLOT(addToViewSourcesFromDbList()));
+
     ui.cbLastDaysHours->setChecked(false);
 
     QDateTime dt = QDateTime::currentDateTime();
@@ -87,6 +93,30 @@ void QHdbConfigWidget::init()
         new QTreeWidgetItem(ui.twHistory, QStringList() << he);
 
     m_viewSourcesListChanged();
+}
+
+void QHdbConfigWidget::addToViewSourcesFromDbList()
+{
+    QStringList selected = ui.twSources->selectedSources();
+    foreach(QString s, selected)
+    {
+        QList<QTreeWidgetItem*> itemsInView = ui.twSelected->findItems(s, Qt::MatchExactly);
+        if(itemsInView.size() == 0) /* not existing, create it */
+        {
+            QTreeWidgetItem *newIt = new QTreeWidgetItem(ui.twSelected, QStringList() << s);
+            newIt->setFlags(newIt->flags()|Qt::ItemIsEditable);
+        }
+        else
+            itemsInView.first()->setSelected(true);
+    }
+    ui.twSelected->resizeColumnToContents(0);
+    ui.twSelected->scrollToBottom();
+    ui.twSelected->horizontalScrollBar()->setValue(ui.twSelected->horizontalScrollBar()->maximum() - 1);
+}
+
+void QHdbConfigWidget::updateSourcesList(const QStringList& srcs)
+{
+    ui.twSources->updateSourcesList(srcs);
 }
 
 bool QHdbConfigWidget::isTimeFillEnabled() const

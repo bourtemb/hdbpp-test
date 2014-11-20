@@ -5,6 +5,8 @@
 #include "qhdbxqueryevent.h"
 #include "qhdbnewdataevent.h"
 #include "qhdbxerrorevent.h"
+#include "qhdbxsourceslistqueryevent.h"
+#include "qhdbsourceslistreadyevent.h"
 #include "qhdbxutils.h"
 #include <QDateTime>
 #include <QStringList>
@@ -96,6 +98,8 @@ QHdbextractorProxy::QHdbextractorProxy(QObject *parent) : QObject(parent)
     QObject::connect(d_ptr->thread, SIGNAL(sourceExtractionFinished(const QString& , int , int , double )),
                      this, SLOT(onFinish(const QString& , int , int , double)), Qt::DirectConnection);
     QObject::connect(d_ptr->thread, SIGNAL(errorMessage(QString)), this, SLOT(onError(QString)), Qt::DirectConnection);
+    QObject::connect(d_ptr->thread, SIGNAL(sourcesListReady(QStringList)), this,
+                     SLOT(onSourcesListReady(QStringList)), Qt::DirectConnection);
     d_ptr->thread->start();
 }
 
@@ -200,6 +204,12 @@ void QHdbextractorProxy::getData(const QStringList& sources,
     d_ptr->thread->addEvent(qe);
 }
 
+void QHdbextractorProxy::getSourcesList()
+{
+    QHdbxSourcesListQueryEvent *sqe = new QHdbxSourcesListQueryEvent();
+    d_ptr->thread->addEvent(sqe);
+}
+
 /** This slot is invoked when data is ready (in partial update mode)
  *
  * This is a slot connected to the database thread through a direct connection.
@@ -225,6 +235,12 @@ void QHdbextractorProxy::onUpdate(const QString &srcname, int step,
      //   printData(data);
 
     }
+}
+
+void QHdbextractorProxy::onSourcesListReady(const QStringList& srcs)
+{
+    QHdbSourcesListReadyEvent *slre = new QHdbSourcesListReadyEvent(srcs);
+    qApp->postEvent(this, slre);
 }
 
 void QHdbextractorProxy::onFinish(const QString &srcname, int srcStep, int totSrcs, double elapsed)
@@ -279,6 +295,10 @@ bool QHdbextractorProxy::event(QEvent *e)
     else if(e->type() == QEvent::User + 1002) /* error */
     {
         emit errorOccurred(static_cast<QHdbXErrorEvent *>(e)->message);
+    }
+    else if(e->type() == QEvent::User + 1011)
+    {
+        emit sourcesListReady(static_cast<QHdbSourcesListReadyEvent *>(e)->sourcesList);
     }
     return QObject::event(e);
 }

@@ -39,6 +39,8 @@ signals:
 
     void sourceExtractionFinished(const QString& name, int step, int totalSources, double elapsed);
 
+    void sourcesListReady(const QStringList& srcs);
+
     void exitLoop();
 
     void processRequest();

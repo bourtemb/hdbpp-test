@@ -14,6 +14,7 @@
 #include <qhdbextractorproxy.h>
 #include <configurationparser.h>
 #include <queryconfiguration.h>
+#include <QTimer>
 #include <QMessageBox>
 #include <QtDebug>
 
@@ -147,11 +148,22 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     connect(ui->rbDots, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
     connect(ui->rbLines, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
     connect(ui->rbSteps, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
+
+    /* sources tree widget */
+    connect(ui->configWidget, SIGNAL(buttonLoadSrcsFromDbClicked()), hdbxp, SLOT(getSourcesList()));
+    connect(hdbxp, SIGNAL(sourcesListReady(QStringList)), this, SLOT(sourcesListReady(QStringList)));
+    QTimer::singleShot(600, hdbxp, SLOT(getSourcesList()));
+
 }
 
 QHdbExtractor::~QHdbExtractor()
 {
     delete ui;
+}
+
+void QHdbExtractor::sourcesListReady(const QStringList &srclist)
+{
+    ui->configWidget->updateSourcesList(srclist);
 }
 
 void QHdbExtractor::slotConfigureClicked()
