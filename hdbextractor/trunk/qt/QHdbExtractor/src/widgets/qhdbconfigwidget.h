@@ -64,6 +64,8 @@ protected slots:
 
     void init();
 
+    void filter(const QString &text);
+
 private:
     Ui::ConfigWidget ui;
 

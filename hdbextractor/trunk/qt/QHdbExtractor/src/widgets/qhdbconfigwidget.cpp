@@ -1,5 +1,6 @@
 #include "qhdbconfigwidget.h"
 #include <QTimer>
+#include "treewidgetsearch.h"
 #include <QtDebug>
 #include <QScrollBar>
 #include <QSettings>
@@ -93,6 +94,9 @@ void QHdbConfigWidget::init()
         new QTreeWidgetItem(ui.twHistory, QStringList() << he);
 
     m_viewSourcesListChanged();
+
+    connect(ui.leFind, SIGNAL(textChanged(QString)), this, SLOT(filter(QString)));
+    ui.twSelected->viewport()->setAcceptDrops(true);
 }
 
 void QHdbConfigWidget::addToViewSourcesFromDbList()
@@ -109,6 +113,7 @@ void QHdbConfigWidget::addToViewSourcesFromDbList()
         else
             itemsInView.first()->setSelected(true);
     }
+    m_viewSourcesListChanged();
     ui.twSelected->resizeColumnToContents(0);
     ui.twSelected->scrollToBottom();
     ui.twSelected->horizontalScrollBar()->setValue(ui.twSelected->horizontalScrollBar()->maximum() - 1);
@@ -151,6 +156,12 @@ void QHdbConfigWidget::setConfig(const QString& host, const QString& db, const Q
 void QHdbConfigWidget::setState(const QString& state)
 {
     ui.labelState->setText(state);
+}
+
+void QHdbConfigWidget::filter(const QString &text)
+{
+    TreeWidgetSearch tws;
+    tws.filter(ui.twSources, text);
 }
 
 QStringList QHdbConfigWidget::m_sourcesFromTree(QTreeWidget *tree) const
@@ -265,6 +276,7 @@ void QHdbConfigWidget::addSourceClicked()
     newIt->setFlags(newIt->flags()|Qt::ItemIsEditable);
     newIt->setSelected(true);
     ui.twSelected->editItem(newIt);
+    m_viewSourcesListChanged();
 }
 
 void QHdbConfigWidget::m_viewSourcesListChanged()
@@ -276,9 +288,9 @@ void QHdbConfigWidget::m_viewSourcesListChanged()
     int ssize = srcs.size();
 
     if(ssize > 1 )
-        ui.labelSource->setText(QString("%1, %2...").arg(srcs.first(), srcs.at(1)));
+        ui.labelSource->setText(QString("%1, %2...").arg(srcs.first().section('/', -4, -1), srcs.at(1).section('/', -4, -1)));
     else if(ssize == 1)
-        ui.labelSource->setText(srcs.first());
+        ui.labelSource->setText(srcs.first().section('/', -4, -1));
 }
 
 void QHdbConfigWidget::lastDaysHoursChanged()

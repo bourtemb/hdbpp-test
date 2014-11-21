@@ -146,8 +146,12 @@ bool MySqlHdbppSchema::getData(const char *source,
 
     d_ptr->notifyEveryNumRows = notifyEveryNumRows;
 
-    snprintf(query, MAXQUERYLEN, "SELECT att_conf_id,data_type from att_conf WHERE att_name like '%%/%s'", source);
+    snprintf(query, MAXQUERYLEN, "SELECT att_conf_id,data_type from att_conf,att_conf_data_type "
+              " WHERE att_name like '%%%s' AND "
+             "att_conf.att_conf_data_type_id=att_conf_data_type.att_conf_data_type_id", source);
+
     Result * res = connection->query(query);
+    printf("\e[1;32mquery: %s\e[0m\n", query);
     if(!res)
     {
         snprintf(d_ptr->errorMessage, MAXERRORLEN,
@@ -232,18 +236,17 @@ bool MySqlHdbppSchema::getData(const char *source,
                 {
                     snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
                     if(format == XVariant::Vector)
-                        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,dim_x,idx FROM "
-                                                     " %s WHERE att_conf_id=%d AND event_time >='%s' "
-                                                     " AND event_time <= '%s' ORDER BY event_time,idx ASC",
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,dim_x,idx FROM "
+                                                     " %s WHERE att_conf_id=%d AND data_time >='%s' "
+                                                     " AND data_time <= '%s' ORDER BY data_time,idx ASC",
                                  table_name, id, start_date, stop_date);
                     else if(format == XVariant::Scalar)
-                        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r FROM "
-                                                     " %s WHERE att_conf_id=%d AND event_time >='%s' "
-                                                     " AND event_time <= '%s' ORDER BY event_time ASC",
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r FROM "
+                                                     " %s WHERE att_conf_id=%d AND data_time >='%s' "
+                                                     " AND data_time <= '%s' ORDER BY data_time ASC",
                                  table_name, id, start_date, stop_date);
                     
                     printf("\e[1;32mquery: %s\e[0m\n", query);
-
 
                     res = connection->query(query);
                     if(!res)
@@ -350,14 +353,14 @@ bool MySqlHdbppSchema::getData(const char *source,
                     /*  */
                     snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
                     if(format == XVariant::Vector)
-                        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w,dim_x,idx FROM "
-                                                     " %s WHERE att_conf_id=%d AND event_time >='%s' "
-                                                     " AND event_time <= '%s' ORDER BY event_time,idx ASC",
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w,dim_x,idx FROM "
+                                                     " %s WHERE att_conf_id=%d AND data_time >='%s' "
+                                                     " AND data_time <= '%s' ORDER BY data_time,idx ASC",
                                  table_name, id, start_date, stop_date);
                     else
-                        snprintf(query, MAXQUERYLEN, "SELECT event_time,value_r,value_w FROM "
-                                                     " %s WHERE att_conf_id=%d AND  event_time >='%s' "
-                                                     " AND event_time <= '%s' ORDER BY event_time ASC",
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w FROM "
+                                                     " %s WHERE att_conf_id=%d AND  data_time >='%s' "
+                                                     " AND data_time <= '%s' ORDER BY data_time ASC",
                                  table_name, id, start_date, stop_date);
 
                     printf("\e[1;32mquery: %s\e[0m\n", query);
@@ -590,8 +593,8 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
 
     if(format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT event_time FROM %s WHERE att_conf_id=%d AND "
-             " event_time <= '%s' ORDER BY event_time DESC LIMIT 1", table_name, att_id, start_date);
+        snprintf(query, MAXQUERYLEN, "SELECT data_time FROM %s WHERE att_conf_id=%d AND "
+             " data_time <= '%s' ORDER BY data_time DESC LIMIT 1", table_name, att_id, start_date);
 
         printf("\e[1;32mquery: %s\e[0m\n", query);
         res = connection->query(query);
@@ -629,30 +632,30 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
     printf("\e[1;4;35mfetching in the past \"%s\" before %s\e[0m\n", source, start_date);
     if(writable == XVariant::RO && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT event_time,dim_x,idx,value_r FROM "
-                                     " %s WHERE att_conf_id=%d AND event_time = "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r FROM "
+                                     " %s WHERE att_conf_id=%d AND data_time = "
                                      " '%s' ORDER BY idx ASC",
                  table_name, att_id, timestamp);
     }
     else if(writable == XVariant::RO)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT event_time, 1 AS dim_x, 0 AS idx,value_r FROM "
-                                     " %s WHERE att_conf_id=%d AND event_time <= "
-                                     " '%s' ORDER BY event_time DESC LIMIT 1",
+        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r FROM "
+                                     " %s WHERE att_conf_id=%d AND data_time <= "
+                                     " '%s' ORDER BY data_time DESC LIMIT 1",
                  table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT event_time,dim_x,idx,value_r,value_w FROM "
-                                     " %s WHERE att_conf_id=%d AND event_time = "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r,value_w FROM "
+                                     " %s WHERE att_conf_id=%d AND data_time = "
                                      " '%s' ORDER BY idx ASC",
                  table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT event_time, 1 AS dim_x, 0 AS idx,value_r,value_w FROM "
-                                     " %s WHERE att_conf_id=%d AND event_time  <= "
-                                     " '%s' ORDER BY event_time DESC LIMIT 1",
+        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r,value_w FROM "
+                                     " %s WHERE att_conf_id=%d AND data_time  <= "
+                                     " '%s' ORDER BY data_time DESC LIMIT 1",
                  table_name, att_id, start_date);
     }
 

@@ -8,6 +8,8 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 
+/* test/device/1/double_scalar */
+
 SourcesTreeWidget::SourcesTreeWidget(QWidget *parent) :
     QTreeWidget(parent)
 {
@@ -16,7 +18,6 @@ SourcesTreeWidget::SourcesTreeWidget(QWidget *parent) :
     setMouseTracking(true);
     setAcceptDrops(true);
     viewport()->setAcceptDrops(true);
-    header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     setDragDropMode(QTreeView::DragDrop);
 }
 
@@ -79,7 +80,7 @@ QMimeData * SourcesTreeWidget::mimeData( const QList<QTreeWidgetItem *> items ) 
   if(!items.size() == 1)
         return NULL;
   QMimeData *mimeData = new QMimeData();
-  if(level(items.first()) == 4)
+  if(level(items.first()) >= 4)
   {
         QString text = buildItemText(items.first());
         mimeData->setText(text);
@@ -125,6 +126,7 @@ void SourcesTreeWidget::dropEvent(QDropEvent *event)
         foreach(QString src, list)
             addSource(src, true);
     }
+    /* test/device/1/double_scalar */
 }
 
 QStringList SourcesTreeWidget::selectedSources() const

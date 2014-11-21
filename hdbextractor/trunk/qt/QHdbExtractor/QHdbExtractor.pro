@@ -34,7 +34,8 @@ SOURCES += src/main.cpp\
     src/widgets/qhistoricalviewwidgetprivate.cpp \
     src/qhdbextractor.cpp \
     src/widgets/sourcestreewidget.cpp \
-    src/widgets/sourcestreewidget_p.cpp
+    src/widgets/sourcestreewidget_p.cpp \
+    src/widgets/treewidgetsearch.cpp
 
 HEADERS  += \
     src/widgets/qhdbconfigwidget.h \
@@ -42,7 +43,8 @@ HEADERS  += \
     src/widgets/qhistoricalviewwidget.h \
     src/qhdbextractor.h \
     src/widgets/sourcestreewidget.h \
-    src/widgets/sourcestreewidget_p.h
+    src/widgets/sourcestreewidget_p.h \
+    src/widgets/treewidgetsearch.h
 
 FORMS    += src/mainwindow.ui \
     src/widgets/configWidget.ui
