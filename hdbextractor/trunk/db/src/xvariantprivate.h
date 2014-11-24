@@ -6,7 +6,7 @@
 class XVariantPrivate
 {
 public:
-    XVariantPrivate() {}
+    XVariantPrivate();
 
     XVariant::DataFormat mFormat;
     XVariant::DataType mType;
@@ -16,7 +16,7 @@ public:
 
     char mTimestamp[TIMESTAMPLEN];
 
-    char mError[ERRMSGLEN];
+    char* mError;
 
     char mSource[SRCLEN];
 
@@ -29,6 +29,8 @@ public:
     void * val;
 
     void * w_val;
+
+    short mQuality;
 
 };
 

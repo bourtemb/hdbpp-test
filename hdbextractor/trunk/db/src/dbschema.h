@@ -102,6 +102,37 @@ public:
      */
     virtual int get(std::vector<XVariant>& variantlist) = 0;
 
+
+    /** \brief This method finds the errors occurred inside a time_interval window for the specified source
+     *
+     * @param source The name of the source to look for in the database
+     * @param time_interval a TimeInterval defining the time window of interest
+     * @param connection the database connection to use
+     *
+     * @param variantlist a vector of XVariant that is populated with the results of the database query.
+     *
+     * @return true if the query to the database is successfull, false otherwise.
+     *
+     * \note The XVariant data structure is used to store the results, even if it is overabundant.
+     * Each XVariant will store the quality factor, the error message and the associated timestamp.
+     * variantlist will be filled with data which either has an <em>invalid quality factor</em>,
+     * or an error description which is not null.
+     * If no errors occurred in the specified time interval, variantlist will be left unchanged.
+     *
+     * \note findErrors will not fetch the data value: rows with a null data value (read or write)
+     * are not selected by this method. findErrors evaluates only the quality factor and a <em>non
+     * empty</em> error string. Moreover, only an <em>invalid quality factor (ATTR_INVALID in Tango)
+     * </em> is considered to be an error marker. The Tango ATTR_INVALID quality corresponds to the
+     * value 1, as you can see from idl/tango.h include file:
+     * enum AttrQuality { ATTR_VALID, ATTR_INVALID, ATTR_ALARM, ATTR_CHANGING,
+     * ATTR_WARNING, __max_AttrQuality=0xffffffff };
+     *
+     * \note The hdb database does not support errors.
+     */
+    virtual bool findErrors(const char *source, const TimeInterval *time_interval,
+                            Connection *connection,
+                            std::vector<XVariant>& variantlist) const = 0;
+
     /** \brief This method returns the last error message that occurred.
      *
      * If during the last operation no error occurred, this method should return an empty string

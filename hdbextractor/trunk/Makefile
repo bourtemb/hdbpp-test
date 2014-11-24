@@ -65,7 +65,8 @@ SOURCES       = src/hdbextractor.cpp \
 		utils/xvariantprinter.cpp \
 		utils/datasieverprogresslistener.cpp \
 		db/src/timeinterval.cpp \
-		db/src/datetimeutils.cpp 
+		db/src/datetimeutils.cpp \
+		db/src/xvariantprivate.cpp 
 OBJECTS       = hdbextractor.o \
 		hdbextractorprivate.o \
 		mysqlconnection.o \
@@ -86,7 +87,8 @@ OBJECTS       = hdbextractor.o \
 		xvariantprinter.o \
 		datasieverprogresslistener.o \
 		timeinterval.o \
-		datetimeutils.o
+		datetimeutils.o \
+		xvariantprivate.o
 DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		/usr/local/qt5/mkspecs/common/shell-unix.conf \
 		/usr/local/qt5/mkspecs/common/unix.conf \
@@ -210,7 +212,8 @@ DIST          = /usr/local/qt5/mkspecs/features/spec_pre.prf \
 		utils/xvariantprinter.cpp \
 		utils/datasieverprogresslistener.cpp \
 		db/src/timeinterval.cpp \
-		db/src/datetimeutils.cpp
+		db/src/datetimeutils.cpp \
+		db/src/xvariantprivate.cpp
 QMAKE_TARGET  = hdbextractor++
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = libhdbextractor++.so.1.0.0
@@ -520,7 +523,8 @@ hdbextractor.o: src/hdbextractor.cpp src/hdbextractor.h \
 		db/src/helpers/configurabledbschemahelper.h \
 		hdbpp/src/mysqlhdbppschema.h \
 		src/hdbextractorlistener.h \
-		src/queryconfiguration.h
+		src/queryconfiguration.h \
+		db/src/timeinterval.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o hdbextractor.o src/hdbextractor.cpp
 
 hdbextractorprivate.o: src/hdbextractorprivate.cpp src/hdbextractorprivate.h \
@@ -576,7 +580,8 @@ mysqlhdbschema.o: hdb/src/mysqlhdbschema.cpp hdb/src/mysqlhdbschema.h \
 		db/src/result.h \
 		mysql/src/mysqlconnection.h \
 		src/hdbxmacros.h \
-		db/src/dbschemaprivate.h
+		db/src/dbschemaprivate.h \
+		db/src/timeinterval.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mysqlhdbschema.o hdb/src/mysqlhdbschema.cpp
 
 xvariantlist.o: db/src/xvariantlist.cpp db/src/xvariantlist.h \
@@ -596,7 +601,8 @@ mysqlhdbppschema.o: hdbpp/src/mysqlhdbppschema.cpp hdbpp/src/mysqlhdbppschema.h 
 		db/src/result.h \
 		mysql/src/mysqlconnection.h \
 		src/hdbxmacros.h \
-		db/src/dbschemaprivate.h
+		db/src/dbschemaprivate.h \
+		db/src/timeinterval.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mysqlhdbppschema.o hdbpp/src/mysqlhdbppschema.cpp
 
 configurationparser.o: src/configurationparser.cpp src/configurationparser.h \
@@ -636,11 +642,16 @@ xvariantprinter.o: utils/xvariantprinter.cpp utils/xvariantprinter.h \
 datasieverprogresslistener.o: utils/datasieverprogresslistener.cpp utils/datasieverprogresslistener.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datasieverprogresslistener.o utils/datasieverprogresslistener.cpp
 
-timeinterval.o: db/src/timeinterval.cpp db/src/timeinterval.h
+timeinterval.o: db/src/timeinterval.cpp db/src/timeinterval.h \
+		db/src/datetimeutils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o timeinterval.o db/src/timeinterval.cpp
 
 datetimeutils.o: db/src/datetimeutils.cpp db/src/datetimeutils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o datetimeutils.o db/src/datetimeutils.cpp
+
+xvariantprivate.o: db/src/xvariantprivate.cpp db/src/xvariantprivate.h \
+		db/src/xvariant.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o xvariantprivate.o db/src/xvariantprivate.cpp
 
 ####### Install
 

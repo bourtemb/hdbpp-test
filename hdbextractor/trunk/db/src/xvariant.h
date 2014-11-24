@@ -6,7 +6,6 @@
 #include <string>
 
 #define TIMESTAMPLEN    32
-#define ERRMSGLEN       128
 #define SRCLEN          256
 
 class XVariantPrivate;
@@ -80,6 +79,8 @@ public:
 
     size_t getSize() const;
 
+    short int getQuality() const;
+
     std::vector<double> toDoubleVector(bool read = true) const;
 
     std::vector<long int> toLongIntVector(bool read = true) const;
@@ -111,6 +112,10 @@ public:
     XVariant& setTimestamp(const char* ts);
 
     XVariant& setTimestamp(const struct timeval* tv);
+
+    XVariant& setQuality(const char *quality);
+
+    XVariant& setError(const char *error);
 
     time_t getTime_tTimestamp() const;
 
@@ -155,6 +160,8 @@ private:
     void delete_wdata();
 
     void mMakeError(int errnum);
+
+    void mMakeError(const char *msg);
 
 private:
 

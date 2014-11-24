@@ -100,6 +100,88 @@ bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
     return getData(sources, time_interval->start(), time_interval->stop(), connection, notifyEveryRows);
 }
 
+bool MySqlHdbppSchema::mGetSourceProperties(const char* source,
+                                            Connection *connection,
+                                            XVariant::DataType *type,
+                                            XVariant::DataFormat *format,
+                                            XVariant::Writable *writable,
+                                            char *data_type,
+                                            int *id) const
+{
+    char query[MAXQUERYLEN];
+    char ch_id[16];
+
+    snprintf(query, MAXQUERYLEN, "SELECT att_conf_id,data_type from att_conf,att_conf_data_type "
+              " WHERE att_name like '%%%s' AND "
+             "att_conf.att_conf_data_type_id=att_conf_data_type.att_conf_data_type_id", source);
+    Result * res = connection->query(query);
+    printf("\e[1;32mquery: %s\e[0m\n", query);
+    if(!res)
+    {
+        snprintf(d_ptr->errorMessage, MAXERRORLEN,
+                 "MySqlHdbppSchema.getData: error in query \"%s\": \"%s\"", query, connection->getError());
+    }
+    else if(res->next() > 0)
+    {
+        Row* row = res->getCurrentRow();
+        if(!row)
+        {
+            snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
+        }
+        else if(row->getFieldCount() == 2)
+        {
+            strncpy(ch_id, row->getField(0), 16);
+
+            strncpy(data_type, row->getField(1), 32);
+
+            *id = atoi(ch_id);
+            /*
+             * enum AttributeDataType { ATT_BOOL, ATT_SHORT, ATT_LONG, ATT_LONG64, ATT_FLOAT,
+             * ATT_DOUBLE, ATT_UCHAR, ATT_USHORT, ATT_ULONG, ATT_ULONG64, ATT_STRING,
+             * ATT_STATE, DEVICE_STATE,
+             * ATT_ENCODED, NO_DATA ...
+             */
+            if(strstr(data_type, "double") != NULL)
+                *type = XVariant::Double;
+            else if(strstr(data_type, "int64") != NULL)
+                *type = XVariant::Int;
+            else if(strstr(data_type, "int8") != NULL)
+                *type = XVariant::Int;
+            else if(strstr(data_type, "string") != NULL)
+                *type = XVariant::String;
+            else if(strstr(data_type, "bool") != NULL)
+                *type = XVariant::Boolean;
+            else
+                *type = XVariant::TypeInvalid;
+
+            /* free memory */
+            res->close();
+            row->close();
+
+            if(strstr(data_type, "ro") != NULL)
+                *writable = XVariant::RO;
+            else if(strstr(data_type, "rw") != NULL)
+                *writable = XVariant::RW;
+            else if(strstr(data_type, "wo") != NULL)
+                *writable = XVariant::WO;
+            else
+                *writable = XVariant::WritableInvalid;
+
+            if(strstr(data_type, "scalar") != NULL)
+                *format = XVariant::Scalar;
+            else if(strstr(data_type, "array") != NULL)
+                *format = XVariant::Vector;
+            else if(strstr(data_type, "image") != NULL)
+                *format = XVariant::Matrix;
+            else
+                *format = XVariant::FormatInvalid;
+
+            return true;
+        }
+    }
+    return false;
+}
+
 /** \brief Fetch attribute data from the MySql hdb++ database between a start and stop date/time.
  *
  * Fetch data from the  MySql hdb++ database.
@@ -125,13 +207,18 @@ bool MySqlHdbppSchema::getData(const char *source,
     bool from_the_past_success = true;
     char query[MAXQUERYLEN];
     char errmsg[256];
-    char ch_id[16];
-    char data_type[32];
     char timestamp[32];
     char table_name[32];
+    char data_type[32];
     int id, datasiz = 1;
     int timestampCnt = 0;
     int index = 0;
+
+    Result *res = NULL;
+    XVariant::DataType dataType;
+    XVariant::Writable wri;
+    XVariant::DataFormat format;
+
     double elapsed = -1.0; /* query elapsed time in seconds.microseconds */
     double from_the_past_elapsed = 0.0; /* fetch from the past query time */
     struct timeval tv1, tv2;
@@ -146,341 +233,275 @@ bool MySqlHdbppSchema::getData(const char *source,
 
     d_ptr->notifyEveryNumRows = notifyEveryNumRows;
 
-    snprintf(query, MAXQUERYLEN, "SELECT att_conf_id,data_type from att_conf,att_conf_data_type "
-              " WHERE att_name like '%%%s' AND "
-             "att_conf.att_conf_data_type_id=att_conf_data_type.att_conf_data_type_id", source);
+    if(mGetSourceProperties(source, connection, &dataType, &format, &wri, data_type, &id))
+    {
 
-    Result * res = connection->query(query);
-    printf("\e[1;32mquery: %s\e[0m\n", query);
-    if(!res)
-    {
-        snprintf(d_ptr->errorMessage, MAXERRORLEN,
-                 "MySqlHdbppSchema.getData: error in query \"%s\": \"%s\"", query, connection->getError());
-        return false;
-    }
-    if(res->next() > 0)
-    {
-        Row* row = res->getCurrentRow();
-        if(!row)
+        if(dataType == XVariant::TypeInvalid || wri ==  XVariant::WritableInvalid ||
+                format == XVariant::FormatInvalid)
         {
-            snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
-            return false;
+            snprintf(d_ptr->errorMessage, MAXERRORLEN,
+                     "MySqlHdbppSchema.getData: invalid type %d, format %d or writable %d",
+                     dataType, format, wri);
+            success = false;
         }
-
-        if(row->getFieldCount() == 2)
+        else
         {
-            strncpy(ch_id, row->getField(0), 16);
-
-            strncpy(data_type, row->getField(1), 32);
-
-            /*
-             * enum AttributeDataType { ATT_BOOL, ATT_SHORT, ATT_LONG, ATT_LONG64, ATT_FLOAT,
-             * ATT_DOUBLE, ATT_UCHAR, ATT_USHORT, ATT_ULONG, ATT_ULONG64, ATT_STRING,
-             * ATT_STATE, DEVICE_STATE,
-             * ATT_ENCODED, NO_DATA ...
-             */
-            XVariant::DataType dataType;
-            if(strstr(data_type, "double") != NULL)
-                dataType = XVariant::Double;
-            else if(strstr(data_type, "int64") != NULL)
-                dataType = XVariant::Int;
-            else if(strstr(data_type, "int8") != NULL)
-                dataType = XVariant::Int;
-            else if(strstr(data_type, "string") != NULL)
-                dataType = XVariant::String;
-            else if(strstr(data_type, "bool") != NULL)
-                dataType = XVariant::Boolean;
-            else
-                dataType = XVariant::TypeInvalid;
-
-            /* free memory */
-            res->close();
-            row->close();
-
-            XVariant::Writable wri;
-            if(strstr(data_type, "ro") != NULL)
-                wri = XVariant::RO;
-            else if(strstr(data_type, "rw") != NULL)
-                wri = XVariant::RW;
-            else if(strstr(data_type, "wo") != NULL)
-                wri = XVariant::WO;
-            else
-                wri = XVariant::WritableInvalid;
-
-            XVariant::DataFormat format;
-            if(strstr(data_type, "scalar") != NULL)
-                format = XVariant::Scalar;
-            else if(strstr(data_type, "array") != NULL)
-                format = XVariant::Vector;
-            else if(strstr(data_type, "image") != NULL)
-                format = XVariant::Matrix;
-            else
-                format = XVariant::FormatInvalid;
-
-            if(dataType == XVariant::TypeInvalid || wri ==  XVariant::WritableInvalid ||
-                    format == XVariant::FormatInvalid)
+            const ConfigurableDbSchemaHelper *configHelper = new ConfigurableDbSchemaHelper();
+            ConfigurableDbSchemaHelper::FillFromThePastMode fillMode = ConfigurableDbSchemaHelper::None;
+            Row *row;
+            /* now get data */
+            if(wri == XVariant::RO)
             {
-                snprintf(d_ptr->errorMessage, MAXERRORLEN,
-                         "MySqlHdbppSchema.getData: invalid type %d, format %d or writable %d",
-                         dataType, format, wri);
-                success = false;
-            }
-            else
-            {
-                const ConfigurableDbSchemaHelper *configHelper = new ConfigurableDbSchemaHelper();
-                ConfigurableDbSchemaHelper::FillFromThePastMode fillMode = ConfigurableDbSchemaHelper::None;
+                snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
+                if(format == XVariant::Vector)
+                    snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,dim_x,idx,quality,error_desc FROM "
+                                                 " %s WHERE att_conf_id=%d AND data_time >='%s' "
+                                                 " AND data_time <= '%s' ORDER BY data_time,idx ASC",
+                             table_name, id, start_date, stop_date);
+                else if(format == XVariant::Scalar)
+                    snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,quality,error_desc FROM "
+                                                 " %s WHERE att_conf_id=%d AND data_time >='%s' "
+                                                 " AND data_time <= '%s' ORDER BY data_time ASC",
+                             table_name, id, start_date, stop_date);
 
-                /* now get data */
-                id = atoi(ch_id);
-                if(wri == XVariant::RO)
+                printf("\e[1;32mquery: %s\e[0m\n", query);
+
+                res = connection->query(query);
+                if(!res)
                 {
-                    snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
-                    if(format == XVariant::Vector)
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,dim_x,idx FROM "
-                                                     " %s WHERE att_conf_id=%d AND data_time >='%s' "
-                                                     " AND data_time <= '%s' ORDER BY data_time,idx ASC",
-                                 table_name, id, start_date, stop_date);
-                    else if(format == XVariant::Scalar)
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r FROM "
-                                                     " %s WHERE att_conf_id=%d AND data_time >='%s' "
-                                                     " AND data_time <= '%s' ORDER BY data_time ASC",
-                                 table_name, id, start_date, stop_date);
-                    
-                    printf("\e[1;32mquery: %s\e[0m\n", query);
+                    snprintf(d_ptr->errorMessage, MAXERRORLEN, "error in query \"%s\": \"%s\"",
+                             query, connection->getError());
+                    return false;
+                }
 
-                    res = connection->query(query);
-                    if(!res)
+                while(res->next() > 0)
+                {
+                    row = res->getCurrentRow();
+
+                    if(!row)
                     {
-                        snprintf(d_ptr->errorMessage, MAXERRORLEN, "error in query \"%s\": \"%s\"",
-                                 query, connection->getError());
+                        snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
                         return false;
                     }
 
-                    while(res->next() > 0)
-                    {
-                        row = res->getCurrentRow();
-
-                        if(!row)
-                        {
-                            snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
-                            return false;
-                        }
-
-                        /* compare timestamp with previous one: if they differ, the row
+                    /* compare timestamp with previous one: if they differ, the row
                          * refers to the next value in time.
                          */
-                        if(strcmp(timestamp, row->getField(0)) != 0)
+                    if(strcmp(timestamp, row->getField(0)) != 0)
+                    {
+                        if(format != XVariant::Scalar && timestampCnt > 0 &&
+                                d_ptr->notifyEveryNumRows > 0 &&
+                                (timestampCnt % d_ptr->notifyEveryNumRows == 0))
                         {
-                            if(format != XVariant::Scalar && timestampCnt > 0 &&
-                                    d_ptr->notifyEveryNumRows > 0 &&
-                                    (timestampCnt % d_ptr->notifyEveryNumRows == 0))
+                            printf("\e[1;33mnotrifying vector!!\e[0m\n");
+                            d_ptr->resultListenerI->onProgressUpdate(source,
+                                                                     timestampCnt,
+                                                                     res->getRowCount() / datasiz);
+                        }
+
+                        /* get timestamp */
+                        strncpy(timestamp, row->getField(0), 32);
+
+                        if(timestampCnt == 0)
+                        {
+                            fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                                                         start_date, stop_date, timestamp);
+                            if(fillMode != ConfigurableDbSchemaHelper::None)
                             {
-                                printf("\e[1;33mnotrifying vector!!\e[0m\n");
-                                d_ptr->resultListenerI->onProgressUpdate(source,
-                                                                         timestampCnt,
-                                                                         res->getRowCount() / datasiz);
-                            }
-
-                            /* get timestamp */
-                            strncpy(timestamp, row->getField(0), 32);
-
-                            if(timestampCnt == 0)
-                            {
-                                fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                                             start_date, stop_date, timestamp);
-                                if(fillMode != ConfigurableDbSchemaHelper::None)
-                                {
-                                    printf("RO: calling fetchInThePast\n");
-                                    from_the_past_success = fetchInThePast(source, start_date, table_name, id,
-                                                                           dataType, format, wri, connection,
-                                                                           &from_the_past_elapsed, fillMode);
-                                }
-                            }
-
-                            /* get data size of array */
-                            if(format == XVariant::Vector)
-                                datasiz = atoi(row->getField(2));
-                            else
-                                datasiz = 1;
-
-                            /* create new XVariant for the timestamp */
-                            xvar = new XVariant(source, timestamp, datasiz, format, dataType, wri);
-
-                            timestampCnt++;
-
-                            printf("+ xvar 0x%p: new source %s %s %s arr.cnt: %d data siz: %d entries cnt: %d)\n", xvar,
-                                   source, row->getField(0), row->getField(1),
-                                   timestampCnt, datasiz, res->getRowCount()/datasiz);
-
-                            pthread_mutex_lock(&d_ptr->mutex);
-
-                            if(d_ptr->variantList == NULL)
-                                d_ptr->variantList = new XVariantList();
-                            if(format == XVariant::Scalar)
-                            {
-                                xvar->add(row->getField(1), 0);
-                            }
-                            d_ptr->variantList->add(xvar);
-
-                            pthread_mutex_unlock(&d_ptr->mutex);
-
-                            if(format == XVariant::Scalar && timestampCnt > 0 &&
-                                    d_ptr->notifyEveryNumRows > 0 &&
-                                    (timestampCnt % d_ptr->notifyEveryNumRows == 0))
-                            {
-                                d_ptr->resultListenerI->onProgressUpdate(source,
-                                                                         timestampCnt,
-                                                                         res->getRowCount() / datasiz);
+                                printf("RO: calling fetchInThePast\n");
+                                from_the_past_success = fetchInThePast(source, start_date, table_name, id,
+                                                                       dataType, format, wri, connection,
+                                                                       &from_the_past_elapsed, fillMode);
                             }
                         }
 
+                        /* get data size of array */
                         if(format == XVariant::Vector)
+                            datasiz = atoi(row->getField(2));
+                        else
+                            datasiz = 1;
+
+                        /* create new XVariant for the timestamp */
+                        xvar = new XVariant(source, timestamp, datasiz, format, dataType, wri);
+                        xvar->setQuality(row->getField(row->getFieldCount() - 2));
+                        xvar->setError(row->getField(row->getFieldCount() - 1));
+
+                        timestampCnt++;
+
+                        printf("+ xvar 0x%p: new source %s %s %s arr.cnt: %d data siz: %d entries cnt: %d)\n", xvar,
+                               source, row->getField(0), row->getField(1),
+                               timestampCnt, datasiz, res->getRowCount()/datasiz);
+
+                        pthread_mutex_lock(&d_ptr->mutex);
+
+                        if(d_ptr->variantList == NULL)
+                            d_ptr->variantList = new XVariantList();
+                        if(format == XVariant::Scalar)
                         {
-                            index = atoi(row->getField(3));
-                            pthread_mutex_lock(&d_ptr->mutex);
-                            xvar->add(row->getField(1), index);
-                            pthread_mutex_unlock(&d_ptr->mutex);
+                            xvar->add(row->getField(1), 0);
                         }
-                        row->close();
+                        d_ptr->variantList->add(xvar);
 
-                    } /* end while(res->next) res is closed after else wri == XVariant::RW */
+                        pthread_mutex_unlock(&d_ptr->mutex);
 
-                    success = from_the_past_success;
+                        if(format == XVariant::Scalar && timestampCnt > 0 &&
+                                d_ptr->notifyEveryNumRows > 0 &&
+                                (timestampCnt % d_ptr->notifyEveryNumRows == 0))
+                        {
+                            d_ptr->resultListenerI->onProgressUpdate(source,
+                                                                     timestampCnt,
+                                                                     res->getRowCount() / datasiz);
+                        }
+                    }
 
-                }  /* end else if(wri == XVariant::RO) */
-                else if(wri == XVariant::RW)
-                {
-                    /*  */
-                    snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
                     if(format == XVariant::Vector)
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w,dim_x,idx FROM "
-                                                     " %s WHERE att_conf_id=%d AND data_time >='%s' "
-                                                     " AND data_time <= '%s' ORDER BY data_time,idx ASC",
-                                 table_name, id, start_date, stop_date);
-                    else
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w FROM "
-                                                     " %s WHERE att_conf_id=%d AND  data_time >='%s' "
-                                                     " AND data_time <= '%s' ORDER BY data_time ASC",
-                                 table_name, id, start_date, stop_date);
-
-                    printf("\e[1;32mquery: %s\e[0m\n", query);
-
-                    res = connection->query(query);
-                    if(!res)
                     {
-                        snprintf(d_ptr->errorMessage, MAXERRORLEN, "error in query \"%s\": \"%s\"",
-                                 query, connection->getError());
+                        index = atoi(row->getField(3));
+                        pthread_mutex_lock(&d_ptr->mutex);
+                        xvar->add(row->getField(1), index);
+                        pthread_mutex_unlock(&d_ptr->mutex);
+                    }
+                    row->close();
+
+                } /* end while(res->next) res is closed after else wri == XVariant::RW */
+
+                success = from_the_past_success;
+
+            }  /* end else if(wri == XVariant::RO) */
+            else if(wri == XVariant::RW)
+            {
+                /*  */
+                snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
+                if(format == XVariant::Vector)
+                    snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w,dim_x,idx,quality,error_desc FROM "
+                                                 " %s WHERE att_conf_id=%d AND data_time >='%s' "
+                                                 " AND data_time <= '%s' ORDER BY data_time,idx ASC",
+                             table_name, id, start_date, stop_date);
+                else
+                    snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w,quality,error_desc FROM "
+                                                 " %s WHERE att_conf_id=%d AND  data_time >='%s' "
+                                                 " AND data_time <= '%s' ORDER BY data_time ASC",
+                             table_name, id, start_date, stop_date);
+
+                printf("\e[1;32mquery: %s\e[0m\n", query);
+
+                res = connection->query(query);
+                if(!res)
+                {
+                    snprintf(d_ptr->errorMessage, MAXERRORLEN, "error in query \"%s\": \"%s\"",
+                             query, connection->getError());
+                    return false;
+                }
+                while(res->next() > 0)
+                {
+                    row = res->getCurrentRow();
+                    if(!row)
+                    {
+                        snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
                         return false;
                     }
-                    while(res->next() > 0)
-                    {
-                        row = res->getCurrentRow();
-                        if(!row)
-                        {
-                            snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
-                            return false;
-                        }
 
-                        XVariant *xvar = NULL;
+                    XVariant *xvar = NULL;
 
-                        /* compare timestamp with previous one: if they differ, the row
+                    /* compare timestamp with previous one: if they differ, the row
                          * refers to the next value in time.
                          */
-                        if(strcmp(timestamp, row->getField(0)) != 0)
+                    if(strcmp(timestamp, row->getField(0)) != 0)
+                    {
+                        if(timestampCnt > 0 &&
+                                d_ptr->notifyEveryNumRows > 0 &&
+                                (timestampCnt % d_ptr->notifyEveryNumRows == 0))
                         {
-                            if(timestampCnt > 0 &&
-                                    d_ptr->notifyEveryNumRows > 0 &&
-                                    (timestampCnt % d_ptr->notifyEveryNumRows == 0))
-                            {
-                                d_ptr->resultListenerI->onProgressUpdate(source, timestampCnt,
-                                                                         res->getRowCount() / datasiz);
-                            }
-                            /* get timestamp */
-                            strncpy(timestamp, row->getField(0), 32);
+                            d_ptr->resultListenerI->onProgressUpdate(source, timestampCnt,
+                                                                     res->getRowCount() / datasiz);
+                        }
+                        /* get timestamp */
+                        strncpy(timestamp, row->getField(0), 32);
 
-                            if(timestampCnt == 0)
+                        if(timestampCnt == 0)
+                        {
+                            fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                                                         start_date,
+                                                                         stop_date,
+                                                                         timestamp);
+                            if(fillMode != ConfigurableDbSchemaHelper::None)
                             {
-                                fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                                             start_date,
-                                                                             stop_date,
-                                                                             timestamp);
-                                if(fillMode != ConfigurableDbSchemaHelper::None)
-                                {
-                                    /* must fetch the first data ahead of the start_date, create a
+                                /* must fetch the first data ahead of the start_date, create a
                                      * XVariant and insert it as first element, according to the
                                      * fillMode
                                      */
-                                    printf("RW: calling fetchInThePast\n");
-                                    from_the_past_success = fetchInThePast(source, start_date, table_name, id,
-                                                                           dataType, format, wri, connection,
-                                                                           &from_the_past_elapsed,
-                                                                           fillMode);
-                                }
+                                printf("RW: calling fetchInThePast\n");
+                                from_the_past_success = fetchInThePast(source, start_date, table_name, id,
+                                                                       dataType, format, wri, connection,
+                                                                       &from_the_past_elapsed,
+                                                                       fillMode);
                             }
-
-                            /* get data size of array */
-                            if(format == XVariant::Vector)
-                                datasiz = atoi(row->getField(3));
-                            else
-                                datasiz = 1;
-
-                            /* create new XVariant for the timestamp */
-                            xvar = new XVariant(source, timestamp, datasiz, format, dataType, wri);
-                            /*  this means a new array is being associated to a timestamp */
-                            timestampCnt++;
-
-                            pthread_mutex_lock(&d_ptr->mutex);
-                            if(d_ptr->variantList == NULL)
-                                d_ptr->variantList = new XVariantList();
-
-                            d_ptr->variantList->add(xvar);
-                            pthread_mutex_unlock(&d_ptr->mutex);
                         }
 
+                        /* get data size of array */
                         if(format == XVariant::Vector)
-                            index = atoi(row->getField(4));
+                            datasiz = atoi(row->getField(3));
                         else
-                            index = 0; /* scalar */
+                            datasiz = 1;
+
+                        /* create new XVariant for the timestamp */
+                        xvar = new XVariant(source, timestamp, datasiz, format, dataType, wri);
+                        xvar->setQuality(row->getField(row->getFieldCount() - 2));
+                        xvar->setError(row->getField(row->getFieldCount() - 1));
+                        /*  this means a new array is being associated to a timestamp */
+                        timestampCnt++;
 
                         pthread_mutex_lock(&d_ptr->mutex);
-                        xvar->add(row->getField(1), row->getField(2), index);
+                        if(d_ptr->variantList == NULL)
+                            d_ptr->variantList = new XVariantList();
+
+                        d_ptr->variantList->add(xvar);
                         pthread_mutex_unlock(&d_ptr->mutex);
-
-                        row->close();
-                    } /* end while(res->next() > 0) */
-
-                    /* res->close() is called after RW else */
-                    success = from_the_past_success;
-                } /* else if(wri == XVariant::RW) */
-
-                if(res->getRowCount() == 0)
-                {
-                    fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                                 start_date, stop_date, timestamp);
-                    if(fillMode != ConfigurableDbSchemaHelper::None)
-                    {
-                        printf("RO: calling fetchInThePast\n");
-                        from_the_past_success = fetchInThePast(source, start_date, table_name, id,
-                                                               dataType, format, wri, connection,
-                                                               &from_the_past_elapsed, fillMode);
-                        if(from_the_past_success)
-                           timestampCnt++;
                     }
-                }
 
-                res->close();
+                    if(format == XVariant::Vector)
+                        index = atoi(row->getField(4));
+                    else
+                        index = 0; /* scalar */
 
-                delete configHelper;
+                    pthread_mutex_lock(&d_ptr->mutex);
+                    xvar->add(row->getField(1), row->getField(2), index);
+                    pthread_mutex_unlock(&d_ptr->mutex);
 
-            } /* else: valid data type, format, writable */
+                    row->close();
+                } /* end while(res->next() > 0) */
 
-            if(timestampCnt > 0 &&
-                    d_ptr->notifyEveryNumRows > 0)
+                /* res->close() is called after RW else */
+                success = from_the_past_success;
+            } /* else if(wri == XVariant::RW) */
+
+            if(res->getRowCount() == 0)
             {
-                d_ptr->resultListenerI->onProgressUpdate(source,
-                                                         res->getRowCount() / datasiz,
-                                                         res->getRowCount() / datasiz);
+                fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                                             start_date, stop_date, timestamp);
+                if(fillMode != ConfigurableDbSchemaHelper::None)
+                {
+                    printf("RO: calling fetchInThePast\n");
+                    from_the_past_success = fetchInThePast(source, start_date, table_name, id,
+                                                           dataType, format, wri, connection,
+                                                           &from_the_past_elapsed, fillMode);
+                    if(from_the_past_success)
+                        timestampCnt++;
+                }
             }
+
+            res->close();
+
+            delete configHelper;
+
+        } /* else: valid data type, format, writable */
+
+        if(res && timestampCnt > 0 &&
+                d_ptr->notifyEveryNumRows > 0)
+        {
+            d_ptr->resultListenerI->onProgressUpdate(source,
+                                                     res->getRowCount() / datasiz,
+                                                     res->getRowCount() / datasiz);
         }
     }
     else
@@ -571,6 +592,46 @@ bool MySqlHdbppSchema::findSource(Connection *connection,
     return success;
 }
 
+bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_interval,
+                        Connection *connection,
+                        std::vector<XVariant>& variantlist) const
+{
+    bool success;
+    char query[MAXQUERYLEN];
+    char timestamp[MAXTIMESTAMPLEN];
+    char errmsg[256];
+    char table_name[32];
+    char data_type[32];
+    int id, datasiz = 1;
+    int timestampCnt = 0;
+    int index = 0;
+
+    Result *res = NULL;
+    XVariant::DataType dataType;
+    XVariant::Writable wri;
+    XVariant::DataFormat format;
+
+    double elapsed = -1.0; /* query elapsed time in seconds.microseconds */
+    struct timeval tv1, tv2;
+
+    XVariant *xvar = NULL;
+    strcpy(timestamp, ""); /* initialize an empty timestamp */
+
+    gettimeofday(&tv1, NULL);
+
+    /* clear error */
+    strcpy(d_ptr->errorMessage, "");
+
+
+    success = mGetSourceProperties(source, connection, &dataType, &format, &wri, data_type, &id);
+    if(success)
+    {
+
+    }
+
+    return success;
+}
+
 bool MySqlHdbppSchema::fetchInThePast(const char *source,
                                       const char *start_date, const char *table_name,
                                       const int att_id,
@@ -632,28 +693,28 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
     printf("\e[1;4;35mfetching in the past \"%s\" before %s\e[0m\n", source, start_date);
     if(writable == XVariant::RO && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r,quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time = "
                                      " '%s' ORDER BY idx ASC",
                  table_name, att_id, timestamp);
     }
     else if(writable == XVariant::RO)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r,quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time <= "
                                      " '%s' ORDER BY data_time DESC LIMIT 1",
                  table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r,value_w FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r,value_w,quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time = "
                                      " '%s' ORDER BY idx ASC",
                  table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r,value_w FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r,value_w,quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time  <= "
                                      " '%s' ORDER BY data_time DESC LIMIT 1",
                  table_name, att_id, start_date);
@@ -697,6 +758,8 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
                      * Otherwise, we'll never enter the else below.
                      */
                 xvar = new XVariant(source, timestamp, datasiz, format, dataType, writable);
+                xvar->setQuality(row->getField(row->getFieldCount() - 2));
+                xvar->setError(row->getField(row->getFieldCount() - 1));
 
                 pthread_mutex_lock(&d_ptr->mutex);
                 if(d_ptr->variantList == NULL)

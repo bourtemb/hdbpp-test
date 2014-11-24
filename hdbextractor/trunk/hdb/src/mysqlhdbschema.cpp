@@ -442,6 +442,19 @@ bool MySqlHdbSchema::getSourcesList(Connection *connection, std::list<std::strin
     return findSource(connection, "", result);
 }
 
+/** \brief The hdb schema does not support errors. This method will return false and does nothing.
+ *
+ * @return false This method always returns false and does nothing else.
+ *
+ */
+bool MySqlHdbSchema::findErrors(const char *, const TimeInterval *,
+                        Connection *,
+                        std::vector<XVariant>& ) const
+{
+    perr("MySqlHdbSchema.findErrors: errors aren't saved into the hdb database");
+    return false;
+}
+
 bool MySqlHdbSchema::findSource(Connection *connection, const char *substring, std::list<std::string>& result) const
 {
     bool success = true;

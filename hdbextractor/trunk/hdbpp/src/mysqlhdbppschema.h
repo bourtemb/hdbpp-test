@@ -54,11 +54,24 @@ public:
 
     virtual bool findSource(Connection *connection, const char *substring, std::list<std::string> &result) const;
 
+    virtual bool findErrors(const char *source, const TimeInterval *time_interval,
+                            Connection *connection,
+                            std::vector<XVariant>& variantlist) const;
+
     virtual int get(std::vector<XVariant>& variantlist);
 
     virtual const char *getError() const;
 
     virtual bool hasError() const;
+
+private:
+    bool mGetSourceProperties(const char* source,
+                              Connection *connection,
+                              XVariant::DataType *type,
+                              XVariant::DataFormat *format,
+                              XVariant::Writable *writable,
+                              char* data_type,
+                              int *id) const;
 
 };
 

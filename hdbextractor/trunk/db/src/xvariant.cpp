@@ -34,6 +34,10 @@ void XVariant::cleanup()
         }
     }
     delete_wdata();
+
+    if(d->mError)
+        delete d->mError;
+
     delete d;
     d = NULL;
 }
@@ -194,8 +198,8 @@ void XVariant::build_from(const XVariant& other)
     }
 
     strncpy(d->mSource, other.getSource(), SRCLEN);
-    strncpy(d->mError, other.getError(), ERRMSGLEN);
     strncpy(d->mTimestamp, other.getTimestamp(), TIMESTAMPLEN);
+    mMakeError(other.getError());
 
     if(d->mWritable != WO)
     {
@@ -961,8 +965,21 @@ void XVariant::parse(const char *sr, const char *sw)
 
 void XVariant::mMakeError(int errnum)
 {
-    strncpy(d->mError, strerror(errnum), ERRMSGLEN);
-    d->mIsValid = false;
+    mMakeError(strerror(errnum));
+}
+
+void XVariant::mMakeError(const char *msg)
+{
+    printf("XVariant.mMakeError \e[1;31msetting error %s\e[0m\n", msg);
+    if(d->mError)
+        delete d->mError;
+    if(!msg)
+        d->mError = NULL;
+    else
+    {
+        d->mError = new char[strlen(msg) + 1];
+        strncpy(d->mError, msg, strlen(msg) + 1);
+    }
 }
 
 void XVariant::init_common(const char* source, const char *timestamp, DataFormat df, DataType dt)
@@ -982,6 +999,7 @@ void XVariant::init_data(size_t size)
     d->val = NULL;
     d->mSize = size;
     d->mIsValid = true;
+    d->mError = NULL;
 
 
     if(d->mType == Double)
@@ -1030,6 +1048,7 @@ void XVariant::init_data()
 {
     d->val = NULL;
     d->w_val = NULL;
+    d->mError = NULL;
 }
 
 void XVariant::delete_rdata()
@@ -1063,6 +1082,54 @@ void XVariant::delete_wdata()
             delete (char *) d->w_val;
         d->w_val = NULL;
     }
+}
+
+/** \brief Convenience function that sets the quality factor of the XVariant taking a char
+ *  pointer as argument. Can be used to set the quality factor directly from the database
+ *  result, as char pointer.
+ *
+ * @param quality the quality factor, expressed as a string. A NULL value does not change
+ * the quality factor previously memorized. A string that does not contain digits does not
+ * change the quality factor.
+ *
+ * @return  a reference to this XVariant
+ *
+ * @see getError
+ * @see setError
+ *
+ * \note Being the hdbextractor++ library not dependent on the Tango library, here is the
+ * Tango AttrQuality enumeration mapping extracted by the include file idl/tango.h:
+ * enum AttrQuality { ATTR_VALID, ATTR_INVALID, ATTR_ALARM, ATTR_CHANGING, ATTR_WARNING,  __max_AttrQuality=0xffffffff }
+ *
+ *
+ */
+XVariant& XVariant::setQuality(const char *quality)
+{
+    if(quality)
+    {
+        char *endptr;
+        long val = strtol(quality, &endptr, 10);
+        if(endptr == quality)
+            perr("XVariant.setQuality: no digits were found in \"%s\"", quality);
+        else
+            d->mQuality = (short) val;
+    }
+}
+
+/** \brief Sets the error message associated to this XVariant
+ *
+ * @param error the error message. Can be NULL.
+ *
+ * @return a reference to this XVariant
+ *
+ * @see getError
+ * @see setQuality
+ * @see getQuality
+ */
+XVariant& XVariant::setError(const char *error)
+{
+    mMakeError(error);
+    return *this;
 }
 
 /** \brief This method allows changing the timestamp of the XVariant
@@ -1143,6 +1210,22 @@ time_t XVariant::getTime_tTimestamp() const
 struct timeval XVariant::getTimevalTimestamp() const
 {
     return DateTimeUtils().toTimeval(d->mTimestamp);
+}
+
+/**
+ * @brief Returns the quality factor as a short integer.
+ *
+ * @return the quality factor of the value stored by this XVariant. The meaning of the value
+ * is directly mapped from the Tango AttrQuality enumeration.
+ *
+ * \note Being the hdbextractor++ library not dependent on the Tango library, here is the
+ * Tango AttrQuality enumeration mapping extracted by the include file idl/tango.h:
+ * enum AttrQuality { ATTR_VALID, ATTR_INVALID, ATTR_ALARM, ATTR_CHANGING, ATTR_WARNING,  __max_AttrQuality=0xffffffff }
+ *
+ */
+short int XVariant::getQuality() const
+{
+    return d->mQuality;
 }
 
 /** \brief The conversion method that tries to convert the stored data into a vector of double

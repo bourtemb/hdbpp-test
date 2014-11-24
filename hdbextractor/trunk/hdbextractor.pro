@@ -54,7 +54,8 @@ SOURCES += src/hdbextractor.cpp \
     utils/xvariantprinter.cpp \
     utils/datasieverprogresslistener.cpp \
     db/src/timeinterval.cpp \
-    db/src/datetimeutils.cpp
+    db/src/datetimeutils.cpp \
+    db/src/xvariantprivate.cpp
 
 HEADERS += src/hdbextractor.h\
     src/hdbextractorprivate.h \
