@@ -448,8 +448,7 @@ bool MySqlHdbSchema::getSourcesList(Connection *connection, std::list<std::strin
  *
  */
 bool MySqlHdbSchema::findErrors(const char *, const TimeInterval *,
-                        Connection *,
-                        std::vector<XVariant>& ) const
+                        Connection *) const
 {
     perr("MySqlHdbSchema.findErrors: errors aren't saved into the hdb database");
     return false;

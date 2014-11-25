@@ -130,8 +130,7 @@ public:
      * \note The hdb database does not support errors.
      */
     virtual bool findErrors(const char *source, const TimeInterval *time_interval,
-                            Connection *connection,
-                            std::vector<XVariant>& variantlist) const = 0;
+                            Connection *connection) const = 0;
 
     /** \brief This method returns the last error message that occurred.
      *

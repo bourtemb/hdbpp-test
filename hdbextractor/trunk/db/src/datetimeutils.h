@@ -1,6 +1,7 @@
 #ifndef DATETIMEUTILS_H
 #define DATETIMEUTILS_H
 
+#include <sys/time.h>
 #include <time.h>
 
 /** \brief This class contains utility methods to convert different date/time representations

@@ -339,6 +339,8 @@ bool XVariant::isValid() const
  * @see getError
  * @see isValid
  * @see isWNull
+ * @see setQuality
+ *
  */
 bool XVariant::isNull() const
 {
@@ -363,6 +365,7 @@ bool XVariant::isNull() const
  * @see getError
  * @see isValid
  * @see isNull
+ * @see setQuality
  */
 bool XVariant::isWNull() const
 {
@@ -1101,6 +1104,7 @@ void XVariant::delete_wdata()
  * Tango AttrQuality enumeration mapping extracted by the include file idl/tango.h:
  * enum AttrQuality { ATTR_VALID, ATTR_INVALID, ATTR_ALARM, ATTR_CHANGING, ATTR_WARNING,  __max_AttrQuality=0xffffffff }
  *
+ * \note <strong>Calling setQuality with value 1 (ATTR_INVALID) will set the flag isValid to false</strong>.
  *
  */
 XVariant& XVariant::setQuality(const char *quality)

@@ -47,7 +47,8 @@ SOURCES += \
     src/qhdbxutils.cpp \
     src/qhdbxerrorevent.cpp \
     src/qhdbxsourceslistqueryevent.cpp \
-    src/qhdbsourceslistreadyevent.cpp
+    src/qhdbsourceslistreadyevent.cpp \
+    src/qhdbxerrorqueryevent.cpp
 
 HEADERS +=\
         src/hdbextractor-qt_global.h \
@@ -61,7 +62,8 @@ HEADERS +=\
     src/qhdbxutils.h \
     src/qhdbxerrorevent.h \
     src/qhdbxsourceslistqueryevent.h \
-    src/qhdbsourceslistreadyevent.h
+    src/qhdbsourceslistreadyevent.h \
+    src/qhdbxerrorqueryevent.h
 
 INCLUDEPATH += src/ ../../src ../../db/src ../../hdb/src ../../mysql/src
 

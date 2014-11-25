@@ -73,6 +73,8 @@ private slots:
     void radioCurvesStyleToggled(bool);
 
     void sourcesListReady(const QStringList& srclist);
+
+    void plotClicked(const QPointF& point);
 };
 
 #endif // MAINWINDOW_H

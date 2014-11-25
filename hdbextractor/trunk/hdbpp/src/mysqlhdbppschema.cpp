@@ -592,21 +592,43 @@ bool MySqlHdbppSchema::findSource(Connection *connection,
     return success;
 }
 
+/** \brief Finds rows containing errors in the time interval specified
+ *
+ * This method can be used to fetch data rows that store an error at a given timestamp.
+ * A row is considered to store an error if the error message is not NULL (the field error_desc) in the
+ * data tables or if the quality factor is invalid (equals the integer 1)
+ *
+ * The results of this query are saved into a list of XVariant, which can be retrieved in the same way
+ * results from getData are retrieved, i.e. by means of the get method. The get method and findErrors are
+ * thread safe. The list of XVariant internally stored (and emptied with get) is not cleared by findErrors.
+ * This means that previous XVariant objects fetched with getData and not taken out of the list
+ * will still be there.
+ *
+ * @param source the name of the source whose errors you want to seek
+ * @param time_interval the interval of time to scan for errors
+ * @param connection the database connection
+ *
+ * This method communicates the progress of the data fetch through the ResultListenerInterface
+ * methods onProgressUpdate and onFinished.
+ * When your implementation of those methods are invoked, you may want to obtain the partial
+ * (or total) results with get
+ *
+ * @see getData
+ * @see getQuality
+ *
+ */
 bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_interval,
-                        Connection *connection,
-                        std::vector<XVariant>& variantlist) const
+                        Connection *connection) const
 {
     bool success;
     char query[MAXQUERYLEN];
     char timestamp[MAXTIMESTAMPLEN];
-    char errmsg[256];
     char table_name[32];
     char data_type[32];
-    int id, datasiz = 1;
-    int timestampCnt = 0;
-    int index = 0;
+    int id;
+    int rowCnt = 0;
+    int totalRows = 0;
 
-    Result *res = NULL;
     XVariant::DataType dataType;
     XVariant::Writable wri;
     XVariant::DataFormat format;
@@ -626,7 +648,63 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
     success = mGetSourceProperties(source, connection, &dataType, &format, &wri, data_type, &id);
     if(success)
     {
+        snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
+        /* no need to distinguish between different data types/formats/writable because every kind
+         * of data has data_time,quality and error. Moreover, in the case of spectrum data, the dim_x
+         * is forced to the value 1 and so for each error in a given time, only one row is returned.
+         */
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,quality,error_desc FROM "
+                                     " %s WHERE att_conf_id=%d AND data_time >='%s' "
+                                     " AND data_time <= '%s' AND (quality = 1 OR error_desc IS NOT NULL)"
+                                     " ORDER BY data_time ASC",
+                 table_name, id, time_interval->start(), time_interval->stop());
 
+        Result * res = connection->query(query);
+        Row *row = NULL;
+        if(!res)
+        {
+            snprintf(d_ptr->errorMessage, MAXERRORLEN,
+                     "MysqlHdbSchema.findErrors: error in query \"%s\": \"%s\"", query, connection->getError());
+            success = false;
+        }
+        else
+        {
+            totalRows = res->getRowCount();
+            while(res->next() > 0 && success)
+            {
+                row = res->getCurrentRow();
+                if(!row || row->getFieldCount() != 3)
+                {
+                    snprintf(d_ptr->errorMessage, MAXERRORLEN, "MysqlHdbSchema.findErrors: error getting row");
+                    success = false;
+                }
+                else
+                {
+                    xvar = new XVariant(source, row->getField(0), 1, format, dataType, wri);
+                    xvar->setQuality(row->getField(1));
+                    xvar->setError(row->getField(2));
+
+                    pthread_mutex_lock(&d_ptr->mutex);
+                    if(d_ptr->variantList == NULL)
+                        d_ptr->variantList = new XVariantList();
+
+                    d_ptr->variantList->add(xvar);
+                    pthread_mutex_unlock(&d_ptr->mutex);
+
+                    rowCnt++;
+                    if(d_ptr->notifyEveryNumRows > 0 && (rowCnt % d_ptr->notifyEveryNumRows == 0))
+                        d_ptr->resultListenerI->onProgressUpdate(source, rowCnt, totalRows);
+                }
+            }
+
+        }
+        /* compute elapsed time */
+        gettimeofday(&tv2, NULL);
+        /* transform the elapsed time from a timeval struct to a double whose integer part
+         * represents seconds and the decimal microseconds.
+         */
+        elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec);
+        d_ptr->resultListenerI->onFinished(source, rowCnt, totalRows, elapsed);
     }
 
     return success;

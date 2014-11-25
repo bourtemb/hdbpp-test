@@ -1,5 +1,6 @@
 #include "qhdbextractor.h"
 #include "ui_mainwindow.h"
+#include <math.h>
 #include <plotscenewidget.h>
 #include <datasiever.h>
 #include <timescalelabel.h>
@@ -45,6 +46,7 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     plot->xScaleItem()->setAxisTitle("Date/Time");
     //  plot->setDefaultYAxisOriginPosPercentage(0);
     plot->setMouseZoomEnabled(true);
+    connect(plot, SIGNAL(clicked(QPointF)), this, SLOT(plotClicked(QPointF)));
 
     plot->yScaleItem()->setAxisLabelsFormat("%g");
 
@@ -353,6 +355,21 @@ void QHdbExtractor::radioCurvesStyleToggled(bool t)
                 sp->setLineColor(curveColor);
             }
         }
+    }
+}
+
+void QHdbExtractor::plotClicked(const QPointF& point)
+{
+    PlotSceneWidget *plot = findChild<PlotSceneWidget *>();
+    QPointF closestPos;
+    int index;
+    QList<SceneCurve*> curves = plot->getClosest(closestPos, &index, point);
+    foreach(SceneCurve *sc, curves)
+    {
+        double y = sc->data()->yData.at(index);
+        qDebug() << sc->name() << closestPos.x() << closestPos.y() << "x" << sc->data()->xData.at(index) <<
+                    y;
+        if(isnan)
     }
 }
 
