@@ -6,7 +6,7 @@ class QHdbXEvent
 
 public:
 
-    enum EventType { CONNECT, DISCONNECT, QUERY, SOURCESLIST };
+    enum EventType { CONNECT, DISCONNECT, DATA_QUERY, ERROR_QUERY, SOURCESLIST };
 
     QHdbXEvent(EventType et);
 

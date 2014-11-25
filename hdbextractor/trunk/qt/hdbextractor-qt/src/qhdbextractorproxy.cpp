@@ -204,6 +204,11 @@ void QHdbextractorProxy::getData(const QStringList& sources,
     d_ptr->thread->addEvent(qe);
 }
 
+void QHdbextractorProxy::getErrors(const QString& source, double *startTime, double *stopTime)
+{
+
+}
+
 void QHdbextractorProxy::getSourcesList()
 {
     QHdbxSourcesListQueryEvent *sqe = new QHdbxSourcesListQueryEvent();

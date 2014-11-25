@@ -369,7 +369,11 @@ void QHdbExtractor::plotClicked(const QPointF& point)
         double y = sc->data()->yData.at(index);
         qDebug() << sc->name() << closestPos.x() << closestPos.y() << "x" << sc->data()->xData.at(index) <<
                     y;
-        if(isnan)
+        if(isnan(y))
+        {
+            QHdbextractorProxy *hdbxp = findChild< QHdbextractorProxy *>();
+
+        }
     }
 }
 

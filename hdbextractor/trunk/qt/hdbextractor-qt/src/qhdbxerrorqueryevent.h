@@ -1,9 +1,9 @@
 #ifndef QHDBXERRORQUERYEVENT_H
 #define QHDBXERRORQUERYEVENT_H
 
-#include <QEvent>
+#include <qhdbxevent.h>
 
-class QHdbXErrorQueryEvent : public QEvent
+class QHdbXErrorQueryEvent : public QHdbXEvent
 {
 public:
     QHdbXErrorQueryEvent();
