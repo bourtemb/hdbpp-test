@@ -110,11 +110,12 @@ void QHdbextractorThread::addEvent(QHdbXEvent *hdbxe)
 
 void QHdbextractorThread::process()
 {
-    qDebug() << this << objectName() << __FUNCTION__ << "eventQueueSize" << m_eventQueue.size();
     while(!m_eventQueue.isEmpty())
     {
         /* dequeue the event */
         QHdbXEvent *e = m_eventQueue.dequeue();
+        qDebug() << this << objectName() << __FUNCTION__ << "eventQueueSize" << m_eventQueue.size() << "type" <<
+                    e->getType();
         if(e->getType() == QHdbXEvent::CONNECT)
         {
             QHdbXConnectionEvent *hxce = static_cast<QHdbXConnectionEvent *>(e);
@@ -154,7 +155,8 @@ void QHdbextractorThread::process()
             if(m_extractor->isConnected())
             {
                 TimeInterval timeInterval(qeque->startTime, qeque->stopTime);
-                if(!m_extractor->findErrors(qstoc(qeque->source), &timeInterval))
+                qDebug() << __FUNCTION__ << "calling find errors";
+                if(!m_extractor->findErrors(qeque->source.toStdString().c_str(), &timeInterval))
                     emit errorMessage(m_extractor->getErrorMessage());
             }
             else

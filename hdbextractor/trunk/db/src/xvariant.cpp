@@ -185,6 +185,7 @@ void XVariant::build_from(const XVariant& other)
     d->mIsValid = other.isValid();
     d->mIsNull = other.isNull();
     d->mIsWNull = other.isWNull();
+    d->mQuality = other.getQuality();
 
 //    printf("\e[0;36mXVariant %p copy from %p this->d: %p: format %d wri %d size %ld\e[0m \n", this, &other, d,
 //           d->mFormat, d->mWritable, d->mSize);
@@ -1118,6 +1119,7 @@ XVariant& XVariant::setQuality(const char *quality)
         else
             d->mQuality = (short) val;
     }
+    return *this;
 }
 
 /** \brief Sets the error message associated to this XVariant
@@ -1419,7 +1421,12 @@ bool XVariant::toBool(bool read, bool *ok) const
 std::string XVariant::toString(bool read, bool *ok) const
 {
     std::string ret;
+    if(read)
+    {
 
+    }
+    if(ok)
+        *ok = false;
     return ret;
 }
 

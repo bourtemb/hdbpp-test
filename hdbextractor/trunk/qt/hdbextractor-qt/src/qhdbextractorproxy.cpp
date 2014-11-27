@@ -3,6 +3,7 @@
 #include "qhdbextractorproxyprivate.h"
 #include "qhdbxconnectionevent.h"
 #include "qhdbxqueryevent.h"
+#include "qhdbxerrorqueryevent.h"
 #include "qhdbnewdataevent.h"
 #include "qhdbnewerrordataevent.h"
 #include "qhdbxerrorevent.h"
@@ -163,9 +164,25 @@ void QHdbextractorProxy::connect(Hdbextractor::DbType dbType,
  * @see Hdbextractor::setUpdateProgressStep
  *
  */
-void QHdbextractorProxy::getData(const QString& source, const QDateTime& start_date, const QDateTime& stop_date)
+void QHdbextractorProxy::getData(const QString& source,
+                                 const QDateTime& start_date,
+                                 const QDateTime& stop_date)
 {
     QHdbXQueryEvent *qe = new QHdbXQueryEvent(QStringList() << source,
+                                              start_date.toString("yyyy-MM-dd hh:mm:ss"),
+                                              stop_date.toString("yyyy-MM-dd hh:mm:ss"));
+    d_ptr->thread->addEvent(qe);
+}
+
+/** \brief get data for multiple sources
+ *
+ * To be implemented
+ */
+void QHdbextractorProxy::getData(const QStringList& sources,
+                                      const QDateTime &start_date,
+                                      const QDateTime &stop_date)
+{
+    QHdbXQueryEvent *qe = new QHdbXQueryEvent(sources,
                                               start_date.toString("yyyy-MM-dd hh:mm:ss"),
                                               stop_date.toString("yyyy-MM-dd hh:mm:ss"));
     d_ptr->thread->addEvent(qe);
@@ -191,23 +208,10 @@ Hdbextractor *QHdbextractorProxy::getHdbExtractor() const
     return d_ptr->thread->getHdbExtractor();
 }
 
-/** \brief get data for multiple sources
- *
- * To be implemented
- */
-void QHdbextractorProxy::getData(const QStringList& sources,
-                                      const QDateTime &start_date,
-                                      const QDateTime &stop_date)
+void QHdbextractorProxy::getErrors(const QString& source, double startTime, double stopTime)
 {
-    QHdbXQueryEvent *qe = new QHdbXQueryEvent(sources,
-                                              start_date.toString("yyyy-MM-dd hh:mm:ss"),
-                                              stop_date.toString("yyyy-MM-dd hh:mm:ss"));
-    d_ptr->thread->addEvent(qe);
-}
-
-void QHdbextractorProxy::getErrors(const QString& source, double *startTime, double *stopTime)
-{
-
+    QHdbXErrorQueryEvent *qheqe = new QHdbXErrorQueryEvent(source, startTime, stopTime);
+    d_ptr->thread->addEvent(qheqe);
 }
 
 void QHdbextractorProxy::getSourcesList()

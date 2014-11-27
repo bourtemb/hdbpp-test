@@ -659,6 +659,8 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
                                      " ORDER BY data_time ASC",
                  table_name, id, time_interval->start(), time_interval->stop());
 
+        printf("\e[1;32mquery %s\e[0m\n", query);
+
         Result * res = connection->query(query);
         Row *row = NULL;
         if(!res)
@@ -706,7 +708,6 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
         elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec);
         d_ptr->resultListenerI->onFinished(source, rowCnt, totalRows, elapsed);
     }
-
     return success;
 }
 

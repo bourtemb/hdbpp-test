@@ -64,7 +64,7 @@ private slots:
                             const QVector<double>& read_data,
                             const QVector<double>& write_data);
 
-    void QHdbExtractor::errorExtractionReady(const QString& src,
+    void errorExtractionReady(const QString& src,
                                              const QVector<double> timestamps,
                                              const QVector<int> codes,
                                              const QStringList &messages);
@@ -80,6 +80,8 @@ private slots:
     void sourcesListReady(const QStringList& srclist);
 
     void plotClicked(const QPointF& point);
+
+    void errorItemSelectionChanged();
 };
 
 #endif // MAINWINDOW_H

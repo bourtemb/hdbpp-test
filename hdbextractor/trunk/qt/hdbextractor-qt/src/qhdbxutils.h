@@ -6,6 +6,8 @@
 #include <QVector>
 #include <QStringList>
 
+class QHdbXUtilsPrivate;
+
 /** \page qhdbutils Utilities to arrange XVariant data fetch results into more convenient
  *        forms to be used with Qt plots and libraries.
  *
@@ -34,6 +36,12 @@ public:
                                     QVector<double> &timestamps,
                                     QVector<int> &codes,
                                     QStringList &messages);
+
+    int getNullDataCount() const;
+
+private:
+    QHdbXUtilsPrivate *d_ptr;
+
 };
 
 #endif // QHDBXUTILS_H

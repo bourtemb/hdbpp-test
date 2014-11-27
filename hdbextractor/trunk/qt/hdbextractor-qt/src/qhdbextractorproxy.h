@@ -66,7 +66,7 @@ public slots:
                  const QDateTime &start_date,
                  const QDateTime &stop_date);
 
-    void getErrors(const QString& source, double *startTime, double *stopTime);
+    void getErrors(const QString& source, double startTime, double stopTime);
 
     void getData(const QString& source, const QDateTime& startDate, const QDateTime& stop_date);
 

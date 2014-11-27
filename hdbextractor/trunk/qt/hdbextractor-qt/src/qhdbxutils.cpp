@@ -1,12 +1,32 @@
 #include "qhdbxutils.h"
 #include "datetimeutils.h"
+#include "qhdbxutilsprivate.h"
 #include <math.h>
 #include <QtDebug>
 #include <QDateTime>
 
 QHdbXUtils::QHdbXUtils()
 {
+    d_ptr = new QHdbXUtilsPrivate();
+    d_ptr->nullDataCount = -1;
+}
 
+/** \brief Returns the number of detected NULL data by either the toTimestampDataDoubleVector
+ * or toTimestampDataDoubleVector methods.
+ *
+ * You can use this method before calling toTimestampErrorDataVector, to test whether an error
+ * is likely to be recorded in the database as to the extracted data.
+ * If this method returns 0, then toTimestampDataDoubleVector or toTimestampDataDoubleVector
+ * haven't detected any NULL data value, and all the data fetched from the database should be
+ * valid.
+ *
+ * \note To have a valid null data count, you must first call either toTimestampDataDoubleVector
+ * or toTimestampDataDoubleVector method.
+ * Otherwise, -1 will be returned.
+ */
+int QHdbXUtils::getNullDataCount() const
+{
+    return d_ptr->nullDataCount;
 }
 
 /** \brief Converts input data into a vector of timestamps (converted to double)
@@ -31,6 +51,7 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
                                              QVector<double> &timestamps,
                                              QVector<double> &data, bool *ok)
 {
+    d_ptr->nullDataCount = 0;
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
     XVariant::DataFormat fmt = XVariant::FormatInvalid;
@@ -61,6 +82,10 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         double timestamp = (double) tv.tv_sec;
         timestamp += ((double) tv.tv_usec) * 1e-6;
         timestamps.append(timestamp);
+        if(v.isNull())
+            d_ptr->nullDataCount++;
+        if(v.isWNull())
+            d_ptr->nullDataCount++;
 
         /* append data */
         if((v.isNull() && w == XVariant::RO) || !v.isValid())
@@ -100,6 +125,7 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
                                              QVector<double> &wdata,
                                              bool *ok)
 {
+    d_ptr->nullDataCount = 0;
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
     XVariant::DataFormat fmt = XVariant::FormatInvalid;
@@ -131,6 +157,11 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         double timestamp = (double) tv.tv_sec;
         timestamp += ((double) tv.tv_usec) * 1e-6;
         timestamps.append(timestamp);
+
+        if(v.isNull())
+            d_ptr->nullDataCount++;
+        if(v.isWNull())
+            d_ptr->nullDataCount++;
 
         /* append data */
         if(dt == XVariant::Double)
@@ -184,7 +215,7 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
     }
 }
 
-void toTimestampErrorDataVector(const std::vector<XVariant> &indata,
+void QHdbXUtils::toTimestampErrorDataVector(const std::vector<XVariant> &indata,
                                 QVector<double> &timestamps,
                                 QVector<int> &codes,
                                 QStringList &messages)
@@ -193,6 +224,7 @@ void toTimestampErrorDataVector(const std::vector<XVariant> &indata,
     {
         const XVariant &v = indata[i];
         timestamps.append(DateTimeUtils().toDouble(v.getTimestamp()));
+        printf("\e[1;35m getQuality returns %d\e[0m\n", v.getQuality());
         codes.append(v.getQuality());
         messages.append(v.getError());
     }

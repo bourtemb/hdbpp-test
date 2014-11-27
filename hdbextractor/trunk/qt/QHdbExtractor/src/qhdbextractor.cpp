@@ -17,6 +17,7 @@
 #include <queryconfiguration.h>
 #include <QTimer>
 #include <QMessageBox>
+#include <QThread>
 #include <QtDebug>
 
 QHdbExtractor::QHdbExtractor(QWidget *parent) :
@@ -160,6 +161,9 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     connect(hdbxp, SIGNAL(sourcesListReady(QStringList)), this, SLOT(sourcesListReady(QStringList)));
     QTimer::singleShot(600, hdbxp, SLOT(getSourcesList()));
 
+    ui->gbErrors->setVisible(false);
+    connect(ui->pbShowErrors, SIGNAL(toggled(bool)), ui->gbErrors, SLOT(setVisible(bool)));
+    connect(ui->twErrors, SIGNAL(itemSelectionChanged()), this, SLOT(errorItemSelectionChanged()));
 }
 
 QHdbExtractor::~QHdbExtractor()
@@ -328,9 +332,14 @@ void QHdbExtractor::errorExtractionReady(const QString& src,
                                          const QVector<int> codes,
                                          const QStringList &messages)
 {
-
-
-
+    qDebug() << __FUNCTION__ <<  QThread::currentThread() << src << codes;
+    ui->gbErrors->setVisible(true);
+    for(int i = 0; i < timestamps.size(); i++)
+    {
+        QTreeWidgetItem *newItem = ui->twErrors->addItem(src, timestamps.at(i), codes.at(i), messages.at(i));
+        ui->twErrors->select(newItem);
+     //   ui->twErrors->addItem(src, timestamps.at(i), codes.at(i), messages.at(i))->setSelected(true);
+    }
 }
 
 void QHdbExtractor::radioCurvesStyleToggled(bool t)
@@ -380,14 +389,34 @@ void QHdbExtractor::plotClicked(const QPointF& point)
     QList<SceneCurve*> curves = plot->getClosest(closestPos, &index, point);
     foreach(SceneCurve *sc, curves)
     {
+        QString source = sc->name().remove("_WRI");
+
         double y = sc->data()->yData.at(index);
         qDebug() << sc->name() << closestPos.x() << closestPos.y() << "x" << sc->data()->xData.at(index) <<
-                    y;
+                    "y" << y;
         if(isnan(y))
         {
-            QHdbextractorProxy *hdbxp = findChild< QHdbextractorProxy *>();
-
+            QTreeWidgetItem *item = ui->twErrors->findItem(source, sc->data()->xData.at(index));
+            if(!item)
+            {
+                QHdbextractorProxy *hdbxp = findChild< QHdbextractorProxy *>();
+                qDebug() << __FUNCTION__ << "getting errors for " << source <<
+                            QDateTime::fromTime_t(sc->data()->xData.at(index));
+                hdbxp->getErrors(source, sc->data()->xData.at(index), sc->data()->xData.at(index));
+            }
+            else
+                item->setSelected(true);
         }
+
     }
 }
 
+void QHdbExtractor::errorItemSelectionChanged()
+{
+    ui->teError->clear();
+    QList<QTreeWidgetItem *>selectedItems = ui->twErrors->selectedItems();
+    if(selectedItems.size() > 0)
+    {
+        ui->teError->setText(selectedItems.last()->data(0, Qt::UserRole).toString());
+    }
+}
