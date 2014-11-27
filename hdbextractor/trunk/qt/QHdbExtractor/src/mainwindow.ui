@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>810</width>
-    <height>622</height>
+    <width>822</width>
+    <height>626</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,10 +28,57 @@
     <item row="1" column="1">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page">
        <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0" colspan="5">
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QHistoricalViewWidget" name="historicalViewWidget" native="true"/>
+          <widget class="QGroupBox" name="gbErrors">
+           <property name="title">
+            <string>Errors</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QTreeWidget" name="twErrors">
+              <property name="rootIsDecorated">
+               <bool>false</bool>
+              </property>
+              <column>
+               <property name="text">
+                <string>Source</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTextEdit" name="teError"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QRadioButton" name="rbLines">
+          <property name="text">
+           <string>&amp;Lines</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QRadioButton" name="rbDots">
+          <property name="text">
+           <string>&amp;Dots</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="2">
          <widget class="QRadioButton" name="rbSteps">
           <property name="enabled">
@@ -45,26 +92,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="4">
-         <widget class="QPushButton" name="pbConfigure">
-          <property name="text">
-           <string>Configure</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" colspan="5">
-         <widget class="QHistoricalViewWidget" name="historicalViewWidget" native="true"/>
-        </item>
-        <item row="1" column="0">
-         <widget class="QRadioButton" name="rbLines">
-          <property name="text">
-           <string>&amp;Lines</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="3">
          <widget class="QProgressBar" name="progressBar">
           <property name="value">
@@ -75,10 +102,10 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QRadioButton" name="rbDots">
+        <item row="1" column="4">
+         <widget class="QPushButton" name="pbConfigure">
           <property name="text">
-           <string>&amp;Dots</string>
+           <string>Configure</string>
           </property>
          </widget>
         </item>
@@ -100,8 +127,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>810</width>
-     <height>31</height>
+     <width>822</width>
+     <height>33</height>
     </rect>
    </property>
   </widget>

@@ -147,6 +147,10 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
     /* 3. errors */
     connect(hdbxp, SIGNAL(errorOccurred(QString)), this, SLOT(onError(QString)));
 
+    /* 4. errors ready */
+    connect(hdbxp, SIGNAL(errorsReady(QString,QVector<double>,QVector<int>,QStringList)),
+            this, SLOT(errorExtractionReady(QString,QVector<double>,QVector<int>,QStringList)));
+
     connect(ui->rbDots, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
     connect(ui->rbLines, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
     connect(ui->rbSteps, SIGNAL(toggled(bool)), this, SLOT(radioCurvesStyleToggled(bool)));
@@ -317,6 +321,16 @@ void QHdbExtractor::onExtractionProgress(const QString& source, int step, int to
     ui->progressBar->setFormat(source + " %p ");
     ui->progressBar->setMaximum(total);
     ui->progressBar->setValue(step);
+}
+
+void QHdbExtractor::errorExtractionReady(const QString& src,
+                                         const QVector<double> timestamps,
+                                         const QVector<int> codes,
+                                         const QStringList &messages)
+{
+
+
+
 }
 
 void QHdbExtractor::radioCurvesStyleToggled(bool t)

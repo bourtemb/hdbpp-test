@@ -376,6 +376,8 @@ public:
 
     bool getSourcesList(std::list<std::string>& result) const;
 
+    bool findErrors(const char *source, const TimeInterval *time_interval) const;
+
     void setQueryConfiguration(QueryConfiguration *qc);
 
     /** \brief Get a copy of the partial or complete data fetched from the database up to this moment

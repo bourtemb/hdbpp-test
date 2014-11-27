@@ -1,4 +1,5 @@
 #include "qhdbxutils.h"
+#include "datetimeutils.h"
 #include <math.h>
 #include <QtDebug>
 #include <QDateTime>
@@ -182,4 +183,19 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
         }
     }
 }
+
+void toTimestampErrorDataVector(const std::vector<XVariant> &indata,
+                                QVector<double> &timestamps,
+                                QVector<int> &codes,
+                                QStringList &messages)
+{
+    for(size_t i = 0; i < indata.size(); i++)
+    {
+        const XVariant &v = indata[i];
+        timestamps.append(DateTimeUtils().toDouble(v.getTimestamp()));
+        codes.append(v.getQuality());
+        messages.append(v.getError());
+    }
+}
+
 

@@ -64,6 +64,11 @@ private slots:
                             const QVector<double>& read_data,
                             const QVector<double>& write_data);
 
+    void QHdbExtractor::errorExtractionReady(const QString& src,
+                                             const QVector<double> timestamps,
+                                             const QVector<int> codes,
+                                             const QStringList &messages);
+
     void onExtractionProgress(const QString& source, int step, int total);
 
     void onExtractionFinished(const QString& source, int srcStep, int srcTotal, double elapsed);

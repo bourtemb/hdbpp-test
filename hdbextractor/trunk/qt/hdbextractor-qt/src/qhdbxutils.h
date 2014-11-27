@@ -4,6 +4,7 @@
 #include <xvariant.h>
 #include <vector>
 #include <QVector>
+#include <QStringList>
 
 /** \page qhdbutils Utilities to arrange XVariant data fetch results into more convenient
  *        forms to be used with Qt plots and libraries.
@@ -28,6 +29,11 @@ public:
                                      QVector<double> &rdata,
                                      QVector<double> &wdata,
                                      bool *ok = NULL);
+
+    void toTimestampErrorDataVector(const std::vector<XVariant> &indata,
+                                    QVector<double> &timestamps,
+                                    QVector<int> &codes,
+                                    QStringList &messages);
 };
 
 #endif // QHDBXUTILS_H

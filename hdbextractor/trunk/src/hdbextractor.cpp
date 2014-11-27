@@ -286,8 +286,20 @@ bool Hdbextractor::getSourcesList(std::list<std::string>& result) const
 
     /* error message, if necessary */
     if(!success && d_ptr->dbschema)
-        snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.getData: %s", d_ptr->dbschema->getError());
+        snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.getSourcesList: %s", d_ptr->dbschema->getError());
 
+    return success;
+}
+
+bool Hdbextractor::findErrors(const char *source, const TimeInterval *time_interval) const
+{
+    bool success = false;
+    strcpy(d_ptr->errorMessage, "");
+    if(d_ptr->connection != NULL && d_ptr->dbschema != NULL && d_ptr->connection->isConnected())
+        success = d_ptr->dbschema->findErrors(source, time_interval, d_ptr->connection);
+    /* error message, if necessary */
+    if(!success && d_ptr->dbschema)
+        snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.findErrors: %s", d_ptr->dbschema->getError());
     return success;
 }
 

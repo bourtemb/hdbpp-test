@@ -12,10 +12,11 @@ public:
     enum UpdateType { Progress, Finish };
 
     QHdbNewDataEvent(const std::vector<XVariant> &newdata, const QString& srcname,
-                     int _step, int _totalSteps);
+                     int _step, int _totalSteps, QEvent::Type eType = (QEvent::Type) (QEvent::User + 1001));
 
     QHdbNewDataEvent(const std::vector<XVariant> &newdata, const QString& srcname,
-                     int _srcStep, int totSrcs, double _elapsed);
+                     int _srcStep, int totSrcs, double _elapsed,
+                     QEvent::Type eType = (QEvent::Type) (QEvent::User + 1001));
 
     std::vector<XVariant> data;
 

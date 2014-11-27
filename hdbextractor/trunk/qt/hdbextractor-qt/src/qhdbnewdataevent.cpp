@@ -1,8 +1,8 @@
 #include "qhdbnewdataevent.h"
 
 QHdbNewDataEvent::QHdbNewDataEvent(const std::vector<XVariant> &newdata, const QString& srcname,
-                                   int _step, int _totalSteps)
-    : QEvent((QEvent::Type) (QEvent::User + 1001))
+                                   int _step, int _totalSteps, QEvent::Type eType)
+    : QEvent(eType)
 {
     data = newdata;
     step = _step;
@@ -12,8 +12,8 @@ QHdbNewDataEvent::QHdbNewDataEvent(const std::vector<XVariant> &newdata, const Q
 }
 
 QHdbNewDataEvent::QHdbNewDataEvent(const std::vector<XVariant> &newdata, const QString& srcname,
-                 int _srcStep, int totSrcs, double _elapsed)
-    : QEvent((QEvent::Type) (QEvent::User + 1001))
+                 int _srcStep, int totSrcs, double _elapsed, QEvent::Type eType)
+    : QEvent(eType)
 {
     data = newdata;
     source = srcname;

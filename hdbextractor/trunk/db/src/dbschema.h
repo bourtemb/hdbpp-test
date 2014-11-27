@@ -8,6 +8,7 @@
 class Connection;
 class XVariantList;
 class XVariant;
+class XErrorData;
 class QueryConfiguration;
 class TimeInterval;
 
@@ -92,8 +93,6 @@ public:
      */
     virtual bool findSource(Connection *connection, const char *substring, std::list<std::string>& ) const = 0;
 
-
-
     /** \brief Empties the queue where partial (or complete) data is stored
      *
      * \note This function is thread safe
@@ -101,7 +100,6 @@ public:
      * @return the number of XVariant elements appended to variantlist, -1 in case an error happened somewhere
      */
     virtual int get(std::vector<XVariant>& variantlist) = 0;
-
 
     /** \brief This method finds the errors occurred inside a time_interval window for the specified source
      *

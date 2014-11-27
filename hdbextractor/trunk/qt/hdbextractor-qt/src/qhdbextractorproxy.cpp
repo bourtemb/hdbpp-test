@@ -4,6 +4,7 @@
 #include "qhdbxconnectionevent.h"
 #include "qhdbxqueryevent.h"
 #include "qhdbnewdataevent.h"
+#include "qhdbnewerrordataevent.h"
 #include "qhdbxerrorevent.h"
 #include "qhdbxsourceslistqueryevent.h"
 #include "qhdbsourceslistreadyevent.h"
@@ -226,19 +227,26 @@ void QHdbextractorProxy::getSourcesList()
 void QHdbextractorProxy::onUpdate(const QString &srcname, int step,
                                   int totalSteps)
 {
+    /* the current state of the thread tells which kind of data is stored in the XVariant.
+     * The thread can fetch data and errors as far as XVariants are involved.
+     */
+    QHdbextractorThread::State thState = d_ptr->thread->getState();
     qDebug() << __FUNCTION__ << QThread::currentThread() << step << totalSteps;
     Hdbextractor *hdbx = d_ptr->thread->getHdbExtractor();
     if(hdbx->updateProgressStep() > 0)
     {
         std::vector<XVariant> data;
-        QHdbNewDataEvent *nd = new QHdbNewDataEvent(data, srcname, step, totalSteps);
+        QHdbNewDataEvent *nd;
+        if(thState == QHdbextractorThread::DataQuery)
+            nd = new QHdbNewDataEvent(data, srcname, step, totalSteps);
+        else
+            nd = new QHdbNewErrorDataEvent(data, srcname, step, totalSteps);
         /* make just one copy */
         hdbx->get(nd->data);
         for(size_t i = 0; i < nd->data.size(); i++)
             printf("QHdbextractorProxy::onUpdate: %s (after get)\n", nd->data.at(i).getTimestamp());
         qApp->postEvent(this, nd);
      //   printData(data);
-
     }
 }
 
@@ -251,17 +259,21 @@ void QHdbextractorProxy::onSourcesListReady(const QStringList& srcs)
 void QHdbextractorProxy::onFinish(const QString &srcname, int srcStep, int totSrcs, double elapsed)
 {
     qDebug() << __FUNCTION__ << QThread::currentThread() << srcStep;
+    QHdbextractorThread::State thState = d_ptr->thread->getState();
     Hdbextractor *hdbx = d_ptr->thread->getHdbExtractor();
   //  if(hdbx->updateProgressStep() <= 0) /* WHY? */
     {
         /* copy whole data */
         std::vector<XVariant> data;
-        QHdbNewDataEvent *nd = new QHdbNewDataEvent(data, srcname, srcStep, totSrcs, elapsed);
+        QHdbNewDataEvent *nd;
+        if(thState == QHdbextractorThread::DataQuery)
+            nd = new QHdbNewDataEvent(data, srcname, srcStep, totSrcs, elapsed);
+        else
+            nd = new QHdbNewErrorDataEvent(data, srcname, srcStep, totSrcs, elapsed);
+
         /* make just one copy */
         hdbx->get(nd->data);
         qApp->postEvent(this, nd);
-
-    //    printData(data);
     }
 }
 
@@ -275,26 +287,14 @@ bool QHdbextractorProxy::event(QEvent *e)
 {
     if(e->type() == QEvent::User + 1001)
     {
-        QHdbNewDataEvent *nde = static_cast<QHdbNewDataEvent *>(e);
-        // qDebug() << __FUNCTION__ << QThread::currentThread() << nde->step << nde->total;
-
-//        for(size_t i = 0; i < nde->data.size(); i++)
-//            printf("\e[1;33mQHdbextractorProxy::event: %s\e[0m\n", nde->data.at(i).getTimestamp());
-
-       // printData(nde->data);
         /* extract data according to the type/format/writable and then emit the apt signals */
-        dataNotify(nde);
-
-//        QHdbXUtils utils;
-//        QVector<double> timestamps, out_data;
-//        utils.toTimestampDataDoubleVector(nde->data, timestamps, out_data);
-//        QVector<QDateTime> dtv;
-//        foreach(double ts, timestamps)
-//            dtv << QDateTime::fromTime_t((uint) ts);
-
-       // if(nde->data.size() > 0)
-       //     qDebug() << "chunk" << nde->data[0].getSource() << dtv;
-
+        dataNotify(static_cast<QHdbNewDataEvent *>(e));
+        return true;
+    }
+    else if(e->type() == QEvent::User + 1211)
+    {
+        /* extract data according to the type/format/writable and then emit the apt signals */
+        dataErrorNotify(static_cast<QHdbNewErrorDataEvent *>(e));
         return true;
     }
     else if(e->type() == QEvent::User + 1002) /* error */
@@ -341,6 +341,17 @@ void QHdbextractorProxy::dataNotify(QHdbNewDataEvent *e)
     }
     if(e->updateType == QHdbNewDataEvent::Finish)
         emit sourceExtractionFinished(source, e->sourceStep, e->totalSources, e->elapsed);
+}
+
+void QHdbextractorProxy::dataErrorNotify(QHdbNewErrorDataEvent *e)
+{
+    qDebug() << __FUNCTION__ << QThread::currentThread();
+    QHdbXUtils utils;
+    QVector<int> codes;
+    QStringList messages;
+    QVector<double> timestamps;
+    utils.toTimestampErrorDataVector(e->data, timestamps, codes, messages);
+    emit errorsReady(e->source, timestamps, codes, messages);
 }
 
 void QHdbextractorProxy::printData(const std::vector<XVariant> &data)

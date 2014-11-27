@@ -16,6 +16,9 @@ class QHdbextractorThread : public QThread,
 {
     Q_OBJECT
 public:
+
+    enum State { SourcesListQuery, DataQuery, ErrorQuery };
+
     explicit QHdbextractorThread(QObject *parent);
 
     ~QHdbextractorThread();
@@ -32,6 +35,8 @@ public:
     Hdbextractor *getHdbExtractor() const;
 
     void leaveLoop();
+
+    State getState() const;
 
 signals:
 
@@ -65,6 +70,8 @@ private:
     Hdbextractor *m_extractor;
 
     QueryConfiguration *m_queryConfiguration;
+
+    State m_state;
 
 };
 

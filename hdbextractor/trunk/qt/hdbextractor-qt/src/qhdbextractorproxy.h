@@ -9,6 +9,7 @@
 class QHdbextractorProxyPrivate;
 class QDateTime;
 class QHdbNewDataEvent;
+class QHdbNewErrorDataEvent;
 
 /** \page qhdbextractorproxy HdbExtractor Qt module
  *
@@ -74,6 +75,8 @@ public slots:
     void getSourcesList();
 
 protected:
+
+    void dataErrorNotify(QHdbNewErrorDataEvent *e);
 
     void dataNotify(QHdbNewDataEvent *e);
 
@@ -146,6 +149,10 @@ signals:
      * The signal is delivered from the main thread and can be safely used in the UI thread.
      */
     void dataReady(const QString& source, double timestamp, const QVector<double> & data);
+
+    void errorsReady(const QString& source, const QVector<double>& timestamps,
+                     const QVector<int>& code,
+                     const QStringList& messages);
 
     /** \brief This signal is emitted whenever an error occurs in data fetch or extraction
      *

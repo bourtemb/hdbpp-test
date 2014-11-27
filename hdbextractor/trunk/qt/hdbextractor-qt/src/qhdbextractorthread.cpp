@@ -6,10 +6,12 @@
 #include <QReadLocker>
 
 #include "hdbextractor.h"
-
+#include "timeinterval.h"
 #include "qhdbxqueryevent.h"
+#include "qhdbxerrorqueryevent.h"
 #include "hdbxmacros.h"
 #include "qhdbxconnectionevent.h"
+#include "qhdbnewerrordataevent.h"
 
 /** \brief The destructor makes the thread exit the loop.
  *
@@ -70,6 +72,11 @@ Hdbextractor *QHdbextractorThread::getHdbExtractor() const
     return m_extractor;
 }
 
+QHdbextractorThread::State QHdbextractorThread::getState() const
+{
+    return m_state;
+}
+
 void QHdbextractorThread::run()
 {
     QTimer *processTimer = new QTimer(0);
@@ -123,8 +130,9 @@ void QHdbextractorThread::process()
         {
             m_extractor->disconnect();
         }
-        else if(e->getType() == QHdbXEvent::QUERY)
+        else if(e->getType() == QHdbXEvent::DATA_QUERY)
         {
+            m_state = DataQuery;
             QHdbXQueryEvent *qe = static_cast<QHdbXQueryEvent *>(e);
             if(m_extractor->isConnected())
             {
@@ -136,9 +144,26 @@ void QHdbextractorThread::process()
                                          qe->stopDate.toStdString().c_str()))
                     emit errorMessage(m_extractor->getErrorMessage());
             }
+            else
+               emit errorMessage("QHdbextractorThread.process: not connected to database");
+        }
+        else if(e->getType() == QHdbXEvent::ERROR_QUERY)
+        {
+            m_state = ErrorQuery;
+            QHdbXErrorQueryEvent *qeque = static_cast<QHdbXErrorQueryEvent *>(e);
+            if(m_extractor->isConnected())
+            {
+                TimeInterval timeInterval(qeque->startTime, qeque->stopTime);
+                if(!m_extractor->findErrors(qstoc(qeque->source), &timeInterval))
+                    emit errorMessage(m_extractor->getErrorMessage());
+            }
+            else
+               emit errorMessage("QHdbextractorThread.process: not connected to database");
+
         }
         else if(e->getType() == QHdbXEvent::SOURCESLIST)
         {
+            m_state = SourcesListQuery;
             std::list<std::string> srcs;
             QStringList ret;
             bool success = m_extractor->getSourcesList(srcs);
