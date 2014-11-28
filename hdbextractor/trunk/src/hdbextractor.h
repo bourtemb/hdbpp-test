@@ -20,8 +20,24 @@ class TimeInterval;
  *  in a simple, fast object oriented fashion. The access to the data retrieved from one of the supported
  *  databases is thread safe.
  *
+ * \par Qt module
+ *  Please read the QHdbExtractor documentation manual to learn how to use the Qt module.
+ *  The Qt module sources are located under the qt/hdbextractor-qt subfolder.
+ *  A ready to use Qt graphical user interface is available under the qt/QHdbExtractor subfolder.
  *
+ *
+ * \par Scalar data visualization.
  * \image html qhdbextractor.png
+ *
+ *
+ * \par Error visualization.
+ * Red vertical lines represent a NULL value into the database at the corresponding date time.
+ * A click close to the invalid data point opens a right pane where error details are available.
+ * Please read the QHdbExtractor documentation manual to learn how to use the Qt module.
+ * These screenshots are taken from the Qt graphical user interface that you can find under the
+ * qt/QHdbExtractor subfolder.
+ *
+ * \image html qhdbX-errors.png
  *
  * \par Important note
  * Even if the HdbExtractor library is tailored to deal with Tango data (as far as data type,

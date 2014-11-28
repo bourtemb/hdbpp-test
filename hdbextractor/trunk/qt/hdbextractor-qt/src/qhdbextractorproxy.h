@@ -11,15 +11,24 @@ class QDateTime;
 class QHdbNewDataEvent;
 class QHdbNewErrorDataEvent;
 
-/** \page qhdbextractorproxy HdbExtractor Qt module
+/** \mainpage qhdbextractorproxy HdbExtractor Qt module
  *
- * This section describe how hdbextractor can be included and easily used by your
+ * This section describes how hdbextractor can be included and easily used by your
  * Qt application.
  *
  * To start with an example, please take a look at the QHdbExtractor graphical user interface.
  *
+ * \par Configuration
  * \image html qhdbextractor-config.png
+ *
+ * \par Scalar data visualization
  * \image html qhdbextractor.png
+ *
+ * \par Error visualization
+ * Red vertical lines represent a NULL value into the database at the corresponding date time.
+ * A click close to the invalid data point opens a right pane where error details are available.
+ *
+ * \image html qhdbX-errors.png
  */
 
 /** \brief This class extends HdbExtractor and implements HdbExtractorListener in order to
@@ -126,7 +135,7 @@ signals:
      *
      * \note
      * Since the underlying Hdbextractor is thread-safe, there is no need to queue connection between
-     * QHdbextractorThread::dataReady and your slot.
+     * QHdbextractorProxy::dataReady and your slot.
      * The signal is delivered from the main thread and can be safely used in the UI thread.
      *
      * Read data and write data are fetched together for each source, so they are sent
@@ -145,11 +154,27 @@ signals:
      *
      * \note
      * Since the underlying Hdbextractor is thread-safe, there is no need to queue connection between
-     * QHdbextractorThread::dataReady and your slot.
+     * QHdbextractorProxy::dataReady and your slot.
      * The signal is delivered from the main thread and can be safely used in the UI thread.
      */
     void dataReady(const QString& source, double timestamp, const QVector<double> & data);
 
+    /** \brief This signal is emitted when the error information is ready for the given source,
+     *         in correspondance of the given timestamps.
+     *
+     * @param source the name of the source whose error information is transmitted by this signal
+     * @param timestamps a vector of timestamps, as double representing seconds.microseconds
+     * @param codes a vector of error codes (quality factor). Its elements are aligned with the
+     *        timestamps and the messages
+     * @param messages a list of error descriptions, aligned with the timestamps and the error
+     *        codes.
+     *\note
+     * Since the underlying Hdbextractor is thread-safe, there is no need to queue connection between
+     * QHdbextractorProxy::errorsReady and your slot.
+     * Data is extracted from the XVariant object.
+     * The signal is delivered from the main thread and can be safely used in the UI thread.
+     *
+     */
     void errorsReady(const QString& source, const QVector<double>& timestamps,
                      const QVector<int>& code,
                      const QStringList& messages);

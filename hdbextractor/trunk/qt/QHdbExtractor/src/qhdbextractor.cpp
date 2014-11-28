@@ -338,7 +338,6 @@ void QHdbExtractor::errorExtractionReady(const QString& src,
     {
         QTreeWidgetItem *newItem = ui->twErrors->addItem(src, timestamps.at(i), codes.at(i), messages.at(i));
         ui->twErrors->select(newItem);
-     //   ui->twErrors->addItem(src, timestamps.at(i), codes.at(i), messages.at(i))->setSelected(true);
     }
 }
 
@@ -405,8 +404,7 @@ void QHdbExtractor::plotClicked(const QPointF& point)
                 hdbxp->getErrors(source, sc->data()->xData.at(index), sc->data()->xData.at(index));
             }
             else
-                item->setSelected(true);
-        }
+                ui->twErrors->select(item);        }
 
     }
 }

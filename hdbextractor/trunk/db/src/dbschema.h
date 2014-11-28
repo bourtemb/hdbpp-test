@@ -107,7 +107,8 @@ public:
      * @param time_interval a TimeInterval defining the time window of interest
      * @param connection the database connection to use
      *
-     * @param variantlist a vector of XVariant that is populated with the results of the database query.
+     * The results can be obtained with the method get. The ResultListenerInterface::onProgressUpdate
+     * and ResultListenerInterface::onFinished can be used in order to receive notifications.
      *
      * @return true if the query to the database is successfull, false otherwise.
      *

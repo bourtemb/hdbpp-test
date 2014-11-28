@@ -124,11 +124,6 @@ void QHdbConfigWidget::updateSourcesList(const QStringList& srcs)
     ui.twSources->updateSourcesList(srcs);
 }
 
-bool QHdbConfigWidget::isTimeFillEnabled() const
-{
-    return ui.cbTimeFill->isChecked();
-}
-
 QDateTime QHdbConfigWidget::startDateTime() const
 {
     QDateTime dt;

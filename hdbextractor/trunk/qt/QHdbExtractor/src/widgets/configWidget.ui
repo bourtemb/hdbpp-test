@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>928</width>
-    <height>645</height>
+    <height>672</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -423,16 +423,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="cbTimeFill">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fill the time axis so that each attribute has the same time scale&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string>Time fill</string>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pbView">
