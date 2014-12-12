@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+class QHdbDataBoundaries;
+
 namespace Ui {
     class MainWindow;
 }
@@ -64,6 +66,12 @@ private slots:
                             const QVector<double>& read_data,
                             const QVector<double>& write_data);
 
+    void onNewDataAvailable(const QString& source,
+                            const double *surface,
+                            size_t dataCount,
+                            size_t dataSize,
+                            const QHdbDataBoundaries& boundaries);
+
     void errorExtractionReady(const QString& src,
                                              const QVector<double> timestamps,
                                              const QVector<int> codes,
@@ -82,6 +90,9 @@ private slots:
     void plotClicked(const QPointF& point);
 
     void errorItemSelectionChanged();
+
+private:
+    bool mUseGl;
 };
 
 #endif // MAINWINDOW_H

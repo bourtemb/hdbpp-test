@@ -1,14 +1,17 @@
 #include "qhdbxutils.h"
 #include "datetimeutils.h"
 #include "qhdbxutilsprivate.h"
+#include "qhdbdataboundaries.h"
 #include <math.h>
 #include <QtDebug>
 #include <QDateTime>
+#include <hdbxmacros.h>
 
 QHdbXUtils::QHdbXUtils()
 {
     d_ptr = new QHdbXUtilsPrivate();
     d_ptr->nullDataCount = -1;
+    snprintf(d_ptr->errorMessage, ERRMSGLEN, "No error");
 }
 
 /** \brief Returns the number of detected NULL data by either the toTimestampDataDoubleVector
@@ -51,6 +54,7 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
                                              QVector<double> &timestamps,
                                              QVector<double> &data, bool *ok)
 {
+    snprintf(d_ptr->errorMessage, ERRMSGLEN, "No error");
     d_ptr->nullDataCount = 0;
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
@@ -71,7 +75,11 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
             *ok = true;
         }
         else
-            *ok = false;
+        {
+            *ok = false;snprintf(d_ptr->errorMessage, ERRMSGLEN,
+                                 "QHdbXUtils.toTimestampDataDoubleVector: Format %d or type %d pr writable %d unsupported",
+                                 fmt, dt, w);
+        }
     }
     /* try to extract data */
     for(size_t i = 0; i < indata.size(); i++)
@@ -125,6 +133,7 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
                                              QVector<double> &wdata,
                                              bool *ok)
 {
+    snprintf(d_ptr->errorMessage, ERRMSGLEN, "No error");
     d_ptr->nullDataCount = 0;
     XVariant::DataType dt = XVariant::TypeInvalid;
     XVariant::Writable w = XVariant::WritableInvalid;
@@ -215,6 +224,84 @@ void QHdbXUtils::toTimestampDataDoubleVector(const std::vector<XVariant> &indata
     }
 }
 
+double* QHdbXUtils::toSurface(const std::vector<XVariant> &indata,
+                                 size_t *dataCount, size_t *dataSize,
+                                 QHdbDataBoundaries *db,
+                                 bool *ok) const
+{
+    double *matrix = NULL;
+    double val;
+    *dataCount = indata.size();
+    if(ok)
+        *ok = true;
+    snprintf(d_ptr->errorMessage, ERRMSGLEN, "No error");
+    if(*dataCount > 0)
+    {
+        const XVariant& xv = indata[0];
+        *dataSize = xv.getSize();
+        if(db)
+        {
+            db->updateX(0);
+            db->updateX(*dataSize);
+        }
+        if(xv.getFormat() == XVariant::Vector &&
+                ( xv.getType() == XVariant::Double || xv.getType() == XVariant::Int
+                  || xv.getType() == XVariant::UInt) )
+        {
+            matrix = new double[(*dataCount) * (*dataSize)];
+
+            for(size_t i = 0; i < *dataCount; i++)
+            {
+                if(indata[i].getSize() == *dataSize)
+                {
+                    for(size_t j = 0; j < *dataSize; j++)
+                    {
+                        val = indata[i].toDoubleP()[j];
+                        if(val > 1000000)
+                            printf("\e[1;31mFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUU-\e[0m\n\n\n");
+
+                        if(isnan(val) || !indata[i].isValid() || indata[i].isNull())
+                        {
+                            printf("\e[0;31m\n*********************\n--- removing NaN\e[0m\n");
+                            val = nan("NaN");
+                        }
+                        matrix[j + i * (*dataSize)] = val;
+                        if(db)
+                        {
+                            db->updateY(val);
+                            db->updateTimestamp(DateTimeUtils().toDouble(indata[i].getTimestamp()));
+                        }
+                    }
+                }
+                else /* error: change in data size! */
+                {
+                    snprintf(d_ptr->errorMessage, ERRMSGLEN, "QHdbXUtils.toSurface: "
+                                                             "\"%s\": data size changed from %ld to %ld at %s: unsupported",
+                             indata[i].getSource(),
+                             *dataSize, indata[i].getSize(), indata[i].getTimestamp());
+                    perr(d_ptr->errorMessage);
+                    if(ok)
+                        *ok = false;
+
+                    if(val > 1000000)
+                        printf("\n\n!!!!\n\n\e[1;35mFFFFFFFFFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUU-\e[0m\n\n\n");
+
+                    *dataSize = qMin(*dataSize, indata[i].getSize());
+                }
+            }
+
+        }
+        else
+        {
+            if(ok)
+                *ok = false;
+            snprintf(d_ptr->errorMessage, ERRMSGLEN,
+                     "QHdbXUtils.toSurface: Format %d or type %d unsupported", xv.getFormat(), xv.getType());
+        }
+    }
+    return matrix;
+}
+
 void QHdbXUtils::toTimestampErrorDataVector(const std::vector<XVariant> &indata,
                                 QVector<double> &timestamps,
                                 QVector<int> &codes,
@@ -230,4 +317,7 @@ void QHdbXUtils::toTimestampErrorDataVector(const std::vector<XVariant> &indata,
     }
 }
 
-
+const char *QHdbXUtils::getErrorMessage() const
+{
+    return d_ptr->errorMessage;
+}

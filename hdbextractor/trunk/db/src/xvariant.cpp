@@ -393,21 +393,74 @@ size_t XVariant::getSize() const
     return d->mSize;
 }
 
+unsigned int XVariant::getNullValuesCount() const
+{
+    return d->mNullValuesCount;
+}
+
+unsigned int *XVariant::getNullValueIndexes() const
+{
+    return d->mNullIndexes;
+}
+
+unsigned int XVariant::getNullWValuesCount() const
+{
+    return d->mNullWValuesCount;
+}
+
+unsigned int *XVariant::getNullWValueIndexes() const
+{
+    return d->mNullWIndexes;
+}
+
+/** \brief Adds an element to a Vector at a certain position. The element to be added is
+ *         passed as a string and is converted to the proper data type stored by the XVariant.
+ *
+ * @param readval the read value to be inserted at index position
+ * @param index the index where readval has to be inserted. It must be less than the available
+ *        space allocated for the XVariant. This method does not extend the XVariant size.
+ *
+ * If readval is null for the given index, then the stored value at position index depends on the
+ * data type:
+ * \list
+ * Double: a NaN is stored;
+ * Int: LONG_MAX is stored;
+ * UInt: ULONG_MAX is stored;
+ * Bool: false is stored.
+ * String: an empty string is stored.
+ *
+ * Double type only supports NaN. You can look for indexes storing a NULL value with getNullValueIndexes.
+ * @see getNullValuesCount
+ * @see getNullValueIndexes
+ *
+ */
 void XVariant::add(const char* readval, size_t index)
 {
     char *endptr;
+    d->mIsValid = true;
     errno = 0; /* To distinguish success/failure after call */
-    d->mIsNull = (readval == NULL && (d->mWritable == XVariant::RO) );
-    d->mIsWNull = (readval == NULL && (d->mWritable == XVariant::WO) );
+    if(readval != NULL && (d->mWritable == XVariant::RO) && index < d->mSize)
+        d->mIsNull = false;
+    if(readval != NULL && (d->mWritable == XVariant::WO) && index < d->mSize)
+        d->mIsWNull = false;
 
-    if(d->mIsNull || d->mIsWNull)
-        return;
+    if(readval == NULL && index < d->mSize)
+    {
+        d->mNullIndexes = (unsigned int * ) realloc(d->mNullIndexes, sizeof(unsigned int) * d->mNullValuesCount + 1);
+        d->mNullIndexes[d->mNullValuesCount] = index;
+        d->mNullValuesCount++;
+    }
 
     if((d->mWritable == XVariant::RO || d->mWritable == XVariant::WO) && index < d->mSize)
     {
         if(d->mType == Double)
         {
-            double val = strtod(readval, &endptr);
+            double val;
+            if(readval == NULL)
+                val = nan("Nan");
+            else
+                val = strtod(readval, &endptr);
+
             if(errno != 0 && val == 0)
                 mMakeError(errno);
             else
@@ -422,7 +475,11 @@ void XVariant::add(const char* readval, size_t index)
         }
         else if(d->mType == Int)
         {
-            long int val = strtol(readval, &endptr, 10);
+            long int val;
+            if(readval == NULL)
+                val = LONG_MAX;
+            else
+                val = strtol(readval, &endptr, 10);
             if(errno != 0 && val == 0)
                 mMakeError(errno);
             else
@@ -437,7 +494,12 @@ void XVariant::add(const char* readval, size_t index)
         }
         else if(d->mType == UInt)
         {
-            long unsigned int val = strtoul(readval, &endptr, 10);
+            long unsigned int val;
+            if(readval == NULL)
+                val = ULONG_MAX;
+            else
+                val = strtoul(readval, &endptr, 10);
+
             if(errno != 0 && val == 0)
                 mMakeError(errno);
             else
@@ -452,7 +514,11 @@ void XVariant::add(const char* readval, size_t index)
         }
         else if(d->mType == Boolean)
         {
-            bool booval = (strcasecmp(readval, "true") == 0 || strtol(readval, &endptr, 10) != 0);
+            bool booval;
+            if(readval == NULL)
+                booval = false;
+            else
+                booval = (strcasecmp(readval, "true") == 0 || strtol(readval, &endptr, 10) != 0);
 
             if(errno != 0)
                 mMakeError(errno);
@@ -467,27 +533,77 @@ void XVariant::add(const char* readval, size_t index)
             }
         }
     }
+    if(errno != 0)
+        d->mIsValid = false;
 }
 
+/** \brief Adds a read write value pair to a Vector at a certain position. The elements to be added are
+ *         passed as a string and they are converted to the proper data type stored by the XVariant.
+ *
+ * @param readval the read value to be inserted at index position
+ * @param writeval the write value to be inserted at index position
+ * @param index the index where readval has to be inserted. It must be less than the available
+ *        space allocated for the XVariant. This method does not extend the XVariant size.
+ *
+ * If either readval or write val is null for the given index, then the stored value at position index depends on the
+ * data type:
+ * \list
+ * Double: a NaN is stored;
+ * Int: LONG_MAX is stored;
+ * UInt: ULONG_MAX is stored;
+ * Bool: false is stored.
+ * String: an empty string is stored.
+ *
+ * Double type only supports NaN. You can look for indexes storing a NULL value with getNullValueIndexes.
+ * @see getNullValuesCount
+ * @see getNullValueIndexes
+ *
+ */
 void XVariant::add(const char* readval, const char* writeval, size_t index)
 {
-    d->mIsNull = (readval == NULL);
-    d->mIsWNull = (writeval == NULL);
+    d->mIsValid = true;
+    errno = 0;
 
-    if(d->mIsNull || d->mIsWNull)
-        return;
+    if(readval != NULL && index < d->mSize)
+        d->mIsNull = false;
+    if(writeval != NULL && index < d->mSize)
+        d->mIsWNull = false;
+
+    if(readval == NULL && index < d->mSize)
+    {
+        d->mNullIndexes = (unsigned int * ) realloc(d->mNullIndexes, sizeof(unsigned int) * d->mNullValuesCount + 1);
+        d->mNullIndexes[d->mNullValuesCount] = index;
+        d->mNullValuesCount++;
+    }
+
+    if(writeval == NULL && index < d->mSize)
+    {
+        d->mNullWIndexes = (unsigned int * ) realloc(d->mNullWIndexes, sizeof(unsigned int) * d->mNullWValuesCount + 1);
+        d->mNullWIndexes[d->mNullWValuesCount] = index;
+        d->mNullWValuesCount++;
+    }
 
     if((d->mWritable == XVariant::RW ) && index < d->mSize)
     {
         char *endptr;
-        errno = 0; /* To distinguish success/failure after call */
 
         if(d->mType == Double)
         {
-            double val = strtod(readval, &endptr);
-            double wval = strtod(writeval, &endptr);
+            double val;
+            if(readval == NULL)
+                val = nan("NaN");
+            else
+                val = strtod(readval, &endptr);
+
+            double wval;
+            if(writeval == NULL)
+                wval = nan("NaN");
+            else
+                wval = strtod(writeval, &endptr);
             if(errno != 0 && (val == 0 || wval == 0) )
+            {
                 mMakeError(errno);
+            }
             else
             {
                 double *dval = (double *) d->val;
@@ -498,8 +614,17 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
         }
         else if(d->mType == Int)
         {
-            long int ival = strtod(readval, &endptr);
-            long int wival = strtod(writeval, &endptr);
+            long int ival;
+            if(readval == NULL)
+                ival = LONG_MAX;
+            else
+                ival = strtol(readval, &endptr, 10);
+
+            long int wival;
+            if(writeval == NULL)
+                wival = LONG_MAX;
+            else
+                wival = strtol(writeval, &endptr, 10);
             if(errno != 0 &&  (ival == 0 || wival == 0) )
                 mMakeError(errno);
             else
@@ -512,8 +637,19 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
         }
         else if(d->mType == UInt)
         {
-            long unsigned int uival = strtod(readval, &endptr);
-            long unsigned int wuival = strtod(writeval, &endptr);
+            long unsigned int uival;
+            long unsigned int wuival;
+
+            if(readval == NULL)
+                uival = ULONG_MAX;
+            else
+                uival = strtoul(readval, &endptr, 10);
+
+            if(writeval == NULL)
+                wuival = ULONG_MAX;
+            else
+                wuival = strtoul(writeval, &endptr, 10);
+
             if(errno != 0 &&  (uival == 0 || wuival == 0) )
                 mMakeError(errno);
             else
@@ -526,8 +662,18 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
         }
         else if(d->mType == Boolean)
         {
-            bool booval = (strcasecmp(readval, "true") == 0 || strtol(readval, &endptr, 10) != 0);
-            bool wbooval = (strcasecmp(writeval, "true") == 0 || strtol(writeval, &endptr, 10) != 0);
+            bool booval;
+            bool wbooval;
+
+            if(readval == NULL)
+                booval = false;
+            else
+                booval = (strcasecmp(readval, "true") == 0 || strtol(readval, &endptr, 10) != 0);
+
+            if(writeval == NULL)
+                wbooval = false;
+            else
+                wbooval = (strcasecmp(writeval, "true") == 0 || strtol(writeval, &endptr, 10) != 0);
 
             if(errno != 0)
                 mMakeError(errno);
@@ -540,6 +686,8 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
             }
         }
     }
+    if(errno != 0)
+        d->mIsValid = false;
 }
 
 /** \brief This method parses a string in order to extract the data and convert it to the
@@ -974,7 +1122,6 @@ void XVariant::mMakeError(int errnum)
 
 void XVariant::mMakeError(const char *msg)
 {
-    printf("XVariant.mMakeError \e[1;31msetting error %s\e[0m\n", msg);
     if(d->mError)
         delete d->mError;
     if(!msg)
@@ -996,14 +1143,16 @@ void XVariant::init_common(const char* source, const char *timestamp, DataFormat
     strncpy(d->mTimestamp, timestamp, TIMESTAMPLEN);
     strncpy(d->mSource, source, SRCLEN);
 }
-
 void XVariant::init_data(size_t size)
 {
     d->w_val = NULL;
     d->val = NULL;
     d->mSize = size;
-    d->mIsValid = true;
     d->mError = NULL;
+
+    d->mIsValid = false;
+    d->mIsNull = true;
+    d->mIsWNull = true;
 
 
     if(d->mType == Double)
@@ -1041,11 +1190,7 @@ void XVariant::init_data(size_t size)
         if(d->mWritable == RW || d->mWritable == WO)
             d->w_val = (char *) new char[size];
     }
-    else
-        d->mIsValid = false;
 
-    d->mIsNull = (d->val != NULL);
-    d->mIsWNull = (d->w_val != NULL);
 }
 
 void XVariant::init_data()
@@ -1165,7 +1310,6 @@ XVariant &XVariant::setTimestamp(const char* ts)
  */
 XVariant & XVariant::setTimestamp(double tsmicro)
 {
-
     struct timeval tv;
     tv.tv_sec = (time_t) tsmicro;
     tv.tv_usec = (tsmicro - tv.tv_sec) * 1e6;
@@ -1331,7 +1475,7 @@ std::vector<bool> XVariant::toBoolVector(bool read) const
  */
 double XVariant::toDouble(bool read, bool *ok) const
 {
-    double v = -9876.543210;
+    double v = nan("NaN");
     if(read && d->mType == Double && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->val != NULL)
         v = *((double *)d->val);
     else if(!read && d->mType == Double && d->mFormat == Scalar && (d->mWritable == RW || d->mWritable == WO) && d->w_val != NULL)
@@ -1353,7 +1497,7 @@ double XVariant::toDouble(bool read, bool *ok) const
  */
 long int XVariant::toLongInt(bool read, bool *ok) const
 {
-    long int i = -9999L;
+    long int i = LONG_MIN;
     if(read && d->mType == Int && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->val != NULL)
         i = *((long int *)d->val);
     else if(read && d->mType == Int && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->w_val != NULL)
@@ -1375,7 +1519,7 @@ long int XVariant::toLongInt(bool read, bool *ok) const
  */
 unsigned long int XVariant::toULongInt(bool read, bool *ok) const
 {
-    unsigned long int i = -9999UL;
+    unsigned long int i = -1UL;
     if(read && d->mType == UInt && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->val != NULL)
         i = *((unsigned long int *)d->val);
     else if(read && d->mType == Int && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->w_val != NULL)

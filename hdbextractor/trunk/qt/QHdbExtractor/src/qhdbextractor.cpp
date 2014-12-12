@@ -1,7 +1,9 @@
 #include "qhdbextractor.h"
 #include "ui_mainwindow.h"
+#include "qhdbdataboundaries.h"
 #include <math.h>
 #include <plotscenewidget.h>
+#include "widgets/waitwidget.h"
 #include <datasiever.h>
 #include <timescalelabel.h>
 #include <markeritem.h>
@@ -19,6 +21,9 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QtDebug>
+
+#include <qdddplotwidget.h>
+#include <qdddplot_gl.h>
 
 QHdbExtractor::QHdbExtractor(QWidget *parent) :
     QMainWindow(parent),
@@ -53,17 +58,31 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
 
     MarkerItem* marker = new MarkerItem(0);
     plot->installMouseEventListener(marker);
+    plot->setObjectName("ScalarDataPlotSceneWidget");
     plot->scene()->addItem(marker);
     /* !important! */
     connect(plot, SIGNAL(curveAboutToBeRemoved(SceneCurve*)), marker,
             SLOT(removeCurve(SceneCurve*)));
 
-
+    WaitWidget *waitW = new WaitWidget(this);
+    ui->historicalViewWidget->registerWidget(waitW, QHistoricalViewWidget::Wait);
     ui->historicalViewWidget->registerWidget(plot, QHistoricalViewWidget::NumberScalar);
+
+    /* prepare 3d surface plot */
+    mUseGl = qApp->arguments().contains("--use-gl");
+
+    QdddPlotWidget *plotw = new QdddPlotWidget(mUseGl, this);
+    plotw->setObjectName("MathGLPlotWidget");
+    ui->historicalViewWidget->registerWidget(plotw, QHistoricalViewWidget::NumberVector);
 
     /* get cmdline args */
     QStringList ar = qApp->arguments();
-    if(qApp->arguments().count() == 2)
+    /* remove from command line args the parameters which do not have to be parsed in the following
+     * section
+     */
+    ar.removeAll("--use-gl");
+
+    if(ar.count() == 2)
     {
         std::map<std::string, std::string> confmap ;
         confmap["dbuser"] = "hdbbrowser";
@@ -71,7 +90,6 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
         confmap["dbhost"] = "fcsproxy";
         confmap["dbname"] = "hdb";
         confmap["dbport"] = "3306";
-
 
         bool ok;
         ConfigurationParser cp;
@@ -138,6 +156,11 @@ QHdbExtractor::QHdbExtractor(QWidget *parent) :
                                           const QVector<double>&,
                                           const QVector<double>&,
                                           const QVector<double>&)));
+
+    /* 1c. data ready (RO), Vector */
+    connect(hdbxp, SIGNAL(dataReady(QString, const double*, size_t, size_t, QHdbDataBoundaries)),
+                       this,
+            SLOT(onNewDataAvailable(QString, const double*, size_t, size_t, QHdbDataBoundaries)));
 
     /* 2. progress */
     connect(hdbxp, SIGNAL(sourceExtractionProgress(QString, int, int)),
@@ -253,6 +276,7 @@ void QHdbExtractor::onNewDataAvailable(const QString& source,
                                        const QVector<double>& read_data,
                                        const QVector<double>& write_data)
 {
+    ui->historicalViewWidget->switchWidget(QHistoricalViewWidget::NumberScalar);
     qDebug() << __FUNCTION__ << "size " << read_data.size() << "w " << write_data.size();
     QList<QColor> palette =
             QList<QColor> ()
@@ -284,6 +308,8 @@ void QHdbExtractor::onNewDataAvailable(const QString& source,
                                        const QVector<double>& timestamps,
                                        const QVector<double>& data)
 {
+    /* this is scalar data */
+    ui->historicalViewWidget->switchWidget(QHistoricalViewWidget::NumberScalar);
     qDebug() << __FUNCTION__ << "size " << data.size();
     QList<QColor> palette =
             QList<QColor> ()
@@ -308,6 +334,29 @@ void QHdbExtractor::onNewDataAvailable(const QString& source,
     plot->appendData(source, timestamps, data);
 }
 
+void QHdbExtractor::onNewDataAvailable(const QString& source,
+                        const double *surface,
+                        size_t dataCount,
+                        size_t dataSize, const QHdbDataBoundaries &boundaries)
+{
+    qDebug() << __FUNCTION__ << "SURFACE" << source << dataCount << dataSize;
+    if(ui->historicalViewWidget->currentIndex() != QHistoricalViewWidget::NumberVector)
+    {
+        ui->historicalViewWidget->switchWidget(QHistoricalViewWidget::NumberVector);
+     //   findChild<QdddPlotWidget *>()->draw();
+    }
+    QdddPlotWidget *plotw = findChild<QdddPlotWidget *>();
+    plotw->setBounds(boundaries.minTimestamp, boundaries.maxTimestamp,
+                     boundaries.minX, boundaries.maxX,
+                     boundaries.minY, boundaries.maxY);
+    plotw->addData(source, surface, dataCount, dataSize);
+
+        printf("\e[1;36m BOUNDS:\e[0m\n");
+        qDebug() << __FUNCTION__ << "BOUNDS" << boundaries.minTimestamp << boundaries.maxTimestamp <<
+                boundaries.minX<<  boundaries.maxX<<
+                boundaries.minY<<  boundaries.maxY;
+}
+
 void QHdbExtractor::onExtractionFinished(const QString& source, int srcStep, int srcTotal, double elapsed)
 {
     qDebug() << __FUNCTION__ << source << srcStep << srcTotal << elapsed;
@@ -316,13 +365,15 @@ void QHdbExtractor::onExtractionFinished(const QString& source, int srcStep, int
     ui->pbSrcs->setValue(srcStep);
     ui->pbSrcs->setMaximum(srcTotal);
     ui->statusBar->showMessage(QString("Extracted %1 sources in %2s").arg(srcTotal).arg(elapsed));
+    if(ui->historicalViewWidget->currentIndex() == QHistoricalViewWidget::NumberVector)
+        findChild<QdddPlotWidget *>()->draw();
 }
 
 void QHdbExtractor::onExtractionProgress(const QString& source, int step, int total)
 {
     qDebug() << __FUNCTION__ << source << source << step << total;
     ui->progressBar->setVisible(step != total);
-    ui->progressBar->setFormat(source + " %p ");
+  //  ui->progressBar->setFormat(source + " %p ");
     ui->progressBar->setMaximum(total);
     ui->progressBar->setValue(step);
 }

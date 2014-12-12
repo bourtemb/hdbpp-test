@@ -63,13 +63,13 @@ bool ConfigurationParser::read(const char *filepath, std::map<std::string, std::
                 }
                 line = line_save;
                 conf = conf_save;
-                printf("parsing line \"%s\" -> trimmed \"%s\"\n", line, conf);
+           //     printf("parsing line \"%s\" -> trimmed \"%s\"\n", line, conf);
                 if(strlen(conf) > 1)
                 {
                     param = (char *) realloc(param, conf_len + 1);
                     memset(param, 0, conf_len + 1);
                     res = sscanf(conf, "%[^=]=%s", key, param);
-                    printf("ConfigurationParser.read: \e[1;32m\"%s\" -> \"%s\"\e[0m\n",  key, param);
+         //           printf("ConfigurationParser.read: \e[1;32m\"%s\" -> \"%s\"\e[0m\n",  key, param);
 
                     params[std::string(key)] = std::string(param);
 

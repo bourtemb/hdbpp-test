@@ -14,6 +14,11 @@ public:
 
     size_t mSize;
 
+    unsigned int *mNullIndexes;
+    unsigned int mNullValuesCount;
+    unsigned int *mNullWIndexes;
+    unsigned int mNullWValuesCount;
+
     char mTimestamp[TIMESTAMPLEN];
 
     char* mError;

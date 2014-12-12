@@ -3,6 +3,8 @@
 
 class QHdbextractorThread;
 
+#include <qhdbdataboundaries.h>
+
 class QHdbextractorProxyPrivate
 {
 public:
@@ -10,6 +12,8 @@ public:
     QHdbextractorProxyPrivate() {}
 
     QHdbextractorThread *thread;
+
+    QHdbDataBoundaries dataBoundaries;
 
 };
 

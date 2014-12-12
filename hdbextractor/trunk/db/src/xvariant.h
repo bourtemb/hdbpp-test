@@ -139,6 +139,14 @@ public:
 
     char **toCharP(bool read = true) const;
 
+    unsigned int getNullValuesCount() const;
+
+    unsigned int *getNullValueIndexes() const;
+
+    unsigned int getNullWValuesCount() const;
+
+    unsigned int *getNullWValueIndexes() const;
+
 private:
 
     void build_from(const XVariant& other);

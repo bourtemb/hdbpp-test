@@ -10,6 +10,7 @@ class QHdbextractorProxyPrivate;
 class QDateTime;
 class QHdbNewDataEvent;
 class QHdbNewErrorDataEvent;
+class QHdbDataBoundaries;
 
 /** \mainpage qhdbextractorproxy HdbExtractor Qt module
  *
@@ -158,6 +159,12 @@ signals:
      * The signal is delivered from the main thread and can be safely used in the UI thread.
      */
     void dataReady(const QString& source, double timestamp, const QVector<double> & data);
+
+    void dataReady(const QString& source,
+                   const double *data,
+                   size_t dataCount,
+                   size_t dataSize,
+                   const QHdbDataBoundaries &dataBoundaries);
 
     /** \brief This signal is emitted when the error information is ready for the given source,
      *         in correspondance of the given timestamps.

@@ -21,7 +21,7 @@ class QHistoricalViewWidget : public QStackedWidget
     Q_OBJECT
 public:
 
-    enum DataType { NumberScalar, NumberVector, StringScalar, StringVector,
+    enum DataType { Wait, NumberScalar, NumberVector, StringScalar, StringVector,
              State, StateVector, User = 100 };
 
     /** \brief The constructor

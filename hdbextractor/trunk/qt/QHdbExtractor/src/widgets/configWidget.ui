@@ -56,9 +56,6 @@
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>
-          <property name="gridVisible">
-           <bool>true</bool>
-          </property>
          </widget>
         </item>
         <item row="0" column="2">
@@ -84,9 +81,6 @@
             <horstretch>0</horstretch>
             <verstretch>1</verstretch>
            </sizepolicy>
-          </property>
-          <property name="gridVisible">
-           <bool>true</bool>
           </property>
          </widget>
         </item>

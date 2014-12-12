@@ -10,6 +10,7 @@
 #include "qhdbxsourceslistqueryevent.h"
 #include "qhdbsourceslistreadyevent.h"
 #include "qhdbxutils.h"
+#include "qhdbdataboundaries.h"
 #include <QDateTime>
 #include <QStringList>
 #include <QCoreApplication> /* for postevent */
@@ -168,6 +169,7 @@ void QHdbextractorProxy::getData(const QString& source,
                                  const QDateTime& start_date,
                                  const QDateTime& stop_date)
 {
+    d_ptr->dataBoundaries.clear();
     QHdbXQueryEvent *qe = new QHdbXQueryEvent(QStringList() << source,
                                               start_date.toString("yyyy-MM-dd hh:mm:ss"),
                                               stop_date.toString("yyyy-MM-dd hh:mm:ss"));
@@ -182,6 +184,7 @@ void QHdbextractorProxy::getData(const QStringList& sources,
                                       const QDateTime &start_date,
                                       const QDateTime &stop_date)
 {
+    d_ptr->dataBoundaries.clear();
     QHdbXQueryEvent *qe = new QHdbXQueryEvent(sources,
                                               start_date.toString("yyyy-MM-dd hh:mm:ss"),
                                               stop_date.toString("yyyy-MM-dd hh:mm:ss"));
@@ -235,7 +238,7 @@ void QHdbextractorProxy::onUpdate(const QString &srcname, int step,
      * The thread can fetch data and errors as far as XVariants are involved.
      */
     QHdbextractorThread::State thState = d_ptr->thread->getState();
-    qDebug() << __FUNCTION__ << QThread::currentThread() << step << totalSteps;
+ //   qDebug() << __FUNCTION__ << QThread::currentThread() << step << totalSteps;
     Hdbextractor *hdbx = d_ptr->thread->getHdbExtractor();
     if(hdbx->updateProgressStep() > 0)
     {
@@ -247,8 +250,8 @@ void QHdbextractorProxy::onUpdate(const QString &srcname, int step,
             nd = new QHdbNewErrorDataEvent(data, srcname, step, totalSteps);
         /* make just one copy */
         hdbx->get(nd->data);
-        for(size_t i = 0; i < nd->data.size(); i++)
-            printf("QHdbextractorProxy::onUpdate: %s (after get)\n", nd->data.at(i).getTimestamp());
+//        for(size_t i = 0; i < nd->data.size(); i++)
+//            printf("QHdbextractorProxy::onUpdate: %s (after get)\n", nd->data.at(i).getTimestamp());
         qApp->postEvent(this, nd);
      //   printData(data);
     }
@@ -314,6 +317,7 @@ bool QHdbextractorProxy::event(QEvent *e)
 
 void QHdbextractorProxy::dataNotify(QHdbNewDataEvent *e)
 {
+    bool ok;
     const QString& source = e->source;
     /* discover the type of data carried by the argument */
     if(e->data.size() > 0)
@@ -339,6 +343,16 @@ void QHdbextractorProxy::dataNotify(QHdbNewDataEvent *e)
             }
 
             /* progress update signals */
+            if(e->updateType == QHdbNewDataEvent::Progress)
+                emit sourceExtractionProgress(source, e->step, e->totalSteps);
+        }
+        else if((dt == XVariant::Double || dt == XVariant::Int || dt == XVariant::UInt)
+                && fmt == XVariant::Vector)
+        {
+            size_t dataCount, dataSize;
+            double *matrix = utils.toSurface(e->data, &dataCount, &dataSize, &d_ptr->dataBoundaries, &ok);
+            printf("\e[1;32;4mdataNotify: surface %ldx%ld\e[0m\n", dataCount, dataSize);
+            emit dataReady(source, matrix, dataCount, dataSize, d_ptr->dataBoundaries);
             if(e->updateType == QHdbNewDataEvent::Progress)
                 emit sourceExtractionProgress(source, e->step, e->totalSteps);
         }

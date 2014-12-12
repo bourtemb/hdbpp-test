@@ -73,7 +73,7 @@ int MySqlHdbppSchema::get(std::vector<XVariant>& variantlist)
         {
             //            printf("copying variant %d over %d\n", i, size);
             variantlist.push_back(XVariant(*(d_ptr->variantList->get(i))));
-            printf("last timestamp %s\n", variantlist.at(variantlist.size() - 1).getTimestamp());
+//            printf("last timestamp %s\n", variantlist.at(variantlist.size() - 1).getTimestamp());
         }
         delete d_ptr->variantList;
         d_ptr->variantList = NULL;
@@ -328,9 +328,9 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                         timestampCnt++;
 
-                        printf("+ xvar 0x%p: new source %s %s %s arr.cnt: %d data siz: %d entries cnt: %d)\n", xvar,
-                               source, row->getField(0), row->getField(1),
-                               timestampCnt, datasiz, res->getRowCount()/datasiz);
+//                        printf("+ xvar 0x%p: new source %s %s %s arr.cnt: %d data siz: %d entries cnt: %d)\n", xvar,
+//                               source, row->getField(0), row->getField(1),
+//                               timestampCnt, datasiz, res->getRowCount()/datasiz);
 
                         pthread_mutex_lock(&d_ptr->mutex);
 
