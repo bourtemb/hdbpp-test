@@ -51,6 +51,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -74,7 +75,7 @@ public class HdbConfigurator extends JFrame {
     private SubscriberMap   subscriberMap;
     private JFileChooser    fileChooser = null;
     private JFrame          diagnosticsPanel = null;
-
+    private List<String>    tangoHostList;
     //=======================================================
     /**
 	 *	Creates new form HdbConfigurator
@@ -121,6 +122,14 @@ public class HdbConfigurator extends JFrame {
                 listMouseClicked(event);    //	for list clicked, menu,...
             }
         });
+        archiverComboBox.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent event) {
+                archiverComboBoxMouseClicked(event);    //	for combo box clicked, menu,...
+            }
+        });
+
+        //  Get used tango host list (used later to change tango host)
+        tangoHostList = subscriberMap.getTangoHostList();
 
         //  Add a tree to select attribute
         SplashUtils.getInstance().increaseSplashProgress(50, "Building Tree");
@@ -161,33 +170,26 @@ public class HdbConfigurator extends JFrame {
 	//=======================================================
     public void changeTangoHost(String tangoHost) {
         try {
-            String input = tangoHost;
-            boolean ok = false;
-            while (!ok) {
-                //  Get Tango host string
-                if ((input=JOptionPane.showInputDialog(this, "New TANGO_HOST", input))==null)
-                    return;
-                try {
-                    //  Check if it an existing tango host
-                    input = TangoUtils.getTangoHost(input);
-                    ok = true;
-                }
-                catch (DevFailed e) {
-                    ErrorPane.showErrorMessage(this, null, e);
-                }
-            }
-            tangoHost = input;
-            System.out.println("Set TANGO_HOST=" + input);
+            Selector    selector = new Selector(this,
+                    "Change Control System", "TANGO_HOST ?", tangoHostList, tangoHost);
+            String  newTangoHost = selector.showDialog();
+            if (newTangoHost!=null && !newTangoHost.equals(tangoHost)) {
+                tangoHost = newTangoHost;
 
-            //  Remove old tree
-            if (attributeTree!=null) {
-                attributeTree.removeAll();
-                treeScrollPane.remove(attributeTree);
+                //  Check if it is a new one
+                if (!tangoHostList.contains(tangoHost))
+                    tangoHostList.add(tangoHost);
+
+                //  Remove old tree
+                if (attributeTree!=null) {
+                    attributeTree.removeAll();
+                    treeScrollPane.remove(attributeTree);
+                }
+                //  And finally, create the new one
+                attributeTree = new AttributeTree(this, tangoHost);
+                treeScrollPane.setViewportView(attributeTree);
+                deviceFilterText.setText("*/*/*");
             }
-            //  And finally, create the new one
-            attributeTree = new AttributeTree(this, tangoHost);
-            treeScrollPane.setViewportView(attributeTree);
-            deviceFilterText.setText("*/*/*");
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, null, e);
@@ -345,6 +347,7 @@ public class HdbConfigurator extends JFrame {
         javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem openItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem changeCsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem();
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem diagnosticsItem = new javax.swing.JMenuItem();
@@ -547,7 +550,7 @@ public class HdbConfigurator extends JFrame {
         fileMenu.setText("File");
 
         openItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
-        openItem.setMnemonic('E');
+        openItem.setMnemonic('O');
         openItem.setText("Open Attribute List");
         openItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -555,6 +558,16 @@ public class HdbConfigurator extends JFrame {
             }
         });
         fileMenu.add(openItem);
+
+        changeCsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.CTRL_MASK));
+        changeCsItem.setMnemonic('T');
+        changeCsItem.setText("Change TANGO_HOST");
+        changeCsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changeCsItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(changeCsItem);
 
         exitItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         exitItem.setMnemonic('E');
@@ -656,7 +669,7 @@ public class HdbConfigurator extends JFrame {
         String  message = "This application is able to configure HDB++\n" +
                 "It is used to Add attributes to subscriber and\n" +
                 "Start and Stop HDB filling for selected attributes\n" +
-                "\nPascal Verdier - Accelerator Control Unit";
+                "\nPascal Verdier - ESRF - Software Group";
         JOptionPane.showMessageDialog(this, message, "Help Window", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_aboutItemActionPerformed
 
@@ -668,6 +681,17 @@ public class HdbConfigurator extends JFrame {
         if (archiverLabel==null)
             return;
         manageSubscriberChanged(archiverLabel);
+    }
+    //=======================================================
+    //=======================================================
+    private void archiverComboBoxMouseClicked(MouseEvent event) {
+        if (event.getClickCount()==2) {
+            //  Refresh list
+            String  archiverLabel = (String) archiverComboBox.getSelectedItem();
+            if (archiverLabel==null)
+                return;
+            manageSubscriberChanged(archiverLabel);
+        }
     }
     //=======================================================
     //=======================================================
@@ -829,7 +853,6 @@ public class HdbConfigurator extends JFrame {
         try {
             if (new CreateSubscriberPanel(this, configuratorProxy,
                     CreateSubscriberPanel.CREATE).showDialog()==JOptionPane.OK_OPTION) {
-                // TODO reset application
                 restartApplication();
             }
         }
@@ -845,7 +868,6 @@ public class HdbConfigurator extends JFrame {
         try {
             if (new CreateSubscriberPanel(this,  configuratorProxy,
                     CreateSubscriberPanel.REMOVE).showDialog()==JOptionPane.OK_OPTION) {
-                // TODO reset application
                 restartApplication();
             }
         }
@@ -853,6 +875,14 @@ public class HdbConfigurator extends JFrame {
             ErrorPane.showErrorMessage(this, null, e);
         }
     }//GEN-LAST:event_removeSubscriberItemActionPerformed
+
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void changeCsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeCsItemActionPerformed
+        // TODO add your handling code here:
+        changeTangoHost(attributeTree.getTangoHost());
+    }//GEN-LAST:event_changeCsItemActionPerformed
 
 	//=======================================================
 	//=======================================================

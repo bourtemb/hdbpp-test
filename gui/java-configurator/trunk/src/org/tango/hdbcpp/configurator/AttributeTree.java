@@ -49,6 +49,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /**
@@ -168,6 +169,8 @@ public class AttributeTree extends JTree {
         } else if ((mask & MouseEvent.BUTTON3_MASK)!=0) {
             if (node==root)
                 menu.showMenu(evt, (String) node.getUserObject());
+            else if (userObject instanceof Member)
+                menu.showMenu(evt, (Member) userObject);
             else if (userObject instanceof Attribute)
                 menu.showMenu(evt, (Attribute) userObject);
         }
@@ -386,7 +389,7 @@ public class AttributeTree extends JTree {
         if (userObject instanceof Attribute) {
             Attribute   attribute = ((Attribute)userObject);
             parent.addSpecifiedAttribute(TangoUtils.fullName(tangoHost, attribute.path));
-            attribute.checkIfSubscribed();
+            attribute.checkIfSubscribedLater();
         }
     }
     //===============================================================
@@ -397,6 +400,20 @@ public class AttributeTree extends JTree {
             final Attribute   attribute = ((Attribute)userObject);
             parent.selectArchiver(attribute.archiver);
             parent.selectAttributeInList(TangoUtils.fullName(tangoHost,attribute.path));
+        }
+    }
+    //===============================================================
+    //===============================================================
+    private void configureAttribute() {
+        Object  userObject = getSelectedObject();
+        if (userObject instanceof Attribute) {
+            String deviceName = ((Attribute)userObject).member.path;
+            Utils.startJiveForDevice(deviceName);
+        }
+        else
+        if (userObject instanceof Member) {
+            String deviceName = ((Member)userObject).path;
+            Utils.startJiveForDevice(deviceName);
         }
     }
     //======================================================
@@ -429,18 +446,18 @@ public class AttributeTree extends JTree {
         DefaultMutableTreeNode  attributeNode = getAttributeNode(attributeName);
         if (attributeNode!=null) {
             Attribute attribute = (Attribute) attributeNode.getUserObject();
-            attribute.checkIfSubscribed();
+            attribute.checkIfSubscribedLater();
         }
     }
     //===============================================================
     //===============================================================
     private DefaultMutableTreeNode getAttributeNode(String attributeName) {
+        //  Split attribute name
         String[] fields = TangoUtils.getAttributeFields(attributeName);
 
         //  Search domain/family/member/attribute node
         for (int i=0 ; i<root.getChildCount() ; i++) {
             DefaultMutableTreeNode  domainNode = (DefaultMutableTreeNode) root.getChildAt(i);
-            //System.out.println(domainNode);
             if (domainNode.toString().equalsIgnoreCase(fields[0])) {
                 for (int j=0 ; j<domainNode.getChildCount() ; j++) {
                     DefaultMutableTreeNode  familyNode =
@@ -557,6 +574,10 @@ public class AttributeTree extends JTree {
             this.member = member;
             this.path = member.path + "/" + name;
             //  Start a runnable to check if attribute is subscribed.
+            checkIfSubscribedLater();
+        }
+        //===========================================================
+        private void checkIfSubscribedLater() {
             Runnable doItLater = new Runnable() {
                 public void run() {
                     parent.setCursor(new Cursor(Cursor.WAIT_CURSOR));
@@ -635,7 +656,6 @@ public class AttributeTree extends JTree {
     private static final Font titleFont  = new Font("Dialog", Font.BOLD, 18);
     private static final Font deviceFont = new Font("Dialog", Font.BOLD, 12);
     private static final Font attributeFont = new Font("Dialog", Font.PLAIN, 12);
-
     private class TangoRenderer extends DefaultTreeCellRenderer {
 
         //===============================================================
@@ -719,12 +739,14 @@ public class AttributeTree extends JTree {
     //==============================================================================
     private static final int CHANGE_TANGO_HOST = 0;
     private static final int ADD_ATTRIBUTE     = 1;
-    private static final int SELECT_ARCHIVER   = 2;
+    private static final int CONFIGURE         = 2;
+    private static final int SELECT_ARCHIVER   = 3;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
             "Change Tango Host",
             "Add Attribute to Subscriber",
+            "Configure Polling/Events",
             "Select Archiver",
     };
 
@@ -801,12 +823,35 @@ public class AttributeTree extends JTree {
                 getComponent(OFFSET + i).setVisible(false);
 
             getComponent(OFFSET + ADD_ATTRIBUTE).setVisible(true);
+            getComponent(OFFSET + CONFIGURE).setVisible(true);
             getComponent(OFFSET + ADD_ATTRIBUTE).setEnabled(attribute.archiver==null);
             if (attribute.archiver!=null) {
                 getComponent(OFFSET + SELECT_ARCHIVER).setVisible(true);
                 ((JMenuItem)getComponent(OFFSET + SELECT_ARCHIVER)).setText(
                         menuLabels[SELECT_ARCHIVER] + ":   " + attribute.archiver);
             }
+            show(tree, evt.getX(), evt.getY());
+        }
+        //======================================================
+        /**
+         * Show menu on Member (device)
+         */
+        //======================================================
+        private void showMenu(MouseEvent evt, Member member) {
+            //	Set selection at mouse position
+            TreePath selectedPath =
+                    tree.getPathForLocation(evt.getX(), evt.getY());
+            if (selectedPath==null)
+                return;
+            tree.setSelectionPath(selectedPath);
+
+            title.setText(member.path);
+
+            //	Reset all items
+            for (int i = 0 ; i<menuLabels.length ; i++)
+                getComponent(OFFSET + i).setVisible(false);
+
+            getComponent(OFFSET + CONFIGURE).setVisible(true);
             show(tree, evt.getX(), evt.getY());
         }
 
@@ -828,6 +873,9 @@ public class AttributeTree extends JTree {
                     break;
                 case SELECT_ARCHIVER:
                     selectArchiver();
+                    break;
+                case CONFIGURE:
+                    configureAttribute();
                     break;
             }
         }
