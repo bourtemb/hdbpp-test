@@ -47,7 +47,6 @@ import org.tango.hdbcpp.tools.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -339,7 +338,7 @@ public class HdbDiagnostics extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void aboutItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutItemActionPerformed
         String  message = "This application is able to display information on HDB event subscribers\n" +
-                "\nPascal Verdier - Accelerator Control Unit";
+                "\nPascal Verdier - ESRF - Software Group";
         JOptionPane.showMessageDialog(this, message, "Help Window", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_aboutItemActionPerformed
 
@@ -383,46 +382,6 @@ public class HdbDiagnostics extends JFrame {
 
 	//=======================================================
 	//=======================================================
-    private void showFaultyAttributes(Subscriber subscriber, String[] failedAttributes) {
-        try {
-            String[]    attributeName = {
-                    "AttributeList",        //  Full list
-                    "AttributeErrorList",   //  error list
-            };
-            List<String[]> list = ArchiverUtils.readStringAttributes(subscriber, attributeName);
-            String[]    attributeList = list.get(0);
-            String[]    errorList     = list.get(1);
-            StringBuilder sb = new StringBuilder();
-            for (String failedAttribute : failedAttributes) {
-                sb.append("<li> ").append(failedAttribute);
-
-                //  Check if Error list available
-                if (errorList.length>0) {
-                    sb.append(":\n<br>\n");
-
-                    //  Search failed attribute index in full list
-                    for (int i=0 ; i<attributeList.length ; i++) {
-                        if (attributeList[i].equalsIgnoreCase(failedAttribute)) {
-                            sb.append(PopupHtml.Space).append(PopupHtml.Space).append(PopupHtml.Space);
-                            sb.append(errorList[i]).append("<br>\n");
-                        }
-                    }
-                }
-                sb.append("</li>\n");
-            }
-
-            //  And display as html
-            int height = 120 + 40*attributeList.length;
-            if (height>800) height = 800;
-            new PopupHtml(this).show(sb.toString(),
-                    subscriber.getLabel() + ": "+ menuLabels[FAULTY_ATTRIBUTES], 700, height);
-        }
-        catch (DevFailed e) {
-             ErrorPane.showErrorMessage(this, e.toString(), e);
-        }
-    }
-	//=======================================================
-	//=======================================================
     private void showAttributes(Subscriber subscriber, int type) {
         try {
             String[] attributeList = new String[0];
@@ -437,7 +396,7 @@ public class HdbDiagnostics extends JFrame {
                 case FAULTY_ATTRIBUTES:
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Nok");
                     if (attributeList.length>0) {
-                        showFaultyAttributes(subscriber, attributeList);
+                        new FaultyAttributesDialog(this, subscriber).setVisible(true);
                         return;
                     }
                     break;

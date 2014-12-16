@@ -36,15 +36,12 @@
 package org.tango.hdbcpp.diagnostics;
 
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoApi.DeviceAttribute;
+import fr.esrf.TangoApi.DeviceData;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.hdbcpp.common.Subscriber;
-import org.tango.hdbcpp.common.SubscriberMap;
-import org.tango.hdbcpp.tools.SplashUtils;
-import org.tango.hdbcpp.tools.TangoUtils;
-import org.tango.hdbcpp.tools.Utils;
+import org.tango.hdbcpp.tools.*;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -54,7 +51,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -69,161 +65,86 @@ import java.util.List;
 
 
 @SuppressWarnings("MagicConstant")
-public class StatisticsDialog extends JDialog {
+public class FaultyAttributesDialog extends JDialog {
 
-    private ArrayList<HdbAttribute> filteredHdbAttributes;
-    private ArrayList<HdbAttribute> hdbAttributes;
+    private ArrayList<FaultyAttribute> filteredFaultyAttributes;
+    private ArrayList<FaultyAttribute> faultyAttributes;
     private JTable table;
     private DataTableModel model;
     private TablePopupMenu popupMenu = new TablePopupMenu();
-    private ArrayList<Subscriber> subscribers;
+    private Subscriber subscriber;
     private int selectedRow    = -1;
-    private int selectedColumn = EVENTS_RESET;
-    private String extractionClass = null;
-    private String subscriberName = null;
-
+    private ImageIcon selectedIcon;
+    private ImageIcon unselectedIcon;
     private static List<String> defaultTangoHosts;
-    private static JFileChooser fileChooser = null;
 
-    private static final int columnWidth[] = { 300, 100, 80, 80 };
+
+
+    private static final int columnWidth[] = { 400, 500 };
     private static final  String[] columnNames = {
-            "Attribute Names", "Ev. since reset", "Events", "Av.Period." };
+            "Attribute Names", "Fault description" };
 
-    private static final int ATTRIBUTE_NAME = 0;
-    private static final int EVENTS_RESET   = 1;
-    private static final int EVENTS_STAT    = 2;
-    private static final int PERIOD_STAT    = 3;
-    //private static final int PERIOD_RESET   = 4;
+    private static final int ATTRIBUTE_NAME    = 0;
+    private static final int FAULT_DESCRIPTION = 1;
+
     private static final Color selectionBackground   = new Color(0xe0e0ff);
     private static final Color firstColumnBackground = new Color(0xe0e0e0);
 	//===============================================================
 	/**
-	 *	Creates new form StatisticsDialog for several subscribers
+	 *	Creates new form FaultyAttributesDialog for several subscribers
 	 */
 	//===============================================================
-    public StatisticsDialog(JFrame parent, SubscriberMap subscriberMap, int statisticsTimeWindow) throws DevFailed {
+    public FaultyAttributesDialog(JFrame parent, Subscriber subscriber) throws DevFailed {
         super(parent, false);
         SplashUtils.getInstance().startSplash();
         try {
             defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
+            this.subscriber = subscriber;
+            selectedIcon = Utils.getInstance().getIcon("selected.gif", 0.75);
+            unselectedIcon = Utils.getInstance().getIcon("unselected.gif", 0.75);
             initComponents();
-            subscribers = (ArrayList<Subscriber>) subscriberMap.getSubscriberList();
-            finalizeConstruction(statisticsTimeWindow, "All Subscribers ", true);
+            buildRecords();
+            buildTableComponent();
+            setTitle(subscriber.getLabel());
+            titleLabel.setText(subscriber.getLabel());
+            pack();
+            ATKGraphicsUtils.centerDialog(this);
         }
         catch (DevFailed e) {
             SplashUtils.getInstance().stopSplash();
             throw e;
         }
         SplashUtils.getInstance().stopSplash();
-    }
-
-    //===============================================================
-	/**
-	 *	Creates new form StatisticsDialog for one subscriber
-	 */
-	//===============================================================
-	public StatisticsDialog(JFrame parent, Subscriber subscriber, int statisticsTimeWindow) throws DevFailed {
-		super(parent, false);
-        SplashUtils.getInstance().startSplash();
-        try {
-            defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
-            initComponents();
-            subscriberName = subscriber.getLabel();
-            subscribers = new ArrayList<Subscriber>(1);
-            subscribers.add(subscriber);
-            finalizeConstruction(statisticsTimeWindow, "Subscriber " + subscriber.getLabel(), false);
-        }
-        catch (DevFailed e) {
-            SplashUtils.getInstance().stopSplash();
-            throw e;
-        }
-        SplashUtils.getInstance().stopSplash();
-	}
-    //===============================================================
-    //===============================================================
-    private void finalizeConstruction(int statisticsTimeWindow,
-                                      String title, boolean allowReset) throws DevFailed{
-
-        buildRecords();
-        updateColumnNames(statisticsTimeWindow);
-        buildTableComponent();
-        setTitle(title);
-        displayTitle();
-
-        //  Do not allow for one subscriber
-        resetItem.setVisible(allowReset);
-
-        //  Check if extraction available
-        extractionClass = System.getenv("ExtractionClass");
-        readHdbItem.setVisible(extractionClass!=null && !extractionClass.isEmpty());
-
-        pack();
-        ATKGraphicsUtils.centerDialog(this);
-    }
-    //===============================================================
-    //===============================================================
-    private void updateColumnNames(int statisticsTimeWindow) {
-        columnNames[EVENTS_STAT] = "Ev./" + Utils.strPeriod(statisticsTimeWindow);
-    }
-    //===============================================================
-    //===============================================================
-    private void displayTitle() {
-        String  title;
-        if (subscriberName==null)
-            title = "Statistics on " + subscribers.size() + " subscribers  -  ";
-        else
-            title = subscriberName + " - ";
-        if (filteredHdbAttributes.size()!=hdbAttributes.size()) {
-            title += Integer.toString(filteredHdbAttributes.size()) + " filtered / ";
-        }
-        title += Integer.toString(hdbAttributes.size()) + " Attributes";
-
-        titleLabel.setText(title);
     }
     //===============================================================
     //===============================================================
     private void buildRecords() throws DevFailed {
-        String[] statAttributeNames = {
-                "AttributeList", "AttributeRecordFreqList", "AttributeEventNumberList" };
+        //  Attribute end error lists
+        String[]    attributeNames =  {
+                "AttributeList",        //  Full list
+                "AttributeErrorList",   //  error list
+                "AttributeStoppedList",
+        };
+        List<String[]> list = ArchiverUtils.readStringAttributes(subscriber, attributeNames);
+        String[]    attributeList = list.get(0);
+        String[]    errorList     = list.get(1);
+        String[]    stoppedList   = list.get(2);
 
-        hdbAttributes = new ArrayList<HdbAttribute>();
-        for (Subscriber subscriber : subscribers) {
-            //  Read statistic attributes
-            SplashUtils.getInstance().increaseSplashProgressForLoop(
-                    subscribers.size(), "Reading " + subscriber.getLabel());
-            DeviceAttribute[] deviceAttributes = subscriber.read_attribute(statAttributeNames);
-
-            //  Extract values
-            int i=0;
-            String[] hdbAttributeNames = new String[0];
-            if (!deviceAttributes[i].hasFailed())
-                hdbAttributeNames = deviceAttributes[i].extractStringArray();
-            i++;
-            double[] frequencies = new double[0];
-            if (!deviceAttributes[i].hasFailed())
-                frequencies = deviceAttributes[i].extractDoubleArray();
-            i++;
-            int[] eventNumbers = new int[0];
-            if (!deviceAttributes[i].hasFailed())
-                eventNumbers = deviceAttributes[i].extractLongArray();
-
-            //  Duration is passed to have just one DB read per subscriber
-            int duration = subscriber.getStatisticsTimeWindow();
-
-            //  Build filteredHdbAttributes and store in a list
-            for (int x=0 ; x<hdbAttributeNames.length &&
-                           x<frequencies.length && x<eventNumbers.length ; x++) {
-                hdbAttributes.add(new HdbAttribute(hdbAttributeNames[x],
-                        frequencies[x], eventNumbers[x], subscriber, duration));
-             }
+        //  And check faulty ones.
+        faultyAttributes = new ArrayList<FaultyAttribute>();
+        for (int i=0 ; i<attributeList.length && i<errorList.length ; i++) {
+            if (!errorList[i].isEmpty()) {
+                faultyAttributes.add(
+                        new FaultyAttribute(attributeList[i], errorList[i], stoppedList));
+            }
         }
-        Collections.sort(hdbAttributes, new AttributeComparator());
 
         //  Copy to filtered (no filter at start up)
-        filteredHdbAttributes = new ArrayList<HdbAttribute>();
-        for (HdbAttribute hdbAttribute : hdbAttributes) {
-            filteredHdbAttributes.add(hdbAttribute);
+        filteredFaultyAttributes = new ArrayList<FaultyAttribute>();
+        for (FaultyAttribute faultyAttribute : faultyAttributes) {
+            filteredFaultyAttributes.add(faultyAttribute);
         }
+        Collections.sort(filteredFaultyAttributes, new AttributeComparator());
     }
     //===============================================================
     //===============================================================
@@ -244,12 +165,13 @@ public class StatisticsDialog extends JDialog {
                     tableActionPerformed(evt);
                 }
             });
+            /*
             table.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent evt) {
                     tableHeaderActionPerformed(evt);
                 }
             });
-
+            */
             //	Put it in scrolled pane
             JScrollPane scrollPane = new JScrollPane(table);
             model.fireTableDataChanged();
@@ -279,13 +201,6 @@ public class StatisticsDialog extends JDialog {
     }
     //===============================================================
     //===============================================================
-    private void tableHeaderActionPerformed(java.awt.event.MouseEvent event) {
-        //	Get specified column
-        selectedColumn = table.getTableHeader().columnAtPoint(new Point(event.getX(), event.getY()));
-        Collections.sort(filteredHdbAttributes, new AttributeComparator());
-    }
-    //===============================================================
-    //===============================================================
     private void tableActionPerformed(java.awt.event.MouseEvent event) {
 
         //	get selected signal
@@ -295,14 +210,14 @@ public class StatisticsDialog extends JDialog {
         table.repaint();
 
         if (event.getClickCount() == 2) {
-            JOptionPane.showMessageDialog(this, filteredHdbAttributes.get(row).getInfo());
+            //JOptionPane.showMessageDialog(this, filteredFaultyAttributes.get(row).getInfo());
         }
         else {
             int mask = event.getModifiers();
 
             //  Check button clicked
             if ((mask & MouseEvent.BUTTON3_MASK) != 0) {
-                popupMenu.showMenu(event, filteredHdbAttributes.get(row));
+                popupMenu.showMenu(event, filteredFaultyAttributes.get(row));
             }
         }
     }
@@ -324,12 +239,9 @@ public class StatisticsDialog extends JDialog {
         javax.swing.JButton applyButton = new javax.swing.JButton();
         javax.swing.JMenuBar jMenuBar1 = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
-        javax.swing.JMenuItem saveItem = new javax.swing.JMenuItem();
-        resetItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem dismissItem = new javax.swing.JMenuItem();
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem updateItem = new javax.swing.JMenuItem();
-        readHdbItem = new javax.swing.JMenuItem();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -367,23 +279,6 @@ public class StatisticsDialog extends JDialog {
 
         fileMenu.setText("File");
 
-        saveItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
-        saveItem.setText("Save in text file");
-        saveItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(saveItem);
-
-        resetItem.setText("Reset Event Counters");
-        resetItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resetItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(resetItem);
-
         dismissItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         dismissItem.setText("Dismiss");
         dismissItem.addActionListener(new java.awt.event.ActionListener() {
@@ -405,15 +300,6 @@ public class StatisticsDialog extends JDialog {
             }
         });
         viewMenu.add(updateItem);
-
-        readHdbItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
-        readHdbItem.setText("Read attribute from HDB");
-        readHdbItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                readHdbItemActionPerformed(evt);
-            }
-        });
-        viewMenu.add(readHdbItem);
 
         jMenuBar1.add(viewMenu);
 
@@ -451,121 +337,27 @@ public class StatisticsDialog extends JDialog {
     //===============================================================
     //===============================================================
     @SuppressWarnings("UnusedParameters")
-    private void resetItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetItemActionPerformed
-        if (JOptionPane.showConfirmDialog(this, "Reset event counter on all archivers ?",
-                "Reset Counters", JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION) {
-            String errorMessage = "";
-            for (Subscriber subscriber : subscribers) {
-                try {
-                    subscriber.command_inout("ResetStatistics");
-                }
-                catch (DevFailed e) {
-                    errorMessage += subscriber.getLabel() + ": "+e.errors[0].desc+"\n";
-                }
-            }
-
-            //  If at least one failed, display message
-            if (!errorMessage.isEmpty()) {
-                JOptionPane.showMessageDialog(this, errorMessage, "Reset Failed", JOptionPane.ERROR_MESSAGE);
-            }
-            updateItemActionPerformed(null);
-        }
-    }//GEN-LAST:event_resetItemActionPerformed
-
-    //===============================================================
-    //===============================================================
-    @SuppressWarnings("UnusedParameters")
     private void updateItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateItemActionPerformed
         try {
+            //  ToDo update
             buildRecords();
             model.fireTableDataChanged();
-            displayTitle();
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, "Update", e);
         }
     }//GEN-LAST:event_updateItemActionPerformed
-
-    //===============================================================
-    //===============================================================
-    @SuppressWarnings("UnusedParameters")
-    private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
-
-        //  Initialize if not already done
-        if (fileChooser==null) {
-            fileChooser = new JFileChooser(new File("").getAbsolutePath());
-            fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-            fileChooser.setDialogTitle("Save as text");
-        }
-
-        //  Start file chooser to select file
-        if (fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            if (file!=null) {
-                String	filename = file.getAbsolutePath();
-                saveDataToFile(filename);
-            }
-        }
-    }//GEN-LAST:event_saveItemActionPerformed
-    //===============================================================
-    //===============================================================
-    private void saveDataToFile(String fileName) {
-        StringBuilder   sb = new StringBuilder();
-        for (String s : columnNames) {
-            sb.append(s).append('\t');
-        }
-        sb.trimToSize();
-        sb.append('\n');
-        for (HdbAttribute hdbAttribute : filteredHdbAttributes) {
-            sb.append(hdbAttribute.shortName).append('\t')
-                    .append(hdbAttribute.nbStatistics).append('\t')
-                    .append(hdbAttribute.averagePeriodString).append('\t')
-                    .append(hdbAttribute.nbEvents).append('\n');
-        }
-
-        //System.out.println(sb);
-        try {
-            Utils.writeFile(fileName, sb.toString());
-        }
-        catch (DevFailed e) {
-            ErrorPane.showErrorMessage(this, "Saving "+fileName, e);
-        }
-
-    }
-
-    //===============================================================
-    //===============================================================
-    @SuppressWarnings("UnusedParameters")
-    private void readHdbItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_readHdbItemActionPerformed
-        // TODO add your handling code here:
-        if (selectedRow<0) {
-            Utils.popupError(this, "No attribute selected !");
-            return;
-        }
-        HdbAttribute    attribute = filteredHdbAttributes.get(selectedRow);
-        System.out.println("Display " + attribute.name);
-        try {
-            Component extractor = Utils.getInstance().startExternalApplication(
-                    new JFrame(), extractionClass, new String[] {attribute.name});
-            extractor.setVisible(false);
-        }
-        catch (DevFailed e) {
-            ErrorPane.showErrorMessage(this, e.toString(), e);
-        }
-    }//GEN-LAST:event_readHdbItemActionPerformed
-
 	//===============================================================
 	//===============================================================
     private void applyFilter() {
         String  filter = filterTextField.getText();
-        filteredHdbAttributes = new ArrayList<HdbAttribute>();
-        for (HdbAttribute hdbAttribute : hdbAttributes) {
-            if (hdbAttribute.shortName.contains(filter)) {
-                filteredHdbAttributes.add(hdbAttribute);
+        filteredFaultyAttributes = new ArrayList<FaultyAttribute>();
+        for (FaultyAttribute faultyAttribute : faultyAttributes) {
+            if (faultyAttribute.attributeName.contains(filter)) {
+                filteredFaultyAttributes.add(faultyAttribute);
             }
         }
         model.fireTableDataChanged();
-        displayTitle();
     }
 	//===============================================================
 	/**
@@ -578,12 +370,27 @@ public class StatisticsDialog extends JDialog {
 	}
     //===============================================================
     //===============================================================
+    private void stopStorage(FaultyAttribute attribute) {
+
+        try {
+            DeviceData  argIn = new DeviceData();
+            argIn.insert(attribute.attributeName);
+            subscriber.command_inout("AttributeStop", argIn);
+
+            //  and then update
+            buildRecords();
+            model.fireTableDataChanged();
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, e.getMessage(), e);
+        }
+    }
+    //===============================================================
+    //===============================================================
 
     //===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField filterTextField;
-    private javax.swing.JMenuItem readHdbItem;
-    private javax.swing.JMenuItem resetItem;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
 	//===============================================================
@@ -591,66 +398,46 @@ public class StatisticsDialog extends JDialog {
 
 
 
-    //===============================================================
-    /**
-     * Attribute read from HDB object.
-     */
-    //===============================================================
-    private class HdbAttribute {
-        private String name;
-        private String shortName;
-        private int nbStatistics;
-        private int nbEvents;
-        private int duration;
-        private String averagePeriodString;
-        private double averagePeriod = -1;
-        private Subscriber subscriber;
-        private String deviceName;
-        private String tangoHost;
 
+
+    //===============================================================
+    //===============================================================
+    private class FaultyAttribute {
+        String attributeName;
+        String faultDescription;
+        boolean stopped;
         /** if use another one, cannot configure with Jive */
         private boolean useDefaultTangoHost = false;
         //===========================================================
-        private HdbAttribute(String name, double frequency, int nbEvents, Subscriber subscriber, int duration) {
-            this.name = name;
-            this.shortName = TangoUtils.getOnlyDeviceName(name);
-            this.nbStatistics = (int)frequency;
-            this.nbEvents  = nbEvents;
-            this.subscriber = subscriber;
-            this.duration = duration;
-            if (frequency==0.0)
-                averagePeriodString = "---";
-            else {
-                averagePeriod = (double)duration/frequency;
-                averagePeriodString = Utils.strPeriod(averagePeriod);
-            }
-
-            deviceName = shortName.substring(0, shortName.lastIndexOf('/'));
-            tangoHost = TangoUtils.getOnlyTangoHost(name);
+        FaultyAttribute(String attributeName, String faultDescription, String[] stoppedList) {
+            this.attributeName = attributeName;
+            this.faultDescription = faultDescription;
+            stopped = isStopped(attributeName, stoppedList);
+            String tangoHost = TangoUtils.getOnlyTangoHost(attributeName);
             for (String defaultTangoHost : defaultTangoHosts) {
                 if (tangoHost.equals(defaultTangoHost))
                     useDefaultTangoHost = true;
             }
         }
         //===========================================================
-        private String getInfo() {
-            return name + ":\n\n" + "Archived by " + subscriber.getLabel() +
-                    "    (" + subscriber.getName() + "\n" +
-                    nbStatistics + " events during " + Utils.strPeriod(duration) + "\n"+
-                    nbEvents + " Since last reset (time not available)" + "\n";
+        private boolean isStopped(String attributeName, String[] stoppedList) {
+            for (String stopped : stoppedList)
+                if (attributeName.equalsIgnoreCase(stopped))
+                    return true;
+            return false;
         }
         //===========================================================
         private void configureEvent() {
+            String  deviceName = TangoUtils.getOnlyDeviceName(attributeName);
+            deviceName = deviceName.substring(0, deviceName.lastIndexOf('/'));
             Utils.startJiveForDevice(deviceName);
         }
-        //===========================================================
-        public String toString() {
-            return shortName + ":\t" + nbEvents;
-        }
-        //===========================================================
     }
-    //===============================================================
-    //===============================================================
+    //=========================================================================
+    //=========================================================================
+
+
+
 
 
     //=========================================================================
@@ -666,7 +453,7 @@ public class StatisticsDialog extends JDialog {
 
         //==========================================================
         public int getRowCount() {
-            return filteredHdbAttributes.size();
+            return filteredFaultyAttributes.size();
         }
 
         //==========================================================
@@ -738,16 +525,20 @@ public class StatisticsDialog extends JDialog {
             setBackground(getBackground(row, column));
             switch (column) {
                 case ATTRIBUTE_NAME:
-                    setText(filteredHdbAttributes.get(row).shortName);
+                    setText(filteredFaultyAttributes.get(row).attributeName);
+                    setToolTipText(null);
+                    setIcon(null);
                     break;
-                case EVENTS_STAT:
-                    setText(Integer.toString(filteredHdbAttributes.get(row).nbStatistics));
-                    break;
-                case PERIOD_STAT:
-                    setText(filteredHdbAttributes.get(row).averagePeriodString);
-                    break;
-                case EVENTS_RESET:
-                    setText(Integer.toString(filteredHdbAttributes.get(row).nbEvents));
+                case FAULT_DESCRIPTION:
+                    setText(filteredFaultyAttributes.get(row).faultDescription);
+                    if (filteredFaultyAttributes.get(row).stopped) {
+                        setIcon(unselectedIcon);
+                        setToolTipText("Archiving Stopped");
+                    }
+                    else {
+                        setIcon(selectedIcon);
+                        setToolTipText("Archiving Started");
+                    }
                     break;
             }
             return this;
@@ -777,21 +568,19 @@ public class StatisticsDialog extends JDialog {
      * Popup menu class
      */
     //======================================================
-    private static final int STATUS    = 0;
-    private static final int READ_HDB  = 1;
-    private static final int CONFIGURE = 2;
+    private static final int STOP_STORAGE = 0;
+    private static final int CONFIGURE    = 1;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
-            "Status",
-            "Read attribute from HDB",
+            "Stop Archiving",
             "Configure Polling/Events",
     };
     //=======================================================
     //=======================================================
     private class TablePopupMenu extends JPopupMenu {
         private JLabel title;
-        private HdbAttribute selectedAttribute;
+        private FaultyAttribute selectedAttribute;
         //======================================================
         private TablePopupMenu() {
             title = new JLabel();
@@ -812,17 +601,16 @@ public class StatisticsDialog extends JDialog {
                     add(btn);
                 }
             }
-            //  Check if extraction available
-            String s = System.getenv("ExtractionClass");
-            getComponent(OFFSET + READ_HDB).setVisible(s!=null && !s.isEmpty());
         }
         //======================================================
         //======================================================
-        private void showMenu(MouseEvent event, HdbAttribute hdbAttribute) {
-            title.setText(hdbAttribute.shortName);
-            selectedAttribute = hdbAttribute;
+        private void showMenu(MouseEvent event, FaultyAttribute faultyAttribute) {
+            title.setText(faultyAttribute.attributeName);
+            selectedAttribute = faultyAttribute;
 
-            getComponent(OFFSET + CONFIGURE).setEnabled(hdbAttribute.useDefaultTangoHost);
+            //noinspection PointlessArithmeticExpression
+            getComponent(OFFSET + STOP_STORAGE).setEnabled(!faultyAttribute.stopped);
+            getComponent(OFFSET + CONFIGURE).setEnabled(faultyAttribute.useDefaultTangoHost);
             show(table, event.getX(), event.getY());
         }
         //======================================================
@@ -834,18 +622,17 @@ public class StatisticsDialog extends JDialog {
                 if (getComponent(OFFSET + i) == obj)
                     itemIndex = i;
             switch (itemIndex){
-                case STATUS:
-                    JOptionPane.showMessageDialog(this, selectedAttribute.getInfo());
+                case STOP_STORAGE:
+                    stopStorage(selectedAttribute);
                     break;
                 case CONFIGURE:
                     selectedAttribute.configureEvent();
                     break;
-                case READ_HDB:
-                    readHdbItemActionPerformed(null);
-                    break;
             }
         }
     }
+    //===============================================================
+    //===============================================================
 
 
 
@@ -854,33 +641,24 @@ public class StatisticsDialog extends JDialog {
      * Comparator to sort attribute list
      */
     //=========================================================================
-    private class AttributeComparator implements Comparator<HdbAttribute> {
+    private class AttributeComparator implements Comparator<FaultyAttribute> {
 
         //======================================================
-        public int compare(HdbAttribute hdbAttribute1, HdbAttribute hdbAttribute2) {
-            switch (selectedColumn) {
-                case EVENTS_STAT:
-                    return valueSort(hdbAttribute2.nbStatistics, hdbAttribute1.nbStatistics);
-                case PERIOD_STAT:
-                    return valueSort(hdbAttribute1.averagePeriod, hdbAttribute2.averagePeriod);
-                case EVENTS_RESET:
-                    return valueSort(hdbAttribute2.nbEvents, hdbAttribute1.nbEvents);
-                default:
-                    return alphabeticalSort(hdbAttribute1.shortName, hdbAttribute2.shortName);
+        public int compare(FaultyAttribute attribute1, FaultyAttribute attribute2) {
+            if (attribute1.stopped) {
+                return 1;
             }
+            if (attribute2.stopped) {
+                return -1;
+            }
+
+            return alphabeticalSort(attribute1.attributeName, attribute2.attributeName);
         }
         //======================================================
         private int alphabeticalSort(String s1, String s2) {
             if (s1==null)      return 1;
             else if (s2==null) return -1;
             else return s1.compareTo(s2);
-        }
-        //======================================================
-        private int valueSort(double d1, double d2) {
-            if (d1==d2)    return 0;
-            else if (d1<0) return  1;   // Not initialized
-            else if (d2<0) return -1;   // Not initialized
-            else return ((d1 > d2)? 1 : -1);
         }
         //======================================================
     }
