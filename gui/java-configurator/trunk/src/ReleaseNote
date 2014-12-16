@@ -9,7 +9,7 @@
 #
 # $Revision: 1.2 $
 #
-# copyright :    European Synchrotron Radiation Facility
+# copyright :   European Synchrotron Radiation Facility
 #               BP 220, Grenoble 38043
 #               FRANCE
 #
@@ -17,6 +17,14 @@
 
 
 
+jblvac-1.8 - 16/12/14:
+	Improve attribute error window.
+	Add a selector to change TANGO_HOST 
+
+jblvac-1.7 - 06/11/14:
+	FQDN event subscriber name to be added to manager.
+	Events since reset added.
+	Save statistics added.
 
 jblvac-1.6 - 30/10/14:
 	Display event frequency added.

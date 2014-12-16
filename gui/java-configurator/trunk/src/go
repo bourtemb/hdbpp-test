@@ -14,6 +14,8 @@ HdbManager=tango/hdb-cassandra/manager
 HdbManager=tango/hdb/manager
 export HdbManager
 
+export ExtractionClass=org.tango.jhdbextract.gui.HdbBrowser
+
 if [ "$#" -lt 1 ]
 then
 	java  org.tango.hdbcpp.configurator.HdbConfigurator
