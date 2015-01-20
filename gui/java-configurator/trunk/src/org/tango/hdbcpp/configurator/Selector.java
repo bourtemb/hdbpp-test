@@ -37,7 +37,6 @@ package org.tango.hdbcpp.configurator;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -53,9 +52,7 @@ import java.util.List;
 
 @SuppressWarnings("MagicConstant")
 public class Selector extends JDialog {
-    private String retVal = "";
-    private List<String>    values = new ArrayList<String>();
-
+    private String selection = "";
     //===============================================================
     /*
      * Creates new form Selector
@@ -65,10 +62,8 @@ public class Selector extends JDialog {
                     String title, String question, List<String> values, String defaultValue) {
         super(parent, true);
         initComponents();
-
-        this.values = values;
         comboBox.addItem("");
-        for (int i = 0; values != null && i < values.size(); i++) {
+        for (int i=0 ; values!=null && i<values.size() ; i++) {
             comboBox.addItem(values.get(i));
             if (values.get(i).equals(defaultValue))
                 comboBox.setSelectedIndex(i + 1);
@@ -173,28 +168,16 @@ public class Selector extends JDialog {
     //===============================================================
     @SuppressWarnings("UnusedParameters")
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
-        retVal = (String) comboBox.getSelectedItem();
-
-        //	Check if already in combo box or a new one
-        boolean found = false;
-        for (String value : values)
-            if (value.equals(retVal))
-                found = true;
-        //	If not found add for a next usage
-        if (!found)
-            comboBox.addItem(retVal);
-
-        //	if it is the empty one, clear it
-        comboBox.removeItemAt(0);
-        comboBox.insertItemAt("", 0);
-        doClose();
+        selection = (String) comboBox.getSelectedItem();
+        if (!selection.isEmpty())
+            doClose();
     }//GEN-LAST:event_okBtnActionPerformed
 
     //===============================================================
     //===============================================================
     @SuppressWarnings("UnusedParameters")
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
-        retVal = null;
+        selection = null;
         doClose();
     }//GEN-LAST:event_cancelBtnActionPerformed
 
@@ -202,7 +185,7 @@ public class Selector extends JDialog {
     //===============================================================
     @SuppressWarnings("UnusedParameters")
     private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
-        retVal = null;
+        selection = null;
         doClose();
     }//GEN-LAST:event_closeDialog
 
@@ -220,7 +203,7 @@ public class Selector extends JDialog {
     //===============================================================
     public String showDialog() {
         setVisible(true);
-        return retVal;
+        return selection;
     }
 
     //===============================================================

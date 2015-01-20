@@ -88,7 +88,7 @@ public class HdbConfigurator extends JFrame {
         initComponents();
         initOwnComponents();
         ManageAttributes.setDisplay(true);
-		
+
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
         SplashUtils.getInstance().stopSplash();
@@ -173,8 +173,8 @@ public class HdbConfigurator extends JFrame {
             Selector    selector = new Selector(this,
                     "Change Control System", "TANGO_HOST ?", tangoHostList, tangoHost);
             String  newTangoHost = selector.showDialog();
-            if (newTangoHost!=null && !newTangoHost.equals(tangoHost)) {
-                tangoHost = newTangoHost;
+            if (newTangoHost!=null && !newTangoHost.isEmpty() && !newTangoHost.equals(tangoHost)) {
+                tangoHost = TangoUtils.getTangoHost(newTangoHost);
 
                 //  Check if it is a new one
                 if (!tangoHostList.contains(tangoHost))
@@ -1032,6 +1032,18 @@ public class HdbConfigurator extends JFrame {
 		catch(DevFailed e) {
             SplashUtils.getInstance().stopSplash();
             ErrorPane.showErrorMessage(new Frame(), null, e);
+            System.exit(0);
+		}
+		catch(Exception e) {
+            SplashUtils.getInstance().stopSplash();
+            e.printStackTrace();
+            ErrorPane.showErrorMessage(new Frame(), null, e);
+            System.exit(0);
+		}
+		catch(Error e) {
+            SplashUtils.getInstance().stopSplash();
+            e.printStackTrace();
+            ErrorPane.showErrorMessage(new Frame(), null, new Exception(e));
             System.exit(0);
 		}
     }

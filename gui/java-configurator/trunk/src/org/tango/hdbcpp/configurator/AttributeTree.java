@@ -48,9 +48,8 @@ import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * This class is able to display in a tree device and attributes.
@@ -67,6 +66,7 @@ public class AttributeTree extends JTree {
     private HdbConfigurator parent;
     private String tangoHost;
     private String[] deviceNames;
+    private boolean useDefaultTangoHost;
 
     private static final int DOMAIN = 0;
     private static final int FAMILY = 1;
@@ -88,8 +88,14 @@ public class AttributeTree extends JTree {
         }
 
         buildTree();
+
+        List<String> defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
+        for (String defaultTangoHost : defaultTangoHosts) {
+            if (tangoHost.equals(defaultTangoHost))
+                useDefaultTangoHost = true;
+        }
+
         menu = new AttributeTreePopupMenu(this);
-        //expandChildren(root);
         setSelectionPath(null);
 
         //	Enable Drag and drop
@@ -382,6 +388,15 @@ public class AttributeTree extends JTree {
         scrollPathToVisible(treePath);
     }
 
+    //===============================================================
+    //===============================================================
+    private void testEvent() {
+        Object  userObject = getSelectedObject();
+        if (userObject instanceof Attribute) {
+            Attribute   attribute = ((Attribute)userObject);
+            Utils.getTestEvents().add("tango://"+tangoHost+'/'+attribute.path);
+        }
+    }
     //===============================================================
     //===============================================================
     private void addAttribute() {
@@ -740,13 +755,15 @@ public class AttributeTree extends JTree {
     private static final int CHANGE_TANGO_HOST = 0;
     private static final int ADD_ATTRIBUTE     = 1;
     private static final int CONFIGURE         = 2;
-    private static final int SELECT_ARCHIVER   = 3;
+    private static final int TEST_EVENT        = 3;
+    private static final int SELECT_ARCHIVER   = 4;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
             "Change Tango Host",
             "Add Attribute to Subscriber",
             "Configure Polling/Events",
+            "Test Event",
             "Select Archiver",
     };
 
@@ -824,6 +841,8 @@ public class AttributeTree extends JTree {
 
             getComponent(OFFSET + ADD_ATTRIBUTE).setVisible(true);
             getComponent(OFFSET + CONFIGURE).setVisible(true);
+            getComponent(OFFSET + CONFIGURE).setEnabled(useDefaultTangoHost);
+            getComponent(OFFSET + TEST_EVENT).setVisible(Utils.getTestEvents()!=null);
             getComponent(OFFSET + ADD_ATTRIBUTE).setEnabled(attribute.archiver==null);
             if (attribute.archiver!=null) {
                 getComponent(OFFSET + SELECT_ARCHIVER).setVisible(true);
@@ -873,6 +892,9 @@ public class AttributeTree extends JTree {
                     break;
                 case SELECT_ARCHIVER:
                     selectArchiver();
+                    break;
+                case TEST_EVENT:
+                    testEvent();
                     break;
                 case CONFIGURE:
                     configureAttribute();
