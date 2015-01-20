@@ -40,7 +40,6 @@ import java.awt.*;
 import java.util.ArrayList;
 
 //=======================================================
-
 /**
  * Class Description: Basic JPanel Class to display
  * an ATK  MultiScalaViewer

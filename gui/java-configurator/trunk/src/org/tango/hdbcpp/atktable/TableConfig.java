@@ -89,8 +89,7 @@ class TableConfig  {
     //==========================================================
     public TableConfig(String name) throws DevFailed {
         DeviceProxy dev = new DeviceProxy(name);
-        columnNames = new String[1];
-        columnNames[0] = name;
+        columnNames = new String[]{ name };
 
         AttributeInfo[] info = dev.get_attribute_info();
 
