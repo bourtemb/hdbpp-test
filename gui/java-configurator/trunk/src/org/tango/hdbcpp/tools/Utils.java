@@ -37,6 +37,8 @@ package org.tango.hdbcpp.tools;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.Except;
+import jive3.MainPanel;
+import org.tango.hdbcpp.configurator.TestEvents;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,6 +51,7 @@ import java.util.StringTokenizer;
 public class Utils {
     private static Utils instance = null;
     private static final String DefaultImagePath = "/org/tango/hdbcpp/img/";
+    private static MainPanel jive = null;
     //======================================================================
     //======================================================================
     private Utils() {
@@ -104,20 +107,53 @@ public class Utils {
 
     //===============================================================
     //===============================================================
+    public static void startJiveForDevice(String deviceName) {
+        //  Start jive and go to the device node
+        if (jive==null) {
+            jive = new MainPanel(false, false);
+        }
+        jive.setVisible(true);
+        jive.goToDeviceNode(deviceName);
+        System.out.println("Go to device node "+deviceName);
+    }
+    //===============================================================
+    //===============================================================
     public Component startExternalApplication(JFrame parent, String className) throws DevFailed {
+        return startExternalApplication(parent, className, null);
+    }
+    //===============================================================
+    //===============================================================
+    public Component startExternalApplication(JFrame parent, String className, Object parameter) throws DevFailed {
+
         try {
-            //	Retrieve class name
+            //	Retrieve class object
             Class	_class = Class.forName(className);
 
             //	And build object
             Constructor[] constructors = _class.getDeclaredConstructors();
             for (Constructor constructor : constructors) {
                 Class[] parameterTypes = constructor.getParameterTypes();
-                if (parameterTypes.length==1 && parameterTypes[0]==JFrame.class){
-                    Component component = (Component) constructor.newInstance(parent);
-                    component.setVisible(true);
-                    return component;
-
+                if (parameter==null) {
+                    if (parameterTypes.length==1 && parameterTypes[0]==JFrame.class){
+                        Component component = (Component) constructor.newInstance(parent);
+                        component.setVisible(true);
+                        return component;
+                    }
+                }
+                else {
+                    if (parameterTypes.length==2 && parameterTypes[0]==JFrame.class){
+                        if (parameterTypes[1]==String.class && parameter instanceof String) {
+                            Component component = (Component) constructor.newInstance(parent, parameter);
+                            component.setVisible(true);
+                            return component;
+                        }
+                        else
+                        if (parameterTypes[1]==String[].class && parameter instanceof String[]) {
+                            Component component = (Component) constructor.newInstance(parent, parameter);
+                            component.setVisible(true);
+                            return component;
+                        }
+                    }
                 }
             }
             throw new Exception("Cannot find constructor for " + className);
@@ -126,9 +162,11 @@ public class Utils {
             if (e instanceof InvocationTargetException) {
                 InvocationTargetException   ite = (InvocationTargetException) e;
                 Throwable   throwable = ite.getTargetException();
-                System.out.println(throwable);
+                System.err.println(throwable);
                 if (throwable instanceof DevFailed)
                     throw (DevFailed) throwable;
+                else
+                    Except.throw_exception(throwable.toString(), throwable.getMessage());
             }
             Except.throw_exception(e.toString(), e.toString());
         }
@@ -291,11 +329,35 @@ public class Utils {
     }
     //======================================================================
     //======================================================================
+    public static String buildTooltip(String text) {
+        return "<html><BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFD0\">" + text +
+                "</body></html>";
+    }
+    //======================================================================
+    //======================================================================
     public static void popupError(Component component, String message) {
         JOptionPane.showMessageDialog(component, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
     //======================================================================
     //======================================================================
+    private static TestEvents testEvents;
+    //=======================================================
+    //=======================================================
+    public static TestEvents getTestEvents() {
+        //  Check if event tester is available
+        if (testEvents==null) {
+            try {
+                testEvents = TestEvents.getInstance(new JFrame());
+            }
+            catch (NoClassDefFoundError e) {
+                System.err.println(e);
+            }
+            catch (DevFailed e) {
+                System.err.println(e);
+            }
+        }
+        return testEvents;
+    }
 
     //======================================================================
     //======================================================================
