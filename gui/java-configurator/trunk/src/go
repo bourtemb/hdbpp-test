@@ -4,6 +4,7 @@ Appli=../bin
 
 CLASSPATH=$TANGO_HOME/lib/TangORB.jar:$TANGO_HOME/lib/ATKWidget.jar:$TANGO_HOME/lib/ATKCore.jar
 CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Jive.jar:$Appli
+CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Astor.jar
 
 echo "CLASSPATH=$CLASSPATH"
 

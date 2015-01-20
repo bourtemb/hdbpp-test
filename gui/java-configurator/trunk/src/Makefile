@@ -1,7 +1,7 @@
 #+======================================================================
 # $Source: /segfs/tango/cvsroot/jclient/jblvac/src/jblvac/Makefile,v $
 #
-# Project:      Tango Device Server
+# Project:      Configurator and diagnotics for Tango HDB++
 #
 # Description:  Makefile to generate the JAVA Tango classes package
 #
@@ -10,11 +10,6 @@
 # $Version$
 #
 # $Log: Makefile,v $
-# Revision 1.2  2014-04-22 13:53:29  verdier
-# Line/device disable added.
-#
-# Revision 1.1.1.1  2014-04-02 12:52:19  verdier
-# Initial Revision
 #
 # copyleft :    European Synchrotron Radiation Facility
 #               BP 220, Grenoble 38043
