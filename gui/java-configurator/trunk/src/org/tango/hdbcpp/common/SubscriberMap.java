@@ -67,10 +67,10 @@ public class SubscriberMap {
         //  Get Subscriber labels
         ArrayList<String[]> labels = TangoUtils.getSubscriberLabels();
         //  Get Subscriber deviceName
-        String[]    archivers = ArchiverUtils.getSubscriberList(configuratorProxy);
-        for (String archiver : archivers) {
-            SplashUtils.getInstance().increaseSplashProgressForLoop(archivers.length, "Building object " + archiver);
-            put(archiver, labels);
+        String[]    subscribers = ArchiverUtils.getSubscriberList(configuratorProxy);
+        for (String subscriber : subscribers) {
+            SplashUtils.getInstance().increaseSplashProgressForLoop(subscribers.length, "Building object " + subscriber);
+            put(subscriber, labels);
         }
         StringComparator.sort(labelList);
     }
@@ -130,6 +130,21 @@ public class SubscriberMap {
         for (Subscriber subscriber : collection)
             subscribers.add(subscriber);
         return subscribers;
+    }
+    //======================================================
+    //======================================================
+    private ArrayList<String> tangoHostList = new ArrayList<String>();
+    public List<String> getTangoHostList() {
+        if (tangoHostList.isEmpty()) {
+            Collection<Subscriber> collection = label2device.values();
+            for (Subscriber subscriber : collection) {
+                List<String> csList = subscriber.getTangoHostList();
+                for (String cs : csList)
+                    if (!((List) tangoHostList).contains(cs))
+                        tangoHostList.add(cs);
+            }
+        }
+        return tangoHostList;
     }
     //======================================================
     //======================================================

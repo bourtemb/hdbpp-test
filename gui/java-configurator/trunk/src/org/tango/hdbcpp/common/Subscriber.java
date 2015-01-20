@@ -39,7 +39,13 @@ package org.tango.hdbcpp.common;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DbClass;
 import fr.esrf.TangoApi.DbDatum;
+import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoApi.DeviceProxy;
+import org.tango.hdbcpp.tools.ArchiverUtils;
+import org.tango.hdbcpp.tools.TangoUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 //======================================================
@@ -92,22 +98,62 @@ public class Subscriber extends DeviceProxy {
     }
     //=======================================================
     //=======================================================
+    public long getStatisticsResetTime() throws DevFailed {
+        DeviceAttribute attribute = read_attribute("StatisticsResetTime");
+        if (attribute.hasFailed())
+            return 0;
+        double nbSeconds = attribute.extractDouble();
+        long nbMillis = (long) nbSeconds*1000;
+        long now = System.currentTimeMillis();
+        return now - nbMillis;
+    }
+    //=======================================================
+    //=======================================================
     public int getStatisticsTimeWindow() throws DevFailed {
-        int value = 3600;
+        int value = 2*3600;
         String propertyName = "StatisticsTimeWindow";
         //  Check class property
         DbDatum datum = new DbClass(CLASS_NAME).get_property(propertyName);
         if (!datum.is_empty()) {
-            value = datum.extractLong();
+            //  Why sometimes value is "Not specified" ???
+            try {
+                 value = datum.extractLong();
+            }
+            catch (NumberFormatException e) {
+                System.err.println(e);
+            }
         }
         //  Check device property
         datum = get_property(propertyName);
         if (!datum.is_empty()) {
-            value = datum.extractLong();
+            try {
+                value = datum.extractLong();
+            }
+            catch (NumberFormatException e) {
+                System.err.println(e);
+            }
         }
         return value;
     }
-    //=======================================================
+    //======================================================
+    //======================================================
+    List<String> getTangoHostList() {
+        ArrayList<String> list = new ArrayList<String>();
+        try {
+            String[] attributeList = ArchiverUtils.getAttributeList(this, "");
+            for (String attributeName : attributeList) {
+                String csName = TangoUtils.getOnlyTangoHost(attributeName);
+                if (!((List)list).contains(csName))
+                    list.add(csName);
+            }
+        }
+        catch (DevFailed e) {
+            System.err.println(e);
+            //  return an empty list
+        }
+        return list;
+    }
+    //======================================================
     //======================================================
     public String toString() {
         return name;

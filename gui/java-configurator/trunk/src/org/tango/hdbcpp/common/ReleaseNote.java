@@ -17,26 +17,34 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Wed Nov 12 09:27:05 CET 2014)</Center><Br>\n" + 
-		"<li><b>jblvac-1.7 - 06/11/14:</b><Br>\n" + 
+		"	(Generated Tue Jan 20 13:54:08 CET 2015)</Center><Br>\n" + 
+		"<li><b>jhdbcpp-1.10 - 20/01/15:</b><Br>\n" + 
+		"&nbsp; &nbsp; Table added to distribution dialog<Br>\n" + 
+		"<li><b>jhdbcpp-1.9 - 16/01/15:</b><Br>\n" + 
+		"&nbsp; &nbsp; Events number added to distribution chart.<Br>\n" + 
+		"<li><b>jhdbcpp-1.8 - 19/12/14:</b><Br>\n" + 
+		"&nbsp; &nbsp; Improve attribute error window.<Br>\n" + 
+		"&nbsp; &nbsp; Add a selector to change TANGO_HOST<Br>\n" + 
+		"&nbsp; &nbsp; Event tester call added.<Br>\n" + 
+		"<li><b>jhdbcpp-1.7 - 06/11/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; FQDN event subscriber name to be added to manager.<Br>\n" + 
 		"&nbsp; &nbsp; Events since reset added.<Br>\n" + 
-		"&nbsp; &nbsp; Save statistics addd.<Br>\n" + 
-		"<li><b>jblvac-1.6 - 30/10/14:</b><Br>\n" + 
+		"&nbsp; &nbsp; Save statistics added.<Br>\n" + 
+		"<li><b>jhdbcpp-1.6 - 30/10/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Display event frequency added.<Br>\n" + 
-		"<li><b>jblvac-1.5 - 13/10/14:</b><Br>\n" + 
+		"<li><b>jhdbcpp-1.5 - 13/10/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Display error message on failed attribute list.<Br>\n" + 
 		"&nbsp; &nbsp; Display HDB name if property set.<Br>\n" + 
-		"<li><b>jblvac-1.4 - 24/09/14:</b><Br>\n" + 
+		"<li><b>jhdbcpp-1.4 - 24/09/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Diag viewers are now in a JTable object.<Br>\n" + 
 		"&nbsp; &nbsp; A double click on table cell displays attribute list.<Br>\n" + 
-		"<li><b>jblvac-1.3 - 22/09/14:</b><Br>\n" + 
+		"<li><b>jhdbcpp-1.3 - 22/09/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Fix a bug in archiver device creation<Br>\n" + 
-		"<li><b>jblvac-1.2 - 05/09/14:</b><Br>\n" + 
+		"<li><b>jhdbcpp-1.2 - 05/09/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Add a graph chart to display distribution.<Br>\n" + 
-		"<li><b>jblvac-1.1 - 28/08/14:</b><Br>\n" + 
+		"<li><b>jhdbcpp-1.1 - 28/08/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Add/Remove subscriber added.<Br>\n" + 
-		"<li><b>jblvac-1.0 - 06/08/14:</b><Br>\n" + 
+		"<li><b>jhdbcpp-1.0 - 06/08/14:</b><Br>\n" + 
 		"&nbsp; &nbsp; Initial Revision<Br>\n" + 
 		"</Body>\n" + 
 		"</Html>\n" + 
