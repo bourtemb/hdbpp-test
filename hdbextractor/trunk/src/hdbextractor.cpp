@@ -11,14 +11,23 @@
 
 #include <string.h>
 
-
+/** \brief the HdbExtractor destructor.
+ *
+ * Deletes private data after closing the connection.
+ * Private data deletion implies freeing resources for connection, dbschema and
+ * QueryConfiguration.
+ */
 Hdbextractor::~Hdbextractor()
 {
+    printf("\e[1;31m~HdbExtractor: connection %p schema %p\e[0m\n", d_ptr->connection,
+           d_ptr->dbschema);
     if(d_ptr->connection != NULL)
     {
         pinfo("~HdbExtractor: closing db connection");
         d_ptr->connection->close();
     }
+    /* Data is deleted by the HdbExtractorPrivate destructor */
+    delete d_ptr;
 }
 
 Hdbextractor::DbType Hdbextractor::dbType() const
@@ -132,16 +141,19 @@ bool Hdbextractor::connect(DbType dbType, const char *host,
         pinfo("HdbExtractor: connected: %d host %s  db %s user %s passwd %s", isConnected(), host, db, user, passwd);
         break;
     default:
-        pfatal("HdbExtractor: connect: database type unsupported: %d", dbType);
+        snprintf(d_ptr->errorMessage, MAXERRORLEN, "HdbExtractor: connect: database type unsupported: %d", dbType);
         break;
     }
 
     /* set the desired schema and initialize DbSchema */
-    setDbType(dbType);
+    if(success)
+        setDbType(dbType);
 
-    if(!success)
+    if(!success && d_ptr->connection != NULL)
         strncpy(d_ptr->errorMessage, d_ptr->connection->getError(), MAXERRORLEN);
 
+    if(!success)
+        perr(d_ptr->errorMessage);
     return success;
 }
 
@@ -215,8 +227,10 @@ bool Hdbextractor::getData(const char *source,
                                            d_ptr->connection, d_ptr->updateEveryRows);
     }
     /* error message, if necessary */
-    if(!success)
+    if(!success && d_ptr->dbschema != NULL)
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.getData: %s", d_ptr->dbschema->getError());
+    else if(!d_ptr->dbschema || !d_ptr->connection)
+        snprintf(d_ptr->errorMessage, MAXERRORLEN, "Hdbextractor.getData: connection/schema not initialized");
 
     return success;
 }
@@ -255,8 +269,10 @@ bool Hdbextractor::getData(const std::vector<std::string> sources,
             printf("HdbExtractor.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
             success = d_ptr->dbschema->getData(sources.at(i).c_str(), start_date, stop_date,
                                                d_ptr->connection, d_ptr->updateEveryRows);
+        //    if(!success)
+        //        break;
             if(!success)
-                break;
+                printf("\e[1;31mHdbExtractor.getData: unsuccessful fetch but continue!\e[0m\n");
         }
     }
     /* error message, if necessary */
@@ -338,17 +354,35 @@ int Hdbextractor::updateProgressStep()
     return d_ptr->updateEveryRows;
 }
 
+/** \brief Returns the QueryConfiguration currently set, if any, or NULL if none has been set.
+ *
+ * @see setQueryConfiguration
+ */
+QueryConfiguration *Hdbextractor::getQueryConfiguration() const
+{
+    return d_ptr->queryConfiguration;
+}
+
 /** \brief This method allows to configure various options before querying the database
  *
  * @param qc The QueryConfiguration object with the desired options set.
  *
  * This method is used to configure the way data is fetched by getData.
  *
+ * \par Important note.
+ * The ownership of the QueryConfiguration passed as parameter is passed to the Hdbextractor.
+ * Its lifetime is tied to the Hdbextractor lifetime. In other words, you <strong>must not</strong>
+ * delete it. It's deleted upon Hdbextractor's destruction.
+ * <br/>If you <strong>replace</strong> the current QueryConfiguration with another one,
+ * <strong>the current one</strong> is deleted for you in this method.
+ *
  * @see QueryConfiguration
  * @see getData
  */
 void Hdbextractor::setQueryConfiguration(QueryConfiguration *qc)
 {
+    if(d_ptr->queryConfiguration) /* delete current configuration */
+        delete d_ptr->queryConfiguration;
     d_ptr->queryConfiguration = qc;
 }
 

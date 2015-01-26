@@ -132,8 +132,8 @@ XVariant::XVariant(const char* source, const char *timestamp, const char *strdat
 
 XVariant::XVariant(const char* source,
                    const char *timestamp,
-         const size_t size, DataFormat df,
-         DataType dt, Writable wri)
+                   const size_t size, DataFormat df,
+                   DataType dt, Writable wri)
 {
     d = new XVariantPrivate();
     d->mWritable = wri;
@@ -187,8 +187,8 @@ void XVariant::build_from(const XVariant& other)
     d->mIsWNull = other.isWNull();
     d->mQuality = other.getQuality();
 
-//    printf("\e[0;36mXVariant %p copy from %p this->d: %p: format %d wri %d size %ld\e[0m \n", this, &other, d,
-//           d->mFormat, d->mWritable, d->mSize);
+    //    printf("\e[0;36mXVariant %p copy from %p this->d: %p: format %d wri %d size %ld\e[0m \n", this, &other, d,
+    //           d->mFormat, d->mWritable, d->mSize);
 
     if(d->mWritable == WritableInvalid || d->mType == TypeInvalid ||
             d->mFormat == FormatInvalid)
@@ -243,28 +243,28 @@ void XVariant::build_from(const XVariant& other)
         {
             double *vd = new double[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
-                vd[i] =  other.toDoubleP()[i];
+                vd[i] =  other.toDoubleP(false)[i];
             d->w_val = vd;
         }
         else if(d->mType == XVariant::Int)
         {
             long int *vi =  new long int[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
-                vi[i] = other.toLongIntP()[i];
+                vi[i] = other.toLongIntP(false)[i];
             d->w_val = vi;
         }
         else if(d->mType == XVariant::UInt)
         {
             unsigned long int *vi =  new unsigned long int[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
-                vi[i] = other.toULongIntP()[i];
+                vi[i] = other.toULongIntP(false)[i];
             d->w_val = vi;
         }
         else if(d->mType == XVariant::Boolean)
         {
             bool *vb = new bool[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
-                vb[i] = other.toBoolP()[i];
+                vb[i] = other.toBoolP(false)[i];
             d->w_val = vb;
         }
     }
@@ -486,7 +486,7 @@ void XVariant::add(const char* readval, size_t index)
             {
                 long int *lval;
                 if(d->mWritable == XVariant::RO )
-                   lval = (long int *) d->val;
+                    lval = (long int *) d->val;
                 else
                     lval = (long int *) d->w_val;
                 lval[index] = val;
@@ -506,7 +506,7 @@ void XVariant::add(const char* readval, size_t index)
             {
                 long unsigned  int *lval;
                 if(d->mWritable == XVariant::RO )
-                   lval = (long unsigned  int *) d->val;
+                    lval = (long unsigned  int *) d->val;
                 else
                     lval = (long unsigned  int *) d->w_val;
                 lval[index] = val;
@@ -526,7 +526,7 @@ void XVariant::add(const char* readval, size_t index)
             {
                 bool *bval;
                 if(d->mWritable == XVariant::RO )
-                   bval = (bool *) d->val;
+                    bval = (bool *) d->val;
                 else
                     bval = (bool *) d->w_val;
                 bval[index] = booval;
@@ -852,6 +852,7 @@ void XVariant::parse(const char *sr, const char *sw)
             if(!d->mIsWNull)
             {
                 double *wv = new double[1];
+                *wv  = strtod(sw, NULL);
                 d->w_val = wv;
             }
             d->mSize = 1;
@@ -1212,7 +1213,7 @@ void XVariant::delete_rdata()
             delete (bool *) d->val;
         else if(d->mType == String)
             delete (char *) d->val;
-//        printf("delete_rdata: XVariant %p deleted d %p d->val %p type %d\n", this, d, d->val, d->mType);
+        //        printf("delete_rdata: XVariant %p deleted d %p d->val %p type %d\n", this, d, d->val, d->mType);
         d->val = NULL;
     }
 }
@@ -1607,7 +1608,7 @@ std::vector<std::string> XVariant::toStringVector() const
  */
 double *XVariant::toDoubleP(bool read) const
 {
-       if(d->val == NULL)
+    if(d->val == NULL)
         printf("\e[1;33mtoDoubleP this %p read %d d %p d->val %p\e[0m\n", this, read, d, d->val);
     if(read)
         return (double *) d->val ;
@@ -1693,4 +1694,94 @@ char **XVariant::toCharP(bool read) const
     if(read)
         return (char **) d->val ;
     return (char **) d->w_val;
+}
+
+/** \brief Tries to convert the value stored into a string.
+ *
+ * This method converts the data stored into an XVariant into a string.
+ * For instance, if the XVariant stores a scalar Double data type which value is 0.12
+ * then a string containing "0.12" is returned. The "%f" conversion specifier
+ * is used to convert Double data type.
+ * If the XVariant stores a Vector Double data type with values [10.1, 12.6, 9.1, -5.4]
+ * then the string returned will be "10.1,12.6,9.1,-5.4". The "%f" conversion specifier is
+ * used to convert doubles.
+ * The "%ld" specifier is used to convert signed integers.
+ * The "%lud" specifier is used to convert unsigned integers.
+ *
+ * @param read if true, convert to string the read value
+ * @param read false, convert to string the set point (write) value.
+ * @param ok if not null, store in ok the result of the conversion.
+ *
+ * @return a std::string representation of the stored values, as described above.
+ *
+ * \par Note
+ * If the read is true and the read value is null or a conversion error occurs,
+ * an empty string is returned. The same goes for the write value.
+ */
+std::string XVariant::convertToString(bool read, bool *ok)
+{
+    std::string ret;
+    char err[256];
+    char tmp[128] = "";
+    if(ok != NULL)
+        *ok = true;
+
+    size_t siz = this->getSize();
+    for(size_t i = 0 ; i < siz; i++)
+    {
+        strcpy(tmp, "");
+        if(d->mType == Double)
+        {
+            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+                snprintf(tmp, 128, "%f", ((double *) d->val)[i]);
+            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+                snprintf(tmp, 128, "%f", ((double *) d->w_val)[i]);
+        }
+        else if(d->mType == Int)
+        {
+            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+                snprintf(tmp, 128, "%ld", ((long int *) d->val)[i]);
+            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+                snprintf(tmp, 128, "%ld", ((long int *) d->w_val)[i]);
+        }
+        else if(d->mType == UInt)
+        {
+            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+                snprintf(tmp, 128, "%lud",  ((unsigned long int *) d->val)[i]);
+            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+                snprintf(tmp, 128, "%lud", ((unsigned long int *) d->w_val)[i]);
+        }
+        else if(d->mType == Boolean)
+        {
+            bool b = false;
+
+            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+                b = ((bool *) d->val)[i];
+            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+                b = ((bool *) d->w_val)[i];
+            if(b)
+                snprintf(tmp, 128, "true");
+            else
+                snprintf(tmp, 128, "true");
+        }
+        else if(d->mType == String)
+        {
+            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+                ret += std::string(((char **) d->val)[i]);
+            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+                ret += std::string(((char **) d->w_val)[i]);
+        }
+        else if(ok != NULL)
+        {
+            *ok = false;
+            snprintf(err, 256, "XVariant.convertToString type %d unsupported (%s)", d->mType, d->mSource);
+            mMakeError(err);
+        }
+
+        ret = std::string(tmp);
+        if(i < siz - 1 && ret.length() > 0)
+            ret += std::string(",");
+    }
+
+    return ret;
 }

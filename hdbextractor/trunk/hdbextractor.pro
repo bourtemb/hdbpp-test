@@ -115,3 +115,8 @@ LIBS += -lmysqlclient -lpthread
 
 INSTALLS += lib inc doc
 
+DISTFILES += \
+    Makefile.am \
+    src/Makefile.am \
+    configure.in
+

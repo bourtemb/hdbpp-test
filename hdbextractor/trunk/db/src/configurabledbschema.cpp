@@ -27,7 +27,6 @@ ConfigurableDbSchema::ConfigurableDbSchema()
  */
 void ConfigurableDbSchema::setQueryConfiguration(QueryConfiguration *queryConfiguration)
 {
-    printf("\e[1;35msetting query conf %p\e[0m\n", queryConfiguration);
     d_ptr->queryConfiguration = queryConfiguration;
 }
 

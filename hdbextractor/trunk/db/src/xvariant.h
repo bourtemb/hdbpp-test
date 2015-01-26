@@ -139,6 +139,8 @@ public:
 
     char **toCharP(bool read = true) const;
 
+    std::string convertToString(bool read = true, bool *ok = NULL);
+
     unsigned int getNullValuesCount() const;
 
     unsigned int *getNullValueIndexes() const;

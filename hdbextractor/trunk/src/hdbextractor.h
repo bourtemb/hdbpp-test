@@ -418,6 +418,8 @@ public:
 
     bool hasError() const;
 
+    QueryConfiguration *getQueryConfiguration() const;
+
 private:
     HdbExtractorPrivate *d_ptr;
 };

@@ -118,7 +118,6 @@ bool MySqlHdbSchema::getData(const char *source,
 {
     bool success, from_the_past_success = true;
     char query[MAXQUERYLEN];
-    char errmsg[256];
     char ch_id[16];
     char data_type[16];
     char data_format[16];
@@ -382,7 +381,7 @@ bool MySqlHdbSchema::getData(const char *source,
     {
         success = false;
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "MysqlHdbSchema: no attribute \"%s\" in adt", source);
-        perr(errmsg);
+        perr(d_ptr->errorMessage);
     }
 
     /* compute elapsed time */
@@ -427,8 +426,8 @@ bool MySqlHdbSchema::getData(const std::vector<std::string> sources,
         printf("MySqlHdbSchema.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
         success = getData(sources.at(i).c_str(), start_date, stop_date,
                           connection, notifyEveryNumRows);
-        if(!success)
-            break;
+   //     if(!success)
+   //         break;
     }
 
     d_ptr->totalSources = 1;
