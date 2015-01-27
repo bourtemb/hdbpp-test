@@ -1,0 +1,22 @@
+INSTALLATION INSTRUCTIONS FOR Hdbextractor++ library
+
+1. Building the hdbextractor core library
+
+1a. Dependencies: mysql and mysql development files
+
+1b. Build the library:
+
+    cd hdbextractor/trunk
+
+    ./configure --prefix=/usr/local/hdbextractor++  (or wherever you like)
+
+    make
+
+    make install
+
+1c. Build the documentation
+
+    make doxygen-doc
+
+    pdf  documentation: doc/hdbextractor.pdf
+    html documentation: doc/html
