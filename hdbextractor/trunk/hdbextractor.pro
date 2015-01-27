@@ -21,7 +21,7 @@ VER_MAJ = 1
 VER_MIN = 0
 VER_FIX = 0
 
-unix:INCLUDEPATH += mysql/src db/src db src ../src db/src/helpers utils utils/private
+unix:INCLUDEPATH += mysql/src db/src db src ../src db/helpers utils utils/private
 
 DEFINES += HDBEXTRACTOR_VERSION_STR=\"\\\"$${VERSION}\\\"\" \
     HDBEXTRACTOR_VERSION=$${VERSION_HEX} \
@@ -36,55 +36,55 @@ DEFINES += HDBEXTRACTOR_LIBRARY
 
 SOURCES += src/hdbextractor.cpp \
     src/hdbextractorprivate.cpp \
-    mysql/src/mysqlconnection.cpp \
-    db/src/row.cpp \
-    mysql/src/mysqlresult.cpp \
-    mysql/src/mysqlrow.cpp \
-    db/src/result.cpp \
-    db/src/xvariant.cpp \
-    hdb/src/mysqlhdbschema.cpp \
-    db/src/xvariantlist.cpp \
-    hdbpp/src/mysqlhdbppschema.cpp \
+    src/mysql/mysqlconnection.cpp \
+    src/db/row.cpp \
+    src/mysql/mysqlresult.cpp \
+    src/mysql/mysqlrow.cpp \
+    src/db/result.cpp \
+    src/db/xvariant.cpp \
+    src/hdb/mysqlhdbschema.cpp \
+    src/db/xvariantlist.cpp \
+    src/hdbpp/mysqlhdbppschema.cpp \
     src/configurationparser.cpp \
     src/queryconfiguration.cpp \
-    db/src/configurabledbschema.cpp \
-    db/src/helpers/configurabledbschemahelper.cpp \
-    utils/datasiever.cpp \
-    utils/private/datasieverprivate.cpp \
-    utils/xvariantprinter.cpp \
-    utils/datasieverprogresslistener.cpp \
-    db/src/timeinterval.cpp \
-    db/src/datetimeutils.cpp \
-    db/src/xvariantprivate.cpp
+    src/db/configurabledbschema.cpp \
+    src/db/helpers/configurabledbschemahelper.cpp \
+    src/utils/datasiever.cpp \
+    src/utils/private/datasieverprivate.cpp \
+    src/utils/xvariantprinter.cpp \
+    src/utils/datasieverprogresslistener.cpp \
+    src/db/timeinterval.cpp \
+    src/db/datetimeutils.cpp \
+    src/db/xvariantprivate.cpp
 
 HEADERS += src/hdbextractor.h\
     src/hdbextractorprivate.h \
     src/hdbxmacros.h \
-    db/src/connection.h \
-    mysql/src/mysqlconnection.h \
-    db/src/row.h \
-    mysql/src/mysqlresult.h \
-    db/src/result.h \
-    mysql/src/mysqlrow.h \
-    db/src/xvariant.h \
-    db/src/dbschema.h \
-    db/src/dbschemaprivate.h \
-    hdb/src/mysqlhdbschema.h \
-    db/src/xvariantlist.h \
-    db/src/xvariantprivate.h \
-    db/src/resultlistenerinterface.h \
+    src/db/connection.h \
+    src/mysql/mysqlconnection.h \
+    src/db/row.h \
+    src/mysql/mysqlresult.h \
+    src/db/result.h \
+    src/mysql/mysqlrow.h \
+    src/db/xvariant.h \
+    src/db/dbschema.h \
+    src/db/dbschemaprivate.h \
+    src/hdb/mysqlhdbschema.h \
+    src/db/xvariantlist.h \
+    src/db/xvariantprivate.h \
+    src/db/resultlistenerinterface.h \
     src/hdbextractorlistener.h \
-    hdbpp/src/mysqlhdbppschema.h \
+    src/hdbpp/mysqlhdbppschema.h \
     src/configurationparser.h \
     src/queryconfiguration.h \
-    db/src/configurabledbschema.h \
-    db/src/helpers/configurabledbschemahelper.h \
-    utils/datasiever.h \
-    utils/private/datasieverprivate.h \
-    utils/xvariantprinter.h \
-    utils/datasieverprogresslistener.h \
-    db/src/timeinterval.h \
-    db/src/datetimeutils.h
+    src/db/configurabledbschema.h \
+    src/db/helpers/configurabledbschemahelper.h \
+    src/utils/datasiever.h \
+    src/utils/private/datasieverprivate.h \
+    src/utils/xvariantprinter.h \
+    src/utils/datasieverprogresslistener.h \
+    src/db/timeinterval.h \
+    src/db/datetimeutils.h
 
 
 lib.path = $${INSTALL_ROOT}/lib
