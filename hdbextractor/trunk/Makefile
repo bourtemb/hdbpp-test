@@ -14,6 +14,36 @@
 
 
 
+# Copyright (C) 2004 Oren Ben-Kiki
+# This file is distributed under the same terms as the Automake macro files.
+
+# Generate automatic documentation using Doxygen. Goals and variables values
+# are controlled by the various DX_COND_??? conditionals set by autoconf.
+#
+# The provided goals are:
+# doxygen-doc: Generate all doxygen documentation.
+# doxygen-run: Run doxygen, which will generate some of the documentation
+#              (HTML, CHM, CHI, MAN, RTF, XML) but will not do the post
+#              processing required for the rest of it (PS, PDF, and some MAN).
+# doxygen-man: Rename some doxygen generated man pages.
+# doxygen-ps: Generate doxygen PostScript documentation.
+# doxygen-pdf: Generate doxygen PDF documentation.
+#
+# Note that by default these are not integrated into the automake goals. If
+# doxygen is used to generate man pages, you can achieve this integration by
+# setting man3_MANS to the list of man pages generated and then adding the
+# dependency:
+#
+#   $(man3_MANS): doxygen-doc
+#
+# This will cause make to run doxygen and generate all the documentation.
+#
+# The following variable is intended for use in Makefile.am:
+#
+# DX_CLEANFILES = everything to clean.
+#
+# This is usually added to MOSTLYCLEANFILES.
+
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
     false; \
@@ -92,6 +122,8 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/m4_ax_check_mysql.m4 \
+	$(top_srcdir)/m4/m4_ax_prog_doxygen.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -158,9 +190,9 @@ ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(srcdir)/Makefile.in AUTHORS COPYING ChangeLog \
-	INSTALL NEWS README compile config.guess config.sub depcomp \
-	install-sh ltmain.sh missing
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/aminclude.am AUTHORS \
+	COPYING ChangeLog INSTALL NEWS README compile config.guess \
+	config.sub depcomp install-sh ltmain.sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -221,11 +253,35 @@ CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -O2
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"hdbextractor\" -DPACKAGE_TARNAME=\"hdbextractor\" -DPACKAGE_VERSION=\"0.90.1\" -DPACKAGE_STRING=\"hdbextractor\ 0.90.1\" -DPACKAGE_BUGREPORT=\"giacomo.strangolino@elettra.trieste.it\" -DPACKAGE_URL=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DPACKAGE=\"hdbextractor\" -DVERSION=\"0.90.1\" -DHAVE_LIBGL=1 -DHAVE_LIBQT5CORE=1 -DHAVE_LIBQT5GUI=1 -DHAVE_LIBQT5WIDGETS=1 -DHAVE_LIBMGL=1 -DHAVE_LIBMYSQLCLIENT=1 -DHAVE_LIBPTHREAD=1 -DHAVE_FLOAT_H=1 -DHAVE_LIMITS_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_STRINGS_H=1 -DHAVE_SYS_TIME_H=1 -DHAVE_UNISTD_H=1 -DHAVE__BOOL=1 -DTIME_WITH_SYS_TIME=1 -DHAVE_SYS_TIME_H=1 -DHAVE_UNISTD_H=1 -DHAVE_ALARM=1 -DHAVE_STDLIB_H=1 -DHAVE_REALLOC=1 -DHAVE_GETTIMEOFDAY=1 -DHAVE_LOCALTIME_R=1 -DHAVE_MEMSET=1 -DHAVE_SELECT=1 -DHAVE_STRCASECMP=1 -DHAVE_STRCHR=1 -DHAVE_STRERROR=1 -DHAVE_STRSTR=1 -DHAVE_STRTOL=1 -DHAVE_STRTOUL=1
+DEFS = -DPACKAGE_NAME=\"hdbextractor\" -DPACKAGE_TARNAME=\"hdbextractor\" -DPACKAGE_VERSION=\"0.90.1\" -DPACKAGE_STRING=\"hdbextractor\ 0.90.1\" -DPACKAGE_BUGREPORT=\"giacomo.strangolino@elettra.trieste.it\" -DPACKAGE_URL=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DPACKAGE=\"hdbextractor\" -DVERSION=\"0.90.1\" -DHAVE_LIBGL=1 -DHAVE_LIBMYSQLCLIENT=1 -DHAVE_LIBPTHREAD=1 -DHAVE_FLOAT_H=1 -DHAVE_LIMITS_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_STRINGS_H=1 -DHAVE_SYS_TIME_H=1 -DHAVE_UNISTD_H=1 -DHAVE__BOOL=1 -DTIME_WITH_SYS_TIME=1 -DHAVE_SYS_TIME_H=1 -DHAVE_UNISTD_H=1 -DHAVE_ALARM=1 -DHAVE_STDLIB_H=1 -DHAVE_REALLOC=1 -DHAVE_GETTIMEOFDAY=1 -DHAVE_LOCALTIME_R=1 -DHAVE_MEMSET=1 -DHAVE_SELECT=1 -DHAVE_STRCASECMP=1 -DHAVE_STRCHR=1 -DHAVE_STRERROR=1 -DHAVE_STRSTR=1 -DHAVE_STRTOL=1 -DHAVE_STRTOUL=1
 DEPDIR = .deps
 DLLTOOL = false
+DOXYGEN_PAPER_SIZE = 
 DSYMUTIL = 
 DUMPBIN = 
+DX_CONFIG = Doxyfile.in
+DX_DOCDIR = doc
+DX_DOT = 
+DX_DOXYGEN = /usr/bin/doxygen
+DX_DVIPS = 
+DX_EGREP = /bin/egrep
+DX_ENV =  SRCDIR='.' PROJECT='hdbextractor' DOCDIR='doc' VERSION='0.90.1' PERL_PATH='/usr/bin/perl' HAVE_DOT='NO' GENERATE_MAN='NO' GENERATE_RTF='NO' GENERATE_XML='NO' GENERATE_HTMLHELP='NO' GENERATE_CHI='NO' GENERATE_HTML='YES' GENERATE_LATEX='YES'
+DX_FLAG_chi = 0
+DX_FLAG_chm = 0
+DX_FLAG_doc = 1
+DX_FLAG_dot = 0
+DX_FLAG_html = 1
+DX_FLAG_man = 0
+DX_FLAG_pdf = 1
+DX_FLAG_ps = 0
+DX_FLAG_rtf = 0
+DX_FLAG_xml = 0
+DX_HHC = 
+DX_LATEX = 
+DX_MAKEINDEX = /usr/bin/makeindex
+DX_PDFLATEX = /usr/bin/pdflatex
+DX_PERL = /usr/bin/perl
+DX_PROJECT = hdbextractor
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
@@ -233,6 +289,8 @@ EGREP = /bin/grep -E
 EXEEXT = 
 FGREP = /bin/grep -F
 GREP = /bin/grep
+HDBX_REVISION = 0.91.0
+HDBX_VERSION = 0:91:0
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
@@ -241,7 +299,7 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/x86_64-pc-linux-gnu/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lpthread -lmysqlclient -lmgl -lQt5Widgets -lQt5Gui -lQt5Core -lGL 
+LIBS = -lpthread -lmysqlclient -lGL 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
@@ -249,6 +307,13 @@ LTLIBOBJS =
 MAKEINFO = ${SHELL} /home/giacomo/devel/utils/hdbextractor/trunk/missing makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
+MYSQL = yes
+MYSQL_55 = yes
+MYSQL_ARCHITECTURE = 64
+MYSQL_COMMANDS = /usr/bin/
+MYSQL_INCLUDES = /usr/include/mysql/
+MYSQL_PLUGIN = yes
+MYSQL_PLUGIN_OK = yes
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
@@ -310,6 +375,9 @@ localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
 mandir = ${datarootdir}/man
 mkdir_p = $(MKDIR_P)
+mysql_bin_test = /usr/bin/
+mysqlpackage = yes
+mysqlsource = no
 oldincludedir = /usr/include
 pdfdir = ${docdir}
 prefix = /usr/local
@@ -326,12 +394,38 @@ top_srcdir = .
 SUBDIRS = src
 AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
+DX_CLEAN_HTML = doc/html
+#DX_CLEAN_CHM = doc/chm
+##DX_CLEAN_CHI = doc/hdbextractor.chi
+#DX_CLEAN_MAN = doc/man
+#DX_CLEAN_RTF = doc/rtf
+#DX_CLEAN_XML = doc/xml
+#DX_CLEAN_PS = doc/hdbextractor.ps
+#DX_PS_GOAL = doxygen-ps
+DX_CLEAN_PDF = doc/hdbextractor.pdf
+DX_PDF_GOAL = doxygen-pdf
+DX_CLEAN_LATEX = doc/latex
+DX_CLEANFILES = \
+    doc/hdbextractor.tag \
+    -r \
+    $(DX_CLEAN_HTML) \
+    $(DX_CLEAN_CHM) \
+    $(DX_CLEAN_CHI) \
+    $(DX_CLEAN_MAN) \
+    $(DX_CLEAN_RTF) \
+    $(DX_CLEAN_XML) \
+    $(DX_CLEAN_PS) \
+    $(DX_CLEAN_PDF) \
+    $(DX_CLEAN_LATEX)
+
+MOSTLYCLEANFILES = $(DX_CLEANFILES)
+EXTRA_DIST = $(DX_CONFIG)
 all: all-recursive
 
 .SUFFIXES:
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/aminclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -353,6 +447,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
+$(srcdir)/aminclude.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -691,6 +786,7 @@ install-strip:
 	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -791,6 +887,52 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
+
+#doxygen-ps: doc/hdbextractor.ps
+
+#doc/hdbextractor.ps: doc/hdbextractor.tag
+#	cd doc/latex; \
+#	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+#	$(DX_LATEX) refman.tex; \
+#	$(MAKEINDEX_PATH) refman.idx; \
+#	$(DX_LATEX) refman.tex; \
+#	countdown=5; \
+#	while $(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \
+#	                  refman.log > /dev/null 2>&1 \
+#	   && test $$countdown -gt 0; do \
+#	    $(DX_LATEX) refman.tex; \
+#	    countdown=`expr $$countdown - 1`; \
+#	done; \
+#	$(DX_DVIPS) -o ../hdbextractor.ps refman.dvi
+
+doxygen-pdf: doc/hdbextractor.pdf
+
+doc/hdbextractor.pdf: doc/hdbextractor.tag
+	cd doc/latex; \
+	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+	$(DX_PDFLATEX) refman.tex; \
+	$(DX_MAKEINDEX) refman.idx; \
+	$(DX_PDFLATEX) refman.tex; \
+	countdown=5; \
+	while $(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \
+	                  refman.log > /dev/null 2>&1 \
+	   && test $$countdown -gt 0; do \
+	    $(DX_PDFLATEX) refman.tex; \
+	    countdown=`expr $$countdown - 1`; \
+	done; \
+	mv refman.pdf ../hdbextractor.pdf
+
+.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+
+.INTERMEDIATE: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
+
+doxygen-run: doc/hdbextractor.tag
+
+doxygen-doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
+
+doc/hdbextractor.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
+	rm -rf doc
+	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -2505,7 +2505,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 #  If the library source code has changed at all since the last update, then increment
 # revision (‘c:r:a’ becomes ‘c:r+1:a’).
 
-Here are a set of rules to help you update your library version information:
+# Here are a set of rules to help you update your library version information:
+
 HDBX_VERSION=0:91:0
 
 HDBX_REVISION=0.91.0

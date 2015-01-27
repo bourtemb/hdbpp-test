@@ -15,7 +15,8 @@ AC_CONFIG_SRCDIR([src/hdbpp/mysqlhdbppschema.h])
 #  If the library source code has changed at all since the last update, then increment
 # revision (‘c:r:a’ becomes ‘c:r+1:a’).
 
-Here are a set of rules to help you update your library version information:
+# Here are a set of rules to help you update your library version information:
+
 AC_SUBST([HDBX_VERSION], [0:91:0])
 AC_SUBST([HDBX_REVISION], [0.91.0])
 
