@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
-AC_INIT([hdbextractor], [0.90.1], [giacomo.strangolino@elettra.trieste.it])
+AC_PREREQ([2.60])
+AC_INIT([hdbextractor], [0.91.0], [giacomo.strangolino@elettra.trieste.it])
 AC_CONFIG_SRCDIR([src/hdbpp/mysqlhdbppschema.h])
 
 
@@ -12,12 +12,16 @@ AC_CONFIG_SRCDIR([src/hdbpp/mysqlhdbppschema.h])
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to 1.
 # If either revision or age are omitted, they default to 0. Also note that age must
 # be less than or equal to the current interface number.
-#  If the library source code has changed at all since the last update, then increment
+# If the library source code has changed at all since the last update, then increment
 # revision (‘c:r:a’ becomes ‘c:r+1:a’).
 
 # Here are a set of rules to help you update your library version information:
 
 AC_SUBST([HDBX_VERSION], [0:91:0])
+
+##
+## Actually, we use revision in src/Makefile.am
+##
 AC_SUBST([HDBX_REVISION], [0.91.0])
 
 # AC_CONFIG_HEADERS([config.h])
@@ -69,8 +73,12 @@ DX_CHI_FEATURE(OFF)
 DX_MAN_FEATURE(OFF)
 DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
-DX_PDF_FEATURE(ON)
+DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
+
+## Note:
+## doc is the output that has been setup in Doxyfile.in ("OUTPUT_DIRECTORY")
+##
 DX_INIT_DOXYGEN(hdbextractor, Doxyfile.in, doc)
 
 AX_CHECK_MYSQL([no],[yes],[5.0],[yes])
@@ -78,8 +86,7 @@ AX_CHECK_MYSQL([no],[yes],[5.0],[yes])
 # AX_CHECK_MYSQL_INSTALL([ROOT-DIR],[IF-FOUND],[IF-NOT-FOUND])
 
 
-AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 
 AC_OUTPUT
 

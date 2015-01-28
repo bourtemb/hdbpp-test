@@ -25,14 +25,46 @@ libhdbextractor___la_SOURCES = hdbextractor.cpp \
     utils/datasieverprogresslistener.cpp \
     db/timeinterval.cpp \
     db/datetimeutils.cpp \
-    db/xvariantprivate.cpp
+    db/xvariantprivate.cpp \
+    hdbextractor.h \
+    hdbextractorlistener.h \
+    db/resultlistenerinterface.h \
+    hdbextractorprivate.h \
+    hdbxmacros.h \
+    mysql/mysqlconnection.h \
+    db/connection.h \
+    db/dbschema.h \
+    db/row.h \
+    mysql/mysqlresult.h \
+    mysql/mysqlrow.h \
+    db/result.h \
+    db/xvariant.h \
+    hdb/mysqlhdbschema.h \
+    db/dbschemaprivate.h \
+    utils/private/datasieverprivate.h \
+    db/xvariantlist.h \
+    hdbpp/mysqlhdbppschema.h \
+    configurationparser.h \
+    queryconfiguration.h \
+    db/configurabledbschema.h \
+    db/helpers/configurabledbschemahelper.h \
+    utils/datasiever.h \
+    db/xvariantprivate.h \
+    utils/xvariantprinter.h \
+    utils/datasieverprogresslistener.h \
+    db/timeinterval.h \
+    db/datetimeutils.h
 
 # Header files that must be installed are specified by the HEADERS family of variables.
 # Headers can be installed in
 # includedir, oldincludedir, pkgincludedir or any other directory you may have defined
 #
 include_HEADERS = hdbextractor.h \
+hdbextractorlistener.h \
+db/resultlistenerinterface.h \
+hdbxmacros.h \
 mysql/mysqlconnection.h \
+db/connection.h \
 db/row.h \
 mysql/mysqlresult.h \
 mysql/mysqlrow.h \
@@ -51,8 +83,11 @@ utils/datasieverprogresslistener.h \
 db/timeinterval.h \
 db/datetimeutils.h
 
-libhdbextractor___la_CXXFLAGS = -I. -Idb -Imysql -Ihdbpp \
-    -Iutils -Iutils/private -I.. -Idb/helpers
+
+libhdbextractor___la_CXXFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/db \
+    -I$(top_srcdir)/src/mysql -I$(top_srcdir)/src/hdbpp \
+    -I$(top_srcdir)/src/utils -I$(top_srcdir)/src/utils/private \
+    -I$(top_srcdir)/src/.. -I$(top_srcdir)/src/db/helpers
 
 # libhdbextractor___la_LDFLAGS = -version-info $(HDBX_VERSION)
 
