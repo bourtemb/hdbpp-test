@@ -1,7 +1,8 @@
 #ifndef XVARIANTPRIVATE_H
 #define XVARIANTPRIVATE_H
 
-#include <xvariant.h>
+#include "xvariant.h"
+#include "../sharedpointer.h"
 
 class XVariantPrivate
 {
@@ -23,7 +24,7 @@ public:
 
     char* mError;
 
-    char mSource[SRCLEN];
+    SharedPointer<char> mSource;
 
     bool mIsValid;
 

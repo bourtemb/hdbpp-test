@@ -32,6 +32,8 @@ LT_INIT
 
 AM_INIT_AUTOMAKE(foreign)
 
+AC_CONFIG_MACRO_DIRS([m4])
+
 
 # Checks for programs.
 AC_PROG_CXX
@@ -40,16 +42,14 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+# AC_PROG_RANLIB # rendered obsolete by LT_INIT
 
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lGL':
 AC_CHECK_LIB([GL], [main])
 
-# FIXME: Replace `main' with a function in `-lmysqlclient':
 AC_CHECK_LIB([mysqlclient], [mysql_real_connect])
-# FIXME: Replace `main' with a function in `-lpthread':
 AC_CHECK_LIB([pthread], [pthread_create])
 
 # Checks for header files.
@@ -57,6 +57,9 @@ AC_CHECK_HEADERS([float.h limits.h stdlib.h string.h strings.h sys/time.h unistd
 
 # Checks for typedefs, structures, and compiler characteristics.
 # AC_CHECK_HEADER_STDBOOL
+
+# AX_CXX_COMPILE_STDCXX_11([],[optional])
+
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 

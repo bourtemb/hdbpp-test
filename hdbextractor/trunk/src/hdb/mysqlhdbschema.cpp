@@ -3,14 +3,15 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include "mysqlhdbschema.h"
-#include "db/connection.h"
-#include "db/row.h"
-#include "db/result.h"
-#include "mysql/mysqlconnection.h"
+#include "../db/connection.h"
+#include "../db/row.h"
+#include "../db/result.h"
+#include "../mysql/mysqlconnection.h"
 #include "../hdbxmacros.h"
-#include "db/dbschemaprivate.h"
-#include "xvariantlist.h"
-#include <timeinterval.h>
+#include "../db/dbschemaprivate.h"
+#include "../db/xvariantlist.h"
+#include "../db/timeinterval.h"
+#include "../sharedpointer.h"
 #include <assert.h>
 #include <map>
 
@@ -64,7 +65,7 @@ int MySqlHdbSchema::get(std::vector<XVariant>& variantlist)
     {
         size = (int) d_ptr->variantList->size();
 
-        printf("\e[0;35mMySqlHdbSchema.get: locketh xvarlist for writing... size %d \e[0m\t", size);
+      //  printf("\e[0;35mMySqlHdbSchema.get: locketh xvarlist for writing... size %d \e[0m\t", size);
 
         for(int i = 0; i < size; i++)
         {
@@ -77,6 +78,9 @@ int MySqlHdbSchema::get(std::vector<XVariant>& variantlist)
 
     pthread_mutex_unlock(&d_ptr->mutex);
     printf("\e[0;32munlocked: [copied %d]\e[0m\n", size);
+  // The following is to test the SharedPointer for the source name */
+  //  for(int i = 0; i < size; i++)
+  //      printf("\e[1;33m source is %s (%p)\e[0m\n", variantlist.at(i).getSource(), variantlist.at(i).getSource());
     return size;
 }
 
@@ -128,6 +132,9 @@ bool MySqlHdbSchema::getData(const char *source,
     double elapsed = -1.0; /* query elapsed time in seconds.microseconds */
     double from_the_past_elapsed = 0.0;
     struct timeval tv1, tv2;
+    char *sharedSource = new char[strlen(source) + 1];
+    strncpy(sharedSource, source, strlen(source) + 1);
+    SharedPointer <char>sharedSourcePtr(sharedSource);
 
     gettimeofday(&tv1, NULL);
 
@@ -138,7 +145,7 @@ bool MySqlHdbSchema::getData(const char *source,
 
     snprintf(query, MAXQUERYLEN, "SELECT ID,data_type,data_format,writable from adt WHERE full_name='%s'", source);
 
-    printf("\e[1;4;36mHDB: query %s\e[0m\n", query);
+    pinfo("\e[1;4;36mHDB: query %s\e[0m\n", query);
 
     Result * res = connection->query(query);
     if(!res)
@@ -147,6 +154,7 @@ bool MySqlHdbSchema::getData(const char *source,
                  "MysqlHdbSchema.getData: error in query \"%s\": \"%s\"", query, connection->getError());
         return false;
     }
+
     if(res->next() > 0)
     {
         Row* row = res->getCurrentRow();
@@ -223,7 +231,7 @@ bool MySqlHdbSchema::getData(const char *source,
                     snprintf(query, MAXQUERYLEN, "SELECT time,value FROM %s WHERE time >='%s' "
                                                  " AND time <= '%s' ORDER BY time ASC", table_name, start_date, stop_date);
 
-                    printf("\e[1;4;36mHDB: query %s\e[0m\n", query);
+                    pinfo("\e[1;4;36mHDB: query %s\e[0m\n", query);
 
                     res = connection->query(query);
                     if(!res)
@@ -232,6 +240,11 @@ bool MySqlHdbSchema::getData(const char *source,
                                  query, connection->getError());
                         return false;
                     }
+
+                    if(notifyEveryNumRows <= 0)
+                        notifyEveryNumRows = res->getRowCount() / 10;
+
+                    printf("\e[1;32m notifying every rows %d row cound %d\e[0m\n", notifyEveryNumRows, res->getRowCount());
                     while(res->next() > 0)
                     {
                         row = res->getCurrentRow();
@@ -263,7 +276,7 @@ bool MySqlHdbSchema::getData(const char *source,
                         XVariant *xvar = NULL;
                     //    printf("+ adding %s %s (row count %d)\n", row->getField(0), row->getField(1), res->getRowCount());
 
-                        xvar = new XVariant(source, row->getField(0), row->getField(1), format, dataType, wri);
+                        xvar = new XVariant(sharedSourcePtr, row->getField(0), row->getField(1), format, dataType, wri);
 
                         pthread_mutex_lock(&d_ptr->mutex);
                         if(d_ptr->variantList == NULL)
@@ -274,7 +287,7 @@ bool MySqlHdbSchema::getData(const char *source,
 
                         row->close();
 
-                        if(d_ptr->notifyEveryNumRows > 0 && (rowCnt % d_ptr->notifyEveryNumRows == 0
+                        if(notifyEveryNumRows > 0 && (rowCnt % notifyEveryNumRows == 0
                                                              || rowCnt == res->getRowCount()) )
                         {
                             d_ptr->resultListenerI->onProgressUpdate(source, rowCnt, res->getRowCount());
@@ -289,7 +302,7 @@ bool MySqlHdbSchema::getData(const char *source,
                     snprintf(query, MAXQUERYLEN, "SELECT time,read_value,write_value FROM %s WHERE time >='%s' "
                                                  " AND time <= '%s' ORDER BY time ASC", table_name, start_date, stop_date);
 
-                    printf("\e[1;4;36mHDB: query %s\e[0m\n", query);
+                    pinfo("\e[1;4;36mHDB: query %s\e[0m\n", query);
 
                     res = connection->query(query);
                     if(!res)
@@ -327,9 +340,9 @@ bool MySqlHdbSchema::getData(const char *source,
                         rowCnt++;
 
                         XVariant *xvar = NULL;
-                        // printf("+ adding %s %s (row count %d)\n", row->getField(0), row->getField(1), res->getRowCount());
+                        // pinfo("+ adding %s %s (row count %d)\n", row->getField(0), row->getField(1), res->getRowCount());
 
-                        xvar = new XVariant(source, row->getField(0), row->getField(1),
+                        xvar = new XVariant(sharedSourcePtr, row->getField(0), row->getField(1),
                                             row->getField(2), format, dataType);
 
                         pthread_mutex_lock(&d_ptr->mutex);
@@ -340,7 +353,7 @@ bool MySqlHdbSchema::getData(const char *source,
 
                         row->close();
 
-                        if(d_ptr->notifyEveryNumRows > 0 && (rowCnt % d_ptr->notifyEveryNumRows == 0
+                        if(notifyEveryNumRows > 0 && (rowCnt % notifyEveryNumRows == 0
                                                              || rowCnt == res->getRowCount()) )
                         {
                             d_ptr->resultListenerI->onProgressUpdate(source, rowCnt, res->getRowCount());
@@ -352,7 +365,7 @@ bool MySqlHdbSchema::getData(const char *source,
 
                 if(res && res->getRowCount() == 0)
                 {
-                    printf("\e[1;36mno rows. Getting from the past\e[0m\n");
+                    pinfo("\e[1;36mno rows. Getting from the past\e[0m\n");
                     if(configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
                                                          start_date,
                                                          stop_date,
@@ -461,7 +474,7 @@ bool MySqlHdbSchema::findSource(Connection *connection, const char *substring, s
 
     snprintf(query, MAXQUERYLEN, "SELECT full_name from adt WHERE full_name like '%%%s%%'", substring);
 
-    printf("\e[1;34mQUERY %s\e[0m\n", query);
+    pinfo("\e[1;34mQUERY %s\e[0m\n", query);
     Result * res = connection->query(query);
     if(!res)
     {
@@ -503,10 +516,13 @@ bool MySqlHdbSchema::fetchInThePast(const char *source,
     struct timeval tv1, tv2;
     Result *res = NULL;
     Row *row = NULL;
+    char *sharedSource = new char[strlen(source) + 1];
+    strncpy(sharedSource, source, strlen(source) + 1);
+    SharedPointer <char> sharedSourcePtr(sharedSource);
 
     gettimeofday(&tv1, NULL);
 
-    printf("\e[1;4;36mHDB: fetching in the past \"%s\" before %s\e[0m\n", source, start_date);
+    pinfo("\e[1;4;36mHDB: fetching in the past \"%s\" before %s\e[0m\n", source, start_date);
     if(writable != XVariant::RW)
     {
         snprintf(query, MAXQUERYLEN, "SELECT time,value FROM "
@@ -522,7 +538,7 @@ bool MySqlHdbSchema::fetchInThePast(const char *source,
                  table_name,  start_date);
     }
 
-    printf("\e[1;36mHDB: query: %s\e[0m\n", query);
+    pinfo("\e[1;36mHDB: query: %s\e[0m\n", query);
     res = connection->query(query);
     if(!res)
     {
@@ -550,9 +566,9 @@ bool MySqlHdbSchema::fetchInThePast(const char *source,
                 strncpy(timestamp, row->getField(0), MAXTIMESTAMPLEN);
 
             if(writable != XVariant::RW)
-                xvar = new XVariant(source, timestamp, row->getField(1), format, dataType, writable);
+                xvar = new XVariant(sharedSourcePtr, timestamp, row->getField(1), format, dataType, writable);
             else
-                xvar = new XVariant(source, timestamp, row->getField(1),
+                xvar = new XVariant(sharedSourcePtr, timestamp, row->getField(1),
                                     row->getField(2), format, dataType);
 
             pthread_mutex_lock(&d_ptr->mutex);

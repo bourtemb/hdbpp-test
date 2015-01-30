@@ -348,6 +348,9 @@ bool Hdbextractor::isConnected() const
  *
  * @see onProgressUpdate
  * @see setUpdateProgressStep to set the current step value
+ *
+ * If the value of this property is less than or equal to 0, then the update steps are
+ * automatically set to receive updates every 10% of the total rows.
  */
 int Hdbextractor::updateProgressStep()
 {
@@ -389,6 +392,9 @@ void Hdbextractor::setQueryConfiguration(QueryConfiguration *qc)
 /** \brief set the number of rows after which a progress update must be triggered on the listener.
  *
  * @param numRows every numRows onProgressUpdate is invoked
+ *
+ * If numRows is less than or equal to 0, then the update steps are
+ * automatically set to receive updates every 10% of the total rows.
  *
  * @see onProgressUpdate
  * @see updateProgressStep to get the current step value

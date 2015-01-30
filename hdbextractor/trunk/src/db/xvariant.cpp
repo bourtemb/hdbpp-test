@@ -6,9 +6,10 @@
 #include <time.h>
 #include <math.h> /* round */
 #include <string.h> /* strerror */
-#include "hdbxmacros.h"
+#include "../hdbxmacros.h"
 #include "datetimeutils.h"
 #include "xvariantprivate.h"
+#include "../test/xvariantstatstest.h"
 
 void XVariant::cleanup()
 {
@@ -45,6 +46,7 @@ void XVariant::cleanup()
 XVariant::~XVariant()
 {
     //printf("~XVariant destructor: calling cleanup %p\n", this);
+    XVariantStatsTest::instance()->removeVariant();
     cleanup();
 }
 
@@ -96,16 +98,13 @@ XVariant::~XVariant()
  * @see toDouble
  * @see toDoubleVector
  */
-XVariant::XVariant(const char* source, const char *timestamp, const char *strdata, DataFormat df, DataType dt, Writable wri)
+XVariant::XVariant(SharedPointer<char> source, const char *timestamp, const char *strdata, DataFormat df, DataType dt, Writable wri)
 {
     d = new XVariantPrivate();
     init_common(source, timestamp, df, dt);
     init_data();
     d->mWritable = wri;
     parse(strdata); /* at the end, after setting up other fields */
-    if(d->val == NULL)
-        printf("\e[1;31m ***********************\n"
-               "d->val is NULL!! for \"%s\" at %s\n*********************\e[0m\n", d->mSource, d->mTimestamp);
 }
 
 /** \brief The constructor for read write data.
@@ -121,7 +120,7 @@ XVariant::XVariant(const char* source, const char *timestamp, const char *strdat
  * \note The writable property is assumed to be read only
  *
  */
-XVariant::XVariant(const char* source, const char *timestamp, const char *strdataR, const char *strdataW, DataFormat df, DataType dt)
+XVariant::XVariant(SharedPointer<char> source, const char *timestamp, const char *strdataR, const char *strdataW, DataFormat df, DataType dt)
 {
     d = new XVariantPrivate();
     init_common(source, timestamp, df, dt);
@@ -130,7 +129,7 @@ XVariant::XVariant(const char* source, const char *timestamp, const char *strdat
     parse(strdataR, strdataW); /* at the end, after setting up other fields */
 }
 
-XVariant::XVariant(const char* source,
+XVariant::XVariant(SharedPointer<char> source,
                    const char *timestamp,
                    const size_t size, DataFormat df,
                    DataType dt, Writable wri)
@@ -154,13 +153,6 @@ XVariant::XVariant()
     d->mType = TypeInvalid;
 }
 
-XVariant & XVariant::operator=(const XVariant& other)
-{
-    cleanup();
-    build_from(other);
-    return *this;
-}
-
 /** \brief copy constructor
  *
  * Create a new variant initialized from the values of the other parameter
@@ -173,6 +165,12 @@ XVariant::XVariant(const XVariant &other)
     build_from(other);
 }
 
+XVariant & XVariant::operator=(const XVariant& other)
+{
+    cleanup();
+    build_from(other);
+    return *this;
+}
 void XVariant::build_from(const XVariant& other)
 {
     d = new XVariantPrivate();
@@ -197,8 +195,8 @@ void XVariant::build_from(const XVariant& other)
                this, d, &other);
         return;
     }
-
-    strncpy(d->mSource, other.getSource(), SRCLEN);
+    d->mSource = other.getSourceSharedPtr();
+    // strncpy(d->mSource, other.getSource(), SRCLEN);
     strncpy(d->mTimestamp, other.getTimestamp(), TIMESTAMPLEN);
     mMakeError(other.getError());
 
@@ -270,11 +268,16 @@ void XVariant::build_from(const XVariant& other)
     }
 }
 
-/** \brief Returns the source name (tango full attribute name)
- */
-const char* XVariant::getSource() const
+SharedPointer <char> XVariant::getSourceSharedPtr() const
 {
     return d->mSource;
+}
+
+/** \brief Returns the source name (tango full attribute name)
+ */
+char* XVariant::getSource() const
+{
+    return d->mSource.operator ->();
 }
 
 /** \brief Query the format of the data stored in the XVariant
@@ -1134,15 +1137,14 @@ void XVariant::mMakeError(const char *msg)
     }
 }
 
-void XVariant::init_common(const char* source, const char *timestamp, DataFormat df, DataType dt)
+void XVariant::init_common(SharedPointer<char> source, const char *timestamp, DataFormat df, DataType dt)
 {
     d->mFormat = df;
     d->mType = dt;
     d->mIsValid = false;
     d->mSize = 0;
-
     strncpy(d->mTimestamp, timestamp, TIMESTAMPLEN);
-    strncpy(d->mSource, source, SRCLEN);
+    d->mSource = source;
 }
 void XVariant::init_data(size_t size)
 {
@@ -1394,8 +1396,6 @@ std::vector<double> XVariant::toDoubleVector(bool read) const
     else
         d_val = (double *) d->w_val;
 
-    if(d_val == NULL)
-        printf("\e[1;31m!!!! XVariant %p d %p toDoubleVector value is null! (read %d)\e[0m\n", this, d, read);
     std::vector<double> dvalues(d_val, d_val + d->mSize);
     return dvalues;
 }
@@ -1608,8 +1608,6 @@ std::vector<std::string> XVariant::toStringVector() const
  */
 double *XVariant::toDoubleP(bool read) const
 {
-    if(d->val == NULL)
-        printf("\e[1;33mtoDoubleP this %p read %d d %p d->val %p\e[0m\n", this, read, d, d->val);
     if(read)
         return (double *) d->val ;
     return (double *) d->w_val;
@@ -1774,7 +1772,8 @@ std::string XVariant::convertToString(bool read, bool *ok)
         else if(ok != NULL)
         {
             *ok = false;
-            snprintf(err, 256, "XVariant.convertToString type %d unsupported (%s)", d->mType, d->mSource);
+            char *source = this->getSource();
+            snprintf(err, 256, "XVariant.convertToString type %d unsupported (%s)", d->mType, source);
             mMakeError(err);
         }
 

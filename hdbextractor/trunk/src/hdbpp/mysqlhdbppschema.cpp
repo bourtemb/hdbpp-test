@@ -4,15 +4,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h>
-#include "db/connection.h"
-#include "db/row.h"
-#include "db/result.h"
-#include "mysql/mysqlconnection.h"
-#include "../src/hdbxmacros.h"
-#include "db/dbschemaprivate.h"
-#include "helpers/configurabledbschemahelper.h"
-#include "xvariantlist.h"
-#include "timeinterval.h"
+#include "../db/connection.h"
+#include "../db/row.h"
+#include "../db/result.h"
+#include "../mysql/mysqlconnection.h"
+#include "../hdbxmacros.h"
+#include "../db/dbschemaprivate.h"
+#include "../db/helpers/configurabledbschemahelper.h"
+#include "../db/xvariantlist.h"
+#include "../db/timeinterval.h"
 #include <assert.h>
 #include <map>
 
@@ -80,7 +80,7 @@ int MySqlHdbppSchema::get(std::vector<XVariant>& variantlist)
     }
 
     pthread_mutex_unlock(&d_ptr->mutex);
-    printf("\e[0;32munlocked: [copied %d]\e[0m\n", size);
+   // printf("\e[0;32munlocked: [copied %d]\e[0m\n", size);
     return size;
 }
 
@@ -115,7 +115,7 @@ bool MySqlHdbppSchema::mGetSourceProperties(const char* source,
               " WHERE att_name like '%%%s' AND "
              "att_conf.att_conf_data_type_id=att_conf_data_type.att_conf_data_type_id", source);
     Result * res = connection->query(query);
-    printf("\e[1;32mquery: %s\e[0m\n", query);
+    pinfo("\e[1;32mquery: %s\e[0m\n", query);
     if(!res)
     {
         snprintf(d_ptr->errorMessage, MAXERRORLEN,
@@ -228,6 +228,10 @@ bool MySqlHdbppSchema::getData(const char *source,
 
     gettimeofday(&tv1, NULL);
 
+    char *sharedSource = new char[strlen(source) + 1];
+    strncpy(sharedSource, source, strlen(source) + 1);
+    SharedPointer <char>sharedSourcePtr(sharedSource);
+
     /* clear error */
     strcpy(d_ptr->errorMessage, "");
 
@@ -264,7 +268,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                                  " AND data_time <= '%s' ORDER BY data_time ASC",
                              table_name, id, start_date, stop_date);
 
-                printf("\e[1;32mquery: %s\e[0m\n", query);
+                pinfo("\e[1;32mquery: %s\e[0m\n", query);
 
                 res = connection->query(query);
                 if(!res)
@@ -273,6 +277,9 @@ bool MySqlHdbppSchema::getData(const char *source,
                              query, connection->getError());
                     return false;
                 }
+
+                if(notifyEveryNumRows <= 0)
+                    notifyEveryNumRows = res->getRowCount() / 10;
 
                 while(res->next() > 0)
                 {
@@ -290,10 +297,10 @@ bool MySqlHdbppSchema::getData(const char *source,
                     if(strcmp(timestamp, row->getField(0)) != 0)
                     {
                         if(format != XVariant::Scalar && timestampCnt > 0 &&
-                                d_ptr->notifyEveryNumRows > 0 &&
-                                (timestampCnt % d_ptr->notifyEveryNumRows == 0))
+                                notifyEveryNumRows > 0 &&
+                                (timestampCnt % notifyEveryNumRows == 0))
                         {
-                            printf("\e[1;33mnotrifying vector!!\e[0m\n");
+//                            printf("\e[1;33mnotrifying vector!!\e[0m\n");
                             d_ptr->resultListenerI->onProgressUpdate(source,
                                                                      timestampCnt,
                                                                      res->getRowCount() / datasiz);
@@ -308,7 +315,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                                                          start_date, stop_date, timestamp);
                             if(fillMode != ConfigurableDbSchemaHelper::None)
                             {
-                                printf("RO: calling fetchInThePast\n");
+                                pinfo("RO: calling fetchInThePast\n");
                                 from_the_past_success = fetchInThePast(source, start_date, table_name, id,
                                                                        dataType, format, wri, connection,
                                                                        &from_the_past_elapsed, fillMode);
@@ -322,7 +329,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                             datasiz = 1;
 
                         /* create new XVariant for the timestamp */
-                        xvar = new XVariant(source, timestamp, datasiz, format, dataType, wri);
+                        xvar = new XVariant(sharedSourcePtr, timestamp, datasiz, format, dataType, wri);
                         xvar->setQuality(row->getField(row->getFieldCount() - 2));
                         xvar->setError(row->getField(row->getFieldCount() - 1));
 
@@ -345,8 +352,8 @@ bool MySqlHdbppSchema::getData(const char *source,
                         pthread_mutex_unlock(&d_ptr->mutex);
 
                         if(format == XVariant::Scalar && timestampCnt > 0 &&
-                                d_ptr->notifyEveryNumRows > 0 &&
-                                (timestampCnt % d_ptr->notifyEveryNumRows == 0))
+                                notifyEveryNumRows > 0 &&
+                                (timestampCnt % notifyEveryNumRows == 0))
                         {
                             d_ptr->resultListenerI->onProgressUpdate(source,
                                                                      timestampCnt,
@@ -383,7 +390,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                                  " AND data_time <= '%s' ORDER BY data_time ASC",
                              table_name, id, start_date, stop_date);
 
-                printf("\e[1;32mquery: %s\e[0m\n", query);
+                pinfo("\e[1;32mquery: %s\e[0m\n", query);
 
                 res = connection->query(query);
                 if(!res)
@@ -409,8 +416,8 @@ bool MySqlHdbppSchema::getData(const char *source,
                     if(strcmp(timestamp, row->getField(0)) != 0)
                     {
                         if(timestampCnt > 0 &&
-                                d_ptr->notifyEveryNumRows > 0 &&
-                                (timestampCnt % d_ptr->notifyEveryNumRows == 0))
+                                notifyEveryNumRows > 0 &&
+                                (timestampCnt % notifyEveryNumRows == 0))
                         {
                             d_ptr->resultListenerI->onProgressUpdate(source, timestampCnt,
                                                                      res->getRowCount() / datasiz);
@@ -430,7 +437,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                      * XVariant and insert it as first element, according to the
                                      * fillMode
                                      */
-                                printf("RW: calling fetchInThePast\n");
+                                pinfo("RW: calling fetchInThePast\n");
                                 from_the_past_success = fetchInThePast(source, start_date, table_name, id,
                                                                        dataType, format, wri, connection,
                                                                        &from_the_past_elapsed,
@@ -445,7 +452,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                             datasiz = 1;
 
                         /* create new XVariant for the timestamp */
-                        xvar = new XVariant(source, timestamp, datasiz, format, dataType, wri);
+                        xvar = new XVariant(sharedSourcePtr, timestamp, datasiz, format, dataType, wri);
                         xvar->setQuality(row->getField(row->getFieldCount() - 2));
                         xvar->setError(row->getField(row->getFieldCount() - 1));
                         /*  this means a new array is being associated to a timestamp */
@@ -481,7 +488,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                                              start_date, stop_date, timestamp);
                 if(fillMode != ConfigurableDbSchemaHelper::None)
                 {
-                    printf("RO: calling fetchInThePast\n");
+                    pinfo("RO: calling fetchInThePast\n");
                     from_the_past_success = fetchInThePast(source, start_date, table_name, id,
                                                            dataType, format, wri, connection,
                                                            &from_the_past_elapsed, fillMode);
@@ -497,7 +504,7 @@ bool MySqlHdbppSchema::getData(const char *source,
         } /* else: valid data type, format, writable */
 
         if(res && timestampCnt > 0 &&
-                d_ptr->notifyEveryNumRows > 0)
+                notifyEveryNumRows > 0)
         {
             d_ptr->resultListenerI->onProgressUpdate(source,
                                                      res->getRowCount() / datasiz,
@@ -550,7 +557,6 @@ bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
 bool MySqlHdbppSchema::getSourcesList(Connection *connection,
                                       std::list<std::string>& result) const
 {
-    printf("\e[1;32mcalling findSource \e[0m\n");
     return findSource(connection, "", result);
 }
 
@@ -564,7 +570,7 @@ bool MySqlHdbppSchema::findSource(Connection *connection,
 
     snprintf(query, MAXQUERYLEN, "SELECT att_name from att_conf WHERE att_name like '%%%s%%'", substring);
 
-    printf("\e[1;34mQUERY %s\e[0m\n", query);
+    pinfo("\e[1;34mQUERY %s\e[0m\n", query);
 
     Result * res = connection->query(query);
     if(!res)
@@ -628,6 +634,7 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
     int id;
     int rowCnt = 0;
     int totalRows = 0;
+    int notifyEveryNumRows = d_ptr->notifyEveryNumRows;
 
     XVariant::DataType dataType;
     XVariant::Writable wri;
@@ -640,6 +647,10 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
     strcpy(timestamp, ""); /* initialize an empty timestamp */
 
     gettimeofday(&tv1, NULL);
+
+    char *sharedSource = new char[strlen(source) + 1];
+    strncpy(sharedSource, source, strlen(source) + 1);
+    SharedPointer <char>sharedSourcePtr(sharedSource);
 
     /* clear error */
     strcpy(d_ptr->errorMessage, "");
@@ -659,7 +670,7 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
                                      " ORDER BY data_time ASC",
                  table_name, id, time_interval->start(), time_interval->stop());
 
-        printf("\e[1;32mquery %s\e[0m\n", query);
+        pinfo("\e[1;32mquery %s\e[0m\n", query);
 
         Result * res = connection->query(query);
         Row *row = NULL;
@@ -672,6 +683,9 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
         else
         {
             totalRows = res->getRowCount();
+            if(notifyEveryNumRows <= 0)
+                notifyEveryNumRows /= 10;
+
             while(res->next() > 0 && success)
             {
                 row = res->getCurrentRow();
@@ -682,7 +696,7 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
                 }
                 else
                 {
-                    xvar = new XVariant(source, row->getField(0), 1, format, dataType, wri);
+                    xvar = new XVariant(sharedSourcePtr, row->getField(0), 1, format, dataType, wri);
                     xvar->setQuality(row->getField(1));
                     xvar->setError(row->getField(2));
 
@@ -694,7 +708,7 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
                     pthread_mutex_unlock(&d_ptr->mutex);
 
                     rowCnt++;
-                    if(d_ptr->notifyEveryNumRows > 0 && (rowCnt % d_ptr->notifyEveryNumRows == 0))
+                    if(notifyEveryNumRows > 0 && (rowCnt % notifyEveryNumRows == 0))
                         d_ptr->resultListenerI->onProgressUpdate(source, rowCnt, totalRows);
                 }
             }
@@ -731,12 +745,16 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
 
     gettimeofday(&tv1, NULL);
 
+    char *sharedSource = new char[strlen(source) + 1];
+    strncpy(sharedSource, source, strlen(source) + 1);
+    SharedPointer <char>sharedSourcePtr(sharedSource);
+
     if(format != XVariant::Scalar)
     {
         snprintf(query, MAXQUERYLEN, "SELECT data_time FROM %s WHERE att_conf_id=%d AND "
              " data_time <= '%s' ORDER BY data_time DESC LIMIT 1", table_name, att_id, start_date);
 
-        printf("\e[1;32mquery: %s\e[0m\n", query);
+        pinfo("\e[1;32mquery: %s\e[0m\n", query);
         res = connection->query(query);
         if(!res)
         {
@@ -769,7 +787,7 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
         }
     } /* if format not scalar */
 
-    printf("\e[1;4;35mfetching in the past \"%s\" before %s\e[0m\n", source, start_date);
+    pinfo("\e[1;4;35mfetching in the past \"%s\" before %s\e[0m\n", source, start_date);
     if(writable == XVariant::RO && format != XVariant::Scalar)
     {
         snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r,quality,error_desc FROM "
@@ -799,7 +817,7 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
                  table_name, att_id, start_date);
     }
 
-    printf("\e[1;32mquery: %s\e[0m\n", query);
+    pinfo("\e[1;32mquery: %s\e[0m\n", query);
     res = connection->query(query);
      if(!res)
     {
@@ -836,7 +854,7 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
                      * we simply add data from the following rows (else below).
                      * Otherwise, we'll never enter the else below.
                      */
-                xvar = new XVariant(source, timestamp, datasiz, format, dataType, writable);
+                xvar = new XVariant(sharedSourcePtr, timestamp, datasiz, format, dataType, writable);
                 xvar->setQuality(row->getField(row->getFieldCount() - 2));
                 xvar->setError(row->getField(row->getFieldCount() - 1));
 
