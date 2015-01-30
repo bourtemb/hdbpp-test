@@ -53,7 +53,8 @@ libhdbextractor___la_SOURCES = hdbextractor.cpp \
     utils/xvariantprinter.h \
     utils/datasieverprogresslistener.h \
     db/timeinterval.h \
-    db/datetimeutils.h \
+    db/datetimeutils.h \ \
+    db/xvariantdatainfo.cpp \
     sharedpointer.cpp \
     test/xvariantstatstest.cpp
 
@@ -85,7 +86,8 @@ utils/datasieverprogresslistener.h \
 db/timeinterval.h \
 db/datetimeutils.h \
 sharedpointer.h \
-test/xvariantstatstest.h
+test/xvariantstatstest.h \
+db/xvariantdatainfo.h
 
 
 libhdbextractor___la_CXXFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/db \

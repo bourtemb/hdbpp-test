@@ -80,9 +80,9 @@ void Hdbextractor::setDbType(DbType dbt)
  *  <li>void HdbExtractorListener::onFinished(int totalRows); </li>
  *  </ul>
  *
- *  Calling setUpdateProgressStep with an integer value greater than 0 determines whether onProgressUpdate
+ *  Calling setUpdateProgressPercent with an integer value greater than 0 determines whether onProgressUpdate
  *  is called or not in your HdbExtractorListener implementation. By default, it is not called
- *  (the method updateProgressStep returns -1) and
+ *  (the method updateProgressPercent returns -1) and
  *  you will be notified that the fetch has been completed when your implementation of the
  *  onFinished method is invoked.
  *  At that time, you can retrieve the actual data as a whole by calling get.
@@ -94,7 +94,7 @@ void Hdbextractor::setDbType(DbType dbt)
  *  (through onProgressUpdate)
  *
  *  \note The HdbExtractorListener::onProgressUpdate is called according to the number configured with
- *  Hdbextractor::setUpdateProgressStep but also when the last bulk of data is available, even if its number of
+ *  Hdbextractor::setUpdateProgressPercent but also when the last bulk of data is available, even if its number of
  *  rows is less than the configured value.
  *
  *  Obtaining data with the Hdbextractor::get method is <em>thread safe</em>.
@@ -197,7 +197,7 @@ bool  Hdbextractor::hasError() const
  *
  * @see XVariant
  * @see get
- * @see setUpdateProgressStep
+ * @see setUpdateProgressPercent
  *
  * @return true if the data fetch was successful, false otherwise.
  *
@@ -347,12 +347,12 @@ bool Hdbextractor::isConnected() const
  * @return the number of extracted rows determining the frequency of the onProgressUpdate invocation
  *
  * @see onProgressUpdate
- * @see setUpdateProgressStep to set the current step value
+ * @see setUpdateProgressPercent to set the current step value
  *
  * If the value of this property is less than or equal to 0, then the update steps are
  * automatically set to receive updates every 10% of the total rows.
  */
-int Hdbextractor::updateProgressStep()
+int Hdbextractor::updateProgressPercent()
 {
     return d_ptr->updateEveryRows;
 }
@@ -389,19 +389,22 @@ void Hdbextractor::setQueryConfiguration(QueryConfiguration *qc)
     d_ptr->queryConfiguration = qc;
 }
 
-/** \brief set the number of rows after which a progress update must be triggered on the listener.
+/** \brief set the percentage of rows processed over total after that
+ *  a progress update is triggered on the listener.
  *
- * @param numRows every numRows onProgressUpdate is invoked
+ * @param percent tells to update the listener about the data processing progress, expressed
+ *        in percentage over the total number of rows fetched.
  *
- * If numRows is less than or equal to 0, then the update steps are
- * automatically set to receive updates every 10% of the total rows.
+ * \par Special values
+ * A value of 0 implies a default 10 %
+ * A negative value disables the progress update
  *
  * @see onProgressUpdate
- * @see updateProgressStep to get the current step value
+ * @see updateProgressPercent to get the current step value
  */
-void Hdbextractor::setUpdateProgressStep(int numRows)
+void Hdbextractor::setUpdateProgressPercent(int percent)
 {
-    d_ptr->updateEveryRows = numRows;
+    d_ptr->updateEveryRows = percent;
 }
 
 /** \brief Implements ResultListener::onProgressUpdate interface

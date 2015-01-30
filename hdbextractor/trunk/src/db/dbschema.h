@@ -150,6 +150,10 @@ public:
      */
     virtual bool hasError() const = 0;
 
+    virtual void cancel() = 0;
+
+    virtual bool isCancelled() const = 0;
+
 };
 
 #endif // DBSCHEMA_H

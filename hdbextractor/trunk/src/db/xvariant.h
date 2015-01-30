@@ -50,15 +50,15 @@ public:
      */
     enum Writable { WritableInvalid = -1, RO, WO, RWW, RW };
 
-    XVariant(SharedPointer<char> source, const char *timestamp,
+    XVariant(const char * source, const char *timestamp,
              const char* strdataR, const char *strdataW,
              DataFormat df, DataType dt);
 
-    XVariant(SharedPointer<char> source, const char *timestamp,
+    XVariant(const char * source, const char *timestamp,
              const char* strdataR, DataFormat df,
              DataType dt, Writable wri);
 
-    XVariant(SharedPointer<char> source, const char *timestamp,
+    XVariant(const char * source, const char *timestamp,
              const size_t size, DataFormat df,
              DataType dt, Writable wri);
 
@@ -70,9 +70,7 @@ public:
 
     virtual ~XVariant();
 
-    SharedPointer <char> getSourceSharedPtr() const;
-
-    char *getSource() const;
+    const char *getSource() const;
 
     DataFormat getFormat() const;
 
@@ -166,7 +164,7 @@ private:
 
     void init_data(size_t size);
 
-    void init_common(SharedPointer<char> source, const char *timestamp, DataFormat df, DataType dt);
+    void init_common(const char *source, const char *timestamp, DataFormat df, DataType dt);
 
     void delete_rdata();
 

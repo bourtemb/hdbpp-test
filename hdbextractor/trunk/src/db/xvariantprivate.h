@@ -3,15 +3,21 @@
 
 #include "xvariant.h"
 #include "../sharedpointer.h"
+#include "xvariantdatainfo.h"
 
 class XVariantPrivate
 {
 public:
     XVariantPrivate();
 
-    XVariant::DataFormat mFormat;
-    XVariant::DataType mType;
-    XVariant::Writable mWritable;
+    /* shared data info. Contains information which is common to
+     * several XVariant data: source name, data type, format, writable.
+     * This allows to save memory.
+     *
+     *
+     * NOTE: this is allocated in XVariantPrivate constructor.
+     */
+    SharedPointer<XVariantDataInfo> dataInfo;
 
     size_t mSize;
 
@@ -23,8 +29,6 @@ public:
     char mTimestamp[TIMESTAMPLEN];
 
     char* mError;
-
-    SharedPointer<char> mSource;
 
     bool mIsValid;
 

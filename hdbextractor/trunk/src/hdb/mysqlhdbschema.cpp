@@ -27,6 +27,7 @@ MySqlHdbSchema::MySqlHdbSchema(ResultListener *resultListenerI) : ConfigurableDb
     d_ptr->variantList = NULL;
     d_ptr->sourceStep = 1;
     d_ptr->totalSources = 1;
+    d_ptr->isCancelled = false;
     pthread_mutex_init(&d_ptr->mutex, NULL);
 }
 
@@ -100,25 +101,13 @@ bool MySqlHdbSchema::getData(const std::vector<std::string> sources,
     return getData(sources, time_interval->start(), time_interval->stop(), connection, notifyEveryRows);
 }
 
-/** \brief Fetch attribute data from the database between a start and stop date/time.
- *
- * Fetch data from the database.
- * \note This method is used by HdbExtractor and it is not meant to be directly used by the library user.
- *
- * @param source A the tango attribute in the form domain/family/member/AttributeName
- * @param start_date the start date (begin of the requested data interval) as string, such as "2014-07-10 10:00:00"
- * @param stop_date the stop date (end of the requested data interval) as string, such as "2014-07-10 12:00:00"
- * @param connection the database Connection specific object
- * @param notifyEveryRows the number of rows that make up a block of data. Every time a block of data is complete
- *        notifications are sent to the listener of type ResultListener (HdbExtractor)
- *
- * @return true if the call was successful, false otherwise.
- */
-bool MySqlHdbSchema::getData(const char *source,
-                             const char *start_date,
-                             const char *stop_date,
-                             Connection *connection,
-                             int notifyEveryNumRows)
+bool MySqlHdbSchema::mGetData(const char *source,
+              const char *start_date,
+              const char *stop_date,
+              Connection *connection,
+              int notifyEveryPercent,
+              int sourceIndex,
+              int totalSources)
 {
     bool success, from_the_past_success = true;
     char query[MAXQUERYLEN];
@@ -132,22 +121,22 @@ bool MySqlHdbSchema::getData(const char *source,
     double elapsed = -1.0; /* query elapsed time in seconds.microseconds */
     double from_the_past_elapsed = 0.0;
     struct timeval tv1, tv2;
-    char *sharedSource = new char[strlen(source) + 1];
-    strncpy(sharedSource, source, strlen(source) + 1);
-    SharedPointer <char>sharedSourcePtr(sharedSource);
+    float myPercent = 100.0 / totalSources;
+    int notifyEverySteps = -1;
 
     gettimeofday(&tv1, NULL);
 
     /* clear error */
     strcpy(d_ptr->errorMessage, "");
 
-    d_ptr->notifyEveryNumRows = notifyEveryNumRows;
+    d_ptr->notifyEveryPercent = notifyEveryPercent;
 
     snprintf(query, MAXQUERYLEN, "SELECT ID,data_type,data_format,writable from adt WHERE full_name='%s'", source);
 
     pinfo("\e[1;4;36mHDB: query %s\e[0m\n", query);
 
     Result * res = connection->query(query);
+    if(d_ptr->is)
     if(!res)
     {
         snprintf(d_ptr->errorMessage, MAXERRORLEN,
@@ -241,10 +230,9 @@ bool MySqlHdbSchema::getData(const char *source,
                         return false;
                     }
 
-                    if(notifyEveryNumRows <= 0)
-                        notifyEveryNumRows = res->getRowCount() / 10;
+                    notifyEverySteps = qRound(res->getRowCount() * d_ptr->notifyEveryPercent / myPercent);
 
-                    printf("\e[1;32m notifying every rows %d row cound %d\e[0m\n", notifyEveryNumRows, res->getRowCount());
+                    printf("\e[1;32m notifying every rows %d row cound %d\e[0m\n", notifyEveryPercent, res->getRowCount());
                     while(res->next() > 0)
                     {
                         row = res->getCurrentRow();
@@ -276,7 +264,7 @@ bool MySqlHdbSchema::getData(const char *source,
                         XVariant *xvar = NULL;
                     //    printf("+ adding %s %s (row count %d)\n", row->getField(0), row->getField(1), res->getRowCount());
 
-                        xvar = new XVariant(sharedSourcePtr, row->getField(0), row->getField(1), format, dataType, wri);
+                        xvar = new XVariant(source, row->getField(0), row->getField(1), format, dataType, wri);
 
                         pthread_mutex_lock(&d_ptr->mutex);
                         if(d_ptr->variantList == NULL)
@@ -287,10 +275,10 @@ bool MySqlHdbSchema::getData(const char *source,
 
                         row->close();
 
-                        if(notifyEveryNumRows > 0 && (rowCnt % notifyEveryNumRows == 0
+                        if(notifyEverySteps > 0 && (rowCnt % notifyEverySteps == 0
                                                              || rowCnt == res->getRowCount()) )
                         {
-                            d_ptr->resultListenerI->onProgressUpdate(source, rowCnt, res->getRowCount());
+                            d_ptr->resultListenerI->onProgressUpdate(source, (double) rowCnt / notifyEverySteps * sourceIndex);
                         }
                     } /* res is closed at the end of else if(wri == XVariant::RW) */
 
@@ -342,7 +330,7 @@ bool MySqlHdbSchema::getData(const char *source,
                         XVariant *xvar = NULL;
                         // pinfo("+ adding %s %s (row count %d)\n", row->getField(0), row->getField(1), res->getRowCount());
 
-                        xvar = new XVariant(sharedSourcePtr, row->getField(0), row->getField(1),
+                        xvar = new XVariant(source, row->getField(0), row->getField(1),
                                             row->getField(2), format, dataType);
 
                         pthread_mutex_lock(&d_ptr->mutex);
@@ -353,10 +341,10 @@ bool MySqlHdbSchema::getData(const char *source,
 
                         row->close();
 
-                        if(notifyEveryNumRows > 0 && (rowCnt % notifyEveryNumRows == 0
+                        if(notifyEveryPercent > 0 && (rowCnt % notifyEveryPercent == 0
                                                              || rowCnt == res->getRowCount()) )
                         {
-                            d_ptr->resultListenerI->onProgressUpdate(source, rowCnt, res->getRowCount());
+                            d_ptr->resultListenerI->onProgressUpdate(source, myPercent * sourceIndex);
                         }
                     } /* end while(res->next() > 0) res is closed at the end */
 
@@ -409,6 +397,29 @@ bool MySqlHdbSchema::getData(const char *source,
     d_ptr->resultListenerI->onFinished(source, d_ptr->sourceStep, d_ptr->totalSources, elapsed);
 
     return success;
+}
+
+/** \brief Fetch attribute data from the database between a start and stop date/time.
+ *
+ * Fetch data from the database.
+ * \note This method is used by HdbExtractor and it is not meant to be directly used by the library user.
+ *
+ * @param source A the tango attribute in the form domain/family/member/AttributeName
+ * @param start_date the start date (begin of the requested data interval) as string, such as "2014-07-10 10:00:00"
+ * @param stop_date the stop date (end of the requested data interval) as string, such as "2014-07-10 12:00:00"
+ * @param connection the database Connection specific object
+ * @param notifyEveryRows the number of rows that make up a block of data. Every time a block of data is complete
+ *        notifications are sent to the listener of type ResultListener (HdbExtractor)
+ *
+ * @return true if the call was successful, false otherwise.
+ */
+bool MySqlHdbSchema::getData(const char *source,
+                             const char *start_date,
+                             const char *stop_date,
+                             Connection *connection,
+                             int notifyEveryPercent)
+{
+    return mGetData(source, start_date, stop_date, connection, notifyEveryPercent, 0, 1);
 }
 
 /** \brief Fetch attribute data from the mysql hdb database between a start and stop date/time.
@@ -516,9 +527,6 @@ bool MySqlHdbSchema::fetchInThePast(const char *source,
     struct timeval tv1, tv2;
     Result *res = NULL;
     Row *row = NULL;
-    char *sharedSource = new char[strlen(source) + 1];
-    strncpy(sharedSource, source, strlen(source) + 1);
-    SharedPointer <char> sharedSourcePtr(sharedSource);
 
     gettimeofday(&tv1, NULL);
 
@@ -566,9 +574,9 @@ bool MySqlHdbSchema::fetchInThePast(const char *source,
                 strncpy(timestamp, row->getField(0), MAXTIMESTAMPLEN);
 
             if(writable != XVariant::RW)
-                xvar = new XVariant(sharedSourcePtr, timestamp, row->getField(1), format, dataType, writable);
+                xvar = new XVariant(source, timestamp, row->getField(1), format, dataType, writable);
             else
-                xvar = new XVariant(sharedSourcePtr, timestamp, row->getField(1),
+                xvar = new XVariant(source, timestamp, row->getField(1),
                                     row->getField(2), format, dataType);
 
             pthread_mutex_lock(&d_ptr->mutex);
@@ -591,6 +599,11 @@ bool MySqlHdbSchema::fetchInThePast(const char *source,
         *time_elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec);
     }
     return true;
+}
+
+void MySqlHdbSchema::cancel()
+{
+    d_ptr->isCancelled = true;
 }
 
 

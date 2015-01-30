@@ -13,9 +13,9 @@ XVariantPrivate::XVariantPrivate()
     mNullWIndexes = NULL;
     mNullWValuesCount = 0;
 
-    mFormat = XVariant::FormatInvalid;
-    mType = XVariant::TypeInvalid;
     mIsValid = false;
     mIsNull = true;
     mSize = 0;
+
+    dataInfo = SharedPointer<XVariantDataInfo>(new XVariantDataInfo());
 }

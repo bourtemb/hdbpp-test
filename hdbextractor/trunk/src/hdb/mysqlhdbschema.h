@@ -68,6 +68,17 @@ public:
                                           double *time_elapsed,
                                           ConfigurableDbSchemaHelper::FillFromThePastMode mode);
 
+    virtual void cancel();
+
+private:
+    bool mGetData(const char *source,
+                  const char *start_date,
+                  const char *stop_date,
+                  Connection *connection,
+                  int notifyEveryPercent,
+                  int sourceIndex,
+                  int totalSources);
+
 };
 
 #endif // HDBSCHEMA_H

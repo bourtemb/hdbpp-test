@@ -9,11 +9,12 @@
 #include "../hdbxmacros.h"
 #include "datetimeutils.h"
 #include "xvariantprivate.h"
+#include "xvariantdatainfo.h"
 #include "../test/xvariantstatstest.h"
 
 void XVariant::cleanup()
 {
-    if(d->mSize > 0 && d->mType == String && d->val != NULL)
+    if(d->mSize > 0 && d->dataInfo->type == String && d->val != NULL)
     {
         char **ssi = (char **) d->val;
         for(size_t i = 0; i < d->mSize; i++)
@@ -25,7 +26,7 @@ void XVariant::cleanup()
     delete_rdata();
 
 
-    if(d->mSize > 0 && d->mType == String && d->w_val != NULL)
+    if(d->mSize > 0 && d->dataInfo->type == String && d->w_val != NULL)
     {
         char **ssi = (char **) d->val;
         for(size_t i = 0; i < d->mSize; i++)
@@ -46,7 +47,6 @@ void XVariant::cleanup()
 XVariant::~XVariant()
 {
     //printf("~XVariant destructor: calling cleanup %p\n", this);
-    XVariantStatsTest::instance()->removeVariant();
     cleanup();
 }
 
@@ -98,12 +98,12 @@ XVariant::~XVariant()
  * @see toDouble
  * @see toDoubleVector
  */
-XVariant::XVariant(SharedPointer<char> source, const char *timestamp, const char *strdata, DataFormat df, DataType dt, Writable wri)
+XVariant::XVariant(const char * source, const char *timestamp, const char *strdata, DataFormat df, DataType dt, Writable wri)
 {
-    d = new XVariantPrivate();
+    d = new XVariantPrivate(); /* allocates XVariantDataInfo */
     init_common(source, timestamp, df, dt);
     init_data();
-    d->mWritable = wri;
+    d->dataInfo->writable = wri;
     parse(strdata); /* at the end, after setting up other fields */
 }
 
@@ -120,22 +120,22 @@ XVariant::XVariant(SharedPointer<char> source, const char *timestamp, const char
  * \note The writable property is assumed to be read only
  *
  */
-XVariant::XVariant(SharedPointer<char> source, const char *timestamp, const char *strdataR, const char *strdataW, DataFormat df, DataType dt)
+XVariant::XVariant(const char *source, const char *timestamp, const char *strdataR, const char *strdataW, DataFormat df, DataType dt)
 {
-    d = new XVariantPrivate();
+    d = new XVariantPrivate(); /* allocates XVariantDataInfo */
     init_common(source, timestamp, df, dt);
     init_data();
-    d->mWritable = RW;
+    d->dataInfo->writable = RW;
     parse(strdataR, strdataW); /* at the end, after setting up other fields */
 }
 
-XVariant::XVariant(SharedPointer<char> source,
+XVariant::XVariant(const char * source,
                    const char *timestamp,
                    const size_t size, DataFormat df,
                    DataType dt, Writable wri)
 {
-    d = new XVariantPrivate();
-    d->mWritable = wri;
+    d = new XVariantPrivate(); /* allocates XVariantDataInfo */
+    d->dataInfo->writable = wri;
     init_common(source, timestamp, df, dt);
     init_data(size);
 }
@@ -146,11 +146,11 @@ XVariant::XVariant(SharedPointer<char> source,
  */
 XVariant::XVariant()
 {
-    d = new XVariantPrivate();
+    d = new XVariantPrivate();  /* allocates XVariantDataInfo */
     init_data();
-    d->mFormat = FormatInvalid;
-    d->mWritable = WritableInvalid;
-    d->mType = TypeInvalid;
+    d->dataInfo->format = FormatInvalid;
+    d->dataInfo->writable = WritableInvalid;
+    d->dataInfo->type = TypeInvalid;
 }
 
 /** \brief copy constructor
@@ -176,9 +176,9 @@ void XVariant::build_from(const XVariant& other)
     d = new XVariantPrivate();
     init_data(); /* NULLify all pointers to data */
 
-    d->mWritable = other.getWritable();
-    d->mFormat  = other.getFormat();
-    d->mType = other.getType();
+    d->dataInfo->writable = other.getWritable();
+    d->dataInfo->format  = other.getFormat();
+    d->dataInfo->type = other.getType();
     d->mSize = other.getSize();
     d->mIsValid = other.isValid();
     d->mIsNull = other.isNull();
@@ -186,30 +186,30 @@ void XVariant::build_from(const XVariant& other)
     d->mQuality = other.getQuality();
 
     //    printf("\e[0;36mXVariant %p copy from %p this->d: %p: format %d wri %d size %ld\e[0m \n", this, &other, d,
-    //           d->mFormat, d->mWritable, d->mSize);
+    //           d->dataInfo->dataFormat, d->dataInfo->writable, d->mSize);
 
-    if(d->mWritable == WritableInvalid || d->mType == TypeInvalid ||
-            d->mFormat == FormatInvalid)
+    if(d->dataInfo->writable == WritableInvalid || d->dataInfo->type == TypeInvalid ||
+            d->dataInfo->format == FormatInvalid)
     {
         printf("\e[1;31mXVariant %p d %p:  FORMAT OR WRI OR TYPE INVALID in other %p\e[0m\n",
                this, d, &other);
         return;
     }
-    d->mSource = other.getSourceSharedPtr();
+    d->dataInfo->setSource(other.getSource());
     // strncpy(d->mSource, other.getSource(), SRCLEN);
     strncpy(d->mTimestamp, other.getTimestamp(), TIMESTAMPLEN);
     mMakeError(other.getError());
 
-    if(d->mWritable != WO)
+    if(d->dataInfo->writable != WO)
     {
-        if(d->mType == XVariant::Double)
+        if(d->dataInfo->type == XVariant::Double)
         {
             double *vd = new double[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
                 vd[i] =  other.toDoubleP()[i];
             d->val = vd;
         }
-        else if(d->mType == XVariant::Int)
+        else if(d->dataInfo->type == XVariant::Int)
         {
             long int *vi =  new long int[d->mSize];
 
@@ -217,7 +217,7 @@ void XVariant::build_from(const XVariant& other)
                 vi[i] = other.toLongIntP()[i];
             d->val = vi;
         }
-        else if(d->mType == XVariant::UInt)
+        else if(d->dataInfo->type == XVariant::UInt)
         {
             unsigned long int *vi =  new unsigned long int[d->mSize];
 
@@ -225,7 +225,7 @@ void XVariant::build_from(const XVariant& other)
                 vi[i] = other.toULongIntP()[i];
             d->val = vi;
         }
-        else if(d->mType == XVariant::Boolean)
+        else if(d->dataInfo->type == XVariant::Boolean)
         {
             bool *vb = new bool[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
@@ -235,30 +235,30 @@ void XVariant::build_from(const XVariant& other)
     }
 
     /* write part */
-    if(d->mWritable == XVariant::RW || d->mWritable == XVariant::WO)
+    if(d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO)
     {
-        if(d->mType == XVariant::Double)
+        if(d->dataInfo->type == XVariant::Double)
         {
             double *vd = new double[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
                 vd[i] =  other.toDoubleP(false)[i];
             d->w_val = vd;
         }
-        else if(d->mType == XVariant::Int)
+        else if(d->dataInfo->type == XVariant::Int)
         {
             long int *vi =  new long int[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
                 vi[i] = other.toLongIntP(false)[i];
             d->w_val = vi;
         }
-        else if(d->mType == XVariant::UInt)
+        else if(d->dataInfo->type == XVariant::UInt)
         {
             unsigned long int *vi =  new unsigned long int[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
                 vi[i] = other.toULongIntP(false)[i];
             d->w_val = vi;
         }
-        else if(d->mType == XVariant::Boolean)
+        else if(d->dataInfo->type == XVariant::Boolean)
         {
             bool *vb = new bool[d->mSize];
             for(size_t i = 0; i < d->mSize; i++)
@@ -268,16 +268,11 @@ void XVariant::build_from(const XVariant& other)
     }
 }
 
-SharedPointer <char> XVariant::getSourceSharedPtr() const
-{
-    return d->mSource;
-}
-
 /** \brief Returns the source name (tango full attribute name)
  */
-char* XVariant::getSource() const
+const char* XVariant::getSource() const
 {
-    return d->mSource.operator ->();
+    return d->dataInfo->source;
 }
 
 /** \brief Query the format of the data stored in the XVariant
@@ -286,7 +281,7 @@ char* XVariant::getSource() const
  */
 XVariant::DataFormat XVariant::getFormat() const
 {
-    return d->mFormat;
+    return d->dataInfo->format;
 }
 
 /** \brief Returns the DataType stored by XVariant
@@ -294,7 +289,7 @@ XVariant::DataFormat XVariant::getFormat() const
  */
 XVariant::DataType XVariant::getType() const
 {
-    return d->mType;
+    return d->dataInfo->type;
 }
 
 /** \brief Returns the Writable property, which tells if the attribute is read only, read write,
@@ -304,7 +299,7 @@ XVariant::DataType XVariant::getType() const
  */
 XVariant::Writable XVariant::getWritable() const
 {
-    return d->mWritable;
+    return d->dataInfo->writable;
 }
 
 /** \brief Returns whether the data stored by XVariant is valid
@@ -442,9 +437,9 @@ void XVariant::add(const char* readval, size_t index)
     char *endptr;
     d->mIsValid = true;
     errno = 0; /* To distinguish success/failure after call */
-    if(readval != NULL && (d->mWritable == XVariant::RO) && index < d->mSize)
+    if(readval != NULL && (d->dataInfo->writable == XVariant::RO) && index < d->mSize)
         d->mIsNull = false;
-    if(readval != NULL && (d->mWritable == XVariant::WO) && index < d->mSize)
+    if(readval != NULL && (d->dataInfo->writable == XVariant::WO) && index < d->mSize)
         d->mIsWNull = false;
 
     if(readval == NULL && index < d->mSize)
@@ -454,9 +449,9 @@ void XVariant::add(const char* readval, size_t index)
         d->mNullValuesCount++;
     }
 
-    if((d->mWritable == XVariant::RO || d->mWritable == XVariant::WO) && index < d->mSize)
+    if((d->dataInfo->writable == XVariant::RO || d->dataInfo->writable == XVariant::WO) && index < d->mSize)
     {
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
         {
             double val;
             if(readval == NULL)
@@ -469,14 +464,14 @@ void XVariant::add(const char* readval, size_t index)
             else
             {
                 double *dval;
-                if(d->mWritable == XVariant::RO )
+                if(d->dataInfo->writable == XVariant::RO )
                     dval = (double *) d->val;
                 else
                     dval = (double *) d->w_val;
                 dval[index] = val;
             }
         }
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
         {
             long int val;
             if(readval == NULL)
@@ -488,14 +483,14 @@ void XVariant::add(const char* readval, size_t index)
             else
             {
                 long int *lval;
-                if(d->mWritable == XVariant::RO )
+                if(d->dataInfo->writable == XVariant::RO )
                     lval = (long int *) d->val;
                 else
                     lval = (long int *) d->w_val;
                 lval[index] = val;
             }
         }
-        else if(d->mType == UInt)
+        else if(d->dataInfo->type == UInt)
         {
             long unsigned int val;
             if(readval == NULL)
@@ -508,14 +503,14 @@ void XVariant::add(const char* readval, size_t index)
             else
             {
                 long unsigned  int *lval;
-                if(d->mWritable == XVariant::RO )
+                if(d->dataInfo->writable == XVariant::RO )
                     lval = (long unsigned  int *) d->val;
                 else
                     lval = (long unsigned  int *) d->w_val;
                 lval[index] = val;
             }
         }
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
         {
             bool booval;
             if(readval == NULL)
@@ -528,7 +523,7 @@ void XVariant::add(const char* readval, size_t index)
             else
             {
                 bool *bval;
-                if(d->mWritable == XVariant::RO )
+                if(d->dataInfo->writable == XVariant::RO )
                     bval = (bool *) d->val;
                 else
                     bval = (bool *) d->w_val;
@@ -586,11 +581,11 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
         d->mNullWValuesCount++;
     }
 
-    if((d->mWritable == XVariant::RW ) && index < d->mSize)
+    if((d->dataInfo->writable == XVariant::RW ) && index < d->mSize)
     {
         char *endptr;
 
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
         {
             double val;
             if(readval == NULL)
@@ -615,7 +610,7 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
                 dval[index] = wval;
             }
         }
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
         {
             long int ival;
             if(readval == NULL)
@@ -638,7 +633,7 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
                 pival[index] = wival;
             }
         }
-        else if(d->mType == UInt)
+        else if(d->dataInfo->type == UInt)
         {
             long unsigned int uival;
             long unsigned int wuival;
@@ -663,7 +658,7 @@ void XVariant::add(const char* readval, const char* writeval, size_t index)
                 puival[index] = wuival;
             }
         }
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
         {
             bool booval;
             bool wbooval;
@@ -707,31 +702,31 @@ void XVariant::parse(const char *s)
 
 
     //   QHdbextractorThread("PARSING %s\n", s);
-    if(d->mFormat == Scalar && d->mWritable == RO && !d->mIsNull)
+    if(d->dataInfo->format == Scalar && d->dataInfo->writable == RO && !d->mIsNull)
     {
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
         {
             double *v = new double[1];
             *v  = strtod(s, NULL);
             d->val = v;
             d->mSize = 1;
         }
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
         {
 
             d->mSize = 1;
         }
-        else if(d->mType == UInt)
+        else if(d->dataInfo->type == UInt)
         {
 
             d->mSize = 1;
         }
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
         {
 
             d->mSize = 1;
         }
-        else if(d->mType == String)
+        else if(d->dataInfo->type == String)
         {
 
             d->mSize = 1;
@@ -739,7 +734,7 @@ void XVariant::parse(const char *s)
         else
             d->mIsValid = false;
     }
-    else if(d->mFormat == Vector && d->mWritable == RO && !d->mIsNull)
+    else if(d->dataInfo->format == Vector && d->dataInfo->writable == RO && !d->mIsNull)
     {
         size_t i = 0;
         d->mSize = 0;
@@ -760,7 +755,7 @@ void XVariant::parse(const char *s)
         }
         strncpy(copy, s, strlen(s) + 1);
 
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
         {
             double *d_array = new double[d->mSize];
             val = strtok_r(copy, delim, &saveptr);
@@ -773,7 +768,7 @@ void XVariant::parse(const char *s)
             }
             d->val = d_array;
         }
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
         {
             long int *li_array = new long int[d->mSize];
             val = strtok_r(copy, delim, &saveptr);
@@ -786,7 +781,7 @@ void XVariant::parse(const char *s)
             }
             d->val = li_array;
         }
-        else if(d->mType == UInt)
+        else if(d->dataInfo->type == UInt)
         {
             unsigned long int *uli_array = new unsigned long int[d->mSize];
             val = strtok_r(copy, delim, &saveptr);
@@ -799,7 +794,7 @@ void XVariant::parse(const char *s)
             }
             d->val = uli_array;
         }
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
         {
             bool *b_array = new bool[d->mSize];
             val = strtok_r(copy, delim, &saveptr);
@@ -812,7 +807,7 @@ void XVariant::parse(const char *s)
             }
             d->val = b_array;
         }
-        else if(d->mType == String)
+        else if(d->dataInfo->type == String)
         {
 
         }
@@ -831,7 +826,7 @@ void XVariant::parse(const char *s)
 
     if(!d->mIsValid &&  s != NULL)
         perr("XVariant.parse(s): \"%s\": format %d writable %d type %d not supported",
-             d->mSource, d->mFormat, d->mWritable, d->mType);
+             d->mSource, d->dataInfo->format, d->dataInfo->writable, d->dataInfo->type);
 }
 
 void XVariant::parse(const char *sr, const char *sw)
@@ -842,9 +837,9 @@ void XVariant::parse(const char *sr, const char *sw)
     d->mIsWNull = (sw == NULL);
 
     //   QHdbextractorThread("PARSING %s\n", s);
-    if(d->mFormat == Scalar && d->mWritable == RW && (!d->mIsNull || !d->mIsWNull))
+    if(d->dataInfo->format == Scalar && d->dataInfo->writable == RW && (!d->mIsNull || !d->mIsWNull))
     {
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
         {
             if(!d->mIsNull)
             {
@@ -860,7 +855,7 @@ void XVariant::parse(const char *sr, const char *sw)
             }
             d->mSize = 1;
         }
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
         {
             if(!d->mIsNull)
             {
@@ -876,7 +871,7 @@ void XVariant::parse(const char *sr, const char *sw)
             }
             d->mSize = 1;
         }
-        else if(d->mType == UInt)
+        else if(d->dataInfo->type == UInt)
         {
             if(!d->mIsNull)
             {
@@ -892,7 +887,7 @@ void XVariant::parse(const char *sr, const char *sw)
             }
             d->mSize = 1;
         }
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
         {
             if(!d->mIsNull)
             {
@@ -908,7 +903,7 @@ void XVariant::parse(const char *sr, const char *sw)
             }
             d->mSize = 1;
         }
-        else if(d->mType == String)
+        else if(d->dataInfo->type == String)
         {
             if(!d->mIsNull)
             {
@@ -923,7 +918,7 @@ void XVariant::parse(const char *sr, const char *sw)
         else
             d->mIsValid = false;
     }
-    else if(d->mFormat == Vector && d->mWritable == RW && (!d->mIsNull || !d->mIsWNull) )
+    else if(d->dataInfo->format == Vector && d->dataInfo->writable == RW && (!d->mIsNull || !d->mIsWNull) )
     {
         size_t i = 0;
         d->mSize = 0;
@@ -950,7 +945,7 @@ void XVariant::parse(const char *sr, const char *sw)
             }
             strncpy(copy, sr, strlen(sr) + 1);
 
-            if(d->mType == Double)
+            if(d->dataInfo->type == Double)
             {
                 double *d_array = new double[d->mSize];
                 val = strtok_r(copy, delim, &saveptr);
@@ -963,7 +958,7 @@ void XVariant::parse(const char *sr, const char *sw)
                 }
                 d->val = d_array;
             }
-            else if(d->mType == Int)
+            else if(d->dataInfo->type == Int)
             {
                 long int *li_array = new long int[d->mSize];
                 val = strtok_r(copy, delim, &saveptr);
@@ -976,7 +971,7 @@ void XVariant::parse(const char *sr, const char *sw)
                 }
                 d->val = li_array;
             }
-            else if(d->mType == UInt)
+            else if(d->dataInfo->type == UInt)
             {
                 unsigned long int *uli_array = new unsigned long int[d->mSize];
                 val = strtok_r(copy, delim, &saveptr);
@@ -989,7 +984,7 @@ void XVariant::parse(const char *sr, const char *sw)
                 }
                 d->val = uli_array;
             }
-            else if(d->mType == Boolean)
+            else if(d->dataInfo->type == Boolean)
             {
                 bool *b_array = new bool[d->mSize];
                 val = strtok_r(copy, delim, &saveptr);
@@ -1002,7 +997,7 @@ void XVariant::parse(const char *sr, const char *sw)
                 }
                 d->val = b_array;
             }
-            else if(d->mType == String)
+            else if(d->dataInfo->type == String)
             {
 
             }
@@ -1035,7 +1030,7 @@ void XVariant::parse(const char *sr, const char *sw)
             strncpy(copy, sw, strlen(sw) + 1);
             if(wri_size == d->mSize)
             {
-                if(d->mType == Double)
+                if(d->dataInfo->type == Double)
                 {
                     double *d_array = new double[wri_size];
                     val = strtok_r(copy, delim, &saveptr);
@@ -1048,7 +1043,7 @@ void XVariant::parse(const char *sr, const char *sw)
                     }
                     d->w_val = d_array;
                 }
-                else if(d->mType == Int)
+                else if(d->dataInfo->type == Int)
                 {
                     long int *li_array = new long int[d->mSize];
                     val = strtok_r(copy, delim, &saveptr);
@@ -1061,7 +1056,7 @@ void XVariant::parse(const char *sr, const char *sw)
                     }
                     d->w_val = li_array;
                 }
-                else if(d->mType == UInt)
+                else if(d->dataInfo->type == UInt)
                 {
                     unsigned long int *uli_array = new unsigned long int[d->mSize];
                     val = strtok_r(copy, delim, &saveptr);
@@ -1074,7 +1069,7 @@ void XVariant::parse(const char *sr, const char *sw)
                     }
                     d->w_val = uli_array;
                 }
-                else if(d->mType == Boolean)
+                else if(d->dataInfo->type == Boolean)
                 {
                     bool *b_array = new bool[d->mSize];
                     val = strtok_r(copy, delim, &saveptr);
@@ -1087,7 +1082,7 @@ void XVariant::parse(const char *sr, const char *sw)
                     }
                     d->w_val = b_array;
                 }
-                else if(d->mType == String)
+                else if(d->dataInfo->type == String)
                 {
 
                 }
@@ -1103,7 +1098,7 @@ void XVariant::parse(const char *sr, const char *sw)
 
         } /* !d->mIsWNull */
 
-    } /* else if(d->mFormat == Vector && d->mWritable == RW && (!d->mIsNull || !d->mIsWNull) ) */
+    } /* else if(d->dataInfo->dataFormat == Vector && d->dataInfo->writable == RW && (!d->mIsNull || !d->mIsWNull) ) */
 
     /* Check for string to number conversion errors */
     if (errno != 0)
@@ -1116,7 +1111,7 @@ void XVariant::parse(const char *sr, const char *sw)
 
     if(!d->mIsValid)
         perr("XVariant.parse(s): \"%s\": format %d writable %d type %d not supported or r/w size mismatch",
-             d->mSource, d->mFormat, d->mWritable, d->mType);
+             d->mSource, d->dataInfo->format, d->dataInfo->writable, d->dataInfo->type);
 }
 
 void XVariant::mMakeError(int errnum)
@@ -1137,14 +1132,12 @@ void XVariant::mMakeError(const char *msg)
     }
 }
 
-void XVariant::init_common(SharedPointer<char> source, const char *timestamp, DataFormat df, DataType dt)
+void XVariant::init_common(const char *source, const char *timestamp, DataFormat df, DataType dt)
 {
-    d->mFormat = df;
-    d->mType = dt;
     d->mIsValid = false;
     d->mSize = 0;
     strncpy(d->mTimestamp, timestamp, TIMESTAMPLEN);
-    d->mSource = source;
+    d->dataInfo->set(source, df, dt); /* writable will be set to invalid */
 }
 void XVariant::init_data(size_t size)
 {
@@ -1157,43 +1150,43 @@ void XVariant::init_data(size_t size)
     d->mIsNull = true;
     d->mIsWNull = true;
 
+    XVariant::Writable wri = d->dataInfo->writable;
 
-    if(d->mType == Double)
+    if(d->dataInfo->type == Double)
     {
-        if(d->mWritable == RW ||d->mWritable == RO)
+        if(wri == RW ||wri == RO)
             d->val = (double *) new double[size];
-        if(d->mWritable == RW || d->mWritable == WO)
+        if(wri == RW || wri == WO)
             d->w_val = (double *) new double[size];
     }
-    else if(d->mType == Int)
+    else if(d->dataInfo->type == Int)
     {
-        if(d->mWritable == RW ||d->mWritable == RO)
+        if(wri == RW ||wri == RO)
             d->val = (long int *) new long int[size];
-        if(d->mWritable == RW || d->mWritable == WO)
+        if(wri == RW || wri == WO)
             d->w_val = (long int *) new long int[size];
     }
-    else if(d->mType == UInt)
+    else if(d->dataInfo->type == UInt)
     {
-        if(d->mWritable == RW ||d->mWritable == RO)
+        if(wri == RW ||wri == RO)
             d->val = (long unsigned int *) new long unsigned int[size];
-        if(d->mWritable == RW || d->mWritable == WO)
+        if(wri == RW || wri == WO)
             d->w_val = (long unsigned int *) new long unsigned int[size];
     }
-    else if(d->mType == Boolean)
+    else if(d->dataInfo->type == Boolean)
     {
-        if(d->mWritable == RW ||d->mWritable == RO)
+        if(wri == RW ||wri == RO)
             d->val = (bool *) new bool[size];
-        if(d->mWritable == RW || d->mWritable == WO)
+        if(wri == RW || wri == WO)
             d->w_val = (bool *) new bool[size];
     }
-    else if(d->mType == String)
+    else if(d->dataInfo->type == String)
     {
-        if(d->mWritable == RW ||d->mWritable == RO)
+        if(wri == RW ||wri == RO)
             d->val = (char *) new char[size];
-        if(d->mWritable == RW || d->mWritable == WO)
+        if(wri == RW || wri == WO)
             d->w_val = (char *) new char[size];
     }
-
 }
 
 void XVariant::init_data()
@@ -1207,15 +1200,15 @@ void XVariant::delete_rdata()
 {
     if(d->val != NULL)
     {
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
             delete (double *) d->val;
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
             delete (int *) d->val;
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
             delete (bool *) d->val;
-        else if(d->mType == String)
+        else if(d->dataInfo->type == String)
             delete (char *) d->val;
-        //        printf("delete_rdata: XVariant %p deleted d %p d->val %p type %d\n", this, d, d->val, d->mType);
+        //        printf("delete_rdata: XVariant %p deleted d %p d->val %p type %d\n", this, d, d->val, d->dataInfo->dataType);
         d->val = NULL;
     }
 }
@@ -1224,13 +1217,13 @@ void XVariant::delete_wdata()
 {
     if(d->w_val != NULL)
     {
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
             delete (double *) d->w_val;
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
             delete (int *) d->w_val;
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
             delete (bool *) d->w_val;
-        else if(d->mType == String)
+        else if(d->dataInfo->type == String)
             delete (char *) d->w_val;
         d->w_val = NULL;
     }
@@ -1477,9 +1470,9 @@ std::vector<bool> XVariant::toBoolVector(bool read) const
 double XVariant::toDouble(bool read, bool *ok) const
 {
     double v = nan("NaN");
-    if(read && d->mType == Double && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->val != NULL)
+    if(read && d->dataInfo->type == Double && d->dataInfo->format == Scalar && (d->dataInfo->writable == RO || d->dataInfo->writable == RW) && d->val != NULL)
         v = *((double *)d->val);
-    else if(!read && d->mType == Double && d->mFormat == Scalar && (d->mWritable == RW || d->mWritable == WO) && d->w_val != NULL)
+    else if(!read && d->dataInfo->type == Double && d->dataInfo->format == Scalar && (d->dataInfo->writable == RW || d->dataInfo->writable == WO) && d->w_val != NULL)
         v = *((double *)d->w_val);
     if(ok)
         *ok = d->mIsValid && (d->val != NULL || d->w_val != NULL);
@@ -1499,9 +1492,9 @@ double XVariant::toDouble(bool read, bool *ok) const
 long int XVariant::toLongInt(bool read, bool *ok) const
 {
     long int i = LONG_MIN;
-    if(read && d->mType == Int && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->val != NULL)
+    if(read && d->dataInfo->type == Int && d->dataInfo->format == Scalar && (d->dataInfo->writable == RO || d->dataInfo->writable == RW) && d->val != NULL)
         i = *((long int *)d->val);
-    else if(read && d->mType == Int && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->w_val != NULL)
+    else if(read && d->dataInfo->type == Int && d->dataInfo->format == Scalar && (d->dataInfo->writable == RO || d->dataInfo->writable == RW) && d->w_val != NULL)
         i = *((long int *)d->w_val);
     if(ok)
         *ok = d->mIsValid && (d->val != NULL || d->w_val != NULL);
@@ -1521,9 +1514,9 @@ long int XVariant::toLongInt(bool read, bool *ok) const
 unsigned long int XVariant::toULongInt(bool read, bool *ok) const
 {
     unsigned long int i = -1UL;
-    if(read && d->mType == UInt && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->val != NULL)
+    if(read && d->dataInfo->type == UInt && d->dataInfo->format == Scalar && (d->dataInfo->writable == RO || d->dataInfo->writable == RW) && d->val != NULL)
         i = *((unsigned long int *)d->val);
-    else if(read && d->mType == Int && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->w_val != NULL)
+    else if(read && d->dataInfo->type == Int && d->dataInfo->format == Scalar && (d->dataInfo->writable == RO || d->dataInfo->writable == RW) && d->w_val != NULL)
         i = *((unsigned long int *)d->w_val);
     if(ok)
         *ok = d->mIsValid && (d->val != NULL || d->w_val != NULL);
@@ -1544,9 +1537,9 @@ unsigned long int XVariant::toULongInt(bool read, bool *ok) const
 bool XVariant::toBool(bool read, bool *ok) const
 {
     bool b = false;
-    if(read && d->mType == Boolean && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->val != NULL)
+    if(read && d->dataInfo->type == Boolean && d->dataInfo->format == Scalar && (d->dataInfo->writable == RO || d->dataInfo->writable == RW) && d->val != NULL)
         b = *((bool *)d->val);
-    else if(!read && d->mType == Boolean && d->mFormat == Scalar && (d->mWritable == RO || d->mWritable == RW) && d->w_val != NULL)
+    else if(!read && d->dataInfo->type == Boolean && d->dataInfo->format == Scalar && (d->dataInfo->writable == RO || d->dataInfo->writable == RW) && d->w_val != NULL)
         b = *((bool *)d->w_val);
     if(ok)
         *ok = d->mIsValid && (d->val != NULL || d->w_val != NULL);
@@ -1728,52 +1721,51 @@ std::string XVariant::convertToString(bool read, bool *ok)
     for(size_t i = 0 ; i < siz; i++)
     {
         strcpy(tmp, "");
-        if(d->mType == Double)
+        if(d->dataInfo->type == Double)
         {
-            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+            if(read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::RO) && d->val != NULL)
                 snprintf(tmp, 128, "%f", ((double *) d->val)[i]);
-            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+            else if(!read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO) && d->w_val != NULL)
                 snprintf(tmp, 128, "%f", ((double *) d->w_val)[i]);
         }
-        else if(d->mType == Int)
+        else if(d->dataInfo->type == Int)
         {
-            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+            if(read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::RO) && d->val != NULL)
                 snprintf(tmp, 128, "%ld", ((long int *) d->val)[i]);
-            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+            else if(!read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO) && d->w_val != NULL)
                 snprintf(tmp, 128, "%ld", ((long int *) d->w_val)[i]);
         }
-        else if(d->mType == UInt)
+        else if(d->dataInfo->type == UInt)
         {
-            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+            if(read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::RO) && d->val != NULL)
                 snprintf(tmp, 128, "%lud",  ((unsigned long int *) d->val)[i]);
-            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+            else if(!read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO) && d->w_val != NULL)
                 snprintf(tmp, 128, "%lud", ((unsigned long int *) d->w_val)[i]);
         }
-        else if(d->mType == Boolean)
+        else if(d->dataInfo->type == Boolean)
         {
             bool b = false;
 
-            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+            if(read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::RO) && d->val != NULL)
                 b = ((bool *) d->val)[i];
-            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+            else if(!read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO) && d->w_val != NULL)
                 b = ((bool *) d->w_val)[i];
             if(b)
                 snprintf(tmp, 128, "true");
             else
                 snprintf(tmp, 128, "true");
         }
-        else if(d->mType == String)
+        else if(d->dataInfo->type == String)
         {
-            if(read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::RO) && d->val != NULL)
+            if(read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::RO) && d->val != NULL)
                 ret += std::string(((char **) d->val)[i]);
-            else if(!read && (d->mWritable == XVariant::RW || d->mWritable == XVariant::WO) && d->w_val != NULL)
+            else if(!read && (d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO) && d->w_val != NULL)
                 ret += std::string(((char **) d->w_val)[i]);
         }
         else if(ok != NULL)
         {
             *ok = false;
-            char *source = this->getSource();
-            snprintf(err, 256, "XVariant.convertToString type %d unsupported (%s)", d->mType, source);
+            snprintf(err, 256, "XVariant.convertToString type %d unsupported (%s)", d->dataInfo->type, getSource());
             mMakeError(err);
         }
 

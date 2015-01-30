@@ -349,7 +349,7 @@ public:
 
     DbType dbType() const;
 
-    virtual void setUpdateProgressStep(int numRows);
+    virtual void setUpdateProgressPercent(int percent);
 
     /** \brief returns the number of rows after which onProgressUpdate is called on the registered HdbExtractorListener
      *
@@ -359,7 +359,7 @@ public:
      * @see HdbExtractorListener
      * @see getData
      */
-    int updateProgressStep();
+    int updateProgressPercent();
 
     /** \brief Try to establish a database connection with the specified host, user, password and database name
      *

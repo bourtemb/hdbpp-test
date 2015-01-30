@@ -16,7 +16,7 @@ public:
 
     ResultListener *resultListenerI;
 
-    int notifyEveryNumRows;
+    int notifyEveryPercent;
 
     pthread_mutex_t mutex;
 
@@ -27,6 +27,8 @@ public:
     char errorMessage[MAXERRORLEN];
 
     size_t sourceStep, totalSources;
+
+    bool isCancelled;
 };
 
 #endif // MYSQLHDBSCHEMAPRIVATE_H
