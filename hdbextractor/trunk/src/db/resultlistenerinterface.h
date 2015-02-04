@@ -41,14 +41,26 @@ public:
      */
     virtual void onProgressUpdate(const char *source, double percent) = 0;
 
-    /** \brief this method is invoked when data extraction is fully accomplished.
+
+    /** \brief This methods is invoked when the data of a particular source has been completely extracted.
      *
-     * @param source the name of the tango attribute
-     * @param sourceStep the source completely extracted over the total sources
-     * @param totalSources the number of requested sources to be extracted
+     * @param source the source name
+     * @param totalRows the number of extracted rows
+     * @param elapsed the time required for the source extraction
+     *
+     * @see onFinished
+     * @see onProgressUpdate
+     * @see setUpdateProgressPercent
+     */
+    virtual void onSourceExtracted(const char *source, int totalRows, double elapsed) = 0;
+
+    /** \brief this method is invoked when data extraction is fully completed.
+     *
+     * @param totalRows the number of total rows fetched.
      * @param elapsed the time that has elapsed since the operation begun.
      */
-    virtual void onFinished(const char* source, int sourceStep, int totalSources, double elapsed) = 0;
+    virtual void onFinished(int totalRows, double elapsed) = 0;
+
 };
 
 #endif // RESULTLISTENER_H

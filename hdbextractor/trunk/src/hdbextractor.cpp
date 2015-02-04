@@ -153,7 +153,7 @@ bool Hdbextractor::connect(DbType dbType, const char *host,
         strncpy(d_ptr->errorMessage, d_ptr->connection->getError(), MAXERRORLEN);
 
     if(!success)
-        perr(d_ptr->errorMessage);
+        perr("%s", d_ptr->errorMessage);
     return success;
 }
 
@@ -264,16 +264,19 @@ bool Hdbextractor::getData(const std::vector<std::string> sources,
         if(d_ptr->queryConfiguration != NULL)
             d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
 
-        for(size_t i = 0; i < sources.size(); i++)
-        {
-            printf("HdbExtractor.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
-            success = d_ptr->dbschema->getData(sources.at(i).c_str(), start_date, stop_date,
-                                               d_ptr->connection, d_ptr->updateEveryRows);
-        //    if(!success)
-        //        break;
-            if(!success)
-                printf("\e[1;31mHdbExtractor.getData: unsuccessful fetch but continue!\e[0m\n");
-        }
+        success = d_ptr->dbschema->getData(sources, start_date, stop_date,
+                                           d_ptr->connection, d_ptr->updateEveryRows);
+
+//        for(size_t i = 0; i < sources.size(); i++)
+//        {
+//            printf("HdbExtractor.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
+//            success = d_ptr->dbschema->getData(sources.at(i).c_str(), start_date, stop_date,
+//                                               d_ptr->connection, d_ptr->updateEveryRows, i, sources.size());
+//        //    if(!success)
+//        //        break;
+//            if(!success)
+//                printf("\e[1;31mHdbExtractor.getData: unsuccessful fetch but continue!\e[0m\n");
+//        }
     }
     /* error message, if necessary */
     if(!success)
@@ -366,6 +369,17 @@ QueryConfiguration *Hdbextractor::getQueryConfiguration() const
     return d_ptr->queryConfiguration;
 }
 
+void Hdbextractor::cancelExtraction()
+{
+    if(d_ptr->dbschema)
+        d_ptr->dbschema->cancel();
+}
+
+bool Hdbextractor::extractionIsCancelled() const
+{
+    return d_ptr->dbschema && d_ptr->dbschema->isCancelled();
+}
+
 /** \brief This method allows to configure various options before querying the database
  *
  * @param qc The QueryConfiguration object with the desired options set.
@@ -410,17 +424,22 @@ void Hdbextractor::setUpdateProgressPercent(int percent)
 /** \brief Implements ResultListener::onProgressUpdate interface
  *
  */
-void Hdbextractor::onProgressUpdate(const char *name, int step, int total)
+void Hdbextractor::onProgressUpdate(const char *name, double percent)
 {
-    d_ptr->hdbXListenerI->onSourceProgressUpdate(name, step, total);
+    d_ptr->hdbXListenerI->onSourceProgressUpdate(name, percent);
 }
 
 /** \brief Implements ResultListener::onFinished interface
  *
  */
-void Hdbextractor::onFinished(const char *name, int sourceStep, int totalSources, double elapsed)
+void Hdbextractor::onFinished(int totalRows, double elapsed)
 {
-    d_ptr->hdbXListenerI->onSourceExtracted(name, sourceStep, totalSources, elapsed);
+    d_ptr->hdbXListenerI->onExtractionFinished(totalRows, elapsed);
+}
+
+void Hdbextractor::onSourceExtracted(const char *source, int totalRows, double elapsed)
+{
+    d_ptr->hdbXListenerI->onSourceExtractionFinished(source, totalRows, elapsed);
 }
 
 

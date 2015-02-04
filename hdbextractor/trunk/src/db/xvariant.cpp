@@ -235,7 +235,7 @@ void XVariant::build_from(const XVariant& other)
     }
 
     /* write part */
-    if(d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO)
+    if((d->dataInfo->writable == XVariant::RW || d->dataInfo->writable == XVariant::WO) && !d->mIsWNull)
     {
         if(d->dataInfo->type == XVariant::Double)
         {
@@ -819,14 +819,14 @@ void XVariant::parse(const char *s)
     /* Check for errors */
     if (errno != 0 &&  s != NULL)
     {
-        perr("XVariant.parse: error converting \"%s\" -> \"%s\": \"%s\"", d->mSource, s, strerror(errno));
+        perr("XVariant.parse: error converting \"%s\" -> \"%s\": \"%s\"", getSource(), s, strerror(errno));
         mMakeError(errno);
         d->mIsValid = false;
     }
 
     if(!d->mIsValid &&  s != NULL)
         perr("XVariant.parse(s): \"%s\": format %d writable %d type %d not supported",
-             d->mSource, d->dataInfo->format, d->dataInfo->writable, d->dataInfo->type);
+             getSource(), d->dataInfo->format, d->dataInfo->writable, d->dataInfo->type);
 }
 
 void XVariant::parse(const char *sr, const char *sw)
@@ -1089,7 +1089,7 @@ void XVariant::parse(const char *sr, const char *sw)
             } /* if(wri_size == d->mSize) */
             else
             {
-                perr("XVariant.parse: error converting \"%s\":\n read and write sizes are different!", d->mSource);
+                perr("XVariant.parse: error converting \"%s\":\n read and write sizes are different!", getSource());
                 d->mIsValid = false;
             }
 
@@ -1104,14 +1104,14 @@ void XVariant::parse(const char *sr, const char *sw)
     if (errno != 0)
     {
         perr("XVariant.parse: error converting \"%s\":\n    READ: \"%s\";\n    WRITE: %s: \"%s\"",
-             d->mSource, sr, sw, strerror(errno));
+             getSource(), sr, sw, strerror(errno));
         mMakeError(errno);
         d->mIsValid = false;
     }
 
     if(!d->mIsValid)
         perr("XVariant.parse(s): \"%s\": format %d writable %d type %d not supported or r/w size mismatch",
-             d->mSource, d->dataInfo->format, d->dataInfo->writable, d->dataInfo->type);
+             getSource(), d->dataInfo->format, d->dataInfo->writable, d->dataInfo->type);
 }
 
 void XVariant::mMakeError(int errnum)

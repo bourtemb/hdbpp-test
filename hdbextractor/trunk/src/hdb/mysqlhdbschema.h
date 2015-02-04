@@ -26,24 +26,31 @@ public:
                                     const char *start_date,
                                     const char *stop_date,
                                     Connection *connection,
-                                    int notifyEveryNumRows);
+                                    int notifyEveryPercent);
 
     virtual bool getData(const std::vector<std::string> sources,
                                  const char *start_date,
                                  const char *stop_date,
                                  Connection *connection,
-                                 int notifyEveryNumRows);
+                                 int notifyEveryPercent);
 
     virtual bool getData(const char *source,
                                     const TimeInterval *time_interval,
                                     Connection *connection,
-                                    int notifyEveryRows);
+                                    int notifyEveryPercent);
 
     virtual bool getData(const std::vector<std::string> sources,
                                     const TimeInterval *time_interval,
                                     Connection *connection,
-                                    int notifyEveryRows);
+                                    int notifyEveryPercent);
 
+    virtual bool getData(const char *source,
+                  const char *start_date,
+                  const char *stop_date,
+                  Connection *connection,
+                  int notifyEveryPercent,
+                  int sourceIndex,
+                  int totalSources, double *elapsed);
 
     virtual bool getSourcesList(Connection *connection, std::list<std::string>& result) const;
 
@@ -58,7 +65,7 @@ public:
 
     virtual bool hasError() const;
 
-    virtual bool fetchInThePast(const char *source,
+    virtual int fetchInThePast(const char *source,
                                           const char *start_date, const char *table_name,
                                           const int att_id,
                                           XVariant::DataType dataType,
@@ -70,14 +77,11 @@ public:
 
     virtual void cancel();
 
+    virtual bool isCancelled() const;
+
+    virtual void resetCancelledFlag() const;
+
 private:
-    bool mGetData(const char *source,
-                  const char *start_date,
-                  const char *stop_date,
-                  Connection *connection,
-                  int notifyEveryPercent,
-                  int sourceIndex,
-                  int totalSources);
 
 };
 

@@ -65,6 +65,35 @@ public:
                                     Connection *connection,
                                     int notifyEveryRows) = 0;
 
+    /** \brief This method allows getting data for the given source. The convenience parameters
+     *         sourceIndex and totalSources help you getting multiple sources separately.
+     *
+     * Normally one should rely on the other methods for the retrieval of multiple sources, but if
+     * you want to perform some operation between two subsequent data extractions, then this is the
+     * way to go. The sourceIndex and totalSources parameters must be spefified in order to get
+     * the correct progress updates on the extraction listeners.
+     *
+     * @param source the name of the source
+     * @param start_date the start date (begin of the requested data interval) as string, such as "2014-07-10 10:00:00"
+     * @param stop_date the stop date (end of the requested data interval) as string, such as "2014-07-10 12:00:00"
+     * @param connection the database Connection specific object
+     * @param notifyEveryRows the number of rows that make up a block of data. Every time a block of data is complete
+     *        notifications are sent to the listener of type ResultListener (HdbExtractor)
+     * @param sourceIndex the index of the current source (starting from 0 and ending to sources size - 1
+     * @param totalSources the total number of sources to extract.
+     *
+     * This method is invoked by the other multiple source getData in this library. This may serve you as
+     * an example (see mysqlhdbschema.cpp and mysqlhdbppschema.cpp).
+     *
+     */
+    virtual bool getData(const char *source,
+                  const char *start_date,
+                  const char *stop_date,
+                  Connection *connection,
+                  int notifyEveryPercent,
+                  int sourceIndex,
+                  int totalSources, double *elapsed) = 0;
+
     /** \brief Retrieves the list of archived sources, returning true if the query is successful.
      *
      * Retrieve the list of sources archived into the database, sorted alphabetically from a to z.
@@ -153,6 +182,18 @@ public:
     virtual void cancel() = 0;
 
     virtual bool isCancelled() const = 0;
+
+    /** \brief Manually set to false the cancelled flag.
+     *
+     * This should not be needed unless special use of the getData version with
+     * the sourceIndex and the totalSources parameters is used.
+     *
+     * Please read the specific implementation of this method in subclasses.
+     *
+     * @see MySqlHdbSchema::resetCancelledFlag
+     * @see MySqlHdbppSchema::resetCancelledFlag
+     */
+    virtual void resetCancelledFlag() const = 0;
 
 };
 

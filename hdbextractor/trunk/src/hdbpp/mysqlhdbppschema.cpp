@@ -13,8 +13,10 @@
 #include "../db/helpers/configurabledbschemahelper.h"
 #include "../db/xvariantlist.h"
 #include "../db/timeinterval.h"
+#include "../queryconfiguration.h"
 #include <assert.h>
 #include <map>
+#include <math.h>
 
 #define MAXQUERYLEN 4096
 #define MAXTABLENAMELEN 32
@@ -27,8 +29,7 @@ MySqlHdbppSchema::MySqlHdbppSchema(ResultListener *resultListenerI) : Configurab
     /* d_ptr is created inside ConfigurableDbSchema */
     d_ptr->resultListenerI = resultListenerI;
     d_ptr->variantList = NULL;
-    d_ptr->sourceStep = 1;
-    d_ptr->totalSources = 1;
+    d_ptr->totalRowCnt = 1;
     d_ptr->isCancelled = false;
     pthread_mutex_init(&d_ptr->mutex, NULL);
 }
@@ -43,13 +44,6 @@ bool MySqlHdbppSchema::hasError() const
     return strlen(d_ptr->errorMessage) > 0;
 }
 
-void MySqlHdbppSchema::cancel()
-{
-    pthread_mutex_lock(&d_ptr->mutex);
-    d_ptr->isCancelled = true;
-    pthread_mutex_unlock(&d_ptr->mutex);
-}
-
 bool MySqlHdbppSchema::isCancelled() const
 {
     bool is;
@@ -57,6 +51,24 @@ bool MySqlHdbppSchema::isCancelled() const
     is = d_ptr->isCancelled;
     pthread_mutex_unlock(&d_ptr->mutex);
     return is;
+}
+
+void MySqlHdbppSchema::cancel()
+{
+    d_ptr->isCancelled = true;
+}
+
+/** \brief Manually reset the cancelled flag.
+ *
+ * The getData method with the additional parameters  sourceIndex and
+ * totalSources  (which is intended for special use) does not reset the
+ * cancelled flag. If you happen to use that version of getData, be sure to
+ * call resetCancelledFlag before.
+ *
+ */
+void MySqlHdbppSchema::resetCancelledFlag() const
+{
+    d_ptr->isCancelled = false;
 }
 
 /** \brief The class destructor.
@@ -200,13 +212,25 @@ bool MySqlHdbppSchema::mGetSourceProperties(const char* source,
 }
 
 
-bool MySqlHdbppSchema::mGetData(const char *source,
+/** \brief A getData version for internal use or for custom implementations who want to deal
+ *         with custom extraction of multiple sources
+ *
+ * This method, with the additional parameters  sourceIndex and
+ * totalSources, is intended for special use and does not reset the
+ * cancelled flag. If you happen to use that version of getData, be sure to
+ * call resetCancelledFlag before.
+ *
+ * @see resetCancelledFlag
+ *
+ */
+bool MySqlHdbppSchema::getData(const char *source,
                                 const char *start_date,
                                 const char *stop_date,
                                 Connection *connection,
                                 int notifyEveryPercent,
                                 int sourceIndex,
-                                int totalSources)
+                                int totalSources,
+                                double *elapsed)
 {
     bool success;
     bool from_the_past_success = true;
@@ -218,13 +242,16 @@ bool MySqlHdbppSchema::mGetData(const char *source,
     int id, datasiz = 1;
     int timestampCnt = 0;
     int index = 0;
+    float myPercent = 100.0 / totalSources;
+    int notifyEverySteps = -1;
+    int rowCnt = 0;
+    *elapsed = 0;
 
     Result *res = NULL;
     XVariant::DataType dataType;
     XVariant::Writable wri;
     XVariant::DataFormat format;
-
-    double elapsed = -1.0; /* query elapsed time in seconds.microseconds */
+    double percent = 0;
     double from_the_past_elapsed = 0.0; /* fetch from the past query time */
     struct timeval tv1, tv2;
 
@@ -233,7 +260,10 @@ bool MySqlHdbppSchema::mGetData(const char *source,
 
     gettimeofday(&tv1, NULL);
 
-    d_ptr->isCancelled = false;
+    /* Do NOT reset isCancelled flag. It is reset by the caller
+     *
+     * //  d_ptr->isCancelled = false;
+     */
 
     /* clear error */
     strcpy(d_ptr->errorMessage, "");
@@ -259,6 +289,10 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                 ConfigurableDbSchemaHelper::FillFromThePastMode fillMode = ConfigurableDbSchemaHelper::None;
                 Row *row;
                 /* now get data */
+                /* ============================================================================= *
+                 *                               READ ONLY                                       *
+                 * ============================================================================= *
+                 */
                 if(wri == XVariant::RO)
                 {
                     snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
@@ -283,10 +317,12 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                         return false;
                     }
 
+                    notifyEverySteps = round(res->getRowCount() * d_ptr->notifyEveryPercent / myPercent);
+
                     while(res->next() > 0 && !d_ptr->isCancelled)
                     {
                         row = res->getCurrentRow();
-
+                        d_ptr->totalRowCnt++;
                         if(!row)
                         {
                             snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
@@ -299,13 +335,11 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                         if(strcmp(timestamp, row->getField(0)) != 0)
                         {
                             if(format != XVariant::Scalar && timestampCnt > 0 &&
-                                    notifyEveryPercent > 0 &&
-                                    (timestampCnt % notifyEveryPercent == 0))
+                                    notifyEverySteps > 0 &&
+                                    (timestampCnt % notifyEverySteps == 0))
                             {
-                                //                            printf("\e[1;33mnotrifying vector!!\e[0m\n");
-                                d_ptr->resultListenerI->onProgressUpdate(source,
-                                                                         timestampCnt,
-                                                                         res->getRowCount() / datasiz);
+                                percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
+                                d_ptr->resultListenerI->onProgressUpdate(source, percent);
                             }
 
                             /* get timestamp */
@@ -354,12 +388,11 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                             pthread_mutex_unlock(&d_ptr->mutex);
 
                             if(format == XVariant::Scalar && timestampCnt > 0 &&
-                                    notifyEveryPercent > 0 &&
-                                    (timestampCnt % notifyEveryPercent == 0))
+                                    notifyEverySteps > 0 &&
+                                    (timestampCnt % notifyEverySteps == 0))
                             {
-                                d_ptr->resultListenerI->onProgressUpdate(source,
-                                                                         timestampCnt,
-                                                                         res->getRowCount() / datasiz);
+                                percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
+                                d_ptr->resultListenerI->onProgressUpdate(source, percent);
                             }
                         }
 
@@ -372,25 +405,37 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                         }
                         row->close();
 
+                        rowCnt++;
                     } /* end while(res->next) res is closed after else wri == XVariant::RW */
 
                     success = from_the_past_success && !d_ptr->isCancelled;
 
                 }  /* end else if(wri == XVariant::RO) */
+
+                /*
+                 * ============================================================================= *
+                 *                               READ WRITE                                      *
+                 * ============================================================================= *
+                 */
                 else if(wri == XVariant::RW)
                 {
                     /*  */
+                    bool fetchOnlyRead = d_ptr->queryConfiguration && d_ptr->queryConfiguration->getBool("FetchOnlyReadFromRWSource");
+                    char column_value_w[10] = "";
+                    if(!fetchOnlyRead) /* query will have a value_w field following value_r */
+                        strncpy(column_value_w, "value_w,", 10);
                     snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
+
                     if(format == XVariant::Vector)
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w,dim_x,idx,quality,error_desc FROM "
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time, value_r, %s dim_x, idx, quality,error_desc FROM "
                                                      " %s WHERE att_conf_id=%d AND data_time >='%s' "
                                                      " AND data_time <= '%s' ORDER BY data_time,idx ASC",
-                                 table_name, id, start_date, stop_date);
+                                 column_value_w, table_name, id, start_date, stop_date);
                     else
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,value_w,quality,error_desc FROM "
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r, %s quality,error_desc FROM "
                                                      " %s WHERE att_conf_id=%d AND  data_time >='%s' "
                                                      " AND data_time <= '%s' ORDER BY data_time ASC",
-                                 table_name, id, start_date, stop_date);
+                                 column_value_w, table_name, id, start_date, stop_date);
 
                     pinfo("\e[1;32mquery: %s\e[0m\n", query);
 
@@ -401,9 +446,12 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                                  query, connection->getError());
                         return false;
                     }
+
+                    notifyEverySteps = round(res->getRowCount() * d_ptr->notifyEveryPercent / myPercent);
                     while(res->next() > 0 && !d_ptr->isCancelled)
                     {
                         row = res->getCurrentRow();
+                        d_ptr->totalRowCnt++;
                         if(!row)
                         {
                             snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
@@ -421,8 +469,8 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                                     notifyEveryPercent > 0 &&
                                     (timestampCnt % notifyEveryPercent == 0))
                             {
-                                d_ptr->resultListenerI->onProgressUpdate(source, timestampCnt,
-                                                                         res->getRowCount() / datasiz);
+                                percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
+                                d_ptr->resultListenerI->onProgressUpdate(source, percent);
                             }
                             /* get timestamp */
                             strncpy(timestamp, row->getField(0), 32);
@@ -474,10 +522,16 @@ bool MySqlHdbppSchema::mGetData(const char *source,
                             index = 0; /* scalar */
 
                         pthread_mutex_lock(&d_ptr->mutex);
-                        xvar->add(row->getField(1), row->getField(2), index);
+                        if(fetchOnlyRead)
+                            xvar->add(row->getField(1), NULL, index);
+                        else
+                            xvar->add(row->getField(1), row->getField(2), index);
+
                         pthread_mutex_unlock(&d_ptr->mutex);
 
                         row->close();
+
+                        rowCnt++;
                     } /* end while(res->next() > 0) */
 
                     /* res->close() is called after RW else */
@@ -507,22 +561,18 @@ bool MySqlHdbppSchema::mGetData(const char *source,
         }/* else: valid data type, format, writable and !isCancelled */
 
         if(d_ptr->isCancelled)
-        {
-            snprintf(d_ptr->errorMessage, MAXERRORLEN, "Operation cancelled by the user");
-        }
+            snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema::mGetData: operation cancelled by the user");
         else if(res && timestampCnt > 0 &&
                 notifyEveryPercent > 0)
         {
-            d_ptr->resultListenerI->onProgressUpdate(source,
-                                                     res->getRowCount() / datasiz,
-                                                     res->getRowCount() / datasiz);
+            d_ptr->resultListenerI->onProgressUpdate(source, myPercent * (sourceIndex + 1));
         }
     }
     else
     {
         success = false;
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema: no attribute \"%s\" in adt", source);
-        perr(errmsg);
+        perr("%s", errmsg);
     }
 
     /* compute elapsed time */
@@ -530,11 +580,11 @@ bool MySqlHdbppSchema::mGetData(const char *source,
     /* transform the elapsed time from a timeval struct to a double whose integer part
      * represents seconds and the decimal microseconds.
      */
-    elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec) + from_the_past_elapsed;
-    /* sourceStep is managed by the const std::vector<std::string> input version of getData */
-    d_ptr->resultListenerI->onFinished(source, d_ptr->sourceStep, d_ptr->totalSources, elapsed);
+    *elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec) + from_the_past_elapsed;
 
-    return success;
+    d_ptr->resultListenerI->onSourceExtracted(source, rowCnt, *elapsed);
+
+    return success && !d_ptr->isCancelled;
 }
 
 /** \brief Fetch attribute data from the MySql hdb++ database between a start and stop date/time.
@@ -558,33 +608,39 @@ bool MySqlHdbppSchema::getData(const char *source,
                                Connection *connection,
                                int notifyEveryPercent)
 {
+    d_ptr->totalRowCnt = 0;
     d_ptr->isCancelled = false;
-    return mGetData(source, start_date, stop_date, connection, notifyEveryPercent, 0, 1);
+    double elapsed = 0.0;
+    bool success = getData(source, start_date, stop_date, connection, notifyEveryPercent, 0, 1, &elapsed);
+    /* sourceStep is managed by the const std::vector<std::string> input version of getData */
+    d_ptr->resultListenerI->onFinished(d_ptr->totalRowCnt, elapsed);
+    return success;
 }
 
 bool MySqlHdbppSchema::getData(const std::vector<std::string> sources,
                                const char *start_date,
                                const char *stop_date,
                                Connection *connection,
-                               int notifyEveryNumRows)
+                               int notifyEveryPercent)
 {
-    d_ptr->isCancelled = false;
     bool success = true;
-    d_ptr->totalSources = sources.size();
-    for(size_t i = 0; i < d_ptr->totalSources; i++)
+    d_ptr->isCancelled = false;
+    size_t totalSources = sources.size();
+    double elapsed = 0.0, perSourceElapsed;
+    for(size_t i = 0; i < totalSources && !d_ptr->isCancelled; i++)
     {
-        d_ptr->sourceStep = i + 1;
+        d_ptr->totalRowCnt = i + 1;
+        perSourceElapsed = 0.0;
         printf("MySqlHdbppSchema.getData %s %s %s\n", sources.at(i).c_str(), start_date, stop_date);
-        success = mGetData(sources.at(i).c_str(), start_date, stop_date,
-                           connection, notifyEveryNumRows, i, d_ptr->totalSources);
+        success = getData(sources.at(i).c_str(), start_date, stop_date,
+                           connection, notifyEveryPercent, i, totalSources, &perSourceElapsed);
+        elapsed += perSourceElapsed;
         if(!success)
             break;
     }
+    d_ptr->resultListenerI->onFinished(d_ptr->totalRowCnt, elapsed);
 
-    d_ptr->totalSources = 1;
-    d_ptr->sourceStep = 1;
     return success;
-
 }
 
 bool MySqlHdbppSchema::getSourcesList(Connection *connection,
@@ -648,7 +704,7 @@ bool MySqlHdbppSchema::findSource(Connection *connection,
  * @param connection the database connection
  *
  * This method communicates the progress of the data fetch through the ResultListenerInterface
- * methods onProgressUpdate and onFinished.
+ * methods onProgressUpdate, onSourceExtracted and onFinished.
  * When your implementation of those methods are invoked, you may want to obtain the partial
  * (or total) results with get
  *
@@ -667,7 +723,8 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
     int id;
     int rowCnt = 0;
     int totalRows = 0;
-    int notifyEveryNumRows = d_ptr->notifyEveryPercent;
+    int notifyEveryNumRows = -1;
+    d_ptr->isCancelled = false;
 
     XVariant::DataType dataType;
     XVariant::Writable wri;
@@ -678,12 +735,10 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
 
     XVariant *xvar = NULL;
     strcpy(timestamp, ""); /* initialize an empty timestamp */
-
-    gettimeofday(&tv1, NULL);
+    gettimeofday(&tv1, NULL); /* measure time */
 
     /* clear error */
     strcpy(d_ptr->errorMessage, "");
-
 
     success = mGetSourceProperties(source, connection, &dataType, &format, &wri, data_type, &id);
     if(success)
@@ -712,10 +767,8 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
         else
         {
             totalRows = res->getRowCount();
-            if(notifyEveryNumRows <= 0)
-                notifyEveryNumRows /= 10;
-
-            while(res->next() > 0 && success)
+            notifyEveryNumRows = round(res->getRowCount() * d_ptr->notifyEveryPercent / 100);
+            while(!d_ptr->isCancelled && res->next() > 0 && success)
             {
                 row = res->getCurrentRow();
                 if(!row || row->getFieldCount() != 3)
@@ -738,23 +791,32 @@ bool MySqlHdbppSchema::findErrors(const char *source, const TimeInterval *time_i
 
                     rowCnt++;
                     if(notifyEveryNumRows > 0 && (rowCnt % notifyEveryNumRows == 0))
-                        d_ptr->resultListenerI->onProgressUpdate(source, rowCnt, totalRows);
+                        d_ptr->resultListenerI->onProgressUpdate(source, rowCnt / totalRows * 100);
                 }
             }
 
         }
+        if(d_ptr->isCancelled)
+            snprintf(d_ptr->errorMessage, MAXERRORLEN, "MysqlHdbSchema.findErrors: operation cancelled");
         /* compute elapsed time */
         gettimeofday(&tv2, NULL);
         /* transform the elapsed time from a timeval struct to a double whose integer part
          * represents seconds and the decimal microseconds.
          */
         elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec);
-        d_ptr->resultListenerI->onFinished(source, rowCnt, totalRows, elapsed);
+
+        d_ptr->resultListenerI->onSourceExtracted(source, rowCnt, elapsed);
+        d_ptr->resultListenerI->onFinished(rowCnt, elapsed);
     }
-    return success;
+    return success && !d_ptr->isCancelled;
 }
 
-bool MySqlHdbppSchema::fetchInThePast(const char *source,
+/** \brief Looks in the database for data before start_date applying to source source
+ *
+ * @return -1 if an error occurs
+ * @return a positive number representing the number of rows extracted
+ */
+int MySqlHdbppSchema::fetchInThePast(const char *source,
                                       const char *start_date, const char *table_name,
                                       const int att_id,
                                       XVariant::DataType dataType,
@@ -764,6 +826,7 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
                                       double *time_elapsed,
                                       ConfigurableDbSchemaHelper::FillFromThePastMode mode)
 {
+    int ret = -1;
     char query[MAXQUERYLEN];
     char timestamp[MAXTIMESTAMPLEN];
     int datasiz = 1;
@@ -785,10 +848,11 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
         {
             snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: bad query \"%s\": \"%s\"",
                      query, connection->getError());
-            return false;
+            return -1;
         }
         else if(res->getRowCount() == 1)
         {
+            ret = 1;
             while(res->next() > 0)
             {
                 row = res->getCurrentRow();
@@ -808,9 +872,14 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
         {
             pinfo("MySqlHdbppSchema.fetchInThePast: no data before \"%s\"", start_date);
             res->close();
-            return true; /* no error actually */
+            return 0; /* no error actually */
         }
     } /* if format not scalar */
+
+    bool fetchOnlyRead = d_ptr->queryConfiguration && d_ptr->queryConfiguration->getBool("FetchOnlyReadFromRWSource");
+    char column_value_w[10] = "";
+    if(!fetchOnlyRead) /* query will have a value_w field following value_r */
+        strncpy(column_value_w, "value_w,", 10);
 
     pinfo("\e[1;4;35mfetching in the past \"%s\" before %s\e[0m\n", source, start_date);
     if(writable == XVariant::RO && format != XVariant::Scalar)
@@ -829,17 +898,17 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
     }
     else if(writable == XVariant::RW && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r,value_w,quality,error_desc FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r, %s quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time = "
                                      " '%s' ORDER BY idx ASC",
-                 table_name, att_id, start_date);
+                 column_value_w, table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r,value_w,quality,error_desc FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r, %s quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time  <= "
                                      " '%s' ORDER BY data_time DESC LIMIT 1",
-                 table_name, att_id, start_date);
+                 column_value_w, table_name, att_id, start_date);
     }
 
     pinfo("\e[1;32mquery: %s\e[0m\n", query);
@@ -848,18 +917,18 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
     {
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: bad query \"%s\": \"%s\"",
                  query, connection->getError());
-        return false;
+        return -1;
     }
 
     XVariant *xvar = NULL;
-
+    ret = res->getRowCount();
     while(res->next() > 0)
     {
         row = res->getCurrentRow();
         if(!row)
         {
             snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.fetchInThePast: error getting row");
-            return false;
+            return -1;
         }
         else
         {
@@ -897,8 +966,10 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
             else
             {
                 pthread_mutex_lock(&d_ptr->mutex);
-                if(writable == XVariant::RW)
+                if(writable == XVariant::RW && !fetchOnlyRead)
                     xvar->add(row->getField(3), row->getField(4), index);
+                else if(writable == XVariant::RW && fetchOnlyRead)
+                    xvar->add(row->getField(3), NULL, index);
                 else
                     xvar->add(row->getField(3), index);
                 pthread_mutex_unlock(&d_ptr->mutex);
@@ -915,6 +986,7 @@ bool MySqlHdbppSchema::fetchInThePast(const char *source,
          */
         *time_elapsed = tv2.tv_sec + 1e-6 * tv2.tv_usec - (tv1.tv_sec + 1e-6 * tv1.tv_usec);
     }
-    return true;
+
+    return ret;
 }
 

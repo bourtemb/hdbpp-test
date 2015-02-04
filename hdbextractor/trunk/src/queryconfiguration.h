@@ -11,7 +11,13 @@ public:
 
     void loadFromFile(const char *filename);
 
-    void add(const char* key, const char *value);
+    void set(const char* key, const char *value);
+
+    void set(const char *key, const double d);
+
+    void set(const char *key, const int i);
+
+    void set(const char *key,  bool b);
 
     bool hasKey(const char *key) const;
 

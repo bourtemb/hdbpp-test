@@ -17,7 +17,7 @@ public:
 
     virtual ~MySqlHdbppSchema();
 
-    virtual bool fetchInThePast(const char *source,
+    virtual int fetchInThePast(const char *source,
                                 const char *start_date,
                                 const char *table_name,
                                 const int att_id,
@@ -50,6 +50,14 @@ public:
                                     Connection *connection,
                                     int notifyEveryPercent);
 
+    virtual bool getData(const char *source,
+                  const char *start_date,
+                  const char *stop_date,
+                  Connection *connection,
+                  int notifyEveryPercent,
+                  int sourceIndex,
+                  int totalSources, double *elapsed);
+
     virtual bool getSourcesList(Connection *connection, std::list<std::string>& result) const;
 
     virtual bool findSource(Connection *connection, const char *substring, std::list<std::string> &result) const;
@@ -63,19 +71,12 @@ public:
 
     virtual bool hasError() const;
 
-    virtual void setCancelled(bool cancelled);
-
     virtual bool isCancelled() const;
 
-private:
+    virtual void cancel();
 
-    bool mGetData(const char *source,
-                  const char *start_date,
-                  const char *stop_date,
-                  Connection *connection,
-                  int notifyEveryPercent,
-                  int sourceIndex,
-                  int totalSources);
+    void resetCancelledFlag() const;
+private:
 
     bool mGetSourceProperties(const char* source,
                               Connection *connection,

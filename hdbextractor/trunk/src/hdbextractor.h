@@ -331,7 +331,6 @@ int main(int argc, char **argv)
 class Hdbextractor :  ResultListener
 {
 
-
 public:
 
     /** \brief the database type to use. This enum lists the supported combinations of database types
@@ -410,15 +409,21 @@ public:
 
     void setDbType(DbType dbt);
 
-    virtual void onProgressUpdate(const char* name, int step, int total);
+    virtual void onProgressUpdate(const char* name, double percent);
 
-    virtual void onFinished(const char *name, int sourceStep, int totalSources, double elapsed);
+    virtual void onFinished(int totalRows, double elapsed);
+
+    virtual void onSourceExtracted(const char *source, int totalRows, double elapsed);
 
     const char* getErrorMessage() const;
 
     bool hasError() const;
 
     QueryConfiguration *getQueryConfiguration() const;
+
+    void cancelExtraction();
+
+    bool extractionIsCancelled() const;
 
 private:
     HdbExtractorPrivate *d_ptr;

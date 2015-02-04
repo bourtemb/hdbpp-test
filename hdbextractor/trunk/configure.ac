@@ -91,6 +91,8 @@ AX_CHECK_MYSQL([no],[yes],[5.0],[yes])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 
+AC_DEFINE(HDBEXTRACTORLIB_PRINTINFO, 1)
+
 AC_OUTPUT
 
 

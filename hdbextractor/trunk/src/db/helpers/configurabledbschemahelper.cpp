@@ -1,6 +1,6 @@
 #include "configurabledbschemahelper.h"
-#include "queryconfiguration.h"
-#include "hdbxmacros.h"
+#include "../../queryconfiguration.h"
+#include "../../hdbxmacros.h"
 
 #include <time.h>
 #include <string.h>

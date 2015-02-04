@@ -26,7 +26,7 @@ public:
 
     char errorMessage[MAXERRORLEN];
 
-    size_t sourceStep, totalSources;
+    size_t totalRowCnt;
 
     bool isCancelled;
 };

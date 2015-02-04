@@ -3,6 +3,7 @@
 #include "hdbxmacros.h"
 #include <stdlib.h>
 #include <strings.h> /* strcasecmp */
+#include <sstream>
 
 /** \brief This class can be used to configure the behavior of the Hdbextractor queries
  *   and set options on the way you want data to be fetched.
@@ -60,9 +61,56 @@ void QueryConfiguration::loadFromFile(const char *filename)
     configParser->read(filename, mMap);
 }
 
-void QueryConfiguration::add(const char* key, const char *value)
+/** \brief Add a property or set its value.
+ *
+ * This method adds a property with name key if it does not exist or updates
+ * its value if already present
+ *
+ * @param key the property name
+ * @param value the property value
+ *
+ * \par Note The value is passed as a const char. The get, getInt, getDouble...
+ *  methods will then convert the values into the desired type, if possible.
+ */
+void QueryConfiguration::set(const char* key, const char *value)
 {
     mMap[std::string(key)] = std::string(value);
+}
+
+void QueryConfiguration::set(const char *key, const double d)
+{
+    std::ostringstream os;
+    try
+    {
+        os << d;
+        mMap[std::string(key)] = os.str();
+    }
+    catch(std::ios_base::failure)
+    {
+
+    }
+}
+
+void QueryConfiguration::set(const char *key, const int i)
+{
+    std::ostringstream os;
+    try
+    {
+        os << i;
+        mMap[std::string(key)] = os.str();
+    }
+    catch(std::ios_base::failure)
+    {
+
+    }
+}
+
+void QueryConfiguration::set(const char *key, bool b)
+{
+    if(b)
+        mMap[std::string(key)] = std::string("true");
+    else
+        mMap[std::string(key)] = std::string("false");
 }
 
 /** \brief Returns true if the QueryConfiguration contains a value associated to the key,
