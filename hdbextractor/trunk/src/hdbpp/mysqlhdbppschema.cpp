@@ -465,8 +465,8 @@ bool MySqlHdbppSchema::getData(const char *source,
                         if(strcmp(timestamp, row->getField(0)) != 0)
                         {
                             if(timestampCnt > 0 &&
-                                    notifyEveryPercent > 0 &&
-                                    (timestampCnt % notifyEveryPercent == 0))
+                                    notifyEverySteps > 0 &&
+                                    (timestampCnt % notifyEverySteps == 0))
                             {
                                 percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
                                 d_ptr->resultListenerI->onProgressUpdate(source, percent);
@@ -562,7 +562,7 @@ bool MySqlHdbppSchema::getData(const char *source,
         if(d_ptr->isCancelled)
             snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema::mGetData: operation cancelled by the user");
         else if(res && timestampCnt > 0 &&
-                notifyEveryPercent > 0)
+                notifyEverySteps > 0)
         {
             d_ptr->resultListenerI->onProgressUpdate(source, myPercent * (sourceIndex + 1));
         }
