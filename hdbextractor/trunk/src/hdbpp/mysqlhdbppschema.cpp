@@ -420,6 +420,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                 else if(wri == XVariant::RW)
                 {
                     /*  */
+                    XVariant *xvar = NULL;
                     bool fetchOnlyRead = d_ptr->queryConfiguration && d_ptr->queryConfiguration->getBool("FetchOnlyReadFromRWSource");
                     char column_value_w[10] = "";
                     if(!fetchOnlyRead) /* query will have a value_w field following value_r */
@@ -457,8 +458,6 @@ bool MySqlHdbppSchema::getData(const char *source,
                             snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema.getData: error getting row");
                             return false;
                         }
-
-                        XVariant *xvar = NULL;
 
                         /* compare timestamp with previous one: if they differ, the row
                          * refers to the next value in time.
