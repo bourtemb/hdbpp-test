@@ -317,7 +317,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                         return false;
                     }
 
-                    notifyEverySteps = round(res->getRowCount() * d_ptr->notifyEveryPercent / myPercent);
+                    notifyEverySteps = round(res->getRowCount() / d_ptr->notifyEveryPercent * totalSources);
 
                     while(res->next() > 0 && !d_ptr->isCancelled)
                     {
@@ -448,7 +448,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                         return false;
                     }
 
-                    notifyEverySteps = round(res->getRowCount() * d_ptr->notifyEveryPercent / myPercent);
+                    notifyEverySteps = round(res->getRowCount() / d_ptr->notifyEveryPercent * totalSources);
                     while(res->next() > 0 && !d_ptr->isCancelled)
                     {
                         row = res->getCurrentRow();
