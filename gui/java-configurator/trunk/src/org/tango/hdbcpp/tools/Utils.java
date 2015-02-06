@@ -37,6 +37,7 @@ package org.tango.hdbcpp.tools;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.Except;
+import fr.esrf.tangoatk.widget.util.ErrorPane;
 import jive3.MainPanel;
 import org.tango.hdbcpp.configurator.TestEvents;
 
@@ -336,7 +337,8 @@ public class Utils {
     //======================================================================
     //======================================================================
     public static void popupError(Component component, String message) {
-        JOptionPane.showMessageDialog(component, message, "Error", JOptionPane.ERROR_MESSAGE);
+        //JOptionPane.showMessageDialog(component, message, "Error", JOptionPane.ERROR_MESSAGE);
+        ErrorPane.showErrorMessage(component, "Error", new Exception(message));
     }
     //======================================================================
     //======================================================================
