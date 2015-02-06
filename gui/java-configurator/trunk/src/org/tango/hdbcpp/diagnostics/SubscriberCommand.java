@@ -35,55 +35,115 @@ package org.tango.hdbcpp.diagnostics;
 
 
 import fr.esrf.Tango.DevFailed;
+import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import org.tango.hdbcpp.common.Subscriber;
 import org.tango.hdbcpp.common.SubscriberMap;
 import org.tango.hdbcpp.tools.TangoUtils;
+import org.tango.hdbcpp.tools.Utils;
 
 import java.util.Date;
 import java.util.List;
 
 /**
  * This class is able to send a command on all subscribers
- * It could be trigged by external program like a unix cron
+ * It could be triggered by external program like a unix cron
  *  to reset counters for instance
  *
  * @author verdier
  */
 
 public class SubscriberCommand {
+    private  List<Subscriber>   subscribers;
+    //===============================================================
+    //===============================================================
+    private SubscriberCommand() throws DevFailed {
+        String  configuratorDeviceName = TangoUtils.getConfiguratorDeviceName();
+        DeviceProxy configuratorProxy = new DeviceProxy(configuratorDeviceName);
+
+        //  Get subscriber labels if any
+        SubscriberMap subscriberMap = new SubscriberMap(configuratorProxy);
+        subscribers = subscriberMap.getSubscriberList();
+    }
+    //===============================================================
+    //===============================================================
+    private void executeCommand(String commandName) throws Exception {
+        String errorMessage = "";
+        for (Subscriber subscriber : subscribers) {
+            try {
+                subscriber.command_inout(commandName);
+            }
+            catch (DevFailed e) {
+                errorMessage += subscriber.getLabel() + ": "+e.errors[0].desc+"\n";
+            }
+        }
+        if (!errorMessage.isEmpty()) {
+            throw new Exception(errorMessage);
+        }
+    }
+    //===============================================================
+    //===============================================================
+    private void saveEventNumber(String fileName) throws Exception {
+        String errorMessage = "";
+        long totalEvents = 0;
+        long totalAttributes = 0;
+        //  read event number for each subscriber
+        for (Subscriber subscriber : subscribers) {
+            try {
+                DeviceAttribute attribute = subscriber.read_attribute("AttributeEventNumberList");
+                if (!attribute.hasFailed()) {
+                    int[] nbEvents = attribute.extractLongArray();
+                    for (int nb : nbEvents) {
+                        totalEvents += nb;
+                        totalAttributes++;
+                    }
+                }
+             }
+            catch (DevFailed e) {
+                errorMessage += subscriber.getLabel() + ": "+e.errors[0].desc+"\n";
+            }
+        }
+        System.out.println("Total events:   " + totalEvents + "/" + totalAttributes);
+        //  Rad file and append
+        String code;
+        try {
+            code = Utils.readFile(fileName);
+        } catch (DevFailed e) {
+            code = "Date\tEvents Received\tNb Attributes\n";
+        }
+        code += new Date().toString() + "\t" + totalEvents + "\t" + totalAttributes + "\n";
+        Utils.writeFile(fileName, code);
+
+        if (!errorMessage.isEmpty()) {
+            throw new Exception(errorMessage);
+        }
+    }
     //===============================================================
     //===============================================================
     public static void main(String[] args) {
         if (args.length>0) {
-            String commandName = args[0];
             try {
-                String  configuratorDeviceName = TangoUtils.getConfiguratorDeviceName();
-                DeviceProxy configuratorProxy = new DeviceProxy(configuratorDeviceName);
-
-                //  Get subscriber labels if any
-                SubscriberMap subscriberMap = new SubscriberMap(configuratorProxy);
-                List<Subscriber> subscribers = subscriberMap.getSubscriberList();
-                String errorMessage = "";
-                for (Subscriber subscriber : subscribers) {
-                    try {
-                        subscriber.command_inout(commandName);
+                SubscriberCommand   subscriberCommand = new SubscriberCommand();
+                String commandName = args[0];
+                if (commandName.equals("-save")) {
+                    if (args.length>1) {
+                        String fileName = args[1];
+                        subscriberCommand.saveEventNumber(fileName);
                     }
-                    catch (DevFailed e) {
-                        errorMessage += subscriber.getLabel() + ": "+e.errors[0].desc+"\n";
-                    }
+                    else
+                        System.err.println("File name expected");
                 }
-                if (!errorMessage.isEmpty()) {
-                    throw new Exception(errorMessage);
-                }
-            }
-            catch (DevFailed e) {
-                System.err.println(new Date()+":");
-                Except.print_exception(e);
+                else
+                    subscriberCommand.executeCommand(commandName);
             }
             catch (Exception e) {
-                System.err.println(new Date()+":\n  "+e);
+                if (e instanceof DevFailed) {
+                    System.err.println(new Date()+":");
+                    Except.print_exception(e);
+                }
+                else
+                    System.err.println(new Date()+":\n  "+e);
             }
         }
         else

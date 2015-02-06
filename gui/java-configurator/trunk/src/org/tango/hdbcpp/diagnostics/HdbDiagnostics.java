@@ -69,7 +69,8 @@ public class HdbDiagnostics extends JFrame {
     private ArrayList<String> labels;
     private TableScalarViewer tableViewer;
     private JFrame parent;
-    private int statisticsTimeWindow;
+    private int  statisticsTimeWindow;
+    private long statisticsResetTime;
 
 
     private static final String[] ATTRIBUTES = {
@@ -136,6 +137,8 @@ public class HdbDiagnostics extends JFrame {
             Subscriber subscriber = subscriberMap.getSubscriber(labels.get(0));
             statisticsTimeWindow = subscriber.getStatisticsTimeWindow();
             columnNames[4] = "ev/"+Utils.strPeriod(statisticsTimeWindow);
+
+            statisticsResetTime = subscriber.getStatisticsResetTime();
         }
 
         //  A list of lines (a line per device)
@@ -210,6 +213,7 @@ public class HdbDiagnostics extends JFrame {
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem statisticsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem distributionItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem attributeErrorsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem viewerAtkErrorItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem viewerAtkDiagnosticsItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
@@ -268,6 +272,15 @@ public class HdbDiagnostics extends JFrame {
             }
         });
         viewMenu.add(distributionItem);
+
+        attributeErrorsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, 0));
+        attributeErrorsItem.setText("Attribute Errors");
+        attributeErrorsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                attributeErrorsItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(attributeErrorsItem);
 
         viewerAtkErrorItem.setText("ATK Viewer Errors");
         viewerAtkErrorItem.addActionListener(new java.awt.event.ActionListener() {
@@ -345,6 +358,19 @@ public class HdbDiagnostics extends JFrame {
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
+    private void attributeErrorsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attributeErrorsItemActionPerformed
+        // TODO add your handling code here:
+        try {
+            new FaultyAttributesDialog(this, subscriberMap).setVisible(true);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, e.getMessage(), e);
+        }
+    }//GEN-LAST:event_attributeErrorsItemActionPerformed
+
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
     private void viewerAtkErrorItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewerAtkErrorItemActionPerformed
         tableViewer.showErrorHistory();
     }//GEN-LAST:event_viewerAtkErrorItemActionPerformed
@@ -380,7 +406,7 @@ public class HdbDiagnostics extends JFrame {
         }
     }//GEN-LAST:event_statisticsItemActionPerformed
 
-	//=======================================================
+ 	//=======================================================
 	//=======================================================
     private void showAttributes(Subscriber subscriber, int type) {
         try {
@@ -404,7 +430,8 @@ public class HdbDiagnostics extends JFrame {
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Pending");
                     break;
                 case RECORD_FREQUENCY:
-                    new StatisticsDialog(this, subscriber,statisticsTimeWindow).setVisible(true);
+                    new StatisticsDialog(this, subscriber,
+                            statisticsTimeWindow, statisticsResetTime).setVisible(true);
                     return;
 
                 default:
