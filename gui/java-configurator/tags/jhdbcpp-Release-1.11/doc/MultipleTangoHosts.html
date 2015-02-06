@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+    <Title> HDB Configurator User s Guide </Title>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#7F00FF" ALINK="#FF0000">
+
+
+<!------------------ MultipleTangoHosts ----------------------->
+<Center><h2><u>HDB++ on Multiple TANGO_HOST</u></h2></Center>
+<br><br>
+
+<ul>
+	<li>
+        Start the Configurator tool with the same TANGO_HOST environment variable
+        your HDB++ servers.<Br>
+        Export an environment variable <b>"HdbManager"</b> with the configurator device name
+        <ul>
+            <b>e.g. : HdbManager=tango/hdb/manager</b>
+        </ul>
+        By default, your JTree will represent this control system.<br>
+        You will be available to change this TANGO_HOST by a right click on root.<br>
+        <br><br>
+
+         <img src="img/ChangeTangoHost.gif">
+    </li>
+    <br><br>
+    <br><br>
+
+    <li>
+        Another way to work on 2 different control systems could be done
+        by exporting another environment variable <b>"EVENT_TANGO_HOST"</b>
+        <ul>
+            <b>e.g. : EVENT_TANGO_HOST=id32:20000</b>
+        </ul>
+        The control system tree will represent this second control system at startup.
+    </li>
+</ul>
+</BODY>
+</HTML>

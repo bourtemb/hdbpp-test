@@ -1,0 +1,57 @@
+#+======================================================================
+# $Source:  $
+#
+# Project:      Tango Application
+#
+# Description:  Hdb++ Configurator and Diagnostics
+#
+# $Author: verdier $
+#
+# $Revision: 1.2 $
+#
+# copyright :   European Synchrotron Radiation Facility
+#               BP 220, Grenoble 38043
+#               FRANCE
+#
+#-======================================================================
+
+
+
+jhdbcpp-1.10 - 20/01/15:
+	Table added to distribution dialog
+
+jhdbcpp-1.9 - 16/01/15:
+	Events number added to distribution chart.
+
+jhdbcpp-1.8 - 19/12/14:
+	Improve attribute error window.
+	Add a selector to change TANGO_HOST
+	Event tester call added.
+
+jhdbcpp-1.7 - 06/11/14:
+	FQDN event subscriber name to be added to manager.
+	Events since reset added.
+	Save statistics added.
+
+jhdbcpp-1.6 - 30/10/14:
+	Display event frequency added.
+
+jhdbcpp-1.5 - 13/10/14:
+	Display error message on failed attribute list.
+	Display HDB name if property set.
+
+jhdbcpp-1.4 - 24/09/14:
+	Diag viewers are now in a JTable object.
+	A double click on table cell displays attribute list.
+
+jhdbcpp-1.3 - 22/09/14:
+	Fix a bug in archiver device creation
+
+jhdbcpp-1.2 - 05/09/14:
+	Add a graph chart to display distribution.
+
+jhdbcpp-1.1 - 28/08/14:
+	Add/Remove subscriber added.
+
+jhdbcpp-1.0 - 06/08/14:
+	Initial Revision
