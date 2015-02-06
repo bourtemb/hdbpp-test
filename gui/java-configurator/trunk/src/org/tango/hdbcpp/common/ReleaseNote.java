@@ -17,7 +17,9 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Tue Jan 20 13:54:08 CET 2015)</Center><Br>\n" + 
+		"	(Generated Fri Feb 06 12:54:39 CET 2015)</Center><Br>\n" + 
+		"<li><b>jhdbcpp-1.11 - 06/02/15:</b><Br>\n" + 
+		"&nbsp; &nbsp; Add a table to view all attribues on error.<Br>\n" + 
 		"<li><b>jhdbcpp-1.10 - 20/01/15:</b><Br>\n" + 
 		"&nbsp; &nbsp; Table added to distribution dialog<Br>\n" + 
 		"<li><b>jhdbcpp-1.9 - 16/01/15:</b><Br>\n" + 
