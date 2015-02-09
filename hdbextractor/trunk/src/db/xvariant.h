@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <vector>
 #include <string>
-#include "../sharedpointer.h"
+#include <sharedpointer.h>
 
 #define TIMESTAMPLEN    32
 #define SRCLEN          256
