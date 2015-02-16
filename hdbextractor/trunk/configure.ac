@@ -22,7 +22,7 @@ AC_SUBST([HDBX_VERSION], [0:91:0])
 ##
 ## Actually, we use revision in src/Makefile.am
 ##
-AC_SUBST([HDBX_REVISION], [0.91.0])
+AC_SUBST([HDBX_REVISION], [0.91.1])
 
 # AC_CONFIG_HEADERS([config.h])
 

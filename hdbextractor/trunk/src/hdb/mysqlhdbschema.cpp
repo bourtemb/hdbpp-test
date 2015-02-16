@@ -151,7 +151,7 @@ bool MySqlHdbSchema::getData(const char *source,
 
     snprintf(query, MAXQUERYLEN, "SELECT ID,data_type,data_format,writable from adt WHERE full_name='%s'", source);
 
-    pinfo("\e[1;4;36mHDB: query %s\e[0m\n", query);
+    pinfo("HDB: query %s", query);
 
     Result * res = connection->query(query);
     if(!res)
@@ -393,7 +393,7 @@ bool MySqlHdbSchema::getData(const char *source,
 
                 if(!d_ptr->isCancelled && res && res->getRowCount() == 0)
                 {
-                    pinfo("\e[1;36mno rows. Getting from the past\e[0m\n");
+                    pinfo("no rows. Getting from the past");
                     if(configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
                                                          start_date,
                                                          stop_date,
@@ -493,7 +493,7 @@ bool MySqlHdbSchema::getData(const std::vector<std::string> sources,
     double perSourceElapsed;
     d_ptr->totalRowCnt = 0;
     d_ptr->isCancelled = false;
-    int totalSources = sources.size();
+    size_t totalSources = sources.size();
     for(size_t i = 0; i < totalSources; i++)
     {
         perSourceElapsed = 0.0;
@@ -590,7 +590,7 @@ int MySqlHdbSchema::fetchInThePast(const char *source,
 
     gettimeofday(&tv1, NULL);
 
-    pinfo("\e[1;4;36mHDB: fetching in the past \"%s\" before %s\e[0m\n", source, start_date);
+    pinfo("HDB: fetching in the past \"%s\" before %s", source, start_date);
     if(writable != XVariant::RW && !fetchOnlyRead)
     {
         snprintf(query, MAXQUERYLEN, "SELECT time,value FROM "
@@ -613,7 +613,7 @@ int MySqlHdbSchema::fetchInThePast(const char *source,
                  table_name,  start_date);
     }
 
-    pinfo("\e[1;36mHDB: query: %s\e[0m\n", query);
+    pinfo("HDB: query: %s", query);
     res = connection->query(query);
     if(!res)
     {

@@ -187,8 +187,12 @@ std::string QueryConfiguration::get(const char *key) const
  */
 bool QueryConfiguration::getBool(const char *key) const
 {
-    std::string val = mMap.at(key);
-    return (val.size() > 0 && (strcasecmp(val.c_str(), "true") == 0 || atoi(val.c_str()) != 0) );
+    if(mMap.count(key) > 0)
+    {
+        std::string val = mMap.at(key);
+        return (val.size() > 0 && (strcasecmp(val.c_str(), "true") == 0 || atoi(val.c_str()) != 0) );
+    }
+    return false;
 }
 
 /** \brief Get the value associated to the key, if present, and transform it in a double.

@@ -233,7 +233,8 @@ bool MySqlHdbppSchema::getData(const char *source,
                                 double *elapsed)
 {
     bool success;
-    bool from_the_past_success = true;
+    bool notifyOnNewTimestamp = false;
+    int rows_from_the_past = 0;
     char query[MAXQUERYLEN];
     char errmsg[256];
     char timestamp[32];
@@ -329,17 +330,23 @@ bool MySqlHdbppSchema::getData(const char *source,
                             return false;
                         }
 
+                        /* decide if it's time to notify when the timestamp changes. We cannot notify
+                         * until all the elements of the vector have been added to the current xvar
+                         */
+                        notifyOnNewTimestamp = notifyOnNewTimestamp || (rowCnt > 0 && notifyEverySteps > 0 &&
+                                                    (rowCnt % notifyEverySteps == 0));
                         /* compare timestamp with previous one: if they differ, the row
                          * refers to the next value in time.
                          */
                         if(strcmp(timestamp, row->getField(0)) != 0)
                         {
-                            if(format != XVariant::Scalar && timestampCnt > 0 &&
-                                    notifyEverySteps > 0 &&
-                                    (timestampCnt % notifyEverySteps == 0))
+
+                            if(notifyOnNewTimestamp)
                             {
+                                printf("\e[1;32monProgressUpdate percent %f src %s\e[0m\n", percent, source);
                                 percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
                                 d_ptr->resultListenerI->onProgressUpdate(source, percent);
+                                notifyOnNewTimestamp = false;
                             }
 
                             /* get timestamp */
@@ -352,7 +359,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                 if(fillMode != ConfigurableDbSchemaHelper::None)
                                 {
                                     pinfo("RO: calling fetchInThePast\n");
-                                    from_the_past_success = fetchInThePast(source, start_date, table_name, id,
+                                    rows_from_the_past = fetchInThePast(source, start_date, table_name, id,
                                                                            dataType, format, wri, connection,
                                                                            &from_the_past_elapsed, fillMode);
                                 }
@@ -387,13 +394,14 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                             pthread_mutex_unlock(&d_ptr->mutex);
 
-                            if(format == XVariant::Scalar && timestampCnt > 0 &&
-                                    notifyEverySteps > 0 &&
-                                    (timestampCnt % notifyEverySteps == 0))
-                            {
-                                percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
-                                d_ptr->resultListenerI->onProgressUpdate(source, percent);
-                            }
+//                            if(/*format == XVariant::Scalar && */rowCnt > 0 &&
+//                                    notifyEverySteps > 0 &&
+//                                    (rowCnt % notifyEverySteps == 0))
+//                            {
+//                                percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
+//                                printf("\e[1;32monProgressUpdate (2) percent %f src %s\e[0m\n", percent, source);
+//                                d_ptr->resultListenerI->onProgressUpdate(source, percent);
+//                            }
                         }
 
                         if(format == XVariant::Vector)
@@ -408,7 +416,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                         rowCnt++;
                     } /* end while(res->next) res is closed after else wri == XVariant::RW */
 
-                    success = from_the_past_success && !d_ptr->isCancelled;
+                    success = rows_from_the_past >= 0 && !d_ptr->isCancelled;
 
                 }  /* end else if(wri == XVariant::RO) */
 
@@ -459,17 +467,20 @@ bool MySqlHdbppSchema::getData(const char *source,
                             return false;
                         }
 
+                        /* see the comment on RO condition above */
+                        notifyOnNewTimestamp = notifyOnNewTimestamp || (rowCnt > 0 && notifyEverySteps > 0 &&
+                                                    (rowCnt % notifyEverySteps == 0));
                         /* compare timestamp with previous one: if they differ, the row
                          * refers to the next value in time.
                          */
                         if(strcmp(timestamp, row->getField(0)) != 0)
                         {
-                            if(timestampCnt > 0 &&
-                                    notifyEverySteps > 0 &&
-                                    (timestampCnt % notifyEverySteps == 0))
+
+                            if(notifyOnNewTimestamp)
                             {
                                 percent = round((double) rowCnt / res->getRowCount() * myPercent  + (myPercent * sourceIndex));
                                 d_ptr->resultListenerI->onProgressUpdate(source, percent);
+                                notifyOnNewTimestamp = false;
                             }
                             /* get timestamp */
                             strncpy(timestamp, row->getField(0), 32);
@@ -487,10 +498,12 @@ bool MySqlHdbppSchema::getData(const char *source,
                                      * fillMode
                                      */
                                     pinfo("RW: calling fetchInThePast\n");
-                                    from_the_past_success = fetchInThePast(source, start_date, table_name, id,
+                                    rows_from_the_past = fetchInThePast(source, start_date, table_name, id,
                                                                            dataType, format, wri, connection,
                                                                            &from_the_past_elapsed,
                                                                            fillMode);
+                                    if(rows_from_the_past >= 0)
+                                        rowCnt += rows_from_the_past;
                                 }
                             }
 
@@ -534,7 +547,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                     } /* end while(res->next() > 0) */
 
                     /* res->close() is called after RW else */
-                    success = from_the_past_success && !d_ptr->isCancelled;
+                    success = rows_from_the_past >= 0 && !d_ptr->isCancelled;
                 } /* else if(wri == XVariant::RW) */
 
                 if(res->getRowCount() == 0 && !d_ptr->isCancelled)
@@ -544,11 +557,14 @@ bool MySqlHdbppSchema::getData(const char *source,
                     if(fillMode != ConfigurableDbSchemaHelper::None)
                     {
                         pinfo("RO: calling fetchInThePast\n");
-                        from_the_past_success = fetchInThePast(source, start_date, table_name, id,
+                        rows_from_the_past = fetchInThePast(source, start_date, table_name, id,
                                                                dataType, format, wri, connection,
                                                                &from_the_past_elapsed, fillMode);
-                        if(from_the_past_success)
+                        if(rows_from_the_past >= 0)
+                        {
                             timestampCnt++;
+                            rowCnt += rows_from_the_past;
+                        }
                     }
                 }
 
@@ -561,8 +577,7 @@ bool MySqlHdbppSchema::getData(const char *source,
 
         if(d_ptr->isCancelled)
             snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema::mGetData: operation cancelled by the user");
-        else if(res && timestampCnt > 0 &&
-                notifyEverySteps > 0)
+        else if(res && rowCnt > 0 && notifyEverySteps > 0)
         {
             d_ptr->resultListenerI->onProgressUpdate(source, myPercent * (sourceIndex + 1));
         }

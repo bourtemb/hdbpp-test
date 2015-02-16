@@ -2,11 +2,12 @@
 #define HDBEXTRACTOR_H
 
 #include <xvariantlist.h>
+#include <resultlistenerinterface.h>
+
 #include <vector>
 #include <string>
 #include <list>
 
-#include "resultlistenerinterface.h"
 
 class HdbExtractorPrivate;
 class HdbExtractorListener;
@@ -16,15 +17,16 @@ class TimeInterval;
 /** \mainpage The Hdbextractor++ historical database data extractor
  *
  * <h3>Introduction</h3>
- *  The Hdbextractor++ framework allows fetching data from an historical database (hdb, hdb++, influxDB)
- *  in a simple, fast object oriented fashion. The access to the data retrieved from one of the supported
+ *  The Hdbextractor++ framework allows fetching data from an historical database (hdb, hdb++)
+ *  in a simple object oriented fashion. The access to the data retrieved from one of the supported
  *  databases is thread safe.
  *
  * \par Qt module
- *  Please read the QHdbExtractor documentation manual to learn how to use the Qt module.
- *  The Qt module sources are located under the qt/hdbextractor-qt subfolder.
- *  A ready to use Qt graphical user interface is available under the qt/QHdbExtractor subfolder.
- *
+ * Please read the hdbextractor-qt documentation manual study the Qt module.
+ * The Qt module sources are located under  a separate project named hdbextractor-qt.
+ * A ready to use Qt graphical user interface is available under the hdbextractor-qt/QHdbExtractor subfolder.
+ * The QHdbExtractor application deals with displaying scalar and vector data in 2D and 3D plots
+ * respectively.
  *
  * \par Scalar data visualization.
  * \image html qhdbextractor.png
@@ -33,9 +35,9 @@ class TimeInterval;
  * \par Error visualization.
  * Red vertical lines represent a NULL value into the database at the corresponding date time.
  * A click close to the invalid data point opens a right pane where error details are available.
- * Please read the QHdbExtractor documentation manual to learn how to use the Qt module.
- * These screenshots are taken from the Qt graphical user interface that you can find under the
- * qt/QHdbExtractor subfolder.
+ * Please read the hdbextractor-qt documentation manual to learn about the Qt module.
+ * These screenshots are taken from the Qt graphical user interface located inside the
+ * hdbextractor-qt/QHdbExtractor subfolder.
  *
  * \image html qhdbX-errors.png
  *
