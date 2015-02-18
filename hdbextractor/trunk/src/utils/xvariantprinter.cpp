@@ -37,7 +37,7 @@ void XVariantPrinter::printValueList(const std::vector<XVariant > &valuelist, in
         XVariant::DataFormat format = valuelist[i].getFormat();
         if(format == XVariant::Scalar)
         {
-            printf("\"%s\": %s -> \e[1;32m%.2f\e[0m:\n, ", valuelist[i].getSource(),  valuelist[i].getTimestamp(), valuelist[i].toDouble());
+            printf("%d) \"%s\": %s -> \e[1;32m%.2f\e[0m\n", i+1, valuelist[i].getSource(),  valuelist[i].getTimestamp(), valuelist[i].toDouble());
             if(i > 0 && i % 20 == 0)
                 printf("\n");
         }
@@ -45,7 +45,7 @@ void XVariantPrinter::printValueList(const std::vector<XVariant > &valuelist, in
         {
             std::vector<double> values = valuelist[i].toDoubleVector();
             if(valuelist.size() > 0)
-                printf("\e[1;33m[ \"%s\": %s\e[0m:\n", valuelist[i].getSource(), valuelist[i].getTimestamp());
+                printf("%d) \e[1;33m[ \"%s\": %s\e[0m\n", i+1, valuelist[i].getSource(), valuelist[i].getTimestamp());
             for(int j = 0; j < (int) values.size() || (maxVectorElements > 0 && j < maxVectorElements); j++)
             {
                 if((maxVectorElements > 0 && j >= maxVectorElements))

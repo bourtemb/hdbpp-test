@@ -713,22 +713,30 @@ void XVariant::parse(const char *s)
         }
         else if(d->dataInfo->type == Int)
         {
-
+            int * i = new int[1];
+            *i = strtol(s, NULL, 10);
+            d->val = i;
             d->mSize = 1;
         }
         else if(d->dataInfo->type == UInt)
         {
-
+            unsigned int *ui = new unsigned int[1];
+            *ui = strtoul(s, NULL, 10);
+            d->val = ui;
             d->mSize = 1;
         }
         else if(d->dataInfo->type == Boolean)
         {
-
+            bool *b = new bool[1];
+            *b = (strcasecmp(s, "true") == 0 || strtol(s, NULL, 10) != 0);
+            d->val = b;
             d->mSize = 1;
         }
         else if(d->dataInfo->type == String)
         {
-
+            char *c = new char[strlen(s) + 1];
+            strncpy(c, s, strlen(s) + 1);
+            d->val = c;
             d->mSize = 1;
         }
         else

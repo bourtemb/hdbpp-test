@@ -11,10 +11,10 @@ QMAKE_CXXFLAGS += -std=gnu++98
 SOURCES += main.cpp \
     myhdbextractorimpl.cpp
 
-INCLUDEPATH += ../src ../db/src
+INCLUDEPATH += ../src ../src/db
 
 
-LIBS += -L.. -lhdbextractor++
+LIBS += -L../src/.libs -lhdbextractor++
 
 HEADERS += \
     myhdbextractorimpl.h

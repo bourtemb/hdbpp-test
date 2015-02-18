@@ -139,7 +139,7 @@ bool MySqlHdbSchema::getData(const char *source,
     memset(&tv1, 0, sizeof(struct timeval));
     memset(&tv2, 0, sizeof(struct timeval));
 
-    float myPercent = 100.0 / totalSources;
+    double myPercent = 100.0 / totalSources;
     int notifyEverySteps = -1;
 
     gettimeofday(&tv1, NULL);
@@ -193,10 +193,15 @@ bool MySqlHdbSchema::getData(const char *source,
                 dataType = XVariant::Double;
             else if(strcmp(data_type, "0") == 0)
                 dataType = XVariant::Boolean;
-            else if(strcmp(data_type, "1") == 0) /* short */
+            else if(strcmp(data_type, "1") == 0)
+                dataType = XVariant::Boolean;
+            else if(strcmp(data_type, "2") == 0
+                    || strcmp(data_type, "3") == 0 ) /* short or long */
                 dataType = XVariant::Int;
-            else if(strcmp(data_type, "2") == 0) /* long */
-                dataType = XVariant::Int;
+            else if(strcmp(data_type, "6") == 0) /* ulong */
+                dataType = XVariant::UInt;
+            else if(strcmp(data_type, "8") == 0) /* string */
+                dataType = XVariant::String;
             else
                 dataType = XVariant::TypeInvalid;
 

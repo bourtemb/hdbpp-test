@@ -102,8 +102,10 @@ void DataSiever::fill()
     tstamps_size = timestamp_set.size();
     total_steps = tstamps_size * d_ptr->dataMap.size();
     steps_to_estimate = tstamps_size * 0.05;
+    if(steps_to_estimate == 0)
+        steps_to_estimate = tstamps_size;
 
-    printf("\e[1;32m *\e[0m final data size will be %ld for each source...\n", tstamps_size);
+    printf("\e[1;32m*\e[0m final data size will be %ld for each source...\n", tstamps_size);
 
     /* for each data row */
     for(std::map<std::string, std::list<XVariant> >::iterator it = d_ptr->dataMap.begin();

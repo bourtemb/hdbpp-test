@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../utils/datasiever.h"
+#include "../src/utils/datasiever.h"
 #include "myhdbextractorimpl.h"
 #include "queryconfiguration.h"
 #include "../src/hdbextractor.h"
 #include "../src/configurationparser.h"
-#include "../utils/xvariantprinter.h"
+#include "../src/utils/xvariantprinter.h"
 #include <map>
 
 using namespace std;
@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 {
     if(argc < 5)
     {
-        printf("\e[1;31mUsage\e[0m \"%s configfile.dat domain/family/member/attribute 2014-07-20 10:00:00 2014-07-20 12:00:00\n",
+        printf("\e[1;31mUsage\e[0m \"%s configfile.dat domain/family/member/attribute \"2014-07-20 10:00:00\" \"2014-07-20 12:00:00\"\n",
                argv[0]);
         exit(EXIT_FAILURE);
     }
