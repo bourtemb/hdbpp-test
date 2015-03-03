@@ -17,6 +17,13 @@
 
 
 
+jhdbcpp-1.12 - 03/03/15:
+	Info on attribute failure frequency and on E.S. manager added.
+	Trend on HDB storage frequency added.
+
+jhdbcpp-1.11 - 06/02/15:
+	Add a table to view all attribues on error.
+
 jhdbcpp-1.10 - 20/01/15:
 	Table added to distribution dialog
 
