@@ -17,7 +17,10 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Fri Feb 06 12:54:39 CET 2015)</Center><Br>\n" + 
+		"	(Generated Tue Mar 03 13:32:40 CET 2015)</Center><Br>\n" + 
+		"<li><b>jhdbcpp-1.12 - 03/03/15:</b><Br>\n" + 
+		"&nbsp; &nbsp; Info on attribute failure frequency and on E.S. manager added.<Br>\n" + 
+		"&nbsp; &nbsp; Trend on HDB storage frequency added.<Br>\n" + 
 		"<li><b>jhdbcpp-1.11 - 06/02/15:</b><Br>\n" + 
 		"&nbsp; &nbsp; Add a table to view all attribues on error.<Br>\n" + 
 		"<li><b>jhdbcpp-1.10 - 20/01/15:</b><Br>\n" + 
