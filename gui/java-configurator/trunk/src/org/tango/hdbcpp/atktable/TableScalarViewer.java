@@ -56,16 +56,16 @@ public class TableScalarViewer extends JPanel {
     /**
      * Creates new form TableScalarViewer
      *
-     * @param    rowList        Row titles
+     * @param    rowNameList        Row titles
      * @param    columnNames    Column titles
      * @param    attributeList  Attribute names (by line)
-     * @param    columnWidths    column widths
+     * @param    columnWidths   column widths
      */
     //===============================================================
-    public TableScalarViewer(ArrayList<String> rowList, String[] columnNames,
+    public TableScalarViewer(ArrayList<String> rowNameList, String[] columnNames,
                              ArrayList<String[]> attributeList, int[] columnWidths) {
-        String[] rowNames = new String[rowList.size()];
-        for (int i=0 ; i<rowList.size() ; i++) rowNames[i] = rowList.get(i);
+        String[] rowNames = new String[rowNameList.size()];
+        for (int i=0 ; i<rowNameList.size() ; i++) rowNames[i] = rowNameList.get(i);
         String[][] attributeNames = new String[attributeList.size()][];
         for (int i=0 ; i<attributeList.size() ; i++) {
             attributeNames[i] = new String[attributeList.get(i).length];
@@ -75,46 +75,6 @@ public class TableScalarViewer extends JPanel {
         }
         initComponents(rowNames, columnNames, attributeNames, columnWidths);
     }
-    //===============================================================
-    /**
-     * Creates new form TableScalarViewer
-     *
-     * @param    rowList        Row titles
-     * @param    columnList     Column titles
-     * @param    attributeList  Attribute names (by line)
-     * @param    columnWidths    column widths
-     */
-    //===============================================================
-    @SuppressWarnings("UnusedDeclaration")
-    public TableScalarViewer(ArrayList<String> rowList, ArrayList<String> columnList,
-                             ArrayList<String[]> attributeList, int[] columnWidths) {
-        String[] rowNames = new String[rowList.size()];
-        for (int i=0 ; i<rowList.size() ; i++) rowNames[i] = rowList.get(i);
-        String[] columnNames = new String[columnList.size()];
-        for (int i=0 ; i<columnList.size() ; i++) columnNames[i] = columnList.get(i);
-        String[][] attributeNames = new String[attributeList.size()][];
-        for (int i=0 ; i<attributeList.size() ; i++) {
-            attributeNames[i] = new String[attributeList.get(i).length];
-            for (int j=0 ; j<attributeList.get(i).length ; j++)
-                attributeNames[i][j] = attributeList.get(i)[j];
-        }
-        initComponents(rowNames, columnNames, attributeNames, columnWidths);
-    }
-   //===============================================================
-    /**
-     * Creates new form TableScalarViewer
-     *
-     * @param    rowNames    Row titles
-     * @param    columnNames    Column titles
-     * @param    attributeNames    Attribute names
-     * @param    columnWidths    column widths
-     */
-    //===============================================================
-    @SuppressWarnings("UnusedDeclaration")
-    public TableScalarViewer(String[] rowNames, String[] columnNames, String[][] attributeNames, int[] columnWidths) {
-        initComponents(rowNames, columnNames, attributeNames, columnWidths);
-    }
-
     //===============================================================
     //===============================================================
     private void initComponents(String[] rowNames, String[] columnNames,
@@ -181,7 +141,6 @@ public class TableScalarViewer extends JPanel {
     public void setPanelTitleFont(Font font) {
         titleLabel.setFont(font);
     }
-
     //=======================================================
     //=======================================================
     public void setPanelTitleVisible(boolean b) {

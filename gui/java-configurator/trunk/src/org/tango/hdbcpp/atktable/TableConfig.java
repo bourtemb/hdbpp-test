@@ -36,11 +36,6 @@
 
 package org.tango.hdbcpp.atktable;
 
-import fr.esrf.Tango.AttrDataFormat;
-import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoApi.AttributeInfo;
-import fr.esrf.TangoApi.DeviceProxy;
-
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.util.ArrayList;
@@ -56,7 +51,7 @@ import java.util.Enumeration;
  * @author Pascal Verdier
  */
 //===============================================================
-class TableConfig  {
+class TableConfig {
     String title = "ATK Table Panel";
     String[] columnNames = new String[0];
     String[] rowNames = new String[0];
@@ -83,27 +78,6 @@ class TableConfig  {
         for (int row=0 ; row<rowNames.length ; row++)
             for (int col=0 ; col<columnNames.length ; col++)
                 add(attributeNames[row][col], row, col);
-    }
-
-    //==========================================================
-    //==========================================================
-    public TableConfig(String name) throws DevFailed {
-        DeviceProxy dev = new DeviceProxy(name);
-        columnNames = new String[]{ name };
-
-        AttributeInfo[] info = dev.get_attribute_info();
-
-        ArrayList<AttributeInfo> attributeInfoList = new ArrayList<AttributeInfo>();
-        for (AttributeInfo anInfo : info)
-            if (anInfo.data_format==AttrDataFormat.SCALAR)
-                attributeInfoList.add(anInfo);
-
-        rowNames = new String[attributeInfoList.size()];
-        for (int i = 0 ; i<attributeInfoList.size() ; i++) {
-            AttributeInfo attributeInfo = attributeInfoList.get(i);
-            rowNames[i] = attributeInfo.label;
-            add(name + "/" + attributeInfo.name, i, 0);
-        }
     }
 
     //==========================================================
@@ -157,17 +131,6 @@ class TableConfig  {
 
     //===========================================================
     //===========================================================
-    public Attribute attributeAt(int row, int col) {
-        for (int i = 0 ; i<attributes.size() ; i++) {
-            Attribute att = attributeAt(i);
-            if (att.row==row && att.col==col)
-                return att;
-        }
-        return null;
-    }
-
-    //===========================================================
-    //===========================================================
     public Attribute attributeAt(int idx) {
         return attributes.get(idx);
     }
@@ -183,15 +146,6 @@ class TableConfig  {
                     return att;
         }
         return null;
-    }
-
-    //==========================================================
-    //==========================================================
-    void setAttributeNameAt(String name, int row, int col) {
-        Attribute att = attributeAt(row, col);
-        if (att!=null)
-            attributes.remove(att);
-        add(name, row, col);
     }
 
     //===========================================================
@@ -221,15 +175,6 @@ class TableConfig  {
                 return true;
         }
         return false;
-    }
-
-    //===========================================================
-    //===========================================================
-    public boolean allConnected() {
-        for (int i = 0 ; i<attributes.size() ; i++)
-            if (!attributeAt(i).connected)
-                return false;
-        return true;
     }
 
     //==========================================================
