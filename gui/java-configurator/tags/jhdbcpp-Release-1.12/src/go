@@ -1,0 +1,30 @@
+TANGO_HOME=/segfs/tango/release/java
+
+Appli=../bin
+
+CLASSPATH=$TANGO_HOME/lib/TangORB.jar:$TANGO_HOME/lib/ATKWidget.jar:$TANGO_HOME/lib/ATKCore.jar
+CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Jive.jar:$Appli
+CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Astor.jar
+
+echo "CLASSPATH=$CLASSPATH"
+
+
+TANGO_HOST=orion:10000
+HdbManager=hdb++/cm/1
+HdbManager=tango/hdb-cassandra/manager
+HdbManager=tango/hdb/manager
+export HdbManager
+
+export ExtractionClass=org.tango.jhdbextract.gui.HdbBrowser
+
+if [ "$#" -lt 1 ]
+then
+	java  org.tango.hdbcpp.configurator.HdbConfigurator
+else
+	if [ $1 = "-diag" ]
+	then
+		java  org.tango.hdbcpp.diagnostics.HdbDiagnostics
+	else
+		java  org.tango.hdbcpp.configurator.HdbConfigurator
+	fi
+fi
