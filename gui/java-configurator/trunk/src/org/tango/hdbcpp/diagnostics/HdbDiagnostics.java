@@ -47,6 +47,7 @@ import org.tango.hdbcpp.tools.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,19 +73,19 @@ public class HdbDiagnostics extends JFrame {
     private int  statisticsTimeWindow;
     private long statisticsResetTime;
 
-
     private static final String[] ATTRIBUTES = {
             "AttributeNokNumber",
             "AttributeStartedNumber",
             "AttributeStoppedNumber",
             "AttributePendingNumber",
             "AttributeRecordFreq",
+            "AttributeFailureFreq",
     };
     private static final String[] columnNames = {
-            "Faulty", "Started", "Stopped", "Pending", "Freq."
+            "Faulty", "Started", "Stopped", "Pending", "Freq.", "Failures"
     };
     private static final int[] columnWiths = {
-            60, 60, 60, 60, 80
+            60, 60, 60, 60, 60, 60
     };
 	//=======================================================
     /**
@@ -136,7 +137,16 @@ public class HdbDiagnostics extends JFrame {
             //  Get the duration from first subscriber
             Subscriber subscriber = subscriberMap.getSubscriber(labels.get(0));
             statisticsTimeWindow = subscriber.getStatisticsTimeWindow();
-            columnNames[4] = "ev/"+Utils.strPeriod(statisticsTimeWindow);
+            columnNames[4] = "ev/";
+            columnNames[5] = "Fail./";
+            if (statisticsTimeWindow==1) {
+                columnNames[4] += "sec";
+                columnNames[5] += "sec";
+            }
+            else {
+                columnNames[4] += Utils.strPeriod(statisticsTimeWindow);
+                columnNames[5] += Utils.strPeriod(statisticsTimeWindow);
+            }
 
             statisticsResetTime = subscriber.getStatisticsResetTime();
         }
@@ -162,6 +172,23 @@ public class HdbDiagnostics extends JFrame {
             }
         });
         getContentPane().add(tableViewer, java.awt.BorderLayout.CENTER);
+
+
+        //  Add a line for manager attributes
+        String[]    line = new String[ATTRIBUTES.length];
+        int i=0;
+        for (String attribute :ATTRIBUTES) {
+            line[i++] = configuratorDeviceName+'/'+attribute;
+        }
+        ArrayList<String[]>   managerAttributes = new ArrayList<String[]>();
+        managerAttributes.add(line);
+        ArrayList<String>   rows = new ArrayList<String>();
+        rows.add("E.S.  Manager");
+
+        TableScalarViewer   table = new TableScalarViewer(rows, columnNames, managerAttributes, columnWiths);
+        table.setPanelTitleVisible(false);
+        table.setTableFont(new Font("Dialog", Font.BOLD, 14));
+        getContentPane().add(table, BorderLayout.SOUTH);
     }
 	//=======================================================
 	//=======================================================
@@ -171,6 +198,10 @@ public class HdbDiagnostics extends JFrame {
         int row = tableViewer.getJTable().rowAtPoint(new Point(evt.getX(), evt.getY()));
         int column = tableViewer.getJTable().columnAtPoint(new Point(evt.getX(), evt.getY()));
         String  label = labels.get(row);
+        //  do any thing only if manager
+        if (label.toLowerCase().contains("manager"))
+            return;
+
         try {
             Subscriber subscriber =  subscriberMap.getSubscriber(label);
 
@@ -181,8 +212,9 @@ public class HdbDiagnostics extends JFrame {
             } else
             if ((mask & MouseEvent.BUTTON3_MASK)!=0) {
                 //	Display menu if on line label
-                if (column==0)
+                if (column==0) {
                     subscriberMenu.showMenu(evt, label, subscriber);
+                }
             }
         }
         catch (DevFailed e) {
@@ -213,6 +245,7 @@ public class HdbDiagnostics extends JFrame {
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem statisticsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem distributionItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem frequencyTrendItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem attributeErrorsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem viewerAtkErrorItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem viewerAtkDiagnosticsItem = new javax.swing.JMenuItem();
@@ -273,7 +306,16 @@ public class HdbDiagnostics extends JFrame {
         });
         viewMenu.add(distributionItem);
 
-        attributeErrorsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, 0));
+        frequencyTrendItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
+        frequencyTrendItem.setText("Frequency Trend");
+        frequencyTrendItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                frequencyTrendItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(frequencyTrendItem);
+
+        attributeErrorsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
         attributeErrorsItem.setText("Attribute Errors");
         attributeErrorsItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -379,7 +421,12 @@ public class HdbDiagnostics extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void viewerAtkDiagnosticsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewerAtkDiagnosticsItemActionPerformed
-        fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
+        try {
+            fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
+        }
+        catch (Exception e) {
+            ErrorPane.showErrorMessage(this, null, e);
+        }
     }//GEN-LAST:event_viewerAtkDiagnosticsItemActionPerformed
 
     //=======================================================
@@ -406,6 +453,24 @@ public class HdbDiagnostics extends JFrame {
         }
     }//GEN-LAST:event_statisticsItemActionPerformed
 
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void frequencyTrendItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_frequencyTrendItemActionPerformed
+        try {
+            List<String> attributeNames = new ArrayList<String>();
+            attributeNames.add(configuratorProxy.name() + "/" + ATTRIBUTES[RECORD_FREQUENCY]);
+            for (String label : labels) {
+                attributeNames.add( TangoUtils.getOnlyDeviceName(
+                        subscriberMap.getSubscriber(label).name) + "/" + ATTRIBUTES[RECORD_FREQUENCY]);
+            }
+            new AtkMoniDialog(this, attributeNames, "HDB storage frequency").setVisible(true);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, e.getMessage(), e);
+        }
+    }//GEN-LAST:event_frequencyTrendItemActionPerformed
+
  	//=======================================================
 	//=======================================================
     private void showAttributes(Subscriber subscriber, int type) {
@@ -430,6 +495,7 @@ public class HdbDiagnostics extends JFrame {
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Pending");
                     break;
                 case RECORD_FREQUENCY:
+                case FAILURE_FREQUENCY:
                     new StatisticsDialog(this, subscriber,
                             statisticsTimeWindow, statisticsResetTime).setVisible(true);
                     return;
@@ -508,6 +574,7 @@ public class HdbDiagnostics extends JFrame {
     private static final int STOPPED_ATTRIBUTES = 2;
     private static final int PENDING_ATTRIBUTES = 3;
     private static final int RECORD_FREQUENCY   = 4;
+    private static final int FAILURE_FREQUENCY  = 5;
 
     private static final int TEST_ARCHIVER      = 5;
     private static final int TEST_CONFIGURATOR  = 6;

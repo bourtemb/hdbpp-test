@@ -37,6 +37,8 @@ package org.tango.hdbcpp.diagnostics;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceAttribute;
+import fr.esrf.TangoApi.DeviceInfo;
+import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
@@ -61,7 +63,7 @@ import java.util.List;
 
 //===============================================================
 /**
- *	JDialog Class to display info
+ *	JDialog Class to display statistics on attributes
  *
  *	@author  Pascal Verdier
  */
@@ -151,7 +153,6 @@ public class StatisticsDialog extends JDialog {
     //===============================================================
     private void finalizeConstruction(int statisticsTimeWindow,
                                       String title, boolean allowReset) throws DevFailed {
-
         try {
             buildRecords();
         }
@@ -727,10 +728,33 @@ public class StatisticsDialog extends JDialog {
         }
         //===========================================================
         private String getInfo() {
-            return name + ":\n\n" + "Archived by " + subscriber.getLabel() +
-                    "    (" + subscriber.getName() + "\n" +
-                    nbStatistics + " events during " + Utils.strPeriod(duration) + "\n"+
-                    nbEvents + " Since last reset (time not available)" + "\n";
+            String host = null;
+            String server = null;
+            try {
+                String deviceName = name.substring(0, name.lastIndexOf('/'));
+                DeviceProxy deviceProxy = new DeviceProxy(deviceName);
+                DeviceInfo info = deviceProxy.get_info();
+                host = info.hostname;
+                server = info.server;
+            }
+            catch (DevFailed e) {
+                Except.print_exception(e);
+            }
+            catch (Exception e) {
+                // cannot find host
+            }
+
+            StringBuilder sb = new StringBuilder(name+"\n");
+            if (server!=null)
+                sb.append("    - Server   ").append(server).append("\n");
+            if (host!=null)
+                sb.append("    - registered on   ").append(host).append("\n");
+            sb.append("\nArchived by ").append(subscriber.getLabel());
+            sb.append("    (").append(subscriber.getName()).append(")\n");
+            sb.append(nbStatistics).append(" events during ").append(Utils.strPeriod(duration)).append("\n");
+            sb.append(nbEvents).append(" Since last reset : ").append(formatResetTime(resetTime)).append("\n");
+            sb.append("    - during ").append(Utils.strPeriod(sinceReset/1000));
+            return sb.toString();
         }
         //===========================================================
         private void configureEvent() {

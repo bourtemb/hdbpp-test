@@ -564,7 +564,7 @@ public class DistributionDialog extends JDialog {
                     lines.add("    - " + attribute);
                     if (cnt++>15) {
                         lines.add("       - - - - -");
-                        lines.add("       Use Shift for Full List");
+                        lines.add("       Use double click for Full List");
                         break;
                     }
                 }
