@@ -7,7 +7,7 @@
 
 class ResultListener;
 class XVariantList;
-class QueryConfiguration;
+class HdbXSettings;
 
 class DbSchemaPrivate
 {
@@ -22,7 +22,7 @@ public:
 
     XVariantList *variantList;
 
-    QueryConfiguration *queryConfiguration;
+    HdbXSettings *hdbxSettings;
 
     char errorMessage[MAXERRORLEN];
 

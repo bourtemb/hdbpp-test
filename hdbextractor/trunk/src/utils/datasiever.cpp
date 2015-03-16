@@ -5,7 +5,7 @@
 #include <string.h>
 #include <set>
 #include <sys/time.h>
-#include <hdbxmacros.h>
+#include "../hdbxmacros.h"
 #include <unistd.h>
 
 #define MAXSRCLEN 256
@@ -24,6 +24,11 @@ DataSiever::~DataSiever()
 void DataSiever::clear()
 {
     d_ptr->dataMap.clear();
+}
+
+double DataSiever::getElapsedTimeMicrosecs() const
+{
+    return d_ptr->elapsedMicros;
 }
 
 /** \brief Separates data coming from different sources, saving couples source name / data in an internal
@@ -47,12 +52,12 @@ void DataSiever::divide(const std::vector<XVariant> &rawdata)
     for(std::vector<XVariant>::const_iterator it = rawdata.begin(); it != rawdata.end(); it++)
     {
         const char *src = it->getSource();
-        if(strcmp(src, source) != 0 && d_ptr->dataMap.count(std::string(src)) == 0)
+        if(d_ptr->dataMap.count(std::string(src)) == 0)
         {
             d_ptr->dataMap[std::string(src)] = std::list<XVariant>();
             strncpy(source, src, MAXSRCLEN);
         }
-        d_ptr->dataMap[std::string(source)].push_back(*it);
+        d_ptr->dataMap[std::string(src)].push_back(*it); /* src, not source here! */
     }
 }
 
@@ -105,7 +110,8 @@ void DataSiever::fill()
     if(steps_to_estimate == 0)
         steps_to_estimate = tstamps_size;
 
-    printf("\e[1;32m*\e[0m final data size will be %ld for each source...\n", tstamps_size);
+    printf("\e[1;32m*\e[0m final data size will be %ld for each source... steps_to_estimate %ld\n",
+           tstamps_size, steps_to_estimate);
 
     /* for each data row */
     for(std::map<std::string, std::list<XVariant> >::iterator it = d_ptr->dataMap.begin();
@@ -167,8 +173,9 @@ void DataSiever::fill()
         }
     }
     gettimeofday(&ended_tv, NULL);
-    printf("\e[1;32m* \e[0mfilled in: %.3fs\n", ended_tv.tv_sec + ended_tv.tv_usec * 1e-6 -
-           started_tv.tv_sec - started_tv.tv_usec * 1e-6);
+    d_ptr->elapsedMicros = ended_tv.tv_sec + ended_tv.tv_usec * 1e-6 -
+            started_tv.tv_sec - started_tv.tv_usec * 1e-6;
+    printf("\e[1;32m* \e[0mfilled in: %.3fs\n", d_ptr->elapsedMicros);
 }
 
 /** \brief returns the number of different sources dug out by divide

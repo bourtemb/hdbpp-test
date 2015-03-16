@@ -11,7 +11,7 @@
 
 class HdbExtractorPrivate;
 class HdbExtractorListener;
-class QueryConfiguration;
+class HdbXSettings;
 class TimeInterval;
 
 /** \mainpage The Hdbextractor++ historical database data extractor
@@ -29,7 +29,11 @@ class TimeInterval;
  * respectively.
  *
  * \par Scalar data visualization.
+ *
  * \image html qhdbextractor.png
+ *
+ * \image latex qhdbextractor.png
+ *
  *
  * \par Vector data visualization.
  * Vectors can be displayed over time using a surface plot. The QHdbExtractor application combines
@@ -60,6 +64,8 @@ class TimeInterval;
  *
  * \image html qhdbextractor-3d.png
  *
+ * \image latex qhdbextractor-3d.png
+ *
  * \par Error visualization.
  *
  * The paint functions of the curves of the qgraphicsplot library draw
@@ -70,6 +76,8 @@ class TimeInterval;
  * hdbextractor-qt/QHdbExtractor subfolder.
  *
  * \image html qhdbX-errors.png
+ *
+ * \image latex qhdbX-errors.png
  *
  * \par Important note
  * Even if the HdbExtractor library is tailored to deal with Tango data (as far as data type,
@@ -269,11 +277,6 @@ void MyHdbExtractorImpl::onSourceProgressUpdate(const char *name , double percen
     mExtractor->get(d_valuelist);
 }
 
-void MyHdbExtractorImpl::onFinished(int totalRows)
-{
-    printf("extraction completed: got %d rows\n", totalRows);
-}
-
 const std::vector<XVariant> &MyHdbExtractorImpl::getValuelistRef() const
 {
     return d_valuelist;
@@ -341,8 +344,14 @@ int main(int argc, char **argv)
  *
  * <h3>Configuration files</h3>
  * The ConfigurationParser class can be used to store couples key/value in form of
- * strings. The ConfigurationParser reads a text file to load the settings. The
- * file has a plain text format, whose lines are of the kind
+ * strings. The ConfigurationParser reads a text file where the settings are written and saves
+ * them into a std::map<std::string, std::string>.
+ * A higher level interface to load and get settings from a configuration file is provided by the
+ * HdbXSettings class. This provides conversion methods that easily decode the values into
+ * integer, double and boolean types in addition to strings.
+ * In general, you should directly use HdbXSettings. A description of the configuration file follows.
+ * Its format is the same for the ConfigurationParser and the HdbXSettings.
+ * The file is in plain text format; here's an example:
  *
   \code
   # Comments start after a # character
@@ -356,7 +365,7 @@ int main(int argc, char **argv)
 
   \endcode
  *
- * The ConfigurationParser can be used to store the connection parameters.
+ * The ConfigurationParser can be used to store the connection parameters and application specific settings as well.
  *
  * To get the configuration pairs, instantiate a ConfigurationParser and call read
  * with the path of the file and a reference to a std::map<std::string, std::string> <br/>
@@ -366,33 +375,179 @@ int main(int argc, char **argv)
  * @see ConfigurationParser
  * @see ConfigurationParser::read
  *
+ * <h3>HdbXSettings</h3>
+ * The HdbXSettings provides a higher level interface to configuration files. Convenience functions are
+ * provided in order to convert the values into different types of data.
+ * <br>Please refer to the HdbXSettings documentation for further details. HdbXSettings should be the
+ * way to go as far as key/value based configuration files are concerned.
+ *
  * <h3>Query and data fetch configuration</h3>
  *
- * The QueryConfiguration class lets you customize queries according to
+ * The HdbXSettings class lets you customize queries according to
  * specific needs and database connection characteristics.
  *
- * For example, if no data is stored within a given period of time, let's say between t0 and t1, QueryConfiguration
+ * For example, if no data is stored within a given period of time, let's say between t0 and t1, Hdbextractor
  * can be told to retrieve the most recent recorded data at a time t < t0 instead of simply returning an empty result.
  * In addition, if the first available data inside (t_start, t_end) has been recorded at a time t1 such as
  * (t1 - t_start) is greater than a given fraction of (t_end - t_start), an additional value fetched at
  * t_past = MAX(t : t < t_start) can be inserted in the data set at t_start.
- * QueryConfiguration stores string key/value couples, and converts it to booleans, integers or
- * doubles if requested.
  *
- * A QueryConfiguration object can load settings from a file organized in the very same format as
- * ConfigurationParser's. Moreover, the same configuration file can be shared by QueryConfiguration
- * and ConfigurationParser.
- * Please refer to the QueryConfiguration documentation for further details.
+ * Take a look at the figure below. As the dotted curve reveals, there is no data in the database from
+ * December, 31st to January, 8th.
+ *
+ * \image html qhdbextractor-fetch-past-1.png
+ *
+ * \image latex qhdbextractor-fetch-past-1.png
+ *
+ * Now let's restrict the time interval on the left only, to include a certain
+ * amount of time without recorded data: from January, 2nd to January, 24.
+ * As expected, data starts from January, 8th and is displayed starting from that point.
+ *
+ * \image html qhdbextractor-fetch-past-2.png
+ *
+ * \image latex qhdbextractor-fetch-past-2.png
+ *
+ * The described behavior is adopted if the configuration key <em>FillFromThePastMode</em> is set to
+ * <em>None</em> in the configuration file:
+ *
+ * \code
+
+# The FillFromThePastMode configures how the lack of data in the desired time window is managed.
+# # Possible values (if not specified, the default is None):
+# #
+# # None:        nothing is done if the window does not contain data or if valid data starts late.
+# # KeepWindow:  look in the past for the most recent valid data and make it the first value of the window.
+# #              The timestamp is changed to start the date/time  of the time window.
+# # WidenWindow: look in the past for the most recent valid data and put it in as the first result with its
+# #              preserving its original timestamp.
+# #
+FillFromThePastMode = None
+
+ \endcode
+ *
+ * The snippet of the configuration file quoted above describes the usage of the FillFromThePastMode property.
+ *
+ * Now change the <em>FillFromThePastMode</em> property value to <em>KeepWindow</em>. Here's the result:
+ *
+ * \image html qhdbextractor-fetch-past-3.png
+ *
+ * \image latex qhdbextractor-fetch-past-3.png
+ *
+ * As one can see, data starts from January, 2nd, which is the start date set on the interval.
+ * \nThe time window specified by the user is thus preserved.
+ *
+ * Changing <em>FillFromThePastMode</em> to <em>WidenWindow</em> produces the result below. In this case,
+ * the timestamp of the last recorded data before the desired start date/time is put as the first point in
+ * the x axis. \nThe time window specified by the user is widened to match the timestamp of the recorded data.
+ * See the picture below.
+ *
+ * \image html qhdbextractor-fetch-past-4.png
+ *
+ * \image latex qhdbextractor-fetch-past-4.png
+ *
+ * Actually, the feature of looking back in the past for a value preceding the start date time requested by
+ * the user is controlled by another option named <em>FillFromThePastThresholdPercent</em>.
+ * This option is taken into account only if <em>FillFromThePastMode</em> is not <em>None</em>.
+ * <em>FillFromThePastThresholdPercent</em>  is a floating point number representing the percentage of the
+ * whole time interval (t0, tN) specified by the user. If the first available data in the interval has a
+ * time stamp <em>t1 > (tN - t0) * FillFromThePastThresholdPercent / 100.0</em>, then the Hdbextractor
+ * seeks data in the past (t < t0) and adjusts the resulting data set date and time according to
+ * the  <em>FillFromThePastMode</em> property. The default value of <em>FillFromThePastThresholdPercent</em>
+ * is set to 5%.
+ *
  *
  * <h3>Sieving results of multiple source queries and data time-alignment</h3>
  *
- * The DataSiever utility class can be used to separate the data of each different source (attribute)
- * given the vector of XVariant returned by Hdbextractor::getData.
+ * The figure below illustrates the trend of the current of two power supplies over two hours.
+ * As expected, each trend evolves independently, in time and current.
+ *
+ * \image html qhdbextractor-no-siever.png
+ *
+ * \image latex qhdbextractor-no-siever.png
+ *
+ * There are times when it may be useful to align two or more trends in time. In these cases, the DataSiever
+ * class can help. <br> The DataSiever class
+ * <ol>
+ * <li>groups data (std::vector<XVariant> ) by source name;</li>
+ * <li>fills the data of each source so that each set contains the same values on the x
+ *     axis (time). If the source <em>Si</em> has no recorded data at the time <em>tk</em>,
+ *     the value saved at the time <em>t < tk</em> is copied at time <em>tk</em>.</li>
+ * </ol>
+ *
+ * As a consequence of (1), DataSiever allows separating data coming from different sources. This
+ * feature is useful when you process all the data coming from multiple sources at once (for example,
+ * inside the callback onExtractionFinished, skipping per source progress updates).
+ *
+ * The DataSiever utility class separates the data of each different source (attribute)
+ * working on the vector of XVariant returned by Hdbextractor::getData.
  * Once organized by source name, each vector of data can be aligned in time, with the DataSiever::fill
  * method. <br/>
+ *
+ * The main.cpp file quoted above can be modified as shown below in order to use DataSiever
+ * and HdbXSettings. This version requires that the program is launched with an additional file
+ * name which stores the settings. Build the hdbxtest source code to run the example.
+ *
+ * \code
+#include <stdio.h>
+#include <stdlib.h>
+#include "myhdbextractorimpl.h"
+#include <hdbextractor.h>
+
+using namespace std;
+
+int main(int argc, char **argv)
+{
+    if(argc < 5)
+    {
+        printf("\e[1;31mUsage\e[0m \"%s configfile.dat domain/family/member/attribute \"2014-07-20 10:00:00\" \"2014-07-20 12:00:00\"\n",
+               argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        const char* start_date = argv[argc - 2];
+        const char* stop_date = argv[argc - 1];
+
+        std::vector<std::string> sources;
+        for(int i = 2; i < argc - 2; i++)
+            sources.push_back(std::string(argv[i]));
+
+        HdbXSettings *qc = new HdbXSettings();
+        qc->loadFromFile(argv[1]);
+
+        MyHdbExtractorImpl *hdbxi = new MyHdbExtractorImpl(qc->get("dbuser").c_str(),
+                qc->get("dbpass").c_str(), qc->get("dbhost").c_str(), qc->get("dbname").c_str());
+
+        hdbxi->getHdbExtractor()->setHdbXSettings(qc);    // settings
+        hdbxi->getData(sources, start_date, stop_date);   // get data
+
+        const std::vector<XVariant> & valuelist = hdbxi->getValuelistRef();
+
+
+        DataSiever siever;
+        siever.divide(valuelist);
+        siever.fill();
+
+        std::vector<std::string> srcs = siever.getSources();
+        for(size_t i = 0; i < srcs.size(); i++)
+        {
+           std::vector<XVariant > values = siever.getData(srcs.at(i));
+           XVariantPrinter().printValueList(values, 2);
+        }
+        delete qc;
+    }
+    return 0;
+}
+ * \endcode
+ *
+ * The screenshot below shows the result of the time fill process. It was taken from the qhdbextractor
+ * graphical application, which has an check box to enable the fill time option.
+ *
+ * \image html  qhdbextractor-fill-time.png
+ * \image latex qhdbextractor-fill-time.png
+ *
  * See the DataSiever documentation for further details.
  *
- * @see DataSiever
  */
 class Hdbextractor :  ResultListener
 {
@@ -458,7 +613,7 @@ public:
 
     bool findErrors(const char *source, const TimeInterval *time_interval) const;
 
-    void setQueryConfiguration(QueryConfiguration *qc);
+    void setHdbXSettings(HdbXSettings *qc);
 
     /** \brief Get a copy of the partial or complete data fetched from the database up to this moment
      *
@@ -484,7 +639,7 @@ public:
 
     bool hasError() const;
 
-    QueryConfiguration *getQueryConfiguration() const;
+    HdbXSettings *getHdbXSettings() const;
 
     void cancelExtraction();
 

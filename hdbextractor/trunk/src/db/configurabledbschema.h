@@ -10,7 +10,7 @@ class ConfigurableDbSchema : public DbSchema
 public:
     ConfigurableDbSchema();
 
-    virtual void setQueryConfiguration(QueryConfiguration *queryConfiguration);
+    virtual void setHdbXSettings(HdbXSettings *HdbXSettings);
 
 
 protected:

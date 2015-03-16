@@ -56,6 +56,8 @@ public:
 
     void clear();
 
+    double getElapsedTimeMicrosecs() const;
+
     size_t getSize() const;
 
     std::vector<std::string> getSources() const;

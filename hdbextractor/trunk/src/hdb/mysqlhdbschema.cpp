@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <map>
 #include <math.h>
-#include "../queryconfiguration.h"
+#include "../hdbxsettings.h"
 
 #define MAXQUERYLEN 4096
 #define MAXTABLENAMELEN 32
@@ -268,11 +268,11 @@ bool MySqlHdbSchema::getData(const char *source,
 
                         if(rowCnt == 0)
                         {
-                            if(configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                                 start_date,
-                                                                 stop_date,
-                                                                 row->getField(0))
-                                    != ConfigurableDbSchemaHelper::None)
+                            fillMode = configHelper->fillFromThePastMode(d_ptr->hdbxSettings,
+                                                                         start_date,
+                                                                         stop_date,
+                                                                         row->getField(0));
+                            if(fillMode != ConfigurableDbSchemaHelper::None)
                             {
                                 rows_from_the_past = fetchInThePast(source, start_date, table_name, id,
                                                                        dataType, format, wri, connection,
@@ -314,7 +314,7 @@ bool MySqlHdbSchema::getData(const char *source,
                 }
                 else if(wri == XVariant::RW)
                 {
-                    bool fetchOnlyRead = d_ptr->queryConfiguration && d_ptr->queryConfiguration->getBool("FetchOnlyReadFromRWSource");
+                    bool fetchOnlyRead = d_ptr->hdbxSettings && d_ptr->hdbxSettings->getBool("FetchOnlyReadFromRWSource");
                     if(fetchOnlyRead)
                         snprintf(query, MAXQUERYLEN, "SELECT time,read_value FROM %s WHERE time >='%s' "
                                                      " AND time <= '%s' ORDER BY time ASC", table_name, start_date, stop_date);
@@ -347,11 +347,11 @@ bool MySqlHdbSchema::getData(const char *source,
 
                         if(rowCnt == 0)
                         {
-                            if(configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                                 start_date,
-                                                                 stop_date,
-                                                                 row->getField(0))
-                                    != ConfigurableDbSchemaHelper::None)
+                            fillMode = configHelper->fillFromThePastMode(d_ptr->hdbxSettings,
+                                                                         start_date,
+                                                                         stop_date,
+                                                                         row->getField(0));
+                            if(fillMode != ConfigurableDbSchemaHelper::None)
                             {
                                 rows_from_the_past = fetchInThePast(source, start_date, table_name, id,
                                                                        dataType, format, wri, connection,
@@ -399,12 +399,13 @@ bool MySqlHdbSchema::getData(const char *source,
                 if(!d_ptr->isCancelled && res && res->getRowCount() == 0)
                 {
                     pinfo("no rows. Getting from the past");
-                    if(configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
-                                                         start_date,
-                                                         stop_date,
-                                                         "")
-                            != ConfigurableDbSchemaHelper::None)
+                    fillMode = configHelper->fillFromThePastMode(d_ptr->hdbxSettings,
+                                                                 start_date,
+                                                                 stop_date,
+                                                                 "");
+                    if(fillMode != ConfigurableDbSchemaHelper::None)
                     {
+
                         rows_from_the_past = fetchInThePast(source, start_date, table_name, id,
                                                                dataType, format, wri, connection,
                                                                &from_the_past_elapsed,
@@ -590,8 +591,8 @@ int MySqlHdbSchema::fetchInThePast(const char *source,
     struct timeval tv1, tv2;
     Result *res = NULL;
     Row *row = NULL;
-    bool fetchOnlyRead = d_ptr->queryConfiguration &&
-            d_ptr->queryConfiguration->getBool("FetchOnlyReadFromRWSource");
+    bool fetchOnlyRead = d_ptr->hdbxSettings &&
+            d_ptr->hdbxSettings->getBool("FetchOnlyReadFromRWSource");
 
     gettimeofday(&tv1, NULL);
 
@@ -642,10 +643,13 @@ int MySqlHdbSchema::fetchInThePast(const char *source,
         {
             XVariant *xvar = NULL;
             /* choose timestamp according to ConfigurableDbSchemaHelper mode */
+            printf("\e[1;35mchoosing form %s and %s mode %d\e[0m\n", start_date, row->getField(0), mode);
             if(mode == ConfigurableDbSchemaHelper::KeepWindow)
                 strncpy(timestamp, start_date, MAXTIMESTAMPLEN);
             else
                 strncpy(timestamp, row->getField(0), MAXTIMESTAMPLEN);
+
+            printf("\e[1;35mchosen form %s \e[0m\n", timestamp);
 
             /* if fetchOnlyRead is true, then the result will contain the read part only
              * and the write data will be null.

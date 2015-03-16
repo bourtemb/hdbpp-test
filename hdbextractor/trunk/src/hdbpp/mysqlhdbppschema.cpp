@@ -13,7 +13,7 @@
 #include "../db/helpers/configurabledbschemahelper.h"
 #include "../db/xvariantlist.h"
 #include "../db/timeinterval.h"
-#include "../queryconfiguration.h"
+#include "../hdbxsettings.h"
 #include <assert.h>
 #include <map>
 #include <math.h>
@@ -354,7 +354,7 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                             if(timestampCnt == 0)
                             {
-                                fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                fillMode = configHelper->fillFromThePastMode(d_ptr->hdbxSettings,
                                                                              start_date, stop_date, timestamp);
                                 if(fillMode != ConfigurableDbSchemaHelper::None)
                                 {
@@ -429,7 +429,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                 {
                     /*  */
                     XVariant *xvar = NULL;
-                    bool fetchOnlyRead = d_ptr->queryConfiguration && d_ptr->queryConfiguration->getBool("FetchOnlyReadFromRWSource");
+                    bool fetchOnlyRead = d_ptr->hdbxSettings && d_ptr->hdbxSettings->getBool("FetchOnlyReadFromRWSource");
                     char column_value_w[10] = "";
                     if(!fetchOnlyRead) /* query will have a value_w field following value_r */
                         strncpy(column_value_w, "value_w,", 10);
@@ -487,7 +487,7 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                             if(timestampCnt == 0)
                             {
-                                fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                                fillMode = configHelper->fillFromThePastMode(d_ptr->hdbxSettings,
                                                                              start_date,
                                                                              stop_date,
                                                                              timestamp);
@@ -552,7 +552,7 @@ bool MySqlHdbppSchema::getData(const char *source,
 
                 if(res->getRowCount() == 0 && !d_ptr->isCancelled)
                 {
-                    fillMode = configHelper->fillFromThePastMode(d_ptr->queryConfiguration,
+                    fillMode = configHelper->fillFromThePastMode(d_ptr->hdbxSettings,
                                                                  start_date, stop_date, timestamp);
                     if(fillMode != ConfigurableDbSchemaHelper::None)
                     {
@@ -890,7 +890,7 @@ int MySqlHdbppSchema::fetchInThePast(const char *source,
         }
     } /* if format not scalar */
 
-    bool fetchOnlyRead = d_ptr->queryConfiguration && d_ptr->queryConfiguration->getBool("FetchOnlyReadFromRWSource");
+    bool fetchOnlyRead = d_ptr->hdbxSettings && d_ptr->hdbxSettings->getBool("FetchOnlyReadFromRWSource");
     char column_value_w[10] = "";
     if(!fetchOnlyRead) /* query will have a value_w field following value_r */
         strncpy(column_value_w, "value_w,", 10);

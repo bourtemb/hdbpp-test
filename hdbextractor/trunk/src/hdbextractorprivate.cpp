@@ -1,7 +1,7 @@
 #include "hdbextractorprivate.h"
-#include <connection.h>
-#include <configurabledbschema.h>
-#include <queryconfiguration.h>
+#include "db/connection.h"
+#include "db/configurabledbschema.h"
+#include "hdbxsettings.h"
 
 HdbExtractorPrivate::HdbExtractorPrivate()
 {
@@ -13,6 +13,6 @@ HdbExtractorPrivate::~HdbExtractorPrivate()
         delete connection;
     if(dbschema)
         delete dbschema;
-    if(queryConfiguration)
-        delete queryConfiguration;
+    if(hdbxSettings)
+        delete hdbxSettings;
 }

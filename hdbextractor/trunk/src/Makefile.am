@@ -16,7 +16,7 @@ libhdbextractor___la_SOURCES = hdbextractor.cpp \
     db/xvariantlist.cpp \
     hdbpp/mysqlhdbppschema.cpp \
     configurationparser.cpp \
-    queryconfiguration.cpp \
+    hdbxsettings.cpp \
     db/configurabledbschema.cpp \
     db/helpers/configurabledbschemahelper.cpp \
     utils/datasiever.cpp \
@@ -45,7 +45,7 @@ libhdbextractor___la_SOURCES = hdbextractor.cpp \
     db/xvariantlist.h \
     hdbpp/mysqlhdbppschema.h \
     configurationparser.h \
-    queryconfiguration.h \
+    hdbxsettings.h \
     db/configurabledbschema.h \
     db/helpers/configurabledbschemahelper.h \
     utils/datasiever.h \
@@ -77,7 +77,7 @@ hdb/mysqlhdbschema.h \
 db/xvariantlist.h \
 hdbpp/mysqlhdbppschema.h \
 configurationparser.h \
-queryconfiguration.h \
+hdbxsettings.h \
 db/configurabledbschema.h \
 db/helpers/configurabledbschemahelper.h \
 utils/datasiever.h \

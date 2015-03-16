@@ -6,7 +6,7 @@
 #include "hdb/mysqlhdbschema.h"
 #include "hdbpp/mysqlhdbppschema.h"
 #include "hdbextractorlistener.h"
-#include "queryconfiguration.h"
+#include "hdbxsettings.h"
 #include "timeinterval.h"
 
 #include <string.h>
@@ -15,7 +15,7 @@
  *
  * Deletes private data after closing the connection.
  * Private data deletion implies freeing resources for connection, dbschema and
- * QueryConfiguration.
+ * HdbXSettings.
  */
 Hdbextractor::~Hdbextractor()
 {
@@ -115,7 +115,7 @@ Hdbextractor::Hdbextractor(HdbExtractorListener *hdbxlistener) : ResultListener(
     d_ptr->dbschema = NULL;
     d_ptr->dbType = DBUNDEFINED;
     d_ptr->hdbXListenerI = hdbxlistener;
-    d_ptr->queryConfiguration = NULL;
+    d_ptr->hdbxSettings = NULL;
     /* by default, trigger data available on listener only when data fetch is complete */
     d_ptr->updateEveryRows = -1;
 }
@@ -202,14 +202,14 @@ bool  Hdbextractor::hasError() const
  * @return true if the data fetch was successful, false otherwise.
  *
  * \par Query options.
- * See setQueryConfiguration and the QueryConfiguration object to see what options can be
+ * See setHdbXSettings and the HdbXSettings object to see what options can be
  * applied to the database queries. For example, it is possible to choose the desired behaviour
  * when no data is available between start_date and stop_date.
  *
  * If this call was not successful, you can call getErrorMessage to get the error message
  *
  * @see getErrorMessage
- * @see setQueryConfiguration
+ * @see setHdbXSettings
  *
  */
 bool Hdbextractor::getData(const char *source,
@@ -221,8 +221,8 @@ bool Hdbextractor::getData(const char *source,
     printf("HdbExtractor.getData %s %s %s\n", source, start_date, stop_date);
     if(d_ptr->connection != NULL && d_ptr->dbschema != NULL && d_ptr->connection->isConnected())
     {
-        if(d_ptr->queryConfiguration != NULL)
-            d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
+        if(d_ptr->hdbxSettings != NULL)
+            d_ptr->dbschema->setHdbXSettings(d_ptr->hdbxSettings);
         success = d_ptr->dbschema->getData(source, start_date, stop_date,
                                            d_ptr->connection, d_ptr->updateEveryRows);
     }
@@ -245,12 +245,12 @@ bool Hdbextractor::getData(const char *source,
  * If this call was not successful, you can call getErrorMessage to get the error message
  *
  * \par Query options.
- * See setQueryConfiguration and the QueryConfiguration object to see what options can be
+ * See setHdbXSettings and the HdbXSettings object to see what options can be
  * applied to the database queries. For example, it is possible to choose the desired behaviour
  * when no data is available between start_date and stop_date.
  *
  * @see getErrorMessage
- * @see setQueryConfiguration
+ * @see setHdbXSettings
  */
 bool Hdbextractor::getData(const std::vector<std::string> sources,
                            const char *start_date,
@@ -261,8 +261,8 @@ bool Hdbextractor::getData(const std::vector<std::string> sources,
 
     if(d_ptr->connection != NULL && d_ptr->dbschema != NULL && d_ptr->connection->isConnected())
     {
-        if(d_ptr->queryConfiguration != NULL)
-            d_ptr->dbschema->setQueryConfiguration(d_ptr->queryConfiguration);
+        if(d_ptr->hdbxSettings != NULL)
+            d_ptr->dbschema->setHdbXSettings(d_ptr->hdbxSettings);
 
         success = d_ptr->dbschema->getData(sources, start_date, stop_date,
                                            d_ptr->connection, d_ptr->updateEveryRows);
@@ -360,13 +360,13 @@ int Hdbextractor::updateProgressPercent()
     return d_ptr->updateEveryRows;
 }
 
-/** \brief Returns the QueryConfiguration currently set, if any, or NULL if none has been set.
+/** \brief Returns the HdbXSettings currently set, if any, or NULL if none has been set.
  *
- * @see setQueryConfiguration
+ * @see setHdbXSettings
  */
-QueryConfiguration *Hdbextractor::getQueryConfiguration() const
+HdbXSettings *Hdbextractor::getHdbXSettings() const
 {
-    return d_ptr->queryConfiguration;
+    return d_ptr->hdbxSettings;
 }
 
 void Hdbextractor::cancelExtraction()
@@ -382,25 +382,25 @@ bool Hdbextractor::extractionIsCancelled() const
 
 /** \brief This method allows to configure various options before querying the database
  *
- * @param qc The QueryConfiguration object with the desired options set.
+ * @param qc The HdbXSettings object with the desired options set.
  *
  * This method is used to configure the way data is fetched by getData.
  *
  * \par Important note.
- * The ownership of the QueryConfiguration passed as parameter is passed to the Hdbextractor.
+ * The ownership of the HdbXSettings passed as parameter is passed to the Hdbextractor.
  * Its lifetime is tied to the Hdbextractor lifetime. In other words, you <strong>must not</strong>
  * delete it. It's deleted upon Hdbextractor's destruction.
- * <br/>If you <strong>replace</strong> the current QueryConfiguration with another one,
+ * <br/>If you <strong>replace</strong> the current HdbXSettings with another one,
  * <strong>the current one</strong> is deleted for you in this method.
  *
- * @see QueryConfiguration
+ * @see HdbXSettings
  * @see getData
  */
-void Hdbextractor::setQueryConfiguration(QueryConfiguration *qc)
+void Hdbextractor::setHdbXSettings(HdbXSettings *qc)
 {
-    if(d_ptr->queryConfiguration) /* delete current configuration */
-        delete d_ptr->queryConfiguration;
-    d_ptr->queryConfiguration = qc;
+    if(d_ptr->hdbxSettings) /* delete current configuration */
+        delete d_ptr->hdbxSettings;
+    d_ptr->hdbxSettings = qc;
 }
 
 /** \brief set the percentage of rows processed over total after that

@@ -1,7 +1,7 @@
 #ifndef CONFIGURABLEDBSCHEMAHELPER_H
 #define CONFIGURABLEDBSCHEMAHELPER_H
 
-class QueryConfiguration;
+class HdbXSettings;
 
 class ConfigurableDbSchemaHelper
 {
@@ -14,7 +14,7 @@ public:
 
     ConfigurableDbSchemaHelper();
 
-    FillFromThePastMode fillFromThePastMode(const QueryConfiguration* queryConfiguration,
+    FillFromThePastMode fillFromThePastMode(const HdbXSettings* hdbXSettings,
                              const char *start_date, const char *stop_date,
                              const char *first_value_date) const;
 

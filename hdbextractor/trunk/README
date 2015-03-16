@@ -47,6 +47,7 @@ INSTALLATION INSTRUCTIONS FOR the Hdbextractor++ library
     $ cd hdbextractor/trunk
 
     $ aclocal
+    $ autoconf # to generate the configure script on the base of the configure.ac file
     $ automake --add-missing
     $ autoconf
 

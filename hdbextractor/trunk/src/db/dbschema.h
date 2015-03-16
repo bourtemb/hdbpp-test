@@ -9,7 +9,7 @@ class Connection;
 class XVariantList;
 class XVariant;
 class XErrorData;
-class QueryConfiguration;
+class HdbXSettings;
 class TimeInterval;
 
 /** \brief The interface representing a database schema. <em>Used internally</em>.

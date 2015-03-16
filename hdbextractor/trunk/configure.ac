@@ -17,12 +17,12 @@ AC_CONFIG_SRCDIR([src/hdbpp/mysqlhdbppschema.h])
 
 # Here are a set of rules to help you update your library version information:
 
-AC_SUBST([HDBX_VERSION], [0:91:0])
+AC_SUBST([HDBX_VERSION], [0:93:0])
 
 ##
 ## Actually, we use revision in src/Makefile.am
 ##
-AC_SUBST([HDBX_REVISION], [0.92.0])
+AC_SUBST([HDBX_REVISION], [0.93.0])
 
 # AC_CONFIG_HEADERS([config.h])
 
@@ -83,7 +83,7 @@ DX_PS_FEATURE(OFF)
 ## Note:
 ## doc is the output that has been setup in Doxyfile.in ("OUTPUT_DIRECTORY")
 ##
-DX_INIT_DOXYGEN(hdbextractor, Doxyfile.in, doc)
+DX_INIT_DOXYGEN([$PACKAGE_NAME],[Doxyfile.in],[doc])
 
 AX_CHECK_MYSQL([no],[yes],[5.0],[yes])
 # AX_SOURCE_MYSQL()

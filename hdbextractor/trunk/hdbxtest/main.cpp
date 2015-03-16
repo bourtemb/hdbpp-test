@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "../src/utils/datasiever.h"
 #include "myhdbextractorimpl.h"
-#include "queryconfiguration.h"
+#include "hdbxsettings.h"
 #include "../src/hdbextractor.h"
 #include "../src/configurationparser.h"
 #include "../src/utils/xvariantprinter.h"
@@ -20,14 +20,6 @@ int main(int argc, char **argv)
     }
     else
     {
-        std::map<std::string, std::string> confmap ;
-
-        confmap["dbuser"] = "hdbbrowser";
-        confmap["dbpass"] = "hdbbrowser";
-        confmap["dbhost"] = "fcsproxy";
-        confmap["dbname"] = "hdb";
-        confmap["dbport"] = "3306";
-
         const char* start_date = argv[argc - 2];
         const char* stop_date = argv[argc - 1];
 
@@ -35,33 +27,23 @@ int main(int argc, char **argv)
         for(int i = 2; i < argc - 2; i++)
             sources.push_back(std::string(argv[i]));
 
-        ConfigurationParser cp;
-        cp.read(argv[1], confmap);
-
-        QueryConfiguration *qc = new QueryConfiguration();
+        HdbXSettings *qc = new HdbXSettings();
         qc->loadFromFile(argv[1]);
 
-        MyHdbExtractorImpl *hdbxi = new MyHdbExtractorImpl(confmap["dbuser"].c_str(),
-                confmap["dbpass"].c_str(), confmap["dbhost"].c_str(), confmap["dbname"].c_str());
+        MyHdbExtractorImpl *hdbxi = new MyHdbExtractorImpl(qc->get("dbuser").c_str(),
+                qc->get("dbpass").c_str(), qc->get("dbhost").c_str(), qc->get("dbname").c_str());
 
-        hdbxi->getHdbExtractor()->setQueryConfiguration(qc);
+        hdbxi->getHdbExtractor()->setHdbXSettings(qc);
         hdbxi->getData(sources, start_date, stop_date);
 
         const std::vector<XVariant> & valuelist = hdbxi->getValuelistRef();
 
-
         DataSiever siever;
-        printf("\e[1;36mSIEVING DATA....\e[0m\n");
         siever.divide(valuelist);
-
         siever.fill();
-
-        printf("\e[1;32msources:\e[0m\n");
         std::vector<std::string> srcs = siever.getSources();
         for(size_t i = 0; i < srcs.size(); i++)
         {
-            printf("\t* %s\n", srcs.at(i).c_str());
-
            std::vector<XVariant > values = siever.getData(srcs.at(i));
            XVariantPrinter().printValueList(values, 2);
         }

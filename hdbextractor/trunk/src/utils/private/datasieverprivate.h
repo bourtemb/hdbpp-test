@@ -16,6 +16,8 @@ public:
     std::list<DataSieverProgressListener *>dataSieverProgressListeners;
 
     std::map<std::string, std::list<XVariant> > dataMap;
+
+    double elapsedMicros;
 };
 
 #endif // DATAFILLERPRIVATE_H
