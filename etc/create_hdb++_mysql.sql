@@ -40,7 +40,7 @@ event VARCHAR(255) NOT NULL
 ) ENGINE=MyISAM COMMENT='Attribute history events description';
 
 INSERT INTO att_history_event (event) VALUES
-('add'),('remove'),('start'),('stop'),('crash');
+('add'),('remove'),('start'),('stop'),('crash'),('pause');
 
 CREATE TABLE IF NOT EXISTS att_parameter
 (
@@ -69,9 +69,8 @@ insert_time DATETIME(6) NOT NULL,
 value_r DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
-) ENGINE=MyISAM COMMENT='Scalar Double ReadOnly Values Table';
+INDEX att_conf_id_data_time (att_conf_id,data_time)
+) ENGINE=MyISAM COMMENT='Scalar Double ReadOnly Values Table'
 
 CREATE TABLE IF NOT EXISTS att_scalar_double_rw
 (
@@ -83,8 +82,7 @@ value_r DOUBLE DEFAULT NULL,
 value_w DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Double ReadWrite Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_double_ro
@@ -99,8 +97,7 @@ dim_y INT UNSIGNED NOT NULL DEFAULT 0,
 value_r DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Double ReadOnly Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_double_rw
@@ -116,8 +113,7 @@ value_r DOUBLE DEFAULT NULL,
 value_w DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Double ReadWrite Values Table';
 
 CREATE TABLE IF NOT EXISTS att_scalar_int64_ro
@@ -129,8 +125,7 @@ insert_time DATETIME(6) NOT NULL,
 value_r BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Int up to 64 bit ReadOnly Values Table';
 
 CREATE TABLE IF NOT EXISTS att_scalar_int64_rw
@@ -143,8 +138,7 @@ value_r BIGINT DEFAULT NULL,
 value_w BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Int up to 64 bit ReadWrite Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_int64_ro
@@ -159,8 +153,7 @@ dim_y INT UNSIGNED NOT NULL DEFAULT 0,
 value_r BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Int up to 64 bit ReadOnly Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_int64_rw
@@ -176,8 +169,7 @@ value_r BIGINT DEFAULT NULL,
 value_w BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Int up to 64 bit ReadWrite Values Table';
 
 CREATE TABLE IF NOT EXISTS att_scalar_int8_ro
@@ -189,8 +181,7 @@ insert_time DATETIME(6) NOT NULL,
 value_r TINYINT(1) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Int up to 8 bit ReadOnly Values Table';
 
 CREATE TABLE IF NOT EXISTS att_scalar_int8_rw
@@ -203,8 +194,7 @@ value_r TINYINT(1) DEFAULT NULL,
 value_w TINYINT(1) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Int up to 8 bit ReadWrite Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_int8_ro
@@ -219,8 +209,7 @@ dim_y INT UNSIGNED NOT NULL DEFAULT 0,
 value_r TINYINT(1) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Int up to 8 bit ReadOnly Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_int8_rw
@@ -236,8 +225,7 @@ value_r TINYINT(1) DEFAULT NULL,
 value_w TINYINT(1) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Int up to 8 bit ReadWrite Values Table';
 
 CREATE TABLE IF NOT EXISTS att_scalar_string_ro
@@ -249,8 +237,7 @@ insert_time DATETIME(6) NOT NULL,
 value_r VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar String ReadOnly Values Table';
 
 CREATE TABLE IF NOT EXISTS att_scalar_string_rw
@@ -263,8 +250,7 @@ value_r VARCHAR(16384) DEFAULT NULL,
 value_w VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar String ReadWrite Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_string_ro
@@ -279,8 +265,7 @@ dim_y INT UNSIGNED NOT NULL DEFAULT 0,
 value_r VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array String ReadOnly Values Table';
 
 CREATE TABLE IF NOT EXISTS att_array_string_rw
@@ -296,8 +281,7 @@ value_r VARCHAR(16384) DEFAULT NULL,
 value_w VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
 error_desc VARCHAR(255) DEFAULT NULL,
-INDEX(data_time),
-INDEX(att_conf_id)
+INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array String ReadWrite Values Table';
 
 
