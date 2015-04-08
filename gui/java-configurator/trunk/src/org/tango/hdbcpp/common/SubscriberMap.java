@@ -61,6 +61,7 @@ public class SubscriberMap {
     private ArrayList<String> labelList = new ArrayList<String>();
     private Hashtable<String, Subscriber> label2device = new Hashtable<String, Subscriber>();
     private Hashtable<String, String> deviceName2label = new Hashtable<String, String>();
+    private ArrayList<String> tangoHostList = new ArrayList<String>();
     //======================================================
     //======================================================
     public SubscriberMap(DeviceProxy configuratorProxy) throws DevFailed {
@@ -105,7 +106,12 @@ public class SubscriberMap {
     }
     //======================================================
     //======================================================
-    public ArrayList<String> getLabelList() {
+    public int size() {
+        return labelList.size();
+    }
+    //======================================================
+    //======================================================
+    public List<String> getLabelList() {
         return labelList;
     }
     //======================================================
@@ -133,7 +139,6 @@ public class SubscriberMap {
     }
     //======================================================
     //======================================================
-    private ArrayList<String> tangoHostList = new ArrayList<String>();
     public List<String> getTangoHostList() {
         if (tangoHostList.isEmpty()) {
             Collection<Subscriber> collection = label2device.values();
