@@ -137,7 +137,7 @@ public class HdbConfigurator extends JFrame {
         treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(attributeTree);
         treeScrollPane.setPreferredSize(new Dimension(500, 500));
-        mainPanel.add(treeScrollPane, BorderLayout.CENTER);
+        attrTreePanel.add(treeScrollPane, BorderLayout.CENTER);
 
         searchButton.setText("");
         searchButton.setIcon(Utils.getInstance().getIcon("search.gif"));
@@ -224,6 +224,11 @@ public class HdbConfigurator extends JFrame {
         filtered = Utils.matchFilter(stoppedAttributeList, stopFilter);
         stoppedAttrJList.setListData(filtered);
         stoppedAttrLabel.setText(Integer.toString(filtered.length) + " Stopped Attributes");
+
+        JScrollBar horizontal = startedAttrScrollPane.getVerticalScrollBar();
+        horizontal.setValue(horizontal.getMaximum());
+        horizontal = stoppedAttrScrollPane.getVerticalScrollBar();
+        horizontal.setValue(horizontal.getMaximum());
     }
 
 	//=======================================================
@@ -313,7 +318,7 @@ public class HdbConfigurator extends JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        mainPanel = new javax.swing.JPanel();
+        attrTreePanel = new javax.swing.JPanel();
         javax.swing.JPanel addingPanel = new javax.swing.JPanel();
         javax.swing.JPanel jPanel4 = new javax.swing.JPanel();
         titleLabel = new javax.swing.JLabel();
@@ -327,10 +332,10 @@ public class HdbConfigurator extends JFrame {
         propertiesArea = new javax.swing.JTextArea();
         javax.swing.JScrollPane pollingScrollPane = new javax.swing.JScrollPane();
         pollingArea = new javax.swing.JTextArea();
-        javax.swing.JPanel eastPanel = new javax.swing.JPanel();
+        javax.swing.JPanel attrListPanel = new javax.swing.JPanel();
         javax.swing.JSplitPane splitPane = new javax.swing.JSplitPane();
         javax.swing.JPanel jPanel2 = new javax.swing.JPanel();
-        javax.swing.JScrollPane startedAttrScrollPane = new javax.swing.JScrollPane();
+        startedAttrScrollPane = new javax.swing.JScrollPane();
         startedAttrJList = new javax.swing.JList();
         javax.swing.JPanel jPanel5 = new javax.swing.JPanel();
         startedAttrLabel = new javax.swing.JLabel();
@@ -339,7 +344,7 @@ public class HdbConfigurator extends JFrame {
         javax.swing.JPanel stoppedPanel = new javax.swing.JPanel();
         stoppedAttrLabel = new javax.swing.JLabel();
         stoppedFilterText = new javax.swing.JTextField();
-        javax.swing.JScrollPane stoppedAttrScrollPane = new javax.swing.JScrollPane();
+        stoppedAttrScrollPane = new javax.swing.JScrollPane();
         stoppedAttrJList = new javax.swing.JList();
         javax.swing.JPanel archiverPanel = new javax.swing.JPanel();
         javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
@@ -364,7 +369,7 @@ public class HdbConfigurator extends JFrame {
             }
         });
 
-        mainPanel.setLayout(new java.awt.BorderLayout());
+        attrTreePanel.setLayout(new java.awt.BorderLayout());
 
         addingPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -422,7 +427,7 @@ public class HdbConfigurator extends JFrame {
         gridBagConstraints.insets = new java.awt.Insets(10, 5, 10, 0);
         addingPanel.add(searchButton, gridBagConstraints);
 
-        mainPanel.add(addingPanel, java.awt.BorderLayout.NORTH);
+        attrTreePanel.add(addingPanel, java.awt.BorderLayout.NORTH);
 
         statusPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -470,17 +475,17 @@ public class HdbConfigurator extends JFrame {
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         statusPanel.add(pollingScrollPane, gridBagConstraints);
 
-        mainPanel.add(statusPanel, java.awt.BorderLayout.SOUTH);
+        attrTreePanel.add(statusPanel, java.awt.BorderLayout.SOUTH);
 
-        getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
+        getContentPane().add(attrTreePanel, java.awt.BorderLayout.WEST);
 
-        eastPanel.setLayout(new java.awt.BorderLayout());
+        attrListPanel.setLayout(new java.awt.BorderLayout());
 
         splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
         jPanel2.setLayout(new java.awt.BorderLayout());
 
-        startedAttrScrollPane.setPreferredSize(new java.awt.Dimension(500, 400));
+        startedAttrScrollPane.setPreferredSize(new java.awt.Dimension(550, 400));
 
         startedAttrScrollPane.setViewportView(startedAttrJList);
 
@@ -520,7 +525,7 @@ public class HdbConfigurator extends JFrame {
 
         jPanel3.add(stoppedPanel, java.awt.BorderLayout.NORTH);
 
-        stoppedAttrScrollPane.setPreferredSize(new java.awt.Dimension(500, 200));
+        stoppedAttrScrollPane.setPreferredSize(new java.awt.Dimension(550, 200));
 
         stoppedAttrScrollPane.setViewportView(stoppedAttrJList);
 
@@ -528,7 +533,7 @@ public class HdbConfigurator extends JFrame {
 
         splitPane.setRightComponent(jPanel3);
 
-        eastPanel.add(splitPane, java.awt.BorderLayout.CENTER);
+        attrListPanel.add(splitPane, java.awt.BorderLayout.CENTER);
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel2.setText("Archiver:");
@@ -542,9 +547,9 @@ public class HdbConfigurator extends JFrame {
         });
         archiverPanel.add(archiverComboBox);
 
-        eastPanel.add(archiverPanel, java.awt.BorderLayout.NORTH);
+        attrListPanel.add(archiverPanel, java.awt.BorderLayout.NORTH);
 
-        getContentPane().add(eastPanel, java.awt.BorderLayout.EAST);
+        getContentPane().add(attrListPanel, java.awt.BorderLayout.CENTER);
 
         fileMenu.setMnemonic('F');
         fileMenu.setText("File");
@@ -669,6 +674,7 @@ public class HdbConfigurator extends JFrame {
         String  message = "This application is able to configure HDB++\n" +
                 "It is used to Add attributes to subscriber and\n" +
                 "Start and Stop HDB filling for selected attributes\n" +
+                "\nIt manages " + subscriberMap.size() + " event subscriber devices\n" +
                 "\nPascal Verdier - ESRF - Software Group";
         JOptionPane.showMessageDialog(this, message, "Help Window", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_aboutItemActionPerformed
@@ -1053,24 +1059,30 @@ public class HdbConfigurator extends JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addAttributeButton;
     private javax.swing.JComboBox archiverComboBox;
+    private javax.swing.JPanel attrTreePanel;
     private javax.swing.JTextField attributeField;
     private javax.swing.JTextField deviceFilterText;
-    private javax.swing.JPanel mainPanel;
     private javax.swing.JTextArea pollingArea;
     private javax.swing.JTextArea propertiesArea;
     private javax.swing.JButton searchButton;
     private javax.swing.JList startedAttrJList;
     private javax.swing.JLabel startedAttrLabel;
+    private javax.swing.JScrollPane startedAttrScrollPane;
     private javax.swing.JTextField startedFilterText;
     private javax.swing.JList stoppedAttrJList;
     private javax.swing.JLabel stoppedAttrLabel;
+    private javax.swing.JScrollPane stoppedAttrScrollPane;
     private javax.swing.JTextField stoppedFilterText;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
 	//=======================================================
 
 
+/*
+        JScrollBar vertical = scrollPane.getVerticalScrollBar();
+        vertical.setValue(vertical.getMaximum());
 
+ */
 
 
 
@@ -1127,7 +1139,7 @@ public class HdbConfigurator extends JFrame {
         //======================================================
         private void setSubscriberMenu() {
 
-            ArrayList<String> subscriberList = subscriberMap.getLabelList();
+            List<String> subscriberList = subscriberMap.getLabelList();
             String  selected = (String) archiverComboBox.getSelectedItem();
             subscriberMenu.removeAll();
             //subscriberList.remove(selected);

@@ -43,6 +43,7 @@ import fr.esrf.tangoatk.widget.util.ErrorPane;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
 
 
 //===============================================================
@@ -70,8 +71,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
      */
     //===============================================================
     public PropertyDialog(JFrame parent, String attributeName,
-                          ArrayList<String> subscribers,
-                          String defaultItem) throws DevFailed {
+                          List<String> subscribers, String defaultItem) throws DevFailed {
         super(parent, true);
         this.parent = parent;
         this.attributeName = attributeName;
@@ -96,8 +96,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
      */
     //===============================================================
     public PropertyDialog(JFrame parent, ArrayList<String> attributeNames,
-                          ArrayList<String> subscribers,
-                          String defaultItem) {
+                          List<String> subscribers, String defaultItem) {
         super(parent, true);
         this.parent = parent;
         initComponents();
@@ -373,6 +372,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
      * Verify if value set are coherent and if at least one is set.
      */
     //===============================================================
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private boolean checkValues() {
         if (manageProperties) {
             try {

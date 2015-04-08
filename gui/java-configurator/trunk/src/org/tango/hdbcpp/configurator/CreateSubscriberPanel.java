@@ -48,6 +48,7 @@ import org.tango.hdbcpp.tools.TangoUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -68,8 +69,8 @@ public class CreateSubscriberPanel extends JDialog {
     private DeviceProxy configuratorProxy;
     private ArrayList<String>   instances = new ArrayList<String>();
     private ArrayList<String>   archivers = new ArrayList<String>();
-    private ArrayList<String>   labels = new ArrayList<String>();
-    private SubscriberMap       subscriberMap = null;   //  Used only to remove
+    private List<String>   labels;
+    private SubscriberMap  subscriberMap = null;   //  Used only to remove
     private int action;
 
     private int option = JOptionPane.OK_OPTION;
