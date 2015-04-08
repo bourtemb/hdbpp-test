@@ -37,7 +37,7 @@ package org.tango.hdbcpp.atktable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.List;
 
 //=======================================================
 /**
@@ -62,8 +62,8 @@ public class TableScalarViewer extends JPanel {
      * @param    columnWidths   column widths
      */
     //===============================================================
-    public TableScalarViewer(ArrayList<String> rowNameList, String[] columnNames,
-                             ArrayList<String[]> attributeList, int[] columnWidths) {
+    public TableScalarViewer(List<String> rowNameList, String[] columnNames,
+                             List<String[]> attributeList, int[] columnWidths) {
         String[] rowNames = new String[rowNameList.size()];
         for (int i=0 ; i<rowNameList.size() ; i++) rowNames[i] = rowNameList.get(i);
         String[][] attributeNames = new String[attributeList.size()][];
