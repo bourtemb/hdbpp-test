@@ -54,8 +54,7 @@ import java.net.URL;
 
 /**
  * Class Description:
- * This class display a dialog with a list of command to be send to
- * the selected server.
+ * This class display a dialog with a html message
  *
  * @author verdier
  */
