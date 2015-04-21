@@ -56,7 +56,7 @@ public class Subscriber extends DeviceProxy {
     protected String startedFilter;
     protected String stoppedFilter;
 
-    private static final String CLASS_NAME = "HdbEventSubscriber";
+    public static final String CLASS_NAME = "HdbEventSubscriber";
     //======================================================
     //======================================================
     public Subscriber(String deviceName, String label) throws DevFailed {
