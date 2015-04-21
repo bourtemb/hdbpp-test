@@ -230,10 +230,17 @@ public class TangoUtils {
             String name = attPollingStatus.substring(header.length(),
                     attPollingStatus.indexOf('\n'));
             if (name.toLowerCase().equals(attributeName.toLowerCase())) {
-                return attPollingStatus;
+                //return attPollingStatus;
+                //  Get Only polling period
+                int start = attPollingStatus.indexOf("Polling period");
+                if (start>0) {
+                    int end = attPollingStatus.indexOf('\n', start);
+                    if (end>start)
+                        return attPollingStatus.substring(start, end).trim();
+                }
             }
         }
-        return "";
+        return "Attribute Not Polled";
     }
     //======================================================================
     /**
