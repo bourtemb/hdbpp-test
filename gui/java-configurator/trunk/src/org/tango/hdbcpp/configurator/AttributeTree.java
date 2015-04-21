@@ -726,10 +726,13 @@ public class AttributeTree extends JTree {
                 }
                 else
                 if (node.getUserObject() instanceof Attribute) {
-                    setFont(attributeFont);
                     Attribute attribute = (Attribute) node.getUserObject();
                     setIcon(attribute.getIcon());
                     setToolTipText(attribute.getToolTip());
+                    if (attribute.archiver==null)
+                        setFont(attributeFont);
+                    else
+                        setFont(deviceFont);    //  BOLD
                 }
                 else {
                     setFont(deviceFont);

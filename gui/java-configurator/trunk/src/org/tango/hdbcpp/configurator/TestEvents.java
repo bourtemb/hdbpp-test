@@ -43,7 +43,7 @@ import java.util.List;
 
 //===============================================================
 /**
- * Class Description: a sigleton to call Astor class to test events
+ * Class Description: a singleton to call Astor class to test events
  *
  * @author Pascal Verdier
  */

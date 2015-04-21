@@ -37,6 +37,7 @@ package org.tango.hdbcpp.configurator;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.AttributeInfoEx;
 import fr.esrf.TangoApi.AttributeProxy;
+import fr.esrf.TangoDs.Except;
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
@@ -157,10 +158,13 @@ public class PropertyDialog extends JDialog implements TangoConst {
         javax.swing.JLabel periodLbl = new javax.swing.JLabel();
         absTxt = new javax.swing.JTextField();
         relTxt = new javax.swing.JTextField();
-        periodTxt = new javax.swing.JTextField();
+        eventPeriodTxt = new javax.swing.JTextField();
         javax.swing.JButton resetAbsBtn = new javax.swing.JButton();
         javax.swing.JButton resetRelBtn = new javax.swing.JButton();
         javax.swing.JButton resetPerBtn = new javax.swing.JButton();
+        javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
+        pollingPeriodTxt = new javax.swing.JTextField();
         javax.swing.JPanel pushedPanel = new javax.swing.JPanel();
         pushedByCodeButton = new javax.swing.JRadioButton();
         javax.swing.JPanel startPanel = new javax.swing.JPanel();
@@ -213,55 +217,55 @@ public class PropertyDialog extends JDialog implements TangoConst {
 
         propertyPanel.setLayout(new java.awt.GridBagLayout());
 
-        absLbl.setText("abs_change:");
+        absLbl.setText("absolute change:");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(30, 10, 0, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         propertyPanel.add(absLbl, gridBagConstraints);
 
-        relLbl.setText("rel_change:");
+        relLbl.setText("relative change:");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         propertyPanel.add(relLbl, gridBagConstraints);
 
-        periodLbl.setText("period:");
+        periodLbl.setText("event period (milliseconds):");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 30, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
         propertyPanel.add(periodLbl, gridBagConstraints);
 
         absTxt.setColumns(12);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         propertyPanel.add(absTxt, gridBagConstraints);
 
         relTxt.setColumns(12);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         propertyPanel.add(relTxt, gridBagConstraints);
 
-        periodTxt.setColumns(12);
+        eventPeriodTxt.setColumns(12);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
-        propertyPanel.add(periodTxt, gridBagConstraints);
+        propertyPanel.add(eventPeriodTxt, gridBagConstraints);
 
         resetAbsBtn.setText("Reset");
         resetAbsBtn.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -271,10 +275,10 @@ public class PropertyDialog extends JDialog implements TangoConst {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         propertyPanel.add(resetAbsBtn, gridBagConstraints);
 
         resetRelBtn.setText("Reset");
@@ -285,7 +289,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
@@ -299,11 +303,34 @@ public class PropertyDialog extends JDialog implements TangoConst {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
         propertyPanel.add(resetPerBtn, gridBagConstraints);
+
+        jLabel3.setText("Event Properties:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(30, 10, 0, 0);
+        propertyPanel.add(jLabel3, gridBagConstraints);
+
+        jLabel4.setText("Attribute polling period (milliseconds):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 30, 0);
+        propertyPanel.add(jLabel4, gridBagConstraints);
+
+        pollingPeriodTxt.setColumns(12);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
+        propertyPanel.add(pollingPeriodTxt, gridBagConstraints);
 
         centerPanel.add(propertyPanel, java.awt.BorderLayout.CENTER);
 
@@ -349,7 +376,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
     //===============================================================
     @SuppressWarnings("UnusedParameters")
     private void resetPerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetPerBtnActionPerformed
-        periodTxt.setText(Tango_AlrmValueNotSpec);
+        eventPeriodTxt.setText(Tango_AlrmValueNotSpec);
     }//GEN-LAST:event_resetPerBtnActionPerformed
 
     //===============================================================
@@ -367,7 +394,6 @@ public class PropertyDialog extends JDialog implements TangoConst {
     }//GEN-LAST:event_resetAbsBtnActionPerformed
 
     //===============================================================
-
     /**
      * Verify if value set are coherent and if at least one is set.
      */
@@ -385,8 +411,12 @@ public class PropertyDialog extends JDialog implements TangoConst {
                 if (!value.equals(Tango_AlrmValueNotSpec)) {
                     Double.parseDouble(value);
                 }
-                value = periodTxt.getText().trim();
+                value = eventPeriodTxt.getText().trim();
                 if (!value.equals(Tango_AlrmValueNotSpec)) {
+                    Integer.parseInt(value);
+                }
+                value = pollingPeriodTxt.getText().trim();
+                if (!value.equals("Not Polled")) {
                     Integer.parseInt(value);
                 }
             } catch (Exception e) {
@@ -415,14 +445,28 @@ public class PropertyDialog extends JDialog implements TangoConst {
                      changed = true;
                 }
                 if (attributeInfoEx.events.arch_event.period!=null ||
-                   !attributeInfoEx.events.arch_event.period.equals(periodTxt.getText().trim())) {
-                    attributeInfoEx.events.arch_event.period = periodTxt.getText().trim();
+                   !attributeInfoEx.events.arch_event.period.equals(eventPeriodTxt.getText().trim())) {
+                    attributeInfoEx.events.arch_event.period = eventPeriodTxt.getText().trim();
                     changed = true;
                 }
 
                 //	And set them if have changed
                 if (changed)
                     attributeProxy.set_info(new AttributeInfoEx[]{ attributeInfoEx });
+
+                //  Check for polling period
+                String s = pollingPeriodTxt.getText().trim();
+                if (!s.equals("Not Polled")) {
+                    try {
+                        int value = Integer.parseInt(s);
+                        if (value!=pollingPeriod) {
+                            attributeProxy.poll(value);
+                        }
+                    }
+                    catch (NumberFormatException e) {
+                        Except.throw_exception("SyntaxError", e.getMessage());
+                    }
+                }
                 return true;
             } catch (DevFailed e) {
                 ErrorPane.showErrorMessage(this, null, e);
@@ -476,6 +520,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
 
     //===============================================================
     //===============================================================
+    private int pollingPeriod = 0;
     private void displayProperty() throws DevFailed {
         if (!manageProperties)
             return;
@@ -498,7 +543,19 @@ public class PropertyDialog extends JDialog implements TangoConst {
         }
         absTxt.setText(abs_change);
         relTxt.setText(rel_change);
-        periodTxt.setText(period);
+        eventPeriodTxt.setText(period);
+
+        //  Add polling period
+        try {
+            pollingPeriod = attributeProxy.get_polling_period();
+            pollingPeriodTxt.setText(Integer.toString(pollingPeriod));
+        }
+        catch (DevFailed e) {
+            if (e.errors[0].desc.contains("not polled"))
+                pollingPeriodTxt.setText("Not Polled");
+            else
+                throw e;
+        }
     }
 
     //===============================================================
@@ -530,7 +587,8 @@ public class PropertyDialog extends JDialog implements TangoConst {
     private javax.swing.JTextField absTxt;
     private javax.swing.JTextArea attributeListArea;
     private javax.swing.JScrollPane attributeListScrollPane;
-    private javax.swing.JTextField periodTxt;
+    private javax.swing.JTextField eventPeriodTxt;
+    private javax.swing.JTextField pollingPeriodTxt;
     private javax.swing.JPanel propertyPanel;
     private javax.swing.JRadioButton pushedByCodeButton;
     private javax.swing.JTextField relTxt;

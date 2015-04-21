@@ -78,6 +78,11 @@ public class CreateSubscriberPanel extends JDialog {
     private static final String CLASS_NAME = "HdbEventSubscriber";
     public static final int CREATE = 0;
     public static final int REMOVE = 1;
+
+    private static final String DB_NAME = "hdb";
+    private static final String START_AT_STARTUP = "false";
+    private static final String STAT_TIME_WINDOW = "1";
+    private static final String POLLING_THREAD_PERIOD = "1";
 	//===============================================================
 	/**
 	 *	Creates new form CreateSubscriberPanel
@@ -89,6 +94,7 @@ public class CreateSubscriberPanel extends JDialog {
         this.configuratorProxy = configuratorProxy;
         this.action = action;
 		initComponents();
+        classPanel.setVisible(false);
 
         subscriberMap = new SubscriberMap(configuratorProxy);
         if (action==CREATE) {
@@ -99,14 +105,27 @@ public class CreateSubscriberPanel extends JDialog {
             for (String archiver : archiverDevices) {
                 archivers.add(archiver);
                 deviceComboBox.addItem(TangoUtils.getOnlyDeviceName(archiver));
-                String  instance = getServerInstance(archiver);
+                String instance = getServerInstance(archiver);
                 if (!instances.contains(instance)) {
                     instances.add(instance);
                     instanceComboBox.addItem(instance);
                 }
             }
+
+            //  Initialize exe file name if first
+            if (archiverDevices.length==0) {
+                exeFile = System.getenv("SubscriberExe");
+
+                // Get class properties if first subscriber
+                classPanel.setVisible(true);
+                dbNameText.setText(DB_NAME);
+                statTimeText.setText(STAT_TIME_WINDOW);
+                startArchivingText.setText(START_AT_STARTUP);
+                pollingThreadText.setText(POLLING_THREAD_PERIOD);
+            }
         }
         else {
+            //  action is REMOVE
             titleLabel.setText("Remove a Subscriber");
             instanceComboBox.setVisible(false);
             instanceLabel.setVisible(false);
@@ -116,8 +135,7 @@ public class CreateSubscriberPanel extends JDialog {
         }
 
         //  Put in a list to sort before
-        labels = subscriberMap.getLabelList();//TangoUtils.getSubscriberLabels();
-        //Collections.sort(labels, new StringComparator());
+        labels = subscriberMap.getLabelList();
         for (String label : labels) {
             labelComboBox.addItem(label);
         }
@@ -162,6 +180,20 @@ public class CreateSubscriberPanel extends JDialog {
         javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
         javax.swing.JButton okBtn = new javax.swing.JButton();
         javax.swing.JButton cancelBtn = new javax.swing.JButton();
+        classPanel = new javax.swing.JPanel();
+        javax.swing.JLabel classLabel = new javax.swing.JLabel();
+        javax.swing.JLabel classLabel1 = new javax.swing.JLabel();
+        dbPortText = new javax.swing.JTextField();
+        javax.swing.JLabel classLabel2 = new javax.swing.JLabel();
+        dbHostText = new javax.swing.JTextField();
+        javax.swing.JLabel classLabel3 = new javax.swing.JLabel();
+        dbNameText = new javax.swing.JTextField();
+        javax.swing.JLabel classLabel4 = new javax.swing.JLabel();
+        pollingThreadText = new javax.swing.JTextField();
+        javax.swing.JLabel classLabel5 = new javax.swing.JLabel();
+        statTimeText = new javax.swing.JTextField();
+        javax.swing.JLabel classLabel6 = new javax.swing.JLabel();
+        startArchivingText = new javax.swing.JTextField();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -248,6 +280,109 @@ public class CreateSubscriberPanel extends JDialog {
 
         getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
 
+        classPanel.setLayout(new java.awt.GridBagLayout());
+
+        classLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        classLabel.setText("Class Properties:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(12, 12, 5, 12);
+        classPanel.add(classLabel, gridBagConstraints);
+
+        classLabel1.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        classLabel1.setText("DbPort (MySql):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 5);
+        classPanel.add(classLabel1, gridBagConstraints);
+
+        dbPortText.setColumns(20);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        classPanel.add(dbPortText, gridBagConstraints);
+
+        classLabel2.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        classLabel2.setText("DbHost:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 5);
+        classPanel.add(classLabel2, gridBagConstraints);
+
+        dbHostText.setColumns(20);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        classPanel.add(dbHostText, gridBagConstraints);
+
+        classLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        classLabel3.setText("DbName:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 5);
+        classPanel.add(classLabel3, gridBagConstraints);
+
+        dbNameText.setColumns(20);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        classPanel.add(dbNameText, gridBagConstraints);
+
+        classLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        classLabel4.setText("Polling thread period (sec.):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 5);
+        classPanel.add(classLabel4, gridBagConstraints);
+
+        pollingThreadText.setColumns(20);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        classPanel.add(pollingThreadText, gridBagConstraints);
+
+        classLabel5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        classLabel5.setText("Statistic time window:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 5);
+        classPanel.add(classLabel5, gridBagConstraints);
+
+        statTimeText.setColumns(20);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        classPanel.add(statTimeText, gridBagConstraints);
+
+        classLabel6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        classLabel6.setText("Start archiving at start up:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 5);
+        classPanel.add(classLabel6, gridBagConstraints);
+
+        startArchivingText.setColumns(20);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        classPanel.add(startArchivingText, gridBagConstraints);
+
+        getContentPane().add(classPanel, java.awt.BorderLayout.LINE_END);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -309,8 +444,39 @@ public class CreateSubscriberPanel extends JDialog {
     }
 	//===============================================================
 	//===============================================================
+    private boolean checkExeFile() {
+        if (exeFile==null) {
+            exeFile = JOptionPane.showInputDialog(this, " Subscriber executable name ?");
+        }
+        return exeFile!=null;
+    }
+	//===============================================================
+	//===============================================================
+    private void setClassProperties() throws DevFailed {
+        //  DbPort is only for MySql hdb
+        String dbPort = dbPortText.getText().trim();
+
+        DbDatum[]  dbData = new DbDatum[(dbPort.isEmpty())? 5 : 6];
+        dbData[0] = new DbDatum("DbName", dbNameText.getText().trim());
+        dbData[1] = new DbDatum("DbHost", dbHostText.getText().trim());
+        dbData[2] = new DbDatum("PollingThreadPeriod", pollingThreadText.getText().trim());
+        dbData[3] = new DbDatum("StartArchivingAtStartup", startArchivingText.getText().trim());
+        dbData[4] = new DbDatum("StatisticsTimeWindow", statTimeText.getText().trim());
+        if (!dbPort.isEmpty()) dbData[5] = new DbDatum("DbPort", dbPort);
+
+        DbClass dbClass = new DbClass(Subscriber.CLASS_NAME);
+        dbClass.put_property(dbData);
+    }
+	//===============================================================
+	//===============================================================
     private boolean addSubscriber() throws DevFailed {
         //  ToDo
+        if (!checkExeFile()) {
+            return false;
+        }
+        if (classPanel.isVisible()) {
+            setClassProperties();
+        }
 
         String instance   = ((String) instanceComboBox.getSelectedItem()).trim();
         String deviceName = ((String) deviceComboBox.getSelectedItem()).trim();
@@ -473,11 +639,18 @@ public class CreateSubscriberPanel extends JDialog {
     }
 	//===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel classPanel;
+    private javax.swing.JTextField dbHostText;
+    private javax.swing.JTextField dbNameText;
+    private javax.swing.JTextField dbPortText;
     private javax.swing.JComboBox deviceComboBox;
     private javax.swing.JLabel deviceLabel;
     private javax.swing.JComboBox instanceComboBox;
     private javax.swing.JLabel instanceLabel;
     private javax.swing.JComboBox labelComboBox;
+    private javax.swing.JTextField pollingThreadText;
+    private javax.swing.JTextField startArchivingText;
+    private javax.swing.JTextField statTimeText;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
 	//===============================================================
@@ -497,7 +670,7 @@ public class CreateSubscriberPanel extends JDialog {
                 Except.throw_exception("DeviceNotDefined",
                         "HDB manager device not defined");
             new CreateSubscriberPanel(null,
-                    new DeviceProxy(deviceName), CreateSubscriberPanel.REMOVE).showDialog();
+                    new DeviceProxy(deviceName), CreateSubscriberPanel.CREATE).showDialog();
 		}
 		catch(DevFailed e) {
             ErrorPane.showErrorMessage(new Frame(), null, e);
