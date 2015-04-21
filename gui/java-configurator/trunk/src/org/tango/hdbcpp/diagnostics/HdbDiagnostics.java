@@ -67,7 +67,7 @@ public class HdbDiagnostics extends JFrame {
     private DeviceProxy   configuratorProxy;
     private SubscriberMap subscriberMap;
     private SubscriberMenu subscriberMenu = new SubscriberMenu();
-    private ArrayList<String> labels;
+    private List<String> labels;
     private TableScalarViewer tableViewer;
     private JFrame parent;
     private int  statisticsTimeWindow;

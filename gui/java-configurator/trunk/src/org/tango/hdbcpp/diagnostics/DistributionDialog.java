@@ -54,6 +54,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.List;
 
 
 //===============================================================
@@ -429,7 +430,7 @@ public class DistributionDialog extends JDialog {
         private void updateValues() throws DevFailed {
             resetDataViews();
             archivers.clear();
-            ArrayList<String> labels = subscriberMap.getLabelList();
+            List<String> labels = subscriberMap.getLabelList();
             SplashUtils.getInstance().reset();
             attributeCount = 0;
             int x = 0;
