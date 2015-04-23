@@ -478,6 +478,7 @@ public class CreateSubscriberPanel extends JDialog {
             setClassProperties();
         }
 
+        //  Check inputs
         String instance   = ((String) instanceComboBox.getSelectedItem()).trim();
         String deviceName = ((String) deviceComboBox.getSelectedItem()).trim();
         String label      = ((String) labelComboBox.getSelectedItem()).trim();
@@ -492,8 +493,8 @@ public class CreateSubscriberPanel extends JDialog {
         //  Check instance
         boolean serverExists = instances.contains(instance);
         System.out.println(instance);
+
         //  Check device name (with tango host !!!)
-        //if (archivers.contains(deviceName))
         boolean deviceExists = false;
         for (String archiver : archivers) {
             if (TangoUtils.getOnlyDeviceName(archiver).equals(deviceName))
@@ -584,6 +585,15 @@ public class CreateSubscriberPanel extends JDialog {
 	//===============================================================
 	//===============================================================
     private void createArchiverDevice(String instance, String deviceName, boolean severExists) throws DevFailed {
+        //  Check if device already exists and is alive
+        try{
+            new DeviceProxy(deviceName).ping();
+            //  if alive, do not create
+            return;
+        } catch (DevFailed e) {
+            //
+        }
+
         String serverName = exeFile + '/' + instance;
         if (!severExists) {
             String adminName = "dserver/"+exeFile.toLowerCase() + "/" + instance;

@@ -76,10 +76,8 @@ public class HdbConfigurator extends JFrame {
     private JFileChooser    fileChooser = null;
     private JFrame          diagnosticsPanel = null;
     private List<String>    tangoHostList;
+    private UpdateListThread updateListThread;
 
-    private static final int STARTED = 0;
-    private static final int STOPPED = 1;
-    private static final int PAUSED  = 2;
     private static final Dimension treeDimension = new Dimension(350, 400);
     //=======================================================
     /**
@@ -93,6 +91,8 @@ public class HdbConfigurator extends JFrame {
         initComponents();
         initOwnComponents();
         ManageAttributes.setDisplay(true);
+        updateListThread = new UpdateListThread();
+        updateListThread.start();
 
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
@@ -211,45 +211,52 @@ public class HdbConfigurator extends JFrame {
         String  attributeName = (String) list.getSelectedValue();
         if (attributeName==null)
             return;
-        int mask = event.getModifiers();
+        //  Check if attribute or error
+        if (attributeName.startsWith("!!!"))
+            return;
+
 
         //  Check button clicked
-        if ((mask & MouseEvent.BUTTON3_MASK) != 0) {
+        if ((event.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
             menu.showMenu(event, attributeName);
         }
     }
 	//=======================================================
 	//=======================================================
     private void updateAttributeList(Subscriber subscriber) throws DevFailed {
-
         //  Get displayed list
-        JScrollBar horizontal;
-        switch (tabbedPane.getSelectedIndex()) {
-            case STARTED:
-                String startFilter = subscriber.getStartedFilter();
-                String[] startedAttributeList = ArchiverUtils.getAttributeList(subscriber, "Started");
-                String[] filtered = Utils.matchFilter(startedAttributeList, startFilter);
-                startedAttrJList.setListData(filtered);
-                startedAttrLabel.setText(Integer.toString(filtered.length) + " Started Attributes");
-                //  move horizontal scroll bar to see end of attribute name
-                horizontal = startedAttrScrollPane.getVerticalScrollBar();
-                horizontal.setValue(horizontal.getMaximum());
+        int selection =  tabbedPane.getSelectedIndex();
+        String[] attributeList = subscriber.getAttributeList(selection, true);
+        switch (selection) {
+            case Subscriber.ATTRIBUTE_STARTED:
+                updateAttributeList(startedAttrJList,
+                        attributeList, startedAttrLabel, startedAttrScrollPane);
                 break;
-            case STOPPED:
-                String stopFilter = subscriber.getStoppedFilter();
-                String[] stoppedAttributeList = ArchiverUtils.getAttributeList(subscriber, "Stopped");
-                filtered = Utils.matchFilter(stoppedAttributeList, stopFilter);
-                stoppedAttrJList.setListData(filtered);
-                stoppedAttrLabel.setText(Integer.toString(filtered.length) + " Stopped Attributes");
-                //  move horizontal scroll bar to see end of attribute name
-                horizontal = stoppedAttrScrollPane.getVerticalScrollBar();
-                horizontal.setValue(horizontal.getMaximum());
+            case Subscriber.ATTRIBUTE_STOPPED:
+                updateAttributeList(stoppedAttrJList,
+                        attributeList, stoppedAttrLabel, stoppedAttrScrollPane);
                 break;
-            case PAUSED:
-                //  ToDo add PausedAttributeList
+            case Subscriber.ATTRIBUTE_PAUSED:
+                updateAttributeList(pausedAttrJList,
+                        attributeList, pausedAttrLabel, pausedAttrScrollPane);
+                break;
         }
     }
 
+	//=======================================================
+	//=======================================================
+    private void updateAttributeList(JList jList, String[] attributes, JLabel jLabel, JScrollPane scrollPane) {
+
+        //  Display attributes in jList
+        int selection =  tabbedPane.getSelectedIndex();
+        String attributeState = tabbedPane.getTitleAt(selection);
+        jList.setListData(attributes);
+        jLabel.setText(Integer.toString(attributes.length) + " " + attributeState);
+
+        //  move horizontal scroll bar to see end of attribute name
+        JScrollBar horizontal = scrollPane.getVerticalScrollBar();
+        horizontal.setValue(horizontal.getMaximum());
+    }
 	//=======================================================
 	//=======================================================
     public void displayPathInfo(String tangoHost, String attributeName) {
@@ -284,7 +291,9 @@ public class HdbConfigurator extends JFrame {
 	//=======================================================
     private void moveAttributeToSubscriber(String targetSubscriberLabel, JList selectedList) {
         try {
-            System.out.println("Move for "+ targetSubscriberLabel);
+            System.out.println("Move to "+ targetSubscriberLabel);
+
+
             Object[] attributeNames = selectedList.getSelectedValues();
             ArrayList<String>   attributeList = new ArrayList<String>();
             for (Object attributeName : attributeNames) {
@@ -293,6 +302,9 @@ public class HdbConfigurator extends JFrame {
             Subscriber targetSubscriber = subscriberMap.getSubscriber(targetSubscriberLabel);
             Subscriber srcSubscriber =
                     subscriberMap.getSubscriber((String) archiverComboBox.getSelectedItem());
+
+            //  Before everything, check if target is alive
+            targetSubscriber.ping();
 
             //  If started -> stop it before
             if (selectedList==startedAttrJList)
@@ -307,6 +319,10 @@ public class HdbConfigurator extends JFrame {
                 ArchiverUtils.removeAttribute(srcSubscriber, attributeName);
                 ArchiverUtils.addAttribute(targetSubscriber, attributeName);
             }
+            //  Wait a bit. Add is done by a thread --> DevFailed(Not subscribed)
+            //  Will be fine to do move sequence in manager device class !!!
+            SplashUtils.getInstance().startSplash();
+            try { Thread.sleep(1000); } catch (InterruptedException e) { /* */ }
 
             //  And restart if they were started
             if (selectedList==startedAttrJList)
@@ -741,6 +757,8 @@ public class HdbConfigurator extends JFrame {
             Subscriber subscriber = subscriberMap.getSubscriber(archiverLabel);
             startedFilterText.setText(subscriber.getStartedFilter());
             stoppedFilterText.setText(subscriber.getStoppedFilter());
+            pausedFilterText.setText(subscriber.getPausedFilter());
+
             updateAttributeList(subscriberMap.getSubscriber(archiverLabel));
         }
         catch (DevFailed e) {
@@ -841,7 +859,15 @@ public class HdbConfigurator extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void pausedFilterTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pausedFilterTextActionPerformed
-        // TODO add your handling code here:
+        try {
+            Subscriber subscriber = subscriberMap.getSubscriber(
+                    (String)archiverComboBox.getSelectedItem());
+            subscriber.setPausedFilter(pausedFilterText.getText());
+            updateAttributeList(subscriber);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, null, e);
+        }
     }//GEN-LAST:event_pausedFilterTextActionPerformed
 
     //=======================================================
@@ -1086,12 +1112,16 @@ public class HdbConfigurator extends JFrame {
 	//=======================================================
 	//=======================================================
     private void doClose() {
+        updateListThread.stopIt = true;
         if (diagnosticsPanel!=null && diagnosticsPanel.isVisible()) {
             setVisible(false);
             dispose();
         }
-        else
+        else {
+            try { updateListThread.join(); }
+            catch (InterruptedException e) { System.err.println(e.getMessage()); }
             System.exit(0);
+        }
     }
 	//=======================================================
     /**
@@ -1309,4 +1339,45 @@ public class HdbConfigurator extends JFrame {
     }
     //======================================================
     //======================================================
+
+
+
+    //=======================================================
+    /**
+     * A thread to update Started/Stopped/Paused attribute lists
+     * on selected subscriber if they have changed
+     */
+    //=======================================================
+    private class UpdateListThread extends Thread {
+        private String[] displayedList = null;
+        private boolean stopIt = false;
+        //===================================================
+        public void run() {
+            while (!stopIt) {
+                try { sleep(1000); } catch (InterruptedException e) { /* */ }
+
+                //  Get selected subscriber
+                String  archiverLabel = (String) archiverComboBox.getSelectedItem();
+                if (archiverLabel!=null) {
+                    try {
+                        Subscriber subscriber = subscriberMap.getSubscriber(archiverLabel);
+
+                        //  Get displayed list
+                        int selection = tabbedPane.getSelectedIndex();
+                        //  Get attribute list and check if has changed
+                        String[] attributeList = subscriber.getAttributeList(selection, false);
+                        if (attributeList!=displayedList) {
+                            displayedList = attributeList;
+                            updateAttributeList(subscriber);
+                        }
+                    }
+                    catch (DevFailed e) {
+                        System.err.println(e.errors[0].desc);
+                    }
+                }
+            }
+        }
+    }
+    //=======================================================
+    //=======================================================
 }
