@@ -1,0 +1,69 @@
+#!/bin/sh
+
+
+#--------------------------------------------------------
+# A little script to build a jar file.
+#--------------------------------------------------------
+TANGO_HOME=/segfs/tango
+
+JAR_HOME=../bin
+PACKAGE=$1
+PACK_HOME=$2
+VERSION=$3
+JAR_DIR=$4
+
+JAR_FILE=$PACKAGE-$VERSION.jar
+
+#--------------------------------------------------------
+#--------------------------------------------------------
+if [ $# -eq 0 ]
+then
+	echo "$0 usage : $0 <version number>"
+	exit
+fi
+
+
+#--------------------------------------------------------
+#	build manifest
+#--------------------------------------------------------
+MANIF_FILE=manif
+
+cat > $JAR_HOME/$MANIF_FILE << EOF
+Manifest-Version: 1.0
+$PACKAGE-Version: $VERSION
+EOF
+
+
+
+#--------------------------------------------------------
+#	build jar file
+#--------------------------------------------------------
+PATH=$PATH:/segfs/tango/jdk/Linux/jdk1.6.0/bin/
+cd $JAR_HOME
+pwd
+jar cmvf  $MANIF_FILE   \
+		$JAR_DIR/$JAR_FILE              \
+		$PACK_HOME/tools/*.class        \
+		$PACK_HOME/common/*.class       \
+		$PACK_HOME/atktable/*.class     \
+		$PACK_HOME/configurator/*.class \
+		$PACK_HOME/diagnostics/*.class  \
+		$PACK_HOME/img/*
+
+
+chmod 664 $JAR_DIR/$JAR_FILE
+echo ""
+echo ""
+rm $MANIF_FILE
+
+
+#--------------------------------------------------------
+#	Install link on this version
+#--------------------------------------------------------
+JAR_LINK=$PACKAGE.jar
+
+rm -f $JAR_DIR/$JAR_LINK
+
+
+cd $JAR_DIR;	pwd;ln -s $JAR_FILE	$JAR_LINK
+cd $JAR_DIR;	ls -l $PACKAGE* 
