@@ -166,18 +166,27 @@ public class ArchiverUtils {
         }
     }
     //======================================================================
+    /**
+     * Use AttributeAssign to move an attribute to another subscriber
+     * @param managerProxy      manager proxy
+     * @param attributeName     attribute name
+     * @param subscriberName    target subscriber name
+     * @throws DevFailed in case of call device failed.
+     */
     //======================================================================
-    public static void addAttribute(DeviceProxy subscriberProxy, String attributeName) throws DevFailed {
+    @SuppressWarnings("unused")
+    public static void moveAttribute(DeviceProxy managerProxy, String attributeName, String subscriberName) throws
+            DevFailed {
         DeviceData  argIn = new DeviceData();
-        argIn.insert(attributeName);
-        subscriberProxy.command_inout("AttributeAdd", argIn);
+        argIn.insert(new String[] { attributeName, subscriberName });
+        managerProxy.command_inout("AttributeAssign", argIn);
     }
     //======================================================================
     /**
      * Start the archiving for specified attribute on specified subscriber
      * @param subscriberProxy specified subscriber
      * @param attributeName  specified attribute name
-     * @throws DevFailed in case of read device failed.
+     * @throws DevFailed in case of call device failed.
      */
     //======================================================================
     public static void startAttribute(DeviceProxy subscriberProxy, String attributeName) throws DevFailed {
@@ -190,7 +199,7 @@ public class ArchiverUtils {
      * Stop the archiving for specified attribute on specified subscriber
      * @param subscriberProxy specified subscriber
      * @param attributeName  specified attribute name
-     * @throws DevFailed in case of read device failed.
+     * @throws DevFailed in case of call device failed.
      */
     //======================================================================
     public static void stopAttribute(DeviceProxy subscriberProxy, String attributeName) throws DevFailed {
@@ -200,16 +209,29 @@ public class ArchiverUtils {
     }
     //======================================================================
     /**
-     * remove specified attribute on specified subscriber
-     * @param proxy         specified subscriber or configurator
-     * @param attributeName specified attribute name
-     * @throws DevFailed in case of read device failed.
+     * Pause the archiving for specified attribute on specified subscriber
+     * @param subscriberProxy specified subscriber
+     * @param attributeName  specified attribute name
+     * @throws DevFailed in case of call device failed.
      */
     //======================================================================
-    public static void removeAttribute(DeviceProxy proxy, String attributeName) throws DevFailed {
+    public static void pauseAttribute(DeviceProxy subscriberProxy, String attributeName) throws DevFailed {
         DeviceData  argIn = new DeviceData();
         argIn.insert(attributeName);
-        proxy.command_inout("AttributeRemove", argIn);
+        subscriberProxy.command_inout("AttributePause", argIn);
+    }
+    //======================================================================
+    /**
+     * remove specified attribute on specified subscriber
+     * @param managerProxy  manager proxy
+     * @param attributeName specified attribute name
+     * @throws DevFailed in case of call device failed.
+     */
+    //======================================================================
+    public static void removeAttribute(DeviceProxy managerProxy, String attributeName) throws DevFailed {
+        DeviceData  argIn = new DeviceData();
+        argIn.insert(attributeName);
+        managerProxy.command_inout("AttributeRemove", argIn);
     }
     //======================================================================
     /**
