@@ -37,6 +37,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.AttributeProxy;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
+import org.tango.hdbcpp.common.Subscriber;
 import org.tango.hdbcpp.tools.ArchiverUtils;
 import org.tango.hdbcpp.tools.SplashUtils;
 import org.tango.hdbcpp.tools.TangoUtils;
@@ -125,6 +126,7 @@ public class ManageAttributes {
     /** Archive event pushed by Tango device code */
     public static final boolean PUSHED_BY_CODE  = true;
     /** Do not start archiving */
+    @SuppressWarnings("unused")
     public static final boolean STOP_ARCHIVING  = false;
     /** Start archiving */
     public static final boolean START_ARCHIVING = true;
@@ -199,40 +201,7 @@ public class ManageAttributes {
      */
     //===============================================================
     public static void startAttributes(ArrayList<String> attributes) throws DevFailed {
-        if (display) {
-            SplashUtils.getInstance().startSplash();
-            SplashUtils.getInstance().setSplashProgress(10, "Starting attributes");
-        }
-        int step = 90/attributes.size();
-        if (step<1) step = 1;
-        //  Get Tango objects
-        DeviceProxy configurator = new DeviceProxy(TangoUtils.getConfiguratorDeviceName());
-
-        try {
-            String  previous = null;
-            DeviceProxy archiver = null;
-            for (String attribute : attributes) {
-                if (display) {
-                    SplashUtils.getInstance().increaseSplashProgress(step, "Starting "+attribute);
-                }
-                else
-                    System.out.println("Starting " + attribute);
-                //  Check if archiver is the same or another one.
-                String  archiverName = ArchiverUtils.getArchiver(configurator, attribute);
-                if (archiver==null || !archiverName.equals(previous)) {
-                    previous = archiverName;
-                    archiver = new DeviceProxy(archiverName);
-                }
-                ArchiverUtils.startAttribute(configurator, TangoUtils.fullName(attribute));
-            }
-            if (display)
-                SplashUtils.getInstance().stopSplash();
-        }
-        catch (DevFailed e) {
-            if (display)
-                SplashUtils.getInstance().stopSplash();
-            throw e;
-        }
+        changeAttributeStates(attributes, Subscriber.ATTRIBUTE_STARTED);
     }
     //===============================================================
     /**
@@ -242,9 +211,34 @@ public class ManageAttributes {
      */
     //===============================================================
     public static void stopAttributes(ArrayList<String> attributes) throws DevFailed {
+        changeAttributeStates(attributes, Subscriber.ATTRIBUTE_STOPPED);
+    }
+    //===============================================================
+    /**
+     * Pause a list of attributes
+     * @param attributes    specified attribute list
+     * @throws DevFailed in case of connection failed.
+     */
+    //===============================================================
+    public static void pauseAttributes(ArrayList<String> attributes) throws DevFailed {
+        changeAttributeStates(attributes, Subscriber.ATTRIBUTE_PAUSED);
+    }
+    //===============================================================
+    /**
+     * Stop a list of attributes
+     * @param attributes    specified attribute list
+     * @throws DevFailed in case of connection failed.
+     */
+    //===============================================================
+    private static void changeAttributeStates(ArrayList<String> attributes, int action) throws DevFailed {
+        if (action<Subscriber.ATTRIBUTE_STARTED || action>Subscriber.ATTRIBUTE_STOPPED)
+            Except.throw_exception("", "Action " + action + " Not Supported");
+        String[] strAttributeStates = { "Staring ", " Pause ", "Stopping "};
+        String strAction = strAttributeStates[action];
+
         if (display) {
             SplashUtils.getInstance().startSplash();
-            SplashUtils.getInstance().setSplashProgress(10, "Adding attributes");
+            SplashUtils.getInstance().setSplashProgress(10, strAction + "attributes");
         }
         int step = 90/attributes.size();
         if (step<1) step = 1;
@@ -257,16 +251,26 @@ public class ManageAttributes {
             DeviceProxy archiver = null;
             for (String attribute : attributes) {
                 if (display)
-                    SplashUtils.getInstance().increaseSplashProgress(step, "Stopping "+attribute);
+                    SplashUtils.getInstance().increaseSplashProgress(step, strAction + attribute);
                 else
-                    System.out.println("Stopping " + attribute);
+                    System.out.println(strAction + attribute);
                 //  Check if archiver is the same or another one.
                 String  archiverName = ArchiverUtils.getArchiver(configurator, attribute);
                 if (archiver==null || !archiverName.equals(previous)) {
                     previous = archiverName;
                     archiver = new DeviceProxy(archiverName);
                 }
-                ArchiverUtils.stopAttribute(configurator, TangoUtils.fullName(attribute));
+                switch (action) {
+                    case Subscriber.ATTRIBUTE_STARTED:
+                        ArchiverUtils.startAttribute(configurator, TangoUtils.fullName(attribute));
+                        break;
+                    case Subscriber.ATTRIBUTE_STOPPED:
+                        ArchiverUtils.stopAttribute(configurator, TangoUtils.fullName(attribute));
+                        break;
+                    case Subscriber.ATTRIBUTE_PAUSED:
+                        ArchiverUtils.pauseAttribute(configurator, TangoUtils.fullName(attribute));
+                        break;
+                }
             }
             if (display)
                 SplashUtils.getInstance().stopSplash();

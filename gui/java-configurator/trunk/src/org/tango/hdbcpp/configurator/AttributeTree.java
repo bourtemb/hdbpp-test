@@ -172,7 +172,9 @@ public class AttributeTree extends JTree {
         //  Check button clicked
         int mask = evt.getModifiers();
         if (evt.getClickCount()==2 && (mask & MouseEvent.BUTTON1_MASK)!=0) {
-        } else if ((mask & MouseEvent.BUTTON3_MASK)!=0) {
+            addAttribute();
+        }
+        else if ((mask & MouseEvent.BUTTON3_MASK)!=0) {
             if (node==root)
                 menu.showMenu(evt, (String) node.getUserObject());
             else if (userObject instanceof Member)

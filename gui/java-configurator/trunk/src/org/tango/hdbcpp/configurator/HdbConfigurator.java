@@ -116,15 +116,20 @@ public class HdbConfigurator extends JFrame {
         for (String subscriber : subscriberMap.getLabelList())
             archiverComboBox.addItem(subscriber);
 
-        //	Add Action listeners
+        //	Add Action listeners for list clicked, menu,...
         startedAttrJList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent event) {
-                listMouseClicked(event);    //	for list clicked, menu,...
+                listMouseClicked(event);
             }
         });
         stoppedAttrJList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent event) {
-                listMouseClicked(event);    //	for list clicked, menu,...
+                listMouseClicked(event);
+            }
+        });
+        pausedAttrJList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent event) {
+                listMouseClicked(event);
             }
         });
 
@@ -170,9 +175,9 @@ public class HdbConfigurator extends JFrame {
             archiverLabel.setText("No subscriber defined ");
         else
        if (subscriberMap.size()==1)
-            archiverLabel.setText("1 subscriber: ");
+           archiverLabel.setText("1 subscriber: ");
         else
-            archiverLabel.setText(subscriberMap.size() + " subscribers: ");
+           archiverLabel.setText(subscriberMap.size() + " subscribers: ");
     }
 	//=======================================================
 	//=======================================================
@@ -251,7 +256,7 @@ public class HdbConfigurator extends JFrame {
         int selection =  tabbedPane.getSelectedIndex();
         String attributeState = tabbedPane.getTitleAt(selection);
         jList.setListData(attributes);
-        jLabel.setText(Integer.toString(attributes.length) + " " + attributeState);
+        jLabel.setText(Integer.toString(attributes.length) + " " + attributeState + "     tango://");
 
         //  move horizontal scroll bar to see end of attribute name
         JScrollBar horizontal = scrollPane.getVerticalScrollBar();
@@ -306,9 +311,8 @@ public class HdbConfigurator extends JFrame {
             //  Before everything, check if target is alive
             targetSubscriber.ping();
 
-            //  If started -> stop it before
-            if (selectedList==startedAttrJList)
-                ManageAttributes.stopAttributes(attributeList);
+            //  If started -> stop it before (not necessary anymore)
+            //if (selectedList==startedAttrJList)  ManageAttributes.stopAttributes(attributeList);
 
             //  Then remove attributes to subscribe and add to another
             SplashUtils.getInstance().startSplash();
@@ -316,8 +320,10 @@ public class HdbConfigurator extends JFrame {
             for (String attributeName : attributeList) {
                 SplashUtils.getInstance().increaseSplashProgressForLoop(
                         attributeList.size(), "Removing/adding "+attributeName);
-                ArchiverUtils.removeAttribute(srcSubscriber, attributeName);
-                ArchiverUtils.addAttribute(targetSubscriber, attributeName);
+                //  Not bug less !
+                //ArchiverUtils.moveAttribute(configuratorProxy, attributeName, srcSubscriber.name);
+                srcSubscriber.removeAttribute(attributeName);
+                targetSubscriber.addAttribute(attributeName);
             }
             //  Wait a bit. Add is done by a thread --> DevFailed(Not subscribed)
             //  Will be fine to do move sequence in manager device class !!!
@@ -325,8 +331,16 @@ public class HdbConfigurator extends JFrame {
             try { Thread.sleep(1000); } catch (InterruptedException e) { /* */ }
 
             //  And restart if they were started
-            if (selectedList==startedAttrJList)
-                ManageAttributes.startAttributes(attributeList);
+            if (selectedList==startedAttrJList) {
+                for (String attribute : attributeList)
+                    targetSubscriber.startAttribute(attribute);
+            }
+            else
+            //  or pause if they were paused
+            if (selectedList==pausedAttrJList) {
+                for (String attribute : attributeList)
+                    targetSubscriber.pauseAttribute(attribute);
+            }
 
             //  Set combo box selection to src subscriber
             archiverComboBox.setSelectedItem(targetSubscriberLabel);
@@ -375,18 +389,18 @@ public class HdbConfigurator extends JFrame {
         startedFilterText = new javax.swing.JTextField();
         startedAttrScrollPane = new javax.swing.JScrollPane();
         startedAttrJList = new javax.swing.JList();
-        javax.swing.JPanel stoppedPanel = new javax.swing.JPanel();
-        javax.swing.JPanel stoppedTopPanel = new javax.swing.JPanel();
-        stoppedAttrLabel = new javax.swing.JLabel();
-        stoppedFilterText = new javax.swing.JTextField();
-        stoppedAttrScrollPane = new javax.swing.JScrollPane();
-        stoppedAttrJList = new javax.swing.JList();
         javax.swing.JPanel pausedPanel = new javax.swing.JPanel();
         javax.swing.JPanel pausedTopPanel = new javax.swing.JPanel();
         pausedAttrLabel = new javax.swing.JLabel();
         pausedFilterText = new javax.swing.JTextField();
         pausedAttrScrollPane = new javax.swing.JScrollPane();
         pausedAttrJList = new javax.swing.JList();
+        javax.swing.JPanel stoppedPanel = new javax.swing.JPanel();
+        javax.swing.JPanel stoppedTopPanel = new javax.swing.JPanel();
+        stoppedAttrLabel = new javax.swing.JLabel();
+        stoppedFilterText = new javax.swing.JTextField();
+        stoppedAttrScrollPane = new javax.swing.JScrollPane();
+        stoppedAttrJList = new javax.swing.JList();
         javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem openItem = new javax.swing.JMenuItem();
@@ -513,7 +527,7 @@ public class HdbConfigurator extends JFrame {
         rightPanel.setLayout(new java.awt.BorderLayout());
 
         archiverLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        archiverLabel.setText("Archiver:");
+        archiverLabel.setText("Archivers:");
         archiverPanel.add(archiverLabel);
 
         archiverComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -557,6 +571,31 @@ public class HdbConfigurator extends JFrame {
 
         tabbedPane.addTab("Started Attributes", startedPanel);
 
+        pausedPanel.setLayout(new java.awt.BorderLayout());
+
+        pausedAttrLabel.setText("Paused Attributes:      tango://");
+        pausedTopPanel.add(pausedAttrLabel);
+
+        pausedFilterText.setColumns(25);
+        pausedFilterText.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        pausedFilterText.setText("*/*/*/*/*");
+        pausedFilterText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pausedFilterTextActionPerformed(evt);
+            }
+        });
+        pausedTopPanel.add(pausedFilterText);
+
+        pausedPanel.add(pausedTopPanel, java.awt.BorderLayout.NORTH);
+
+        pausedAttrScrollPane.setPreferredSize(new java.awt.Dimension(550, 200));
+
+        pausedAttrScrollPane.setViewportView(pausedAttrJList);
+
+        pausedPanel.add(pausedAttrScrollPane, java.awt.BorderLayout.CENTER);
+
+        tabbedPane.addTab("Paused Attributes", pausedPanel);
+
         stoppedPanel.setLayout(new java.awt.BorderLayout());
 
         stoppedAttrLabel.setText("Stopped Attributes:      tango://");
@@ -581,31 +620,6 @@ public class HdbConfigurator extends JFrame {
         stoppedPanel.add(stoppedAttrScrollPane, java.awt.BorderLayout.CENTER);
 
         tabbedPane.addTab("Stopped Attributes", stoppedPanel);
-
-        pausedPanel.setLayout(new java.awt.BorderLayout());
-
-        pausedAttrLabel.setText("Stopped Attributes:      tango://");
-        pausedTopPanel.add(pausedAttrLabel);
-
-        pausedFilterText.setColumns(25);
-        pausedFilterText.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        pausedFilterText.setText("*/*/*/*/*");
-        pausedFilterText.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                pausedFilterTextActionPerformed(evt);
-            }
-        });
-        pausedTopPanel.add(pausedFilterText);
-
-        pausedPanel.add(pausedTopPanel, java.awt.BorderLayout.NORTH);
-
-        pausedAttrScrollPane.setPreferredSize(new java.awt.Dimension(550, 200));
-
-        pausedAttrScrollPane.setViewportView(pausedAttrJList);
-
-        pausedPanel.add(pausedAttrScrollPane, java.awt.BorderLayout.CENTER);
-
-        tabbedPane.addTab("Paused Attributes", pausedPanel);
 
         rightPanel.add(tabbedPane, java.awt.BorderLayout.CENTER);
 
@@ -765,6 +779,7 @@ public class HdbConfigurator extends JFrame {
             String[]    filtered = new String[0];
             startedAttrJList.setListData(filtered);
             stoppedAttrJList.setListData(filtered);
+            pausedAttrJList.setListData(filtered);
             ErrorPane.showErrorMessage(this, null, e);
         }
     }//GEN-LAST:event_archiverComboBoxActionPerformed
@@ -1067,7 +1082,8 @@ public class HdbConfigurator extends JFrame {
 	//=======================================================
     public void selectAttributeInList(String attributeName) {
         if (!selectAttributeInList(attributeName, startedAttrJList))
-            selectAttributeInList(attributeName, stoppedAttrJList);
+            if(!selectAttributeInList(attributeName, stoppedAttrJList))
+                selectAttributeInList(attributeName, pausedAttrJList);
     }
 	//=======================================================
 	//=======================================================
@@ -1096,7 +1112,7 @@ public class HdbConfigurator extends JFrame {
             ArchiverUtils.addAttribute(configuratorProxy,
                     subscriber.getName(), attributeName, pushedByCode, true/*Lock*/);
             if (startArchiving)
-                ArchiverUtils.startAttribute(subscriber, attributeName);
+                subscriber.startAttribute(attributeName);
 
             updateAttributeList(subscriber);
         }
@@ -1197,14 +1213,16 @@ public class HdbConfigurator extends JFrame {
     //======================================================
     private static final int START_ARCHIVING  = 0;
     private static final int STOP_ARCHIVING   = 1;
-    private static final int REMOVE_ATTRIBUTE = 2;
-    private static final int MOVE_TO = 3;
-    private static final int COPY_AS_TEXT = 4;
+    private static final int PAUSE_ARCHIVING  = 2;
+    private static final int REMOVE_ATTRIBUTE = 3;
+    private static final int MOVE_TO = 4;
+    private static final int COPY_AS_TEXT = 5;
 
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
-            "Start Archiving", "Stop Archiving", "Remove Attribute", "Move Attribute To ", "Copy as Text",
+            "Start Archiving", "Stop Archiving", "Pause Archiving",
+            "Remove Attribute", "Move Attribute To ", "Copy as Text",
     };
     //=======================================================
     //=======================================================
@@ -1265,9 +1283,26 @@ public class HdbConfigurator extends JFrame {
             setSubscriberMenu();
 
             selectedList = (JList) event.getSource();
-            //noinspection PointlessArithmeticExpression
-            getComponent(OFFSET + START_ARCHIVING).setVisible(selectedList==stoppedAttrJList);
-            getComponent(OFFSET + STOP_ARCHIVING).setVisible(selectedList==startedAttrJList);
+            if (selectedList==startedAttrJList) {
+                //noinspection PointlessArithmeticExpression
+                getComponent(OFFSET + START_ARCHIVING).setVisible(false);
+                getComponent(OFFSET + STOP_ARCHIVING).setVisible(true);
+                getComponent(OFFSET + PAUSE_ARCHIVING).setVisible(true);
+            }
+            else
+            if (selectedList==stoppedAttrJList) {
+                //noinspection PointlessArithmeticExpression
+                getComponent(OFFSET + START_ARCHIVING).setVisible(true);
+                getComponent(OFFSET + STOP_ARCHIVING).setVisible(false);
+                getComponent(OFFSET + PAUSE_ARCHIVING).setVisible(false);
+            }
+            else
+            if (selectedList==pausedAttrJList) {
+                //noinspection PointlessArithmeticExpression
+                getComponent(OFFSET + START_ARCHIVING).setVisible(true);
+                getComponent(OFFSET + STOP_ARCHIVING).setVisible(true);
+                getComponent(OFFSET + PAUSE_ARCHIVING).setVisible(false);
+            }
             show(selectedList, event.getX(), event.getY());
         }
         //======================================================
@@ -1302,7 +1337,11 @@ public class HdbConfigurator extends JFrame {
                         break;
                     case STOP_ARCHIVING:
                         ManageAttributes.stopAttributes(attributeList);
-                       updateAttributeList(archiver);
+                        updateAttributeList(archiver);
+                        break;
+                    case PAUSE_ARCHIVING:
+                        ManageAttributes.pauseAttributes(attributeList);
+                        updateAttributeList(archiver);
                         break;
                     case REMOVE_ATTRIBUTE:
                         ManageAttributes.removeAttributes(attributeList);
