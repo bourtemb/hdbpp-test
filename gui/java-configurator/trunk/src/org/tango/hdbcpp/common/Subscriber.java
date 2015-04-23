@@ -38,10 +38,7 @@ package org.tango.hdbcpp.common;
 
 import fr.esrf.Tango.AttrQuality;
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoApi.DbClass;
-import fr.esrf.TangoApi.DbDatum;
-import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.TangoApi.DeviceProxy;
+import fr.esrf.TangoApi.*;
 import fr.esrf.TangoApi.events.ITangoChangeListener;
 import fr.esrf.TangoApi.events.TangoChangeEvent;
 import fr.esrf.TangoApi.events.TangoEventsAdapter;
@@ -67,8 +64,8 @@ public class Subscriber extends DeviceProxy {
     protected String[] pausedAttributes  = new String[0];
 
     public static final int ATTRIBUTE_STARTED = 0;
-    public static final int ATTRIBUTE_STOPPED = 1;
-    public static final int ATTRIBUTE_PAUSED  = 2;
+    public static final int ATTRIBUTE_PAUSED  = 1;
+    public static final int ATTRIBUTE_STOPPED = 2;
     public static final String CLASS_NAME = "HdbEventSubscriber";
     //======================================================
     //======================================================
@@ -211,6 +208,48 @@ public class Subscriber extends DeviceProxy {
                     return pausedAttributes;
         }
         return new String[] { "Unexpected type list"};
+    }
+    //======================================================
+    //======================================================
+    public void addAttribute(String attributeName) throws DevFailed {
+        DeviceData argIn = new DeviceData();
+        argIn.insert(attributeName);
+        this.command_inout("AttributeAdd", argIn);
+    }
+    //======================================================
+    //======================================================
+    public void removeAttribute(String attributeName) throws DevFailed {
+        ArchiverUtils.removeAttribute(this, attributeName);
+    }
+    //======================================================================
+    /**
+     * Start the archiving for specified attribute on specified subscriber
+     * @param attributeName  specified attribute name
+     * @throws DevFailed in case of read device failed.
+     */
+    //======================================================================
+    public void startAttribute(String attributeName) throws DevFailed {
+        ArchiverUtils.startAttribute(this, attributeName);
+    }
+    //======================================================================
+    /**
+     * Stop the archiving for specified attribute on specified subscriber
+     * @param attributeName  specified attribute name
+     * @throws DevFailed in case of read device failed.
+     */
+    //======================================================================
+    public  void stopAttribute(String attributeName) throws DevFailed {
+        ArchiverUtils.stopAttribute(this, attributeName);
+    }
+    //======================================================================
+    /**
+     * Pause the archiving for specified attribute on specified subscriber
+     * @param attributeName  specified attribute name
+     * @throws DevFailed in case of read device failed.
+     */
+    //======================================================================
+    public  void pauseAttribute(String attributeName) throws DevFailed {
+        ArchiverUtils.pauseAttribute(this, attributeName);
     }
     //======================================================
     //======================================================
