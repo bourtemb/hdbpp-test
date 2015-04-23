@@ -36,13 +36,19 @@
 
 package org.tango.hdbcpp.common;
 
+import fr.esrf.Tango.AttrQuality;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DbClass;
 import fr.esrf.TangoApi.DbDatum;
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoApi.DeviceProxy;
+import fr.esrf.TangoApi.events.ITangoChangeListener;
+import fr.esrf.TangoApi.events.TangoChangeEvent;
+import fr.esrf.TangoApi.events.TangoEventsAdapter;
+import fr.esrf.TangoDs.TangoConst;
 import org.tango.hdbcpp.tools.ArchiverUtils;
 import org.tango.hdbcpp.tools.TangoUtils;
+import org.tango.hdbcpp.tools.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +61,14 @@ public class Subscriber extends DeviceProxy {
     protected String label;
     protected String startedFilter;
     protected String stoppedFilter;
+    protected String pausedFilter;
+    protected String[] startedAttributes = new String[0];
+    protected String[] stoppedAttributes = new String[0];
+    protected String[] pausedAttributes  = new String[0];
 
+    public static final int ATTRIBUTE_STARTED = 0;
+    public static final int ATTRIBUTE_STOPPED = 1;
+    public static final int ATTRIBUTE_PAUSED  = 2;
     public static final String CLASS_NAME = "HdbEventSubscriber";
     //======================================================
     //======================================================
@@ -65,6 +78,15 @@ public class Subscriber extends DeviceProxy {
         this.label = label;
         startedFilter = "*/*/*/*/*";
         stoppedFilter = "*/*/*/*/*";
+        pausedFilter  = "*/*/*/*/*";
+
+        //  Subscribe to attribute lists events
+        TangoEventsAdapter  adapter = new TangoEventsAdapter(this);
+        ChangeEventListener changeListener = new ChangeEventListener();
+
+        adapter.addTangoChangeListener(changeListener, "AttributeStartedList", TangoConst.STATELESS);
+        adapter.addTangoChangeListener(changeListener, "AttributeStoppedList", TangoConst.STATELESS);
+        adapter.addTangoChangeListener(changeListener, "AttributePausedList",  TangoConst.STATELESS);
     }
     //======================================================
     //======================================================
@@ -96,6 +118,16 @@ public class Subscriber extends DeviceProxy {
     public void setStoppedFilter(String stoppedFilter) {
         this.stoppedFilter = stoppedFilter;
     }
+    //======================================================
+    //======================================================
+    public String getPausedFilter() {
+        return pausedFilter;
+    }
+    //======================================================
+    //======================================================
+    public void setPausedFilter(String pausedFilter) {
+        this.pausedFilter = pausedFilter;
+    }
     //=======================================================
     //=======================================================
     public long getStatisticsResetTime() throws DevFailed {
@@ -120,7 +152,7 @@ public class Subscriber extends DeviceProxy {
                  value = datum.extractLong();
             }
             catch (NumberFormatException e) {
-                System.err.println(e);
+                System.err.println(e.getMessage());
             }
         }
         //  Check device property
@@ -130,7 +162,7 @@ public class Subscriber extends DeviceProxy {
                 value = datum.extractLong();
             }
             catch (NumberFormatException e) {
-                System.err.println(e);
+                System.err.println(e.getMessage());
             }
         }
         return value;
@@ -148,7 +180,7 @@ public class Subscriber extends DeviceProxy {
             }
         }
         catch (DevFailed e) {
-            System.err.println(e);
+            System.err.println(e.errors[0].desc);
             //  return an empty list
         }
         return list;
@@ -160,5 +192,72 @@ public class Subscriber extends DeviceProxy {
     }
     //======================================================
     //======================================================
+    public String[] getAttributeList(int attributeState, boolean filtered) {
+        switch (attributeState) {
+            case ATTRIBUTE_STARTED:
+                if (filtered)
+                    return Utils.matchFilter(startedAttributes, startedFilter);
+                else
+                    return startedAttributes;
+            case ATTRIBUTE_STOPPED:
+                if (filtered)
+                    return Utils.matchFilter(stoppedAttributes, stoppedFilter);
+                else
+                    return stoppedAttributes;
+            case ATTRIBUTE_PAUSED:
+                if (filtered)
+                    return Utils.matchFilter(pausedAttributes, pausedFilter);
+                else
+                    return pausedAttributes;
+        }
+        return new String[] { "Unexpected type list"};
+    }
+    //======================================================
+    //======================================================
+
+
+
+
+    //=========================================================================
+    /**
+     * Change event listener
+     */
+    //=========================================================================
+    public class ChangeEventListener implements ITangoChangeListener {
+        //=====================================================================
+        private void setError(String message) {
+            startedAttributes = new String[] { "!!! " + message };
+            stoppedAttributes = new String[] { "!!! " + message };
+            pausedAttributes  = new String[] { "!!! " + message };
+        }
+        //=====================================================================
+        public void change(TangoChangeEvent event) {
+            try {
+                //	Get the attribute value
+                DeviceAttribute attribute = event.getValue();
+                if (attribute.getQuality()==AttrQuality.ATTR_VALID) {
+                    if (attribute.getName().contains("Started"))
+                        startedAttributes = attribute.extractStringArray();
+                    else
+                    if (attribute.getName().contains("Stopped"))
+                        stoppedAttributes = attribute.extractStringArray();
+                    else
+                    if (attribute.getName().contains("Paused"))
+                        pausedAttributes = attribute.extractStringArray();
+                }
+                else {
+                    setError(attribute.getName() + " is invalid");
+                }
+
+            } catch (DevFailed e) {
+                setError(e.errors[0].desc);
+            } catch (Exception e) {
+                e.printStackTrace();
+                setError(e.getMessage());
+            }
+        }
+    }
+    //===============================================================
+    //===============================================================
 }
 
