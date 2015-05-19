@@ -76,16 +76,17 @@ public class HdbDiagnostics extends JFrame {
     private static final String[] ATTRIBUTES = {
             "AttributeNokNumber",
             "AttributeStartedNumber",
+            "AttributePausedNumber",
             "AttributeStoppedNumber",
             "AttributePendingNumber",
             "AttributeRecordFreq",
             "AttributeFailureFreq",
     };
     private static final String[] columnNames = {
-            "Faulty", "Started", "Stopped", "Pending", "Freq.", "Failures"
+            "Faulty", "Started", "Paused", "Stopped", "Pending", "Freq.", "Failures"
     };
     private static final int[] columnWiths = {
-            60, 60, 60, 60, 60, 60
+            60, 60, 60, 60, 60, 60, 60
     };
 	//=======================================================
     /**
@@ -137,15 +138,15 @@ public class HdbDiagnostics extends JFrame {
             //  Get the duration from first subscriber
             Subscriber subscriber = subscriberMap.getSubscriber(labels.get(0));
             statisticsTimeWindow = subscriber.getStatisticsTimeWindow();
-            columnNames[4] = "ev/";
-            columnNames[5] = "Fail./";
+            columnNames[RECORD_FREQUENCY] = "ev/";
+            columnNames[FAILURE_FREQUENCY] = "Fail./";
             if (statisticsTimeWindow==1) {
-                columnNames[4] += "sec";
-                columnNames[5] += "sec";
+                columnNames[RECORD_FREQUENCY] += "sec";
+                columnNames[FAILURE_FREQUENCY] += "sec";
             }
             else {
-                columnNames[4] += Utils.strPeriod(statisticsTimeWindow);
-                columnNames[5] += Utils.strPeriod(statisticsTimeWindow);
+                columnNames[RECORD_FREQUENCY] += Utils.strPeriod(statisticsTimeWindow);
+                columnNames[FAILURE_FREQUENCY] += Utils.strPeriod(statisticsTimeWindow);
             }
 
             statisticsResetTime = subscriber.getStatisticsResetTime();
@@ -480,19 +481,37 @@ public class HdbDiagnostics extends JFrame {
             switch (type) {
                 case STARTED_ATTRIBUTES:
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Started");
+                    if (attributeList.length>0) {
+                        new AttributesTableDialog(this,
+                                subscriber.getLabel() + ": Started ", attributeList).setVisible(true);
+                    }
+                    break;
+                case PAUSED_ATTRIBUTES:
+                    attributeList = ArchiverUtils.getAttributeList(subscriber, "Paused");
+                    if (attributeList.length>0) {
+                        new AttributesTableDialog(this,
+                                subscriber.getLabel() + ": Paused ", attributeList).setVisible(true);
+                    }
                     break;
                 case STOPPED_ATTRIBUTES:
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Stopped");
+                    if (attributeList.length>0) {
+                        new AttributesTableDialog(this,
+                                subscriber.getLabel() + ": Stopped ", attributeList).setVisible(true);
+                    }
                     break;
                 case FAULTY_ATTRIBUTES:
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Nok");
                     if (attributeList.length>0) {
                         new FaultyAttributesDialog(this, subscriber).setVisible(true);
-                        return;
                     }
                     break;
                 case PENDING_ATTRIBUTES:
                     attributeList = ArchiverUtils.getAttributeList(subscriber, "Pending");
+                    if (attributeList.length>0) {
+                        new AttributesTableDialog(this,
+                                subscriber.getLabel() + ": Pending ", attributeList).setVisible(true);
+                    }
                     break;
                 case RECORD_FREQUENCY:
                 case FAILURE_FREQUENCY:
@@ -506,18 +525,6 @@ public class HdbDiagnostics extends JFrame {
 
             if (attributeList.length==0) {
                 JOptionPane.showMessageDialog(this, "No " + menuLabels[type]);
-            }
-            else {
-                //  Build the list as string
-                StringBuilder sb = new StringBuilder();
-                for (String attribute : attributeList) {
-                    sb.append("<li> ").append(attribute).append("</li>\n");
-                }
-                //  And display as html
-                int height = 120 + 20*attributeList.length;
-                if (height>800) height = 800;
-                new PopupHtml(this).show(sb.toString(),
-                        subscriber.getLabel() + ": "+ menuLabels[type], 600, height);
             }
         }
         catch (DevFailed e) {
@@ -571,18 +578,20 @@ public class HdbDiagnostics extends JFrame {
     //==============================================================================
     private static final int FAULTY_ATTRIBUTES  = 0;
     private static final int STARTED_ATTRIBUTES = 1;
-    private static final int STOPPED_ATTRIBUTES = 2;
-    private static final int PENDING_ATTRIBUTES = 3;
-    private static final int RECORD_FREQUENCY   = 4;
-    private static final int FAILURE_FREQUENCY  = 5;
+    private static final int PAUSED_ATTRIBUTES  = 2;
+    private static final int STOPPED_ATTRIBUTES = 3;
+    private static final int PENDING_ATTRIBUTES = 4;
+    private static final int RECORD_FREQUENCY   = 5;
+    private static final int FAILURE_FREQUENCY  = 6;
 
-    private static final int TEST_ARCHIVER      = 5;
-    private static final int TEST_CONFIGURATOR  = 6;
+    private static final int TEST_ARCHIVER      = 6;
+    private static final int TEST_CONFIGURATOR  = 7;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
             "Faulty  Attributes",
             "Started Attributes",
+            "Paused Attributes",
             "Stopped Attributes",
             "Pending Attributes",
             "Record Frequency",
@@ -623,6 +632,7 @@ public class HdbDiagnostics extends JFrame {
 
             getComponent(OFFSET /*+ FAULTY_ATTRIBUTES*/).setVisible(!expert);
             getComponent(OFFSET + STARTED_ATTRIBUTES).setVisible(!expert);
+            getComponent(OFFSET + PAUSED_ATTRIBUTES).setVisible(!expert);
             getComponent(OFFSET + STOPPED_ATTRIBUTES).setVisible(!expert);
             getComponent(OFFSET + PENDING_ATTRIBUTES).setVisible(!expert);
             getComponent(OFFSET + RECORD_FREQUENCY).setVisible(!expert);
@@ -642,6 +652,7 @@ public class HdbDiagnostics extends JFrame {
 
             switch (itemIndex) {
                 case STARTED_ATTRIBUTES:
+                case PAUSED_ATTRIBUTES:
                 case STOPPED_ATTRIBUTES:
                 case FAULTY_ATTRIBUTES:
                 case PENDING_ATTRIBUTES:

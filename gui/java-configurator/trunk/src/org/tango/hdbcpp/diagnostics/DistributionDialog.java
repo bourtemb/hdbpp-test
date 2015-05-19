@@ -72,7 +72,8 @@ public class DistributionDialog extends JDialog {
 	private JFrame	parent;
 	private JDialog	thisDialog;
     private SubscriberMap subscriberMap;
-    private DistributionChart distributionChart;
+    private AttributeChart attributeChartChart;
+    private PerformancesChart performancesChart;
     private ArrayList<Archiver> archivers = new ArrayList<Archiver>();
     private JTable table;
     private int selectedColumn = SUBSCRIBER_NAME;
@@ -80,12 +81,18 @@ public class DistributionDialog extends JDialog {
     private static final int SUBSCRIBER_NAME  = 0;
     private static final int ATTRIBUTE_NUMBER = 1;
     private static final int EVENT_NUMBER     = 2;
-    private static final int RESET_TIME       = 3;
-    private static final int RESET_DURATION   = 4;
+    private static final int STORE_TIME       = 3;
+    private static final int MAX_PENDING      = 4;
+    private static final int RESET_TIME       = 5;
+    private static final int RESET_DURATION   = 6;
     private static final String[] columnNames = {
-            "Subscriber", "Attributes", "Nb Events", "Reset Time", "Duration"
+            "Subscriber",
+            "Attributes", "Nb Events",
+            "Max Store",  "Max Pending",
+            "Reset Time", "Duration"
     };
-    private static final int[] columnWidth = { 300, 60, 60, 120, 120 };
+    private static final int[] columnWidth = { 250, 60, 60, 60, 60, 100, 120 };
+    private static final Dimension chartDimension = new Dimension(800, 650);
 	//===============================================================
 	/**
 	 *	Creates new form DistributionDialog
@@ -104,11 +111,13 @@ public class DistributionDialog extends JDialog {
                 subscriberMap = new SubscriberMap(new DeviceProxy(configuratorDeviceName));
             }
             this.subscriberMap = subscriberMap;
-            distributionChart = new DistributionChart();
-            chartPanel.add(distributionChart, BorderLayout.CENTER);
+            attributeChartChart = new AttributeChart();
+            attributesPanel.add(attributeChartChart, BorderLayout.CENTER);
+            performancesChart = new PerformancesChart();
+            performencesPanel.add(performancesChart, BorderLayout.CENTER);
             buildTable();
 
-            titleLabel.setText(distributionChart.attributeCount + " Attributes   distributed   in " +
+            titleLabel.setText(attributeChartChart.attributeCount + " Attributes   distributed   in " +
                     subscriberMap.getLabelList().size() + " Subscribers");
 
             pack();
@@ -123,6 +132,7 @@ public class DistributionDialog extends JDialog {
 
 	//===============================================================
 	//===============================================================
+    private static final String Space = "&nbsp;";
     private void buildTable() {
 
         DataTableModel model = new DataTableModel();
@@ -139,8 +149,12 @@ public class DistributionDialog extends JDialog {
                     int row = rowAtPoint(p);
                     if (column==SUBSCRIBER_NAME) {
                         Archiver archiver = archivers.get(row);
-                        String text = "<b>"+archiver.subscriber.getLabel() + "</b><ul>( " +
-                                archiver.subscriber.name() +" )</ul>";
+                        /*
+                        String text = "<b>"+archiver.subscriber.getLabel() + "</b>( " +
+                                archiver.subscriber.name() +" )";
+                        */
+                        String text = "<b>"+archiver.subscriber.getLabel() + "</b>" +
+                                Space+ Space + Space + "( " + archiver.subscriber.name() +")";
                         tip = Utils.buildTooltip(text);
                     }
                 }
@@ -202,13 +216,20 @@ public class DistributionDialog extends JDialog {
         javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
         javax.swing.JButton cancelBtn = new javax.swing.JButton();
         javax.swing.JTabbedPane jTabbedPane1 = new javax.swing.JTabbedPane();
-        chartPanel = new javax.swing.JPanel();
+        attributesPanel = new javax.swing.JPanel();
         javax.swing.JPanel jPanel1 = new javax.swing.JPanel();
         javax.swing.JRadioButton notOkButton = new javax.swing.JRadioButton();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
         javax.swing.JRadioButton OkButton = new javax.swing.JRadioButton();
         javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
         javax.swing.JRadioButton eventsButton = new javax.swing.JRadioButton();
+        performencesPanel = new javax.swing.JPanel();
+        javax.swing.JPanel jPanel2 = new javax.swing.JPanel();
+        javax.swing.JRadioButton processButton = new javax.swing.JRadioButton();
+        javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
+        javax.swing.JRadioButton storeButton = new javax.swing.JRadioButton();
+        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
+        javax.swing.JRadioButton pendingButton = new javax.swing.JRadioButton();
         tablePanel = new javax.swing.JPanel();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -233,7 +254,7 @@ public class DistributionDialog extends JDialog {
 
         getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
 
-        chartPanel.setLayout(new java.awt.BorderLayout());
+        attributesPanel.setLayout(new java.awt.BorderLayout());
 
         notOkButton.setSelected(true);
         notOkButton.setText("Attributes Not OK");
@@ -268,9 +289,48 @@ public class DistributionDialog extends JDialog {
         });
         jPanel1.add(eventsButton);
 
-        chartPanel.add(jPanel1, java.awt.BorderLayout.NORTH);
+        attributesPanel.add(jPanel1, java.awt.BorderLayout.NORTH);
 
-        jTabbedPane1.addTab("Chart", chartPanel);
+        jTabbedPane1.addTab("Attributes", attributesPanel);
+
+        performencesPanel.setLayout(new java.awt.BorderLayout());
+
+        processButton.setSelected(true);
+        processButton.setText("Process Time");
+        processButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                processButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(processButton);
+
+        jLabel3.setText("          ");
+        jPanel2.add(jLabel3);
+
+        storeButton.setSelected(true);
+        storeButton.setText("Store Time");
+        storeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                storeButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(storeButton);
+
+        jLabel4.setText("          ");
+        jPanel2.add(jLabel4);
+
+        pendingButton.setSelected(true);
+        pendingButton.setText("Pending");
+        pendingButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pendingButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(pendingButton);
+
+        performencesPanel.add(jPanel2, java.awt.BorderLayout.NORTH);
+
+        jTabbedPane1.addTab("Performances", performencesPanel);
 
         tablePanel.setLayout(new java.awt.BorderLayout());
         jTabbedPane1.addTab("Table", tablePanel);
@@ -298,27 +358,44 @@ public class DistributionDialog extends JDialog {
     //===============================================================
     private void notOkButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_notOkButtonActionPerformed
         JRadioButton btn = (JRadioButton) evt.getSource();
-        distributionChart.setVisibleCurve(btn.isSelected(),  failedDataView);
+        attributeChartChart.setVisibleCurve(btn.isSelected(),  attributeChartChart.failedDataView);
     }//GEN-LAST:event_notOkButtonActionPerformed
 
     //===============================================================
     //===============================================================
     private void OkButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OkButtonActionPerformed
         JRadioButton btn = (JRadioButton) evt.getSource();
-        distributionChart.setVisibleCurve(btn.isSelected(),  okDataView);
+        attributeChartChart.setVisibleCurve(btn.isSelected(), attributeChartChart.okDataView);
     }//GEN-LAST:event_OkButtonActionPerformed
 
     //===============================================================
     //===============================================================
     private void eventsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_eventsButtonActionPerformed
         JRadioButton btn = (JRadioButton) evt.getSource();
-        distributionChart.setVisibleCurve(btn.isSelected(),  eventDataView);
+        attributeChartChart.setVisibleCurve(btn.isSelected(), attributeChartChart.eventDataView);
     }//GEN-LAST:event_eventsButtonActionPerformed
 
     //===============================================================
     //===============================================================
-    @SuppressWarnings("UnusedParameters")
-	//===============================================================
+    private void processButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_processButtonActionPerformed
+        JRadioButton btn = (JRadioButton) evt.getSource();
+        performancesChart.setVisibleCurve(btn.isSelected(), performancesChart.processDataView);
+    }//GEN-LAST:event_processButtonActionPerformed
+
+    //===============================================================
+    //===============================================================
+    private void storeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_storeButtonActionPerformed
+        JRadioButton btn = (JRadioButton) evt.getSource();
+        performancesChart.setVisibleCurve(btn.isSelected(), performancesChart.storeDataView);
+    }//GEN-LAST:event_storeButtonActionPerformed
+
+    //===============================================================
+    //===============================================================
+    private void pendingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pendingButtonActionPerformed
+        JRadioButton btn = (JRadioButton) evt.getSource();
+        performancesChart.setVisibleCurve(btn.isSelected(), performancesChart.pendingDataView);
+    }//GEN-LAST:event_pendingButtonActionPerformed
+    //===============================================================
 	/**
 	 *	Closes the dialog
 	 */
@@ -335,7 +412,8 @@ public class DistributionDialog extends JDialog {
 
 	//===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel chartPanel;
+    private javax.swing.JPanel attributesPanel;
+    private javax.swing.JPanel performencesPanel;
     private javax.swing.JPanel tablePanel;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
@@ -364,43 +442,23 @@ public class DistributionDialog extends JDialog {
 
 
 
-    private JLDataView failedDataView;
-    private JLDataView okDataView;
-    private JLDataView eventDataView;
     //===============================================================
     /**
-     * JLChart class to display distribution
+     * Generic chart to display distribution
      */
     //===============================================================
-    private class DistributionChart extends JLChart implements IJLChartListener {
-        private Archiver selectedArchiver = null;
-        private int attributeCount;
-
-        private final String[] labels = {
+    private class DistributionChart extends JLChart{
+        protected ArrayList<JLDataView> dataViews = new ArrayList<JLDataView>();
+        protected Archiver selectedArchiver = null;
+        protected final String[] labels = {
                 "========================",
                 "Update from archivers",
         };
-        private static final int SEPARATOR = 0;
-        private static final int UPDATE_DATA = 1;
+        protected static final int SEPARATOR = 0;
+        protected static final int UPDATE_DATA = 1;
         //===============================================================
-        private DistributionChart() throws DevFailed {
-
-            setJLChartListener(this);
-            buildAxises();
-            failedDataView = buildCurve("Attributes Not OK", Color.red);
-            okDataView = buildCurve("Attributes OK", new Color(0x00aa00));
-            eventDataView = buildCurve("Events Received", new Color(0x0000aa));
-            getY1Axis().addDataView(failedDataView);
-            getY1Axis().addDataView(okDataView);
-            getY2Axis().addDataView(eventDataView);
-
-            updateValues();
-            setPreferredSize(new Dimension(800, 650));
-            addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent event) {
-                    chartMouseClicked(event);
-                }
-            });
+        protected DistributionChart() {
+            setPreferredSize(chartDimension);
 
             //  Add JMenuItem to popup menu
             this.addMenuItem(new JMenuItem(labels[SEPARATOR]));
@@ -414,17 +472,128 @@ public class DistributionDialog extends JDialog {
             this.addMenuItem(updateItem);
         }
         //===============================================================
-        private void setVisibleCurve(boolean b, JLDataView dataView) {
-            JLAxis axis = dataView.getAxis();
-            if (!b)
-                axis.removeDataView(dataView);
-            else {
-                if (dataView==eventDataView)
-                    getY2Axis().addDataView(dataView);
-                else
-                    getY1Axis().addDataView(dataView);
+        protected JLDataView buildCurve(String name, Color color, JLAxis axis) {
+            JLDataView  dataView = new JLDataView();
+            dataView.setColor(color);
+            dataView.setFillColor(color);
+            dataView.setName(name);
+            dataView.setFill(false);
+            dataView.setLabelVisible(true);
+            dataView.setViewType(JLDataView.TYPE_BAR);
+            dataView.setBarWidth(6);
+            dataView.setFillStyle(JLDataView.FILL_STYLE_SOLID);
+            axis.addDataView(dataView);
+
+            dataViews.add(dataView);
+            return dataView;
+        }
+        //===============================================================
+        protected void buildAxises(String[] names) {
+            //  Create X axis.
+            int i=0;
+            getXAxis().setName(names[i++]);
+            getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
+            getXAxis().setGridVisible(true);
+            getXAxis().setSubGridVisible(true);
+
+            //  Create Y1
+            getY1Axis().setName(names[i++]);
+            getY1Axis().setAutoScale(true);
+            getY1Axis().setScale(JLAxis.LINEAR_SCALE);
+            getY1Axis().setGridVisible(true);
+            getY1Axis().setSubGridVisible(true);
+
+            //  Create Y2
+            getY2Axis().setName(names[i]);
+            getY2Axis().setAutoScale(true);
+            getY2Axis().setScale(JLAxis.LINEAR_SCALE);
+            getY2Axis().setGridVisible(true);
+            getY2Axis().setSubGridVisible(true);
+        }
+        //===============================================================
+        private void menuActionPerformed(ActionEvent evt) {
+            String cmd = evt.getActionCommand();
+            if (cmd.equals(labels[UPDATE_DATA])) {
+                try {
+                    SplashUtils.getInstance().startSplash();
+                    String  configuratorDeviceName = TangoUtils.getConfiguratorDeviceName();
+                    subscriberMap = new SubscriberMap(new DeviceProxy(configuratorDeviceName));
+                    attributeChartChart.updateValues();
+                    performancesChart.updateValues();
+                    SplashUtils.getInstance().stopSplash();
+                }
+                catch (DevFailed e) {
+                    SplashUtils.getInstance().stopSplash();
+                    ErrorPane.showErrorMessage(this, null, e);
+                }
             }
             repaint();
+        }
+        //===============================================================
+        protected void setVisibleCurve(boolean b, JLDataView dataView) {
+            int i = 0;
+            for (JLDataView dv : dataViews) {
+                if (dv == dataView) {
+                    if (!b) {
+                        dataView.getAxis().removeDataView(dataView);
+                    }
+                    else {
+                        if (i==0 || i==1)
+                            getY1Axis().addDataView(dataView);
+                        else
+                            getY2Axis().addDataView(dataView);
+                    }
+                }
+                i++;
+            }
+            repaint();
+        }
+        //===============================================================
+        protected void resetDataViews() {
+            for (JLDataView dataView : dataViews) {
+                dataView.reset();
+            }
+        }
+        //===============================================================
+    }
+    //===============================================================
+    //===============================================================
+
+
+
+
+
+    //===============================================================
+    /**
+     * JLChart class to display attribute distribution
+     */
+    //===============================================================
+    private class AttributeChart extends DistributionChart  implements IJLChartListener {
+        private JLDataView failedDataView;
+        private JLDataView okDataView;
+        private JLDataView eventDataView;
+        private int attributeCount;
+        private final String[] axisNames = {
+                "Archivers",  "Attributes", "Events Number"
+        };
+        private final String[] curveNames = {
+                "Attributes Not OK", "Attributes OK", "Events Received"
+        };
+        //===============================================================
+        private AttributeChart() throws DevFailed {
+            setJLChartListener(this);
+            buildAxises(axisNames);
+            int i=0;
+            failedDataView = buildCurve(curveNames[i++], Color.red, getY1Axis());
+            okDataView     = buildCurve(curveNames[i++], new Color(0x00aa00), getY1Axis());
+            eventDataView  = buildCurve(curveNames[i],   new Color(0x0000aa), getY2Axis());
+
+            updateValues();
+            addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent event) {
+                    chartMouseClicked(event);
+                }
+            });
         }
         //===============================================================
         private void updateValues() throws DevFailed {
@@ -445,67 +614,6 @@ public class DistributionDialog extends JDialog {
                 archivers.add(archiver);
                 x++;
             }
-        }
-        //===============================================================
-        private void menuActionPerformed(ActionEvent evt) {
-            String cmd = evt.getActionCommand();
-            if (cmd.equals(labels[UPDATE_DATA])) {
-                try {
-                    SplashUtils.getInstance().startSplash();
-                    String  configuratorDeviceName = TangoUtils.getConfiguratorDeviceName();
-                    subscriberMap = new SubscriberMap(new DeviceProxy(configuratorDeviceName));
-                    distributionChart.updateValues();
-                    SplashUtils.getInstance().stopSplash();
-                }
-                catch (DevFailed e) {
-                    SplashUtils.getInstance().stopSplash();
-                    ErrorPane.showErrorMessage(this, null, e);
-                }
-            }
-            repaint();
-        }
-        //===============================================================
-        private void resetDataViews() {
-            okDataView.reset();
-            failedDataView.reset();
-            eventDataView.reset();
-        }
-        //===============================================================
-        private void buildAxises() {
-            //  Create X axis.
-            JLAxis  xAxis = getXAxis();
-            xAxis.setName("Archivers");
-            xAxis.setAnnotation(JLAxis.VALUE_ANNO);
-            xAxis.setGridVisible(true);
-            xAxis.setSubGridVisible(true);
-
-            JLAxis  y1Axis = getY1Axis();
-            y1Axis.setName("Attributes");
-            y1Axis.setAutoScale(true);
-            y1Axis.setScale(JLAxis.LINEAR_SCALE);
-            y1Axis.setGridVisible(true);
-            y1Axis.setSubGridVisible(true);
-
-            JLAxis  y2Axis = getY2Axis();
-            y2Axis.setName("Events Number");
-            y2Axis.setAutoScale(true);
-            y2Axis.setScale(JLAxis.LINEAR_SCALE);
-            y2Axis.setGridVisible(true);
-            y2Axis.setSubGridVisible(true);
-        }
-        //===============================================================
-        private JLDataView buildCurve(String name, Color color) {
-            JLDataView  dataView = new JLDataView();
-            dataView.setColor(Color.blue);
-            dataView.setFillColor(color);
-            dataView.setName(name);
-            dataView.setFill(false);
-            dataView.setLabelVisible(true);
-            dataView.setViewType(JLDataView.TYPE_BAR);
-            dataView.setBarWidth(6);
-            dataView.setFillStyle(JLDataView.FILL_STYLE_SOLID);
-
-            return dataView;
         }
         //===============================================================
         /**
@@ -534,7 +642,6 @@ public class DistributionDialog extends JDialog {
         //===============================================================
         @Override
         public String[] clickOnChart(JLChartEvent event) {
-            //JLDataView dataView = event.getDataView();
             int index = event.getDataViewIndex();
             Archiver archiver = archivers.get(index);
             selectedArchiver = archiver;
@@ -549,6 +656,10 @@ public class DistributionDialog extends JDialog {
                 //  Display archiver info
                 ArrayList<String>   lines = new ArrayList<String>();
                 lines.add(archiver.title);
+                if (archiver.resetTime>0) {
+                    lines.add("Since " + archiver.getResetTime() +
+                            "  (" + archiver.getResetDuration() + ")");
+                }
                 lines.add(archiver.totalEvents + " Events Received");
                 if ( archiver.attributeOk.length==0)
                     lines.add(" - NO  Attribute OK");
@@ -587,6 +698,92 @@ public class DistributionDialog extends JDialog {
 
 
     //===============================================================
+    /**
+     * JLChart class to display performances distribution
+     */
+    //===============================================================
+    private class PerformancesChart extends DistributionChart implements IJLChartListener {
+        private JLDataView processDataView;
+        private JLDataView storeDataView;
+        private JLDataView pendingDataView;
+        private final String[] axisNames = {
+                "Archivers",  "Time (millis)", "Attributes"
+        };
+        private final String[] curveNames = {
+                "Process Time", "Store Time", "Max Pending"
+        };
+        //===============================================================
+        private PerformancesChart() throws DevFailed {
+            setJLChartListener(this);
+            buildAxises(axisNames);
+            int i=0;
+            processDataView = buildCurve(curveNames[i++], Color.red, getY1Axis());
+            storeDataView   = buildCurve(curveNames[i++], new Color(0x00aa00), getY1Axis());
+            pendingDataView = buildCurve(curveNames[i],   new Color(0x0000aa), getY2Axis());
+
+            updateValues();
+        }
+        //===============================================================
+        private void updateValues() throws DevFailed {
+            resetDataViews();
+            archivers.clear();
+            List<String> labels = subscriberMap.getLabelList();
+            SplashUtils.getInstance().reset();
+            int x = 0;
+            for (String label : labels) {
+                SplashUtils.getInstance().increaseSplashProgressForLoop(labels.size(), "Reading " + label);
+                Archiver archiver = new Archiver(subscriberMap.getSubscriber(label));
+
+                processDataView.add(x, archiver.maxProcess*1000.0);
+                storeDataView.add(x + 0.2, archiver.maxStore*1000.0);
+                pendingDataView.add(x + 0.4, archiver.pending);
+                archivers.add(archiver);
+                x++;
+            }
+        }
+        //===============================================================
+        @Override
+        public String[] clickOnChart(JLChartEvent event) {
+            int index = event.getDataViewIndex();
+            Archiver archiver = archivers.get(index);
+
+            if (archiver!=null) {
+                //  Check mouse modifier
+                MouseEvent mouseEvent = event.getMouseEvent();
+                if (archiver.attributeFailed.length>0 && mouseEvent!=null &&
+                        (mouseEvent.getModifiers() & MouseEvent.SHIFT_MASK)!=0)
+                    return null;
+
+                //  Display archiver info
+                ArrayList<String>   lines = new ArrayList<String>();
+                lines.add(archiver.title);
+                if (archiver.resetTime>0) {
+                    lines.add("Since " + archiver.getResetTime() +
+                            "  (" + archiver.getResetDuration() + ")");
+                }
+                lines.add(archiver.totalEvents + " Events Received");
+                lines.add(" - Max process time: " + Utils.strPeriod(archiver.maxProcess));
+                lines.add(" - Max store time: "   + Utils.strPeriod(archiver.maxStore));
+                lines.add(" - Min store time: "   + Utils.strPeriod(archiver.minStore));
+                lines.add(" - Max pending:    "   + archiver.pending   + " att.");
+
+                String[]    array = new String[lines.size()];
+                for (int i=0 ; i<lines.size() ; i++)
+                    array[i] = lines.get(i);
+                return array;
+            }
+            else
+                return new String[0];
+        }
+
+        //===============================================================
+    }
+    //===============================================================
+    //===============================================================
+
+
+
+    //===============================================================
     //===============================================================
     private class Archiver {
         private Subscriber  subscriber;
@@ -594,6 +791,12 @@ public class DistributionDialog extends JDialog {
         private String[]    attributeOk;
         private String[]    attributeFailed;
         private int         totalEvents = 0;
+        private int         pending;
+        private double      maxProcess;
+        @SuppressWarnings("unused")
+        private double      minProcess;
+        private double      maxStore;
+        private double      minStore;
         private long        resetTime=-1;
         private long        sinceReset=0;
         //===========================================================
@@ -607,8 +810,16 @@ public class DistributionDialog extends JDialog {
         private void update() {
             try {
                 DeviceAttribute[] attributes = subscriber.read_attribute(
-                        new String[]{ "AttributeOkList",
-                                "AttributeNOkList", "AttributeEventNumberList"});
+                        new String[]{
+                                "AttributeOkList",
+                                "AttributeNOkList",
+                                "AttributeEventNumberList",
+                                "AttributeMinProcessingTime",
+                                "AttributeMaxProcessingTime",
+                                "AttributeMaxStoreTime",
+                                "AttributeMinStoreTime",
+                                "AttributeMaxPendingNumber"
+                        });
                 int i = 0;
                 DeviceAttribute attribute = attributes[i++];
                 if (attribute.hasFailed())
@@ -622,7 +833,7 @@ public class DistributionDialog extends JDialog {
                 else
                     attributeFailed = attribute.extractStringArray();
 
-                attribute = attributes[i];
+                attribute = attributes[i++];
                 if (!attribute.hasFailed()) {
                     int[] nbEvents = attribute.extractLongArray();
                     totalEvents = 0;
@@ -633,6 +844,24 @@ public class DistributionDialog extends JDialog {
                 if (resetTime>0) {
                     sinceReset = System.currentTimeMillis() - resetTime;
                 }
+
+                //  extraction for performances
+                attribute = attributes[i++];
+                if (attribute.hasFailed())  maxProcess = 0;
+                else maxProcess = attribute.extractDouble();
+                attribute = attributes[i++];
+                if (attribute.hasFailed())  minProcess = 0;
+                else minProcess = attribute.extractDouble();
+                attribute = attributes[i++];
+                if (attribute.hasFailed())  maxStore= 0;
+                else maxStore = attribute.extractDouble();
+                attribute = attributes[i++];
+                if (attribute.hasFailed())  minStore = 0;
+                else minStore = attribute.extractDouble();
+
+                attribute = attributes[i];
+                if (attribute.hasFailed())  pending = 0;
+                else pending = attribute.extractLong();
             }
             catch (DevFailed e) {
                 attributeOk = new String[0];
@@ -642,6 +871,15 @@ public class DistributionDialog extends JDialog {
         //===========================================================
         private int attributeCount() {
             return attributeOk.length + attributeFailed.length;
+        }
+        //===========================================================
+        public String getResetTime() {
+            return StatisticsDialog.formatResetTime(resetTime);
+        }
+        //===========================================================
+        public String getResetDuration() {
+            return  Utils.strPeriod(sinceReset / 1000);
+
         }
         //===========================================================
         public String toString() {
@@ -748,17 +986,21 @@ public class DistributionDialog extends JDialog {
                 case EVENT_NUMBER:
                     setText(Integer.toString(archiver.totalEvents));
                     break;
+                case STORE_TIME:
+                    setText(Utils.strPeriod(archiver.maxStore));
+                    break;
+                case MAX_PENDING:
+                    setText(Integer.toString(archiver.pending));
+                    break;
                 case RESET_TIME:
-                    long resetTime = archiver.resetTime;
-                    if (resetTime>0)
-                        setText(StatisticsDialog.formatResetTime(resetTime));
+                    if (archiver.resetTime>0)
+                        setText(archiver.getResetTime());
                     else
                         setText("Not available");
                     break;
                 case RESET_DURATION:
-                    resetTime = archiver.resetTime;
-                    if (resetTime>0)
-                        setText(Utils.strPeriod(archiver.sinceReset / 1000));
+                    if (archiver.resetTime>0)
+                        setText(archiver.getResetDuration());
                     else
                         setText("Not available");
                     break;
