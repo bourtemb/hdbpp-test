@@ -66,7 +66,7 @@ public class SubscriberMap {
     //======================================================
     public SubscriberMap(DeviceProxy configuratorProxy) throws DevFailed {
         //  Get Subscriber labels
-        ArrayList<String[]> labels = TangoUtils.getSubscriberLabels();
+        List<String[]> labels = TangoUtils.getSubscriberLabels();
         //  Get Subscriber deviceName
         String[]    subscribers = ArchiverUtils.getSubscriberList(configuratorProxy);
         for (String subscriber : subscribers) {
@@ -77,7 +77,7 @@ public class SubscriberMap {
     }
     //======================================================
     //======================================================
-    private void put(String deviceName, ArrayList<String[]> labels) throws DevFailed {
+    private void put(String deviceName, List<String[]> labels) throws DevFailed {
         boolean found = false;
         //  Manage full device name
         String tgHost = "";

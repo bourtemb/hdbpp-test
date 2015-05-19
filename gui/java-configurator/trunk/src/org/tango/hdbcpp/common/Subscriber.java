@@ -238,6 +238,7 @@ public class Subscriber extends DeviceProxy {
      * @throws DevFailed in case of read device failed.
      */
     //======================================================================
+    @SuppressWarnings("unused")
     public  void stopAttribute(String attributeName) throws DevFailed {
         ArchiverUtils.stopAttribute(this, attributeName);
     }
