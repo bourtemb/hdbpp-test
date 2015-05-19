@@ -17,6 +17,16 @@
 
 
 
+jhdbcpp-2.1 - 19/05/15:
+	Subscriber alias management added.
+	Performance view added in distribution
+	Compatibility with Java-7
+
+jhdbcpp-2.0 - 23/04/15:
+	Change GUI look and feel.
+	Add pause attribute state.
+	Attribute lists are updated from events
+
 jhdbcpp-1.13 - 08/04/15:
 	small chamges.
 

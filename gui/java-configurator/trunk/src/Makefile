@@ -17,8 +17,8 @@
 #
 #-======================================================================
 
-MAJOR_RELEASE=1
-MINOR_RELEASE=13
+MAJOR_RELEASE = 2
+MINOR_RELEASE  = 1
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 
@@ -40,7 +40,7 @@ SVN_TAG_REV =	Release-$(MAJOR_RELEASE).$(MINOR_RELEASE)
 #------------------------------------------------------------------
 
 BIN_DIR   = ../bin
-JAVAFLAGS = -d $(BIN_DIR)
+JAVAFLAGS = -deprecation -Xlint:unchecked  -d $(BIN_DIR)
 JAVAC     = javac  $(JAVAFLAGS)
 
 #-------------------------------------------------------------------
@@ -57,31 +57,31 @@ tools:
 	@echo "-----------------------------------------"
 	@echo "	Building $(PACKAGE).tools"
 	@echo "-----------------------------------------"
-	javac -d $(BIN_DIR) $(PACKAGE_HOME)/tools/*.java
+	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/tools/*.java
 
 common:
 	@echo "-----------------------------------------"
 	@echo "	Building $(PACKAGE).common"
 	@echo "-----------------------------------------"
-	javac -d $(BIN_DIR) $(PACKAGE_HOME)/common/*.java
+	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/common/*.java
 
 table:
 	@echo "-----------------------------------------"
 	@echo "	Building $(PACKAGE).atktable"
 	@echo "-----------------------------------------"
-	javac -d $(BIN_DIR) $(PACKAGE_HOME)/atktable/*.java
+	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/atktable/*.java
 
 config:
 	@echo "-----------------------------------------"
 	@echo "	Building $(PACKAGE)/"configurator
 	@echo "-----------------------------------------"
-	javac -d $(BIN_DIR) $(PACKAGE_HOME)/configurator/*.java
+	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/configurator/*.java
 
 diags:
 	@echo "-----------------------------------------"
 	@echo "	Building $(PACKAGE)/diagnostics"
 	@echo "-----------------------------------------"
-	javac -d $(BIN_DIR) $(PACKAGE_HOME)/diagnostics/*.java
+	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/diagnostics/*.java
 
 
 img:
