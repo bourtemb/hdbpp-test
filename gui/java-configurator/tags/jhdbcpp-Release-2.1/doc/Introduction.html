@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+    <Title> HDB Configurator User s Guide </Title>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#7F00FF" ALINK="#FF0000">
+
+
+<!------------------ Introduction ----------------------->
+<Center><h2><u>Introduction to HDB++ Configurator</u></h2></Center>
+<br><br>
+<h2>Goal:</h2>
+<ul>
+	<li> The first goal of this tool is to add attributes to archiver.
+	<li> The second goal is to start and stop attributes archiving .<br>
+</ul>
+<br>
+<br>
+<h2>Start up:</h2>
+<ul>
+	<li>
+        This tool is a java Tango GUI.<br>
+        That means that the <b>$CLASSPATH</b> needs:
+        <ul>
+            <li> TangORB.jar </li>
+            <li> ATKWidget.jar </li>
+            <li> ATKCore.jar </li>
+            <li> Jive.jar </li>
+            <li> jhdcpp.jar </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        It needs the configurator manager device name as an environment variable:
+        <ul> e.g: <b>export HdbManager=tango/hdb/manager </b></ul>
+    </li>
+    <br>
+    <li>
+        Then Start the java class:
+        <ul> <b> java org.tango.hdbcpp.configurator.HdbConfigurator </b></ul>
+    </li>
+</ul>
+<br>
+<br>
+<h2>Principle:</h2>
+<ul>
+	<li>
+        An attribute could be simply added to a subscriber
+            by a simple selection in a JTree (jive like).<br>
+        Select the expected archiver to assign the attribute.<br>
+        Set the archiving event properties if needed or set the
+            <b>Event push by code</b> button if it the case.
+        <br><br>
+
+         <img src="img/AddAttribute.gif">
+         <br><br>
+         <br><br>
+    </li>
+    <li>
+        When the attribute has been added to and archiver, the archiving could be easily started.
+        <br><br>
+        <img src="img/StartAttribute.gif">
+    </li>
+</ul>
+</BODY>
+</HTML>
