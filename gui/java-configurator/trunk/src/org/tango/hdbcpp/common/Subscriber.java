@@ -254,6 +254,14 @@ public class Subscriber extends DeviceProxy {
     }
     //======================================================
     //======================================================
+    public String getAttributeStatus(String attributeName) throws DevFailed {
+        DeviceData  argIn = new DeviceData();
+        argIn.insert(attributeName);
+        DeviceData  argOut = command_inout("AttributeStatus", argIn);
+        return argOut.extractString();
+    }
+    //======================================================
+    //======================================================
 
 
 

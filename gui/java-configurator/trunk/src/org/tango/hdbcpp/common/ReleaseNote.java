@@ -17,7 +17,11 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Thu Apr 23 15:39:49 CEST 2015)</Center><Br>\n" + 
+		"	(Generated Tue May 19 14:31:09 CEST 2015)</Center><Br>\n" + 
+		"<li><b>jhdbcpp-2.1 - 19/05/15:</b><Br>\n" + 
+		"&nbsp; &nbsp; Subscriber alias management added.<Br>\n" + 
+		"&nbsp; &nbsp; Performance view added in distribution<Br>\n" + 
+		"&nbsp; &nbsp; Compatibility with Java-7<Br>\n" + 
 		"<li><b>jhdbcpp-2.0 - 23/04/15:</b><Br>\n" + 
 		"&nbsp; &nbsp; Change GUI look and feel.<Br>\n" + 
 		"&nbsp; &nbsp; Add pause attribute state.<Br>\n" + 
