@@ -74,6 +74,7 @@ public class Utils {
                     "Icon file  " + filename + "  not found");
         }
 
+        //noinspection ConstantConditions
         return new ImageIcon(url);
     }
 
@@ -163,7 +164,7 @@ public class Utils {
             if (e instanceof InvocationTargetException) {
                 InvocationTargetException   ite = (InvocationTargetException) e;
                 Throwable   throwable = ite.getTargetException();
-                System.err.println(throwable);
+                System.err.println(throwable.getMessage());
                 if (throwable instanceof DevFailed)
                     throw (DevFailed) throwable;
                 else
@@ -306,6 +307,14 @@ public class Utils {
     //===============================================================
     //===============================================================
     public static String strPeriod(double period) {
+        if (period<2e-3) {
+            return String.format("%.2f us", 1e6*period);
+        }
+        else
+        if (period<1) {
+            return String.format("%.2f ms.", 1e3*period);
+        }
+        else
         if (period < 60.0) {
             return String.format("%.2f sec.", period);
         } else {
@@ -331,13 +340,15 @@ public class Utils {
     //======================================================================
     //======================================================================
     public static String buildTooltip(String text) {
-        return "<html><BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFD0\">" + text +
-                "</body></html>";
+        //  Put it in a table for margin
+        return "<html><BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFD0\">\n" +
+                "<table border=0 cellSpacing=2>\n" +
+                "<tr>" + text + "</tr>\n" +
+                "</table></body></html>";
     }
     //======================================================================
     //======================================================================
     public static void popupError(Component component, String message) {
-        //JOptionPane.showMessageDialog(component, message, "Error", JOptionPane.ERROR_MESSAGE);
         ErrorPane.showErrorMessage(component, "Error", new Exception(message));
     }
     //======================================================================
@@ -352,10 +363,10 @@ public class Utils {
                 testEvents = TestEvents.getInstance(new JFrame());
             }
             catch (NoClassDefFoundError e) {
-                System.err.println(e);
+                System.err.println(e.getMessage());
             }
             catch (DevFailed e) {
-                System.err.println(e);
+                System.err.println(e.errors[0].desc);
             }
         }
         return testEvents;

@@ -249,7 +249,7 @@ public class TangoUtils {
      * @throws DevFailed
      */
     //======================================================================
-    public static ArrayList<String[]> getSubscriberLabels() throws DevFailed {
+    public static List<String[]> getSubscriberLabels() throws DevFailed {
         DbDatum datum = ApiUtil.get_db_obj().get_property(
                 "HdbConfigurator", "ArchiverLabels");
         ArrayList<String[]> labels = new ArrayList<String[]>();
@@ -268,6 +268,23 @@ public class TangoUtils {
             }
         }
         return labels;
+    }
+    //======================================================================
+    /**
+     * Write archiver label list (deviceName, Label) in data base.
+     *
+     * @throws DevFailed
+     */
+    //======================================================================
+    public static void setSubscriberLabels(List<String[]> labels) throws DevFailed {
+        String[] lines = new String[labels.size()];
+        int i=0;
+        for (String[] label : labels) {
+            lines[i++] = label[0] + ":  " + label[1];
+        }
+        DbDatum datum = new DbDatum("ArchiverLabels");
+        datum.insert(lines);
+        ApiUtil.get_db_obj().put_property("HdbConfigurator", new DbDatum[] {datum});
     }
     //======================================================================
     //======================================================================
