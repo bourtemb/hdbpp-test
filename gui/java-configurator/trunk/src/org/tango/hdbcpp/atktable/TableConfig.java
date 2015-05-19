@@ -137,7 +137,7 @@ class TableConfig {
 
     //===========================================================
     //===========================================================
-    public Attribute attributeNamed(String name) {
+    private Attribute getAttribute(String name) {
         Attribute att;
         for (int i = 0 ; i<attributes.size() ; i++) {
             att = attributeAt(i);
@@ -159,7 +159,7 @@ class TableConfig {
     public void setError(String attname, boolean b) {
         Attribute att;
         if (attname!=null) {
-            att = attributeNamed(attname);
+            att = getAttribute(attname);
             if (att!=null)
                 att.on_error = b;
         }
@@ -204,20 +204,38 @@ class TableConfig {
 
     //===========================================================
     //===========================================================
-    public class Attribute {
-        String name;
-        int row;
-        int col;
-        boolean connected = false;
-        boolean on_error = true;
-
+    class Attribute {
+        private String name;
+        private int row;
+        private int col;
+        private boolean connected = false;
+        private boolean on_error = true;
         //=======================================================
-        public Attribute(String name, int row, int col) {
+        private Attribute(String name, int row, int col) {
             this.name = name;
             this.row = row;
             this.col = col;
         }
-
+        //=======================================================
+        public int getRow() {
+            return row;
+        }
+        //=======================================================
+        public int getCol() {
+            return col;
+        }
+        //=======================================================
+        public void setConnected(boolean connected) {
+            this.connected = connected;
+        }
+        //=======================================================
+        public boolean isConnected() {
+            return connected;
+        }
+        //=======================================================
+        public String getName() {
+            return name;
+        }
         //=======================================================
         public String toString() {
             return name;

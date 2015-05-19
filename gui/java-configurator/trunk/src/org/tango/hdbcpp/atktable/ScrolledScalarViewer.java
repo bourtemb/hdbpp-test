@@ -179,6 +179,7 @@ class ScrolledScalarViewer extends JScrollPane implements IErrorListener,
         config.setError(evt.getSource().toString(), true);
         if (!on_error) {
             on_error = true;
+            //noinspection ConstantConditions
             parent.errorChanged(on_error);
             new EndErrorCheck().start();
         }
@@ -250,14 +251,14 @@ class ScrolledScalarViewer extends JScrollPane implements IErrorListener,
 
         //===========================================================
         private boolean connectAttribute(TableConfig.Attribute attribute) {
-            if (attribute.name==null) {
-                attribute.connected = true;
+            if (attribute.getName()==null) {
+                attribute.setConnected(true);
                 return false;
             }
 
             try {
                 //	Add listener on attribute.
-                IAttribute iAttribute = (IAttribute) attlist.add(attribute.name);
+                IAttribute iAttribute = (IAttribute) attlist.add(attribute.getName());
 
                 if (iAttribute instanceof INumberScalar)
                     ((INumberScalar) iAttribute).addNumberScalarListener(thisViewer);
@@ -268,14 +269,14 @@ class ScrolledScalarViewer extends JScrollPane implements IErrorListener,
                 else if (iAttribute instanceof IBooleanScalar)
                     ((IBooleanScalar) iAttribute).addBooleanScalarListener(thisViewer);
                 else
-                    System.out.println(attribute.name + "  Not Supported Type !!");
+                    System.out.println(attribute.getName() + "  Not Supported Type !!");
 
                 //	Set all attribute positions
-                table.setModelAt(iAttribute, attribute.row, attribute.col);
-                attribute.connected = true;
+                table.setModelAt(iAttribute, attribute.getRow(), attribute.getCol());
+                attribute.setConnected(true);
                 return true;
             } catch (Exception e) {
-                attribute.connected = false;
+                attribute.setConnected(false);
                 return false;
             }
         }
@@ -288,10 +289,10 @@ class ScrolledScalarViewer extends JScrollPane implements IErrorListener,
                 nbConnected = 0;
                 for (int i=0 ; i<config.size() ; i++) {
                     TableConfig.Attribute attribute = config.attributeAt(i);
-                    if (!attribute.connected) {
+                    if (!attribute.isConnected()) {
                         connectAttribute(attribute);
                     }
-                    if (attribute.connected)
+                    if (attribute.isConnected())
                         nbConnected++;
                 }
 

@@ -96,7 +96,7 @@ public class TableScalarViewer extends JPanel {
         //errorBtn.setIcon(Utils.getInstance().getIcon("redball.gif"));
         errorBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                errorBtnActionPerformed(evt);
+                errorBtnActionPerformed();
             }
         });
 
@@ -169,9 +169,9 @@ public class TableScalarViewer extends JPanel {
     }
     //=======================================================
     //=======================================================
-    private void errorBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_errorBtnActionPerformed
+    private void errorBtnActionPerformed() {
         showErrorHistory();
-    }//GEN-LAST:event_errorBtnActionPerformed
+    }
     //=======================================================
     //=======================================================
     static Window getMainContainer(Component c) {
