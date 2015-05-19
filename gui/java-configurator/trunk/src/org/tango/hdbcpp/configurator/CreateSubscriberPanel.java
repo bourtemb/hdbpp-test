@@ -174,9 +174,9 @@ public class CreateSubscriberPanel extends JDialog {
         instanceLabel = new javax.swing.JLabel();
         deviceLabel = new javax.swing.JLabel();
         javax.swing.JLabel aliasLabel = new javax.swing.JLabel();
-        instanceComboBox = new javax.swing.JComboBox();
-        deviceComboBox = new javax.swing.JComboBox();
-        labelComboBox = new javax.swing.JComboBox();
+        instanceComboBox = new javax.swing.JComboBox<String>();
+        deviceComboBox = new javax.swing.JComboBox<String>();
+        labelComboBox = new javax.swing.JComboBox<String>();
         javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
         javax.swing.JButton okBtn = new javax.swing.JButton();
         javax.swing.JButton cancelBtn = new javax.swing.JButton();
@@ -545,42 +545,22 @@ public class CreateSubscriberPanel extends JDialog {
 	//===============================================================
     private void manageArchiveLabels(String deviceName, String archiverLabel) throws DevFailed {
 
-        String objectName = "HdbConfigurator";
-        String propertyName = "ArchiverLabels";
-        DbDatum   datum = ApiUtil.get_db_obj().get_property(objectName, propertyName);
-
-        ArrayList<String>   labelList = new ArrayList<String>();
-        String[]    labelArray;
-        if (datum.is_empty()) {
-            System.err.println("No archiver label found !");
-        }
-        else {
-            //  Copy to a list to be sorted
-            labelArray = datum.extractStringArray();
-            Collections.addAll(labelList, labelArray);
-        }
-
+        List<String[]> labelList = TangoUtils.getSubscriberLabels();
         if (action==CREATE) {
             //  Add new one and sort
-            labelList.add(deviceName + ":  " + archiverLabel);
-            Collections.sort(labelList, new StringComparator());
+            labelList.add(new String[]{deviceName, archiverLabel});
+            Collections.sort(labelList, new StringArrayComparator());
         }
         else {
             //  Remove
-            for (String line : labelList)
-                if (line.startsWith(deviceName+':')) {
+            for (String[] line : labelList)
+                if (line[0].startsWith(deviceName+':')) {
                     labelList.remove(line);
                     break;
                 }
         }
-        //  Re-put in array to write property
-        int i = 0;
-        labelArray = new String[labelList.size()];
-        for (String label : labelList) {
-            labelArray[i++] = label;
-        }
-        datum = new DbDatum(propertyName, labelArray);
-        ApiUtil.get_db_obj().put_property(objectName, new DbDatum[]{ datum });
+        // And update database
+        TangoUtils.setSubscriberLabels(labelList);
     }
 	//===============================================================
 	//===============================================================
@@ -653,11 +633,11 @@ public class CreateSubscriberPanel extends JDialog {
     private javax.swing.JTextField dbHostText;
     private javax.swing.JTextField dbNameText;
     private javax.swing.JTextField dbPortText;
-    private javax.swing.JComboBox deviceComboBox;
+    private javax.swing.JComboBox<String> deviceComboBox;
     private javax.swing.JLabel deviceLabel;
-    private javax.swing.JComboBox instanceComboBox;
+    private javax.swing.JComboBox<String> instanceComboBox;
     private javax.swing.JLabel instanceLabel;
-    private javax.swing.JComboBox labelComboBox;
+    private javax.swing.JComboBox<String> labelComboBox;
     private javax.swing.JTextField pollingThreadText;
     private javax.swing.JTextField startArchivingText;
     private javax.swing.JTextField statTimeText;
@@ -693,40 +673,18 @@ public class CreateSubscriberPanel extends JDialog {
 
 
 
-    //======================================================
-    /**
-     * Comparator class to sort by labels
-     */
-    //======================================================
-    @SuppressWarnings("UnusedDeclaration")
-    private class LabelComparator implements Comparator<String> {
-        public int compare(String s1, String s2) {
-
-            if (s1 == null)      return 1;
-            else if (s2 == null) return -1;
-            else {
-                int idx1 = s1.indexOf(':');
-                if (idx1<0) return 1;
-                int idx2 = s2.indexOf(':');
-                if (idx2<0) return 1;
-                String label1 = s1.substring(idx1 + 1).trim();
-                String label2 = s2.substring(idx2 + 1).trim();
-                return label1.compareTo(label2);
-            }
-        }
-    }
    //======================================================
     /**
      * Comparator class to sort by Strings
      */
     //======================================================
-    class StringComparator implements Comparator<String> {
-        public int compare(String s1, String s2) {
+    private class StringArrayComparator implements Comparator<String[]> {
+        public int compare(String[] a1, String[] a2) {
 
-            if (s1 == null)      return 1;
-            else if (s2 == null) return -1;
+            if (a1 == null)      return 1;
+            else if (a2 == null) return -1;
             else {
-                return s1.compareTo(s2);
+                return a1[0].compareTo(a2[0]);
             }
         }
     }

@@ -78,6 +78,9 @@ public class HdbConfigurator extends JFrame {
     private List<String>    tangoHostList;
     private UpdateListThread updateListThread;
 
+    private static final String[]  strAttributeState = {
+            "Started Attributes","Paused Attributes", "Stopped Attributes"
+    };
     private static final Dimension treeDimension = new Dimension(350, 400);
     //=======================================================
     /**
@@ -246,17 +249,27 @@ public class HdbConfigurator extends JFrame {
                         attributeList, pausedAttrLabel, pausedAttrScrollPane);
                 break;
         }
+        //  Update pane label
+       updatePaneTitle(subscriber, Subscriber.ATTRIBUTE_STARTED);
+       updatePaneTitle(subscriber, Subscriber.ATTRIBUTE_PAUSED);
+       updatePaneTitle(subscriber, Subscriber.ATTRIBUTE_STOPPED);
     }
 
 	//=======================================================
 	//=======================================================
-    private void updateAttributeList(JList jList, String[] attributes, JLabel jLabel, JScrollPane scrollPane) {
+    private void updatePaneTitle(Subscriber subscriber, int index) {
+        int nb = subscriber.getAttributeList(index, false).length;
+        tabbedPane.setTitleAt(index, nb + " " + strAttributeState[index]);
+    }
+	//=======================================================
+	//=======================================================
+    private void updateAttributeList(JList<String > jList, String[] attributes, JLabel jLabel, JScrollPane scrollPane) {
 
         //  Display attributes in jList
-        int selection =  tabbedPane.getSelectedIndex();
-        String attributeState = tabbedPane.getTitleAt(selection);
+        attributes = StringComparator.sortArray(attributes);
         jList.setListData(attributes);
-        jLabel.setText(Integer.toString(attributes.length) + " " + attributeState + "     tango://");
+        String s = (attributes.length>1) ? "s" : "";
+        jLabel.setText(Integer.toString(attributes.length) + " attribute"+s);
 
         //  move horizontal scroll bar to see end of attribute name
         JScrollBar horizontal = scrollPane.getVerticalScrollBar();
@@ -294,16 +307,12 @@ public class HdbConfigurator extends JFrame {
     }
 	//=======================================================
 	//=======================================================
-    private void moveAttributeToSubscriber(String targetSubscriberLabel, JList selectedList) {
+    private void moveAttributeToSubscriber(String targetSubscriberLabel, JList<String> selectedList) {
         try {
-            System.out.println("Move to "+ targetSubscriberLabel);
+            System.out.println("Move to " + targetSubscriberLabel);
 
 
-            Object[] attributeNames = selectedList.getSelectedValues();
-            ArrayList<String>   attributeList = new ArrayList<String>();
-            for (Object attributeName : attributeNames) {
-                attributeList.add((String) attributeName);
-            }
+            List<String>   attributeList = selectedList.getSelectedValuesList();
             Subscriber targetSubscriber = subscriberMap.getSubscriber(targetSubscriberLabel);
             Subscriber srcSubscriber =
                     subscriberMap.getSubscriber((String) archiverComboBox.getSelectedItem());
@@ -381,26 +390,32 @@ public class HdbConfigurator extends JFrame {
         javax.swing.JPanel rightPanel = new javax.swing.JPanel();
         javax.swing.JPanel archiverPanel = new javax.swing.JPanel();
         archiverLabel = new javax.swing.JLabel();
-        archiverComboBox = new javax.swing.JComboBox();
+        archiverComboBox = new javax.swing.JComboBox<String>();
         tabbedPane = new javax.swing.JTabbedPane();
         javax.swing.JPanel startedPanel = new javax.swing.JPanel();
         javax.swing.JPanel startedTopPanel = new javax.swing.JPanel();
-        startedAttrLabel = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
         startedFilterText = new javax.swing.JTextField();
+        javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
+        startedAttrLabel = new javax.swing.JLabel();
         startedAttrScrollPane = new javax.swing.JScrollPane();
-        startedAttrJList = new javax.swing.JList();
+        startedAttrJList = new javax.swing.JList<String>();
         javax.swing.JPanel pausedPanel = new javax.swing.JPanel();
         javax.swing.JPanel pausedTopPanel = new javax.swing.JPanel();
-        pausedAttrLabel = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
         pausedFilterText = new javax.swing.JTextField();
+        javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
+        pausedAttrLabel = new javax.swing.JLabel();
         pausedAttrScrollPane = new javax.swing.JScrollPane();
-        pausedAttrJList = new javax.swing.JList();
+        pausedAttrJList = new javax.swing.JList<String>();
         javax.swing.JPanel stoppedPanel = new javax.swing.JPanel();
         javax.swing.JPanel stoppedTopPanel = new javax.swing.JPanel();
-        stoppedAttrLabel = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
         stoppedFilterText = new javax.swing.JTextField();
+        javax.swing.JLabel jLabel7 = new javax.swing.JLabel();
+        stoppedAttrLabel = new javax.swing.JLabel();
         stoppedAttrScrollPane = new javax.swing.JScrollPane();
-        stoppedAttrJList = new javax.swing.JList();
+        stoppedAttrJList = new javax.swing.JList<String>();
         javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem openItem = new javax.swing.JMenuItem();
@@ -411,6 +426,7 @@ public class HdbConfigurator extends JFrame {
         javax.swing.JMenu toolMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem addSubscriberItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem removeSubscriberItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem manageAliasesItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem releaseNoteItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem aboutItem = new javax.swing.JMenuItem();
@@ -530,7 +546,6 @@ public class HdbConfigurator extends JFrame {
         archiverLabel.setText("Archivers:");
         archiverPanel.add(archiverLabel);
 
-        archiverComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         archiverComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 archiverComboBoxActionPerformed(evt);
@@ -548,8 +563,8 @@ public class HdbConfigurator extends JFrame {
 
         startedPanel.setLayout(new java.awt.BorderLayout());
 
-        startedAttrLabel.setText("Started Attributes:       tango://");
-        startedTopPanel.add(startedAttrLabel);
+        jLabel3.setText("Filter    tango://");
+        startedTopPanel.add(jLabel3);
 
         startedFilterText.setColumns(25);
         startedFilterText.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
@@ -560,6 +575,12 @@ public class HdbConfigurator extends JFrame {
             }
         });
         startedTopPanel.add(startedFilterText);
+
+        jLabel2.setText("   ");
+        startedTopPanel.add(jLabel2);
+
+        startedAttrLabel.setText("Attributes");
+        startedTopPanel.add(startedAttrLabel);
 
         startedPanel.add(startedTopPanel, java.awt.BorderLayout.NORTH);
 
@@ -573,8 +594,8 @@ public class HdbConfigurator extends JFrame {
 
         pausedPanel.setLayout(new java.awt.BorderLayout());
 
-        pausedAttrLabel.setText("Paused Attributes:      tango://");
-        pausedTopPanel.add(pausedAttrLabel);
+        jLabel4.setText("Filter    tango://");
+        pausedTopPanel.add(jLabel4);
 
         pausedFilterText.setColumns(25);
         pausedFilterText.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
@@ -585,6 +606,12 @@ public class HdbConfigurator extends JFrame {
             }
         });
         pausedTopPanel.add(pausedFilterText);
+
+        jLabel6.setText("   ");
+        pausedTopPanel.add(jLabel6);
+
+        pausedAttrLabel.setText("Attributes");
+        pausedTopPanel.add(pausedAttrLabel);
 
         pausedPanel.add(pausedTopPanel, java.awt.BorderLayout.NORTH);
 
@@ -598,8 +625,8 @@ public class HdbConfigurator extends JFrame {
 
         stoppedPanel.setLayout(new java.awt.BorderLayout());
 
-        stoppedAttrLabel.setText("Stopped Attributes:      tango://");
-        stoppedTopPanel.add(stoppedAttrLabel);
+        jLabel5.setText("Filter    tango://");
+        stoppedTopPanel.add(jLabel5);
 
         stoppedFilterText.setColumns(25);
         stoppedFilterText.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
@@ -610,6 +637,12 @@ public class HdbConfigurator extends JFrame {
             }
         });
         stoppedTopPanel.add(stoppedFilterText);
+
+        jLabel7.setText("   ");
+        stoppedTopPanel.add(jLabel7);
+
+        stoppedAttrLabel.setText("Attributes");
+        stoppedTopPanel.add(stoppedAttrLabel);
 
         stoppedPanel.add(stoppedTopPanel, java.awt.BorderLayout.NORTH);
 
@@ -696,6 +729,15 @@ public class HdbConfigurator extends JFrame {
             }
         });
         toolMenu.add(removeSubscriberItem);
+
+        manageAliasesItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
+        manageAliasesItem.setText("Manage Subscriber Aliases");
+        manageAliasesItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                manageAliasesItemActionPerformed(evt);
+            }
+        });
+        toolMenu.add(manageAliasesItem);
 
         menuBar.add(toolMenu);
 
@@ -998,6 +1040,21 @@ public class HdbConfigurator extends JFrame {
         }
     }//GEN-LAST:event_tabbedPaneStateChanged
 
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void manageAliasesItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_manageAliasesItemActionPerformed
+        try {
+            ArchiverAliasesDialog aliasesDialog = new ArchiverAliasesDialog(this, subscriberMap);
+            if (aliasesDialog.showDialog()==JOptionPane.OK_OPTION) {
+                restartApplication();
+            }
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, e.getMessage(), e);
+        }
+    }//GEN-LAST:event_manageAliasesItemActionPerformed
+
 	//=======================================================
 	//=======================================================
     private void restartApplication() {
@@ -1171,22 +1228,22 @@ public class HdbConfigurator extends JFrame {
 	//=======================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addAttributeButton;
-    private javax.swing.JComboBox archiverComboBox;
+    private javax.swing.JComboBox<String> archiverComboBox;
     private javax.swing.JLabel archiverLabel;
     private javax.swing.JPanel attrTreePanel;
     private javax.swing.JTextField attributeField;
     private javax.swing.JTextField deviceFilterText;
-    private javax.swing.JList pausedAttrJList;
+    private javax.swing.JList<String> pausedAttrJList;
     private javax.swing.JLabel pausedAttrLabel;
     private javax.swing.JScrollPane pausedAttrScrollPane;
     private javax.swing.JTextField pausedFilterText;
     private javax.swing.JTextArea propertiesArea;
     private javax.swing.JButton searchButton;
-    private javax.swing.JList startedAttrJList;
+    private javax.swing.JList<String> startedAttrJList;
     private javax.swing.JLabel startedAttrLabel;
     private javax.swing.JScrollPane startedAttrScrollPane;
     private javax.swing.JTextField startedFilterText;
-    private javax.swing.JList stoppedAttrJList;
+    private javax.swing.JList<String> stoppedAttrJList;
     private javax.swing.JLabel stoppedAttrLabel;
     private javax.swing.JScrollPane stoppedAttrScrollPane;
     private javax.swing.JTextField stoppedFilterText;
@@ -1228,7 +1285,7 @@ public class HdbConfigurator extends JFrame {
     //=======================================================
     private class ListPopupMenu extends JPopupMenu {
         private JLabel title;
-        private JList  selectedList;
+        private JList<String>  selectedList;
         private JMenu  subscriberMenu = new JMenu(menuLabels[MOVE_TO]);
         //======================================================
         private ListPopupMenu() {
@@ -1278,27 +1335,28 @@ public class HdbConfigurator extends JFrame {
             subscriberMenu.setVisible(subscriberList.size()>1);
         }
         //======================================================
+        //noinspection PointlessArithmeticExpression
         private void showMenu(MouseEvent event, String attributeName) {
             title.setText(attributeName);
             setSubscriberMenu();
 
-            selectedList = (JList) event.getSource();
-            if (selectedList==startedAttrJList) {
-                //noinspection PointlessArithmeticExpression
+            Object object = event.getSource();
+            if (object==startedAttrJList) {
+                selectedList = startedAttrJList;
                 getComponent(OFFSET + START_ARCHIVING).setVisible(false);
                 getComponent(OFFSET + STOP_ARCHIVING).setVisible(true);
                 getComponent(OFFSET + PAUSE_ARCHIVING).setVisible(true);
             }
             else
-            if (selectedList==stoppedAttrJList) {
-                //noinspection PointlessArithmeticExpression
+            if (object==stoppedAttrJList) {
+                selectedList = stoppedAttrJList;
                 getComponent(OFFSET + START_ARCHIVING).setVisible(true);
                 getComponent(OFFSET + STOP_ARCHIVING).setVisible(false);
                 getComponent(OFFSET + PAUSE_ARCHIVING).setVisible(false);
             }
             else
-            if (selectedList==pausedAttrJList) {
-                //noinspection PointlessArithmeticExpression
+            if (object==pausedAttrJList) {
+                selectedList = pausedAttrJList;
                 getComponent(OFFSET + START_ARCHIVING).setVisible(true);
                 getComponent(OFFSET + STOP_ARCHIVING).setVisible(true);
                 getComponent(OFFSET + PAUSE_ARCHIVING).setVisible(false);
@@ -1324,12 +1382,7 @@ public class HdbConfigurator extends JFrame {
             try {
                 Subscriber  archiver =
                         subscriberMap.getSubscriber((String) archiverComboBox.getSelectedItem());
-                Object[] attributeNames = selectedList.getSelectedValues();
-                ArrayList<String>   attributeList = new ArrayList<String>();
-                for (Object attributeName : attributeNames) {
-                    attributeList.add((String) attributeName);
-                }
-
+                List<String> attributeList = selectedList.getSelectedValuesList();
                 switch (itemIndex) {
                     case START_ARCHIVING:
                         ManageAttributes.startAttributes(attributeList);
@@ -1364,9 +1417,9 @@ public class HdbConfigurator extends JFrame {
         //======================================================
         private void copyAttributeAsText() {
             //  Put selection in a text area, select and copy to clipboard
-            Object[] attributeNames = selectedList.getSelectedValues();
+            List<String> attributeNames = selectedList.getSelectedValuesList();
             StringBuilder   sb = new StringBuilder();
-            for (Object attributeName : attributeNames) {
+            for (String attributeName : attributeNames) {
                 sb.append(attributeName).append('\n');
             }
             JTextArea   textArea = new JTextArea(sb.toString());

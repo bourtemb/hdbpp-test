@@ -150,7 +150,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
         attributeListArea = new javax.swing.JTextArea();
         javax.swing.JPanel archiverPanel = new javax.swing.JPanel();
         javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
-        subscriberComboBox = new javax.swing.JComboBox();
+        subscriberComboBox = new javax.swing.JComboBox<String>();
         javax.swing.JPanel centerPanel = new javax.swing.JPanel();
         propertyPanel = new javax.swing.JPanel();
         javax.swing.JLabel absLbl = new javax.swing.JLabel();
@@ -206,7 +206,6 @@ public class PropertyDialog extends JDialog implements TangoConst {
         jLabel2.setText("Archiver: ");
         archiverPanel.add(jLabel2);
 
-        subscriberComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         archiverPanel.add(subscriberComboBox);
 
         topPanel.add(archiverPanel, java.awt.BorderLayout.SOUTH);
@@ -593,7 +592,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
     private javax.swing.JRadioButton pushedByCodeButton;
     private javax.swing.JTextField relTxt;
     private javax.swing.JRadioButton startArchivingButton;
-    private javax.swing.JComboBox subscriberComboBox;
+    private javax.swing.JComboBox<String> subscriberComboBox;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
     //===============================================================

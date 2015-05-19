@@ -43,6 +43,7 @@ import org.tango.hdbcpp.tools.SplashUtils;
 import org.tango.hdbcpp.tools.TangoUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -200,7 +201,7 @@ public class ManageAttributes {
      * @throws DevFailed in case of connection failed.
      */
     //===============================================================
-    public static void startAttributes(ArrayList<String> attributes) throws DevFailed {
+    public static void startAttributes(List<String> attributes) throws DevFailed {
         changeAttributeStates(attributes, Subscriber.ATTRIBUTE_STARTED);
     }
     //===============================================================
@@ -210,7 +211,7 @@ public class ManageAttributes {
      * @throws DevFailed in case of connection failed.
      */
     //===============================================================
-    public static void stopAttributes(ArrayList<String> attributes) throws DevFailed {
+    public static void stopAttributes(List<String> attributes) throws DevFailed {
         changeAttributeStates(attributes, Subscriber.ATTRIBUTE_STOPPED);
     }
     //===============================================================
@@ -220,7 +221,7 @@ public class ManageAttributes {
      * @throws DevFailed in case of connection failed.
      */
     //===============================================================
-    public static void pauseAttributes(ArrayList<String> attributes) throws DevFailed {
+    public static void pauseAttributes(List<String> attributes) throws DevFailed {
         changeAttributeStates(attributes, Subscriber.ATTRIBUTE_PAUSED);
     }
     //===============================================================
@@ -230,7 +231,7 @@ public class ManageAttributes {
      * @throws DevFailed in case of connection failed.
      */
     //===============================================================
-    private static void changeAttributeStates(ArrayList<String> attributes, int action) throws DevFailed {
+    private static void changeAttributeStates(List<String> attributes, int action) throws DevFailed {
         if (action<Subscriber.ATTRIBUTE_STARTED || action>Subscriber.ATTRIBUTE_STOPPED)
             Except.throw_exception("", "Action " + action + " Not Supported");
         String[] strAttributeStates = { "Staring ", " Pause ", "Stopping "};
@@ -288,7 +289,7 @@ public class ManageAttributes {
      * @throws DevFailed in case of connection failed.
      */
     //===============================================================
-    public static void removeAttributes(ArrayList<String> attributes) throws DevFailed {
+    public static void removeAttributes(List<String> attributes) throws DevFailed {
         if (display) {
             SplashUtils.getInstance().startSplash();
             SplashUtils.getInstance().setSplashProgress(10, "Adding attributes");

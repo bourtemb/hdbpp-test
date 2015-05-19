@@ -95,7 +95,7 @@ public class Selector extends JDialog {
         javax.swing.JPanel topPanel = new javax.swing.JPanel();
         titleLabel = new javax.swing.JLabel();
         javax.swing.JPanel centerPanel = new javax.swing.JPanel();
-        comboBox = new javax.swing.JComboBox();
+        comboBox = new javax.swing.JComboBox<String>();
         questionLabel = new javax.swing.JLabel();
         javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
         javax.swing.JButton okBtn = new javax.swing.JButton();
@@ -208,7 +208,7 @@ public class Selector extends JDialog {
 
     //===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox comboBox;
+    private javax.swing.JComboBox<String> comboBox;
     private javax.swing.JLabel questionLabel;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables

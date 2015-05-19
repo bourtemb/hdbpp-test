@@ -452,7 +452,7 @@ public class AttributeTree extends JTree {
     }
     //===============================================================
     //===============================================================
-    public void updateAttributeInfo(ArrayList<String> attributeNames) {
+    public void updateAttributeInfo(List<String> attributeNames) {
         for (String attributeName : attributeNames) {
             updateAttributeInfo(attributeName);
         }
