@@ -730,12 +730,14 @@ public class StatisticsDialog extends JDialog {
         private String getInfo() {
             String host = null;
             String server = null;
+            String attributeStatus = null;
             try {
                 String deviceName = name.substring(0, name.lastIndexOf('/'));
                 DeviceProxy deviceProxy = new DeviceProxy(deviceName);
                 DeviceInfo info = deviceProxy.get_info();
                 host = info.hostname;
                 server = info.server;
+                attributeStatus = subscriber.getAttributeStatus(name);
             }
             catch (DevFailed e) {
                 Except.print_exception(e);
@@ -754,6 +756,11 @@ public class StatisticsDialog extends JDialog {
             sb.append(nbStatistics).append(" events during ").append(Utils.strPeriod(duration)).append("\n");
             sb.append(nbEvents).append(" Since last reset : ").append(formatResetTime(resetTime)).append("\n");
             sb.append("    - during ").append(Utils.strPeriod(sinceReset/1000));
+
+            if (attributeStatus!=null) {
+                sb.append("\n\n----------------------- Attribute Status --------------------------\n");
+                sb.append(attributeStatus);
+            }
             return sb.toString();
         }
         //===========================================================

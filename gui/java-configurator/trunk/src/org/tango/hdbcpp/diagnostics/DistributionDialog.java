@@ -849,15 +849,20 @@ public class DistributionDialog extends JDialog {
                 attribute = attributes[i++];
                 if (attribute.hasFailed())  maxProcess = 0;
                 else maxProcess = attribute.extractDouble();
+                if (maxProcess<0)   maxProcess = 0.0;
                 attribute = attributes[i++];
                 if (attribute.hasFailed())  minProcess = 0;
                 else minProcess = attribute.extractDouble();
+                if (minProcess<0)   minProcess = 0.0;
+
                 attribute = attributes[i++];
                 if (attribute.hasFailed())  maxStore= 0;
                 else maxStore = attribute.extractDouble();
+                if (maxStore<0)   maxStore = 0.0;
                 attribute = attributes[i++];
                 if (attribute.hasFailed())  minStore = 0;
                 else minStore = attribute.extractDouble();
+                if (minStore<0)   minStore = 0.0;
 
                 attribute = attributes[i];
                 if (attribute.hasFailed())  pending = 0;
