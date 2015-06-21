@@ -4,13 +4,11 @@
 #include <sys/types.h>
 #include <vector>
 #include <string>
-#include <sharedpointer.h>
 
 #define TIMESTAMPLEN    32
 #define SRCLEN          256
 
 class XVariantPrivate;
-
 
 /** \brief Historical database data container.
  *

@@ -6,7 +6,7 @@ class DataSieverProgressListener
 public:
     DataSieverProgressListener();
 
-    void onFillProgressUpdate(int step, int total, double elapsed, double estimated_remaining);
+    void onFillProgressUpdate(int step, int total, double elapsed, double estimated_remaining) {};
 };
 
 #endif // DATASIEVERPROGRESSLISTENER_H

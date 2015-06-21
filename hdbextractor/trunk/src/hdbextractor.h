@@ -549,7 +549,7 @@ int main(int argc, char **argv)
  * See the DataSiever documentation for further details.
  *
  */
-class Hdbextractor :  ResultListener
+class Hdbextractor :  public ResultListener
 {
 public:
 
