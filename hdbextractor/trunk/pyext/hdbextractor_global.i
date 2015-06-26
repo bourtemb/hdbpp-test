@@ -9,8 +9,6 @@
 %include "typemaps.i"
 
 %include xvariant.i
-%include simpleclass.i
-
 
 namespace std {
     %template(IntVector) vector<int>;

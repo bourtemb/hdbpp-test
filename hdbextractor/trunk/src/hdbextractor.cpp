@@ -345,47 +345,6 @@ int Hdbextractor::get(std::vector<XVariant>& variantlist)
     return -1;
 }
 
-int Hdbextractor::testGet(std::vector<XVariant> variantli)
-{
-    printf("test method to see if the problem is reference\n");
-    return 0;
-}
-
-int Hdbextractor::testGet2(XVariant var)
-{
-    return var.getType();
-}
-
-double Hdbextractor::testGet3(double d)
-{
-    return d;
-}
-
-int Hdbextractor::testGet4(std::vector<double>& dv)
-{
-    dv.push_back(10);
-    dv.push_back(11);
-    return dv.size();
-}
-
-int Hdbextractor::testGet5(std::vector<double> dv)
-{
-    return dv.size();
-}
-
-int Hdbextractor::testSimpleClass(std::vector<SimpleClass> sv)
-{
-    return sv.size();
-}
-
-int Hdbextractor::testSimpleClassRef(std::vector<SimpleClass> &sv)
-{
-    sv.push_back(SimpleClass());
-    sv.push_back(SimpleClass());
-    return sv.size();
-}
-
-
 bool Hdbextractor::isConnected() const
 {
     return d_ptr->connection != NULL;
