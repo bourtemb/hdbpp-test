@@ -49,7 +49,10 @@ int main(int argc, char **argv)
         }
 
 
+        printf("main.cpp: deleting hdbxsettings\n");
         delete qc;
+        printf("main.cpp: deleting MyHdbExtractorImpl\n");
+        delete hdbxi;
     }
     return 0;
 }

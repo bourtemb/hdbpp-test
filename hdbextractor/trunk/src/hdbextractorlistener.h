@@ -12,6 +12,8 @@ class HdbExtractorListener
 public:
     HdbExtractorListener() {}
 
+    virtual ~HdbExtractorListener() {}
+
     /** \brief this method is invoked according to the percentage value configured in setUpgradeProgressPercent
      *         whenever the specified percentage of rows are read from the database.
      *

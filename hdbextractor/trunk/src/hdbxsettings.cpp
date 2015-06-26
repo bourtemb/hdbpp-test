@@ -45,6 +45,13 @@ HdbXSettings::HdbXSettings()
 
 }
 
+HdbXSettings::~HdbXSettings()
+{
+    printf("\e[1;31mdeleting hdbxsettings START\e[0m\n");
+    mMap.clear();
+    printf("\e[1;31mdeleting hdbxsettings END\e[0m\n");
+}
+
 /** \brief Load the configuration from a text file.
  *
  * @param filename The full path to the configuration file.

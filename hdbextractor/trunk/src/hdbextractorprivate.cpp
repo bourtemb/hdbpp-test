@@ -7,12 +7,3 @@ HdbExtractorPrivate::HdbExtractorPrivate()
 {
 }
 
-HdbExtractorPrivate::~HdbExtractorPrivate()
-{
-    if(connection)
-        delete connection;
-    if(dbschema)
-        delete dbschema;
-    if(hdbxSettings)
-        delete hdbxSettings;
-}

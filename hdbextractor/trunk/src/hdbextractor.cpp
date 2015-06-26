@@ -14,8 +14,9 @@
 /** \brief the HdbExtractor destructor.
  *
  * Deletes private data after closing the connection.
- * Private data deletion implies freeing resources for connection, dbschema and
- * HdbXSettings.
+ * Private data deletion implies freeing resources for connection and dbschema,
+ * which are allocated by Hdbextractor, but not freeing HdbXSettings, which is
+ * set by clients.
  */
 Hdbextractor::~Hdbextractor()
 {
@@ -23,9 +24,13 @@ Hdbextractor::~Hdbextractor()
            d_ptr->dbschema);
     if(d_ptr->connection != NULL)
     {
-        pinfo("~HdbExtractor: closing db connection");
+        printf("~HdbExtractor: closing db connection\n");
         d_ptr->connection->close();
     }
+    if(d_ptr->dbschema)
+        delete d_ptr->dbschema;
+    if(d_ptr->connection)
+        delete d_ptr->connection;
     /* Data is deleted by the HdbExtractorPrivate destructor */
     delete d_ptr;
 }
@@ -340,6 +345,47 @@ int Hdbextractor::get(std::vector<XVariant>& variantlist)
     return -1;
 }
 
+int Hdbextractor::testGet(std::vector<XVariant> variantli)
+{
+    printf("test method to see if the problem is reference\n");
+    return 0;
+}
+
+int Hdbextractor::testGet2(XVariant var)
+{
+    return var.getType();
+}
+
+double Hdbextractor::testGet3(double d)
+{
+    return d;
+}
+
+int Hdbextractor::testGet4(std::vector<double>& dv)
+{
+    dv.push_back(10);
+    dv.push_back(11);
+    return dv.size();
+}
+
+int Hdbextractor::testGet5(std::vector<double> dv)
+{
+    return dv.size();
+}
+
+int Hdbextractor::testSimpleClass(std::vector<SimpleClass> sv)
+{
+    return sv.size();
+}
+
+int Hdbextractor::testSimpleClassRef(std::vector<SimpleClass> &sv)
+{
+    sv.push_back(SimpleClass());
+    sv.push_back(SimpleClass());
+    return sv.size();
+}
+
+
 bool Hdbextractor::isConnected() const
 {
     return d_ptr->connection != NULL;
@@ -399,7 +445,10 @@ bool Hdbextractor::extractionIsCancelled() const
 void Hdbextractor::setHdbXSettings(HdbXSettings *qc)
 {
     if(d_ptr->hdbxSettings) /* delete current configuration */
+    {
+        printf("\e[1;31mDELETING hdbXSettings in hdbextractor\e[0m\n");
         delete d_ptr->hdbxSettings;
+    }
     d_ptr->hdbxSettings = qc;
 }
 

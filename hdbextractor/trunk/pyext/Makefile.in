@@ -782,11 +782,11 @@ uninstall-am: uninstall-pkgpyexecLTLIBRARIES uninstall-pkgpythonPYTHON
 .PRECIOUS: Makefile
 
 
-swig_wrap.cpp : $(SWIG_SOURCES) 
-	$(SWIG) $(SWIG_PYTHON_OPT) $(AX_SWIG_PYTHON_OPT) $(INCLUDEDIRS)  -o $@ $<
+swig_wrap.cpp : $(SWIG_SOURCES)
+	$(SWIG) $(SWIG_PYTHON_OPT) $(AX_SWIG_PYTHON_OPT) $(INCLUDEDIRS) -o $@ $<
 
-hdbextractor.py: swig_wrap.cpp
-	$(MAKE) $(AM_MAKEFLAGS)  $(BUILT_SOURCES)
+# hdbextractor.py: swig_wrap.cpp
+#	$(MAKE) $(AM_MAKEFLAGS)  $(BUILT_SOURCES)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -15,8 +15,6 @@ class HdbExtractorPrivate
 public:
     HdbExtractorPrivate();
 
-    virtual ~HdbExtractorPrivate();
-
     Hdbextractor::DbType dbType;
 
     Connection * connection;

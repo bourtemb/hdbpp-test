@@ -16,8 +16,8 @@ _hdbextractor_la_CPPFLAGS = $(AX_SWIG_PYTHON_CPPFLAGS) $(INCLUDEDIRS)
 _hdbextractor_la_LDFLAGS = -module -DUSE_TCL_STUBS 
 _hdbextractor_la_LIBADD = ../src/libhdbextractor++.la
 
-swig_wrap.cpp : $(SWIG_SOURCES) 
-	$(SWIG) $(SWIG_PYTHON_OPT) $(AX_SWIG_PYTHON_OPT) $(INCLUDEDIRS)  -o $@ $<
+swig_wrap.cpp : $(SWIG_SOURCES)
+	$(SWIG) $(SWIG_PYTHON_OPT) $(AX_SWIG_PYTHON_OPT) $(INCLUDEDIRS) -o $@ $<
 
-hdbextractor.py: swig_wrap.cpp
-	$(MAKE) $(AM_MAKEFLAGS)  $(BUILT_SOURCES)
+# hdbextractor.py: swig_wrap.cpp
+#	$(MAKE) $(AM_MAKEFLAGS)  $(BUILT_SOURCES)

@@ -8,11 +8,14 @@
 #include <string>
 #include <list>
 
+#include <simpleclass.h>
 
 class HdbExtractorPrivate;
 class HdbExtractorListener;
 class HdbXSettings;
 class TimeInterval;
+
+
 
 /** \mainpage The Hdbextractor++ historical database data extractor
  *
@@ -644,6 +647,20 @@ public:
     void cancelExtraction();
 
     bool extractionIsCancelled() const;
+
+    int testGet(std::vector<XVariant> variantli);
+
+    int testGet2(XVariant var);
+
+    double testGet3(double d);
+
+    int testGet4(std::vector<double> &dv);
+
+    int testGet5(std::vector<double> dv);
+
+    int testSimpleClass(std::vector<SimpleClass> sv);
+
+    int testSimpleClassRef(std::vector<SimpleClass>& sv);
 
 private:
     HdbExtractorPrivate *d_ptr;

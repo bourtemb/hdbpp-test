@@ -106,15 +106,15 @@ public:
 
     const char *getError() const;
 
-    XVariant &setTimestamp(double tsmicro);
+    void setTimestamp(double tsmicro);
 
-    XVariant& setTimestamp(const char* ts);
+    void setTimestamp(const char* ts);
 
-    XVariant& setTimestamp(const struct timeval* tv);
+    void setTimestamp(const struct timeval* tv);
 
-    XVariant& setQuality(const char *quality);
+    void setQuality(const char *quality);
 
-    XVariant& setError(const char *error);
+    void setError(const char *error);
 
     time_t getTime_tTimestamp() const;
 

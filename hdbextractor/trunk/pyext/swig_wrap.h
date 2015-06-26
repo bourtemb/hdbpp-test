@@ -19,6 +19,7 @@ class SwigDirector_HdbExtractorListener : public HdbExtractorListener, public Sw
 
 public:
     SwigDirector_HdbExtractorListener(PyObject *self);
+    virtual ~SwigDirector_HdbExtractorListener();
     virtual void onSourceProgressUpdate(char const *name, double percent);
     virtual void onExtractionFinished(int totalRows, double elapsed);
     virtual void onSourceExtractionFinished(char const *name, int totalRows, double elapsed);

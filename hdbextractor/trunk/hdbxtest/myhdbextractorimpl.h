@@ -17,6 +17,8 @@ public:
     MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
                        const char *dbhost, const char *dbnam);
 
+    virtual ~MyHdbExtractorImpl();
+
     void getData(std::vector<std::string> sources, const char* start_date, const char *stop_date);
 
     virtual void onSourceProgressUpdate(const char *name, double percent);

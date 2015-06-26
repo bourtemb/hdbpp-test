@@ -97,6 +97,1265 @@ except:
     weakref_proxy = lambda x: x
 
 
+class SwigPyIterator(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SwigPyIterator, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SwigPyIterator, name)
+
+    def __init__(self, *args, **kwargs):
+        raise AttributeError("No constructor defined - class is abstract")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _hdbextractor.delete_SwigPyIterator
+    __del__ = lambda self: None
+
+    def value(self):
+        return _hdbextractor.SwigPyIterator_value(self)
+
+    def incr(self, n=1):
+        return _hdbextractor.SwigPyIterator_incr(self, n)
+
+    def decr(self, n=1):
+        return _hdbextractor.SwigPyIterator_decr(self, n)
+
+    def distance(self, x):
+        return _hdbextractor.SwigPyIterator_distance(self, x)
+
+    def equal(self, x):
+        return _hdbextractor.SwigPyIterator_equal(self, x)
+
+    def copy(self):
+        return _hdbextractor.SwigPyIterator_copy(self)
+
+    def next(self):
+        return _hdbextractor.SwigPyIterator_next(self)
+
+    def __next__(self):
+        return _hdbextractor.SwigPyIterator___next__(self)
+
+    def previous(self):
+        return _hdbextractor.SwigPyIterator_previous(self)
+
+    def advance(self, n):
+        return _hdbextractor.SwigPyIterator_advance(self, n)
+
+    def __eq__(self, x):
+        return _hdbextractor.SwigPyIterator___eq__(self, x)
+
+    def __ne__(self, x):
+        return _hdbextractor.SwigPyIterator___ne__(self, x)
+
+    def __iadd__(self, n):
+        return _hdbextractor.SwigPyIterator___iadd__(self, n)
+
+    def __isub__(self, n):
+        return _hdbextractor.SwigPyIterator___isub__(self, n)
+
+    def __add__(self, n):
+        return _hdbextractor.SwigPyIterator___add__(self, n)
+
+    def __sub__(self, *args):
+        return _hdbextractor.SwigPyIterator___sub__(self, *args)
+    def __iter__(self):
+        return self
+SwigPyIterator_swigregister = _hdbextractor.SwigPyIterator_swigregister
+SwigPyIterator_swigregister(SwigPyIterator)
+
+
+_hdbextractor.TIMESTAMPLEN_swigconstant(_hdbextractor)
+TIMESTAMPLEN = _hdbextractor.TIMESTAMPLEN
+
+_hdbextractor.SRCLEN_swigconstant(_hdbextractor)
+SRCLEN = _hdbextractor.SRCLEN
+class XVariant(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, XVariant, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, XVariant, name)
+    __repr__ = _swig_repr
+    FormatInvalid = _hdbextractor.XVariant_FormatInvalid
+    Scalar = _hdbextractor.XVariant_Scalar
+    Vector = _hdbextractor.XVariant_Vector
+    Matrix = _hdbextractor.XVariant_Matrix
+    TypeInvalid = _hdbextractor.XVariant_TypeInvalid
+    Int = _hdbextractor.XVariant_Int
+    UInt = _hdbextractor.XVariant_UInt
+    Double = _hdbextractor.XVariant_Double
+    Boolean = _hdbextractor.XVariant_Boolean
+    String = _hdbextractor.XVariant_String
+    WritableInvalid = _hdbextractor.XVariant_WritableInvalid
+    RO = _hdbextractor.XVariant_RO
+    WO = _hdbextractor.XVariant_WO
+    RWW = _hdbextractor.XVariant_RWW
+    RW = _hdbextractor.XVariant_RW
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_XVariant(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+    __swig_destroy__ = _hdbextractor.delete_XVariant
+    __del__ = lambda self: None
+
+    def getSource(self):
+        return _hdbextractor.XVariant_getSource(self)
+
+    def getFormat(self):
+        return _hdbextractor.XVariant_getFormat(self)
+
+    def getType(self):
+        return _hdbextractor.XVariant_getType(self)
+
+    def getWritable(self):
+        return _hdbextractor.XVariant_getWritable(self)
+
+    def getSize(self):
+        return _hdbextractor.XVariant_getSize(self)
+
+    def getQuality(self):
+        return _hdbextractor.XVariant_getQuality(self)
+
+    def toDoubleVector(self, read=True):
+        return _hdbextractor.XVariant_toDoubleVector(self, read)
+
+    def toLongIntVector(self, read=True):
+        return _hdbextractor.XVariant_toLongIntVector(self, read)
+
+    def toULongIntVector(self, read=True):
+        return _hdbextractor.XVariant_toULongIntVector(self, read)
+
+    def toBoolVector(self, read=True):
+        return _hdbextractor.XVariant_toBoolVector(self, read)
+
+    def toDouble(self, read=True, ok=None):
+        return _hdbextractor.XVariant_toDouble(self, read, ok)
+
+    def isValid(self):
+        return _hdbextractor.XVariant_isValid(self)
+
+    def isNull(self):
+        return _hdbextractor.XVariant_isNull(self)
+
+    def isWNull(self):
+        return _hdbextractor.XVariant_isWNull(self)
+
+    def toULongInt(self, read=True, ok=None):
+        return _hdbextractor.XVariant_toULongInt(self, read, ok)
+
+    def toLongInt(self, read=True, ok=None):
+        return _hdbextractor.XVariant_toLongInt(self, read, ok)
+
+    def toBool(self, read=True, ok=None):
+        return _hdbextractor.XVariant_toBool(self, read, ok)
+
+    def getTimestamp(self):
+        return _hdbextractor.XVariant_getTimestamp(self)
+
+    def getError(self):
+        return _hdbextractor.XVariant_getError(self)
+
+    def setTimestamp(self, *args):
+        return _hdbextractor.XVariant_setTimestamp(self, *args)
+
+    def setQuality(self, quality):
+        return _hdbextractor.XVariant_setQuality(self, quality)
+
+    def setError(self, error):
+        return _hdbextractor.XVariant_setError(self, error)
+
+    def getTime_tTimestamp(self):
+        return _hdbextractor.XVariant_getTime_tTimestamp(self)
+
+    def getTimevalTimestamp(self):
+        return _hdbextractor.XVariant_getTimevalTimestamp(self)
+
+    def add(self, *args):
+        return _hdbextractor.XVariant_add(self, *args)
+
+    def toString(self, read=True, ok=None):
+        return _hdbextractor.XVariant_toString(self, read, ok)
+
+    def toStringVector(self):
+        return _hdbextractor.XVariant_toStringVector(self)
+
+    def toDoubleP(self, read=True):
+        return _hdbextractor.XVariant_toDoubleP(self, read)
+
+    def toLongIntP(self, read=True):
+        return _hdbextractor.XVariant_toLongIntP(self, read)
+
+    def toULongIntP(self, read=True):
+        return _hdbextractor.XVariant_toULongIntP(self, read)
+
+    def toBoolP(self, read=True):
+        return _hdbextractor.XVariant_toBoolP(self, read)
+
+    def toCharP(self, read=True):
+        return _hdbextractor.XVariant_toCharP(self, read)
+
+    def convertToString(self, read=True, ok=None):
+        return _hdbextractor.XVariant_convertToString(self, read, ok)
+
+    def getNullValuesCount(self):
+        return _hdbextractor.XVariant_getNullValuesCount(self)
+
+    def getNullValueIndexes(self):
+        return _hdbextractor.XVariant_getNullValueIndexes(self)
+
+    def getNullWValuesCount(self):
+        return _hdbextractor.XVariant_getNullWValuesCount(self)
+
+    def getNullWValueIndexes(self):
+        return _hdbextractor.XVariant_getNullWValueIndexes(self)
+XVariant_swigregister = _hdbextractor.XVariant_swigregister
+XVariant_swigregister(XVariant)
+
+class SimpleClass(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SimpleClass, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SimpleClass, name)
+    __repr__ = _swig_repr
+    __swig_destroy__ = _hdbextractor.delete_SimpleClass
+    __del__ = lambda self: None
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_SimpleClass(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+    __swig_setmethods__["a"] = _hdbextractor.SimpleClass_a_set
+    __swig_getmethods__["a"] = _hdbextractor.SimpleClass_a_get
+    if _newclass:
+        a = _swig_property(_hdbextractor.SimpleClass_a_get, _hdbextractor.SimpleClass_a_set)
+    __swig_setmethods__["b"] = _hdbextractor.SimpleClass_b_set
+    __swig_getmethods__["b"] = _hdbextractor.SimpleClass_b_get
+    if _newclass:
+        b = _swig_property(_hdbextractor.SimpleClass_b_get, _hdbextractor.SimpleClass_b_set)
+SimpleClass_swigregister = _hdbextractor.SimpleClass_swigregister
+SimpleClass_swigregister(SimpleClass)
+
+class IntVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, IntVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, IntVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.IntVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.IntVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.IntVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.IntVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.IntVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.IntVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.IntVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.IntVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.IntVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.IntVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.IntVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.IntVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.IntVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.IntVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.IntVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.IntVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.IntVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.IntVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.IntVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.IntVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.IntVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.IntVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.IntVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_IntVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.IntVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.IntVector_front(self)
+
+    def back(self):
+        return _hdbextractor.IntVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.IntVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.IntVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.IntVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.IntVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.IntVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_IntVector
+    __del__ = lambda self: None
+IntVector_swigregister = _hdbextractor.IntVector_swigregister
+IntVector_swigregister(IntVector)
+
+class LongIntVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, LongIntVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, LongIntVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.LongIntVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.LongIntVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.LongIntVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.LongIntVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.LongIntVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.LongIntVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.LongIntVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.LongIntVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.LongIntVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.LongIntVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.LongIntVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.LongIntVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.LongIntVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.LongIntVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.LongIntVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.LongIntVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.LongIntVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.LongIntVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.LongIntVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.LongIntVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.LongIntVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.LongIntVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.LongIntVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_LongIntVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.LongIntVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.LongIntVector_front(self)
+
+    def back(self):
+        return _hdbextractor.LongIntVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.LongIntVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.LongIntVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.LongIntVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.LongIntVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.LongIntVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_LongIntVector
+    __del__ = lambda self: None
+LongIntVector_swigregister = _hdbextractor.LongIntVector_swigregister
+LongIntVector_swigregister(LongIntVector)
+
+class ULongIntVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ULongIntVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, ULongIntVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.ULongIntVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.ULongIntVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.ULongIntVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.ULongIntVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.ULongIntVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.ULongIntVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.ULongIntVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.ULongIntVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.ULongIntVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.ULongIntVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.ULongIntVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.ULongIntVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.ULongIntVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.ULongIntVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.ULongIntVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.ULongIntVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.ULongIntVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.ULongIntVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.ULongIntVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.ULongIntVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.ULongIntVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.ULongIntVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.ULongIntVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_ULongIntVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.ULongIntVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.ULongIntVector_front(self)
+
+    def back(self):
+        return _hdbextractor.ULongIntVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.ULongIntVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.ULongIntVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.ULongIntVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.ULongIntVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.ULongIntVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_ULongIntVector
+    __del__ = lambda self: None
+ULongIntVector_swigregister = _hdbextractor.ULongIntVector_swigregister
+ULongIntVector_swigregister(ULongIntVector)
+
+class BoolVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, BoolVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, BoolVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.BoolVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.BoolVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.BoolVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.BoolVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.BoolVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.BoolVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.BoolVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.BoolVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.BoolVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.BoolVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.BoolVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.BoolVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.BoolVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.BoolVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.BoolVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.BoolVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.BoolVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.BoolVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.BoolVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.BoolVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.BoolVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.BoolVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.BoolVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_BoolVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.BoolVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.BoolVector_front(self)
+
+    def back(self):
+        return _hdbextractor.BoolVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.BoolVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.BoolVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.BoolVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.BoolVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.BoolVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_BoolVector
+    __del__ = lambda self: None
+BoolVector_swigregister = _hdbextractor.BoolVector_swigregister
+BoolVector_swigregister(BoolVector)
+
+class DoubleVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, DoubleVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, DoubleVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.DoubleVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.DoubleVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.DoubleVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.DoubleVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.DoubleVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.DoubleVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.DoubleVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.DoubleVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.DoubleVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.DoubleVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.DoubleVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.DoubleVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.DoubleVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.DoubleVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.DoubleVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.DoubleVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.DoubleVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.DoubleVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.DoubleVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.DoubleVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.DoubleVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.DoubleVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.DoubleVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_DoubleVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.DoubleVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.DoubleVector_front(self)
+
+    def back(self):
+        return _hdbextractor.DoubleVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.DoubleVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.DoubleVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.DoubleVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.DoubleVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.DoubleVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_DoubleVector
+    __del__ = lambda self: None
+DoubleVector_swigregister = _hdbextractor.DoubleVector_swigregister
+DoubleVector_swigregister(DoubleVector)
+
+class XVariantVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, XVariantVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, XVariantVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.XVariantVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.XVariantVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.XVariantVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.XVariantVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.XVariantVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.XVariantVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.XVariantVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.XVariantVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.XVariantVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.XVariantVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.XVariantVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.XVariantVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.XVariantVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.XVariantVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.XVariantVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.XVariantVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.XVariantVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.XVariantVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.XVariantVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.XVariantVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.XVariantVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.XVariantVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.XVariantVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_XVariantVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.XVariantVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.XVariantVector_front(self)
+
+    def back(self):
+        return _hdbextractor.XVariantVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.XVariantVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.XVariantVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.XVariantVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.XVariantVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.XVariantVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_XVariantVector
+    __del__ = lambda self: None
+XVariantVector_swigregister = _hdbextractor.XVariantVector_swigregister
+XVariantVector_swigregister(XVariantVector)
+
+class StringVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, StringVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, StringVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.StringVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.StringVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.StringVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.StringVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.StringVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.StringVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.StringVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.StringVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.StringVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.StringVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.StringVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.StringVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.StringVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.StringVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.StringVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.StringVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.StringVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.StringVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.StringVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.StringVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.StringVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.StringVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.StringVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_StringVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.StringVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.StringVector_front(self)
+
+    def back(self):
+        return _hdbextractor.StringVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.StringVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.StringVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.StringVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.StringVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.StringVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_StringVector
+    __del__ = lambda self: None
+StringVector_swigregister = _hdbextractor.StringVector_swigregister
+StringVector_swigregister(StringVector)
+
+class StringStringMap(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, StringStringMap, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, StringStringMap, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.StringStringMap_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.StringStringMap___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.StringStringMap___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.StringStringMap___len__(self)
+    def __iter__(self):
+        return self.key_iterator()
+    def iterkeys(self):
+        return self.key_iterator()
+    def itervalues(self):
+        return self.value_iterator()
+    def iteritems(self):
+        return self.iterator()
+
+    def __getitem__(self, key):
+        return _hdbextractor.StringStringMap___getitem__(self, key)
+
+    def __delitem__(self, key):
+        return _hdbextractor.StringStringMap___delitem__(self, key)
+
+    def has_key(self, key):
+        return _hdbextractor.StringStringMap_has_key(self, key)
+
+    def keys(self):
+        return _hdbextractor.StringStringMap_keys(self)
+
+    def values(self):
+        return _hdbextractor.StringStringMap_values(self)
+
+    def items(self):
+        return _hdbextractor.StringStringMap_items(self)
+
+    def __contains__(self, key):
+        return _hdbextractor.StringStringMap___contains__(self, key)
+
+    def key_iterator(self):
+        return _hdbextractor.StringStringMap_key_iterator(self)
+
+    def value_iterator(self):
+        return _hdbextractor.StringStringMap_value_iterator(self)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.StringStringMap___setitem__(self, *args)
+
+    def asdict(self):
+        return _hdbextractor.StringStringMap_asdict(self)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_StringStringMap(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def empty(self):
+        return _hdbextractor.StringStringMap_empty(self)
+
+    def size(self):
+        return _hdbextractor.StringStringMap_size(self)
+
+    def clear(self):
+        return _hdbextractor.StringStringMap_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.StringStringMap_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.StringStringMap_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.StringStringMap_begin(self)
+
+    def end(self):
+        return _hdbextractor.StringStringMap_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.StringStringMap_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.StringStringMap_rend(self)
+
+    def count(self, x):
+        return _hdbextractor.StringStringMap_count(self, x)
+
+    def erase(self, *args):
+        return _hdbextractor.StringStringMap_erase(self, *args)
+
+    def find(self, x):
+        return _hdbextractor.StringStringMap_find(self, x)
+
+    def lower_bound(self, x):
+        return _hdbextractor.StringStringMap_lower_bound(self, x)
+
+    def upper_bound(self, x):
+        return _hdbextractor.StringStringMap_upper_bound(self, x)
+    __swig_destroy__ = _hdbextractor.delete_StringStringMap
+    __del__ = lambda self: None
+StringStringMap_swigregister = _hdbextractor.StringStringMap_swigregister
+StringStringMap_swigregister(StringStringMap)
+
+class SimpleClassVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SimpleClassVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SimpleClassVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _hdbextractor.SimpleClassVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _hdbextractor.SimpleClassVector___nonzero__(self)
+
+    def __bool__(self):
+        return _hdbextractor.SimpleClassVector___bool__(self)
+
+    def __len__(self):
+        return _hdbextractor.SimpleClassVector___len__(self)
+
+    def pop(self):
+        return _hdbextractor.SimpleClassVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _hdbextractor.SimpleClassVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _hdbextractor.SimpleClassVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _hdbextractor.SimpleClassVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _hdbextractor.SimpleClassVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _hdbextractor.SimpleClassVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _hdbextractor.SimpleClassVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _hdbextractor.SimpleClassVector_append(self, x)
+
+    def empty(self):
+        return _hdbextractor.SimpleClassVector_empty(self)
+
+    def size(self):
+        return _hdbextractor.SimpleClassVector_size(self)
+
+    def clear(self):
+        return _hdbextractor.SimpleClassVector_clear(self)
+
+    def swap(self, v):
+        return _hdbextractor.SimpleClassVector_swap(self, v)
+
+    def get_allocator(self):
+        return _hdbextractor.SimpleClassVector_get_allocator(self)
+
+    def begin(self):
+        return _hdbextractor.SimpleClassVector_begin(self)
+
+    def end(self):
+        return _hdbextractor.SimpleClassVector_end(self)
+
+    def rbegin(self):
+        return _hdbextractor.SimpleClassVector_rbegin(self)
+
+    def rend(self):
+        return _hdbextractor.SimpleClassVector_rend(self)
+
+    def pop_back(self):
+        return _hdbextractor.SimpleClassVector_pop_back(self)
+
+    def erase(self, *args):
+        return _hdbextractor.SimpleClassVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _hdbextractor.new_SimpleClassVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _hdbextractor.SimpleClassVector_push_back(self, x)
+
+    def front(self):
+        return _hdbextractor.SimpleClassVector_front(self)
+
+    def back(self):
+        return _hdbextractor.SimpleClassVector_back(self)
+
+    def assign(self, n, x):
+        return _hdbextractor.SimpleClassVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _hdbextractor.SimpleClassVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _hdbextractor.SimpleClassVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _hdbextractor.SimpleClassVector_reserve(self, n)
+
+    def capacity(self):
+        return _hdbextractor.SimpleClassVector_capacity(self)
+    __swig_destroy__ = _hdbextractor.delete_SimpleClassVector
+    __del__ = lambda self: None
+SimpleClassVector_swigregister = _hdbextractor.SimpleClassVector_swigregister
+SimpleClassVector_swigregister(SimpleClassVector)
+
 class DataSieverProgressListener(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, DataSieverProgressListener, name, value)
@@ -131,6 +1390,8 @@ class HdbXSettings(_object):
             self.this.append(this)
         except:
             self.this = this
+    __swig_destroy__ = _hdbextractor.delete_HdbXSettings
+    __del__ = lambda self: None
 
     def loadFromFile(self, filename):
         return _hdbextractor.HdbXSettings_loadFromFile(self, filename)
@@ -152,8 +1413,6 @@ class HdbXSettings(_object):
 
     def getDouble(self, key, ok):
         return _hdbextractor.HdbXSettings_getDouble(self, key, ok)
-    __swig_destroy__ = _hdbextractor.delete_HdbXSettings
-    __del__ = lambda self: None
 HdbXSettings_swigregister = _hdbextractor.HdbXSettings_swigregister
 HdbXSettings_swigregister(HdbXSettings)
 
@@ -380,6 +1639,8 @@ class HdbExtractorListener(_object):
             self.this.append(this)
         except:
             self.this = this
+    __swig_destroy__ = _hdbextractor.delete_HdbExtractorListener
+    __del__ = lambda self: None
 
     def onSourceProgressUpdate(self, name, percent):
         return _hdbextractor.HdbExtractorListener_onSourceProgressUpdate(self, name, percent)
@@ -389,8 +1650,6 @@ class HdbExtractorListener(_object):
 
     def onSourceExtractionFinished(self, name, totalRows, elapsed):
         return _hdbextractor.HdbExtractorListener_onSourceExtractionFinished(self, name, totalRows, elapsed)
-    __swig_destroy__ = _hdbextractor.delete_HdbExtractorListener
-    __del__ = lambda self: None
     def __disown__(self):
         self.this.disown()
         _hdbextractor.disown_HdbExtractorListener(self)
@@ -545,156 +1804,6 @@ class TimeInterval(_object):
 TimeInterval_swigregister = _hdbextractor.TimeInterval_swigregister
 TimeInterval_swigregister(TimeInterval)
 
-
-_hdbextractor.TIMESTAMPLEN_swigconstant(_hdbextractor)
-TIMESTAMPLEN = _hdbextractor.TIMESTAMPLEN
-
-_hdbextractor.SRCLEN_swigconstant(_hdbextractor)
-SRCLEN = _hdbextractor.SRCLEN
-class XVariant(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, XVariant, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, XVariant, name)
-    __repr__ = _swig_repr
-    FormatInvalid = _hdbextractor.XVariant_FormatInvalid
-    Scalar = _hdbextractor.XVariant_Scalar
-    Vector = _hdbextractor.XVariant_Vector
-    Matrix = _hdbextractor.XVariant_Matrix
-    TypeInvalid = _hdbextractor.XVariant_TypeInvalid
-    Int = _hdbextractor.XVariant_Int
-    UInt = _hdbextractor.XVariant_UInt
-    Double = _hdbextractor.XVariant_Double
-    Boolean = _hdbextractor.XVariant_Boolean
-    String = _hdbextractor.XVariant_String
-    WritableInvalid = _hdbextractor.XVariant_WritableInvalid
-    RO = _hdbextractor.XVariant_RO
-    WO = _hdbextractor.XVariant_WO
-    RWW = _hdbextractor.XVariant_RWW
-    RW = _hdbextractor.XVariant_RW
-
-    def __init__(self, *args):
-        this = _hdbextractor.new_XVariant(*args)
-        try:
-            self.this.append(this)
-        except:
-            self.this = this
-    __swig_destroy__ = _hdbextractor.delete_XVariant
-    __del__ = lambda self: None
-
-    def getSource(self):
-        return _hdbextractor.XVariant_getSource(self)
-
-    def getFormat(self):
-        return _hdbextractor.XVariant_getFormat(self)
-
-    def getType(self):
-        return _hdbextractor.XVariant_getType(self)
-
-    def getWritable(self):
-        return _hdbextractor.XVariant_getWritable(self)
-
-    def getSize(self):
-        return _hdbextractor.XVariant_getSize(self)
-
-    def getQuality(self):
-        return _hdbextractor.XVariant_getQuality(self)
-
-    def toDoubleVector(self, read=True):
-        return _hdbextractor.XVariant_toDoubleVector(self, read)
-
-    def toLongIntVector(self, read=True):
-        return _hdbextractor.XVariant_toLongIntVector(self, read)
-
-    def toULongIntVector(self, read=True):
-        return _hdbextractor.XVariant_toULongIntVector(self, read)
-
-    def toBoolVector(self, read=True):
-        return _hdbextractor.XVariant_toBoolVector(self, read)
-
-    def toDouble(self, read=True, ok=None):
-        return _hdbextractor.XVariant_toDouble(self, read, ok)
-
-    def isValid(self):
-        return _hdbextractor.XVariant_isValid(self)
-
-    def isNull(self):
-        return _hdbextractor.XVariant_isNull(self)
-
-    def isWNull(self):
-        return _hdbextractor.XVariant_isWNull(self)
-
-    def toULongInt(self, read=True, ok=None):
-        return _hdbextractor.XVariant_toULongInt(self, read, ok)
-
-    def toLongInt(self, read=True, ok=None):
-        return _hdbextractor.XVariant_toLongInt(self, read, ok)
-
-    def toBool(self, read=True, ok=None):
-        return _hdbextractor.XVariant_toBool(self, read, ok)
-
-    def getTimestamp(self):
-        return _hdbextractor.XVariant_getTimestamp(self)
-
-    def getError(self):
-        return _hdbextractor.XVariant_getError(self)
-
-    def setTimestamp(self, *args):
-        return _hdbextractor.XVariant_setTimestamp(self, *args)
-
-    def setQuality(self, quality):
-        return _hdbextractor.XVariant_setQuality(self, quality)
-
-    def setError(self, error):
-        return _hdbextractor.XVariant_setError(self, error)
-
-    def getTime_tTimestamp(self):
-        return _hdbextractor.XVariant_getTime_tTimestamp(self)
-
-    def getTimevalTimestamp(self):
-        return _hdbextractor.XVariant_getTimevalTimestamp(self)
-
-    def add(self, *args):
-        return _hdbextractor.XVariant_add(self, *args)
-
-    def toString(self, read=True, ok=None):
-        return _hdbextractor.XVariant_toString(self, read, ok)
-
-    def toStringVector(self):
-        return _hdbextractor.XVariant_toStringVector(self)
-
-    def toDoubleP(self, read=True):
-        return _hdbextractor.XVariant_toDoubleP(self, read)
-
-    def toLongIntP(self, read=True):
-        return _hdbextractor.XVariant_toLongIntP(self, read)
-
-    def toULongIntP(self, read=True):
-        return _hdbextractor.XVariant_toULongIntP(self, read)
-
-    def toBoolP(self, read=True):
-        return _hdbextractor.XVariant_toBoolP(self, read)
-
-    def toCharP(self, read=True):
-        return _hdbextractor.XVariant_toCharP(self, read)
-
-    def convertToString(self, read=True, ok=None):
-        return _hdbextractor.XVariant_convertToString(self, read, ok)
-
-    def getNullValuesCount(self):
-        return _hdbextractor.XVariant_getNullValuesCount(self)
-
-    def getNullValueIndexes(self):
-        return _hdbextractor.XVariant_getNullValueIndexes(self)
-
-    def getNullWValuesCount(self):
-        return _hdbextractor.XVariant_getNullWValuesCount(self)
-
-    def getNullWValueIndexes(self):
-        return _hdbextractor.XVariant_getNullWValueIndexes(self)
-XVariant_swigregister = _hdbextractor.XVariant_swigregister
-XVariant_swigregister(XVariant)
-
 class XVariantPrinter(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, XVariantPrinter, name, value)
@@ -804,6 +1913,27 @@ class Hdbextractor(ResultListener):
 
     def extractionIsCancelled(self):
         return _hdbextractor.Hdbextractor_extractionIsCancelled(self)
+
+    def testGet(self, variantli):
+        return _hdbextractor.Hdbextractor_testGet(self, variantli)
+
+    def testGet2(self, var):
+        return _hdbextractor.Hdbextractor_testGet2(self, var)
+
+    def testGet3(self, d):
+        return _hdbextractor.Hdbextractor_testGet3(self, d)
+
+    def testGet4(self, dv):
+        return _hdbextractor.Hdbextractor_testGet4(self, dv)
+
+    def testGet5(self, dv):
+        return _hdbextractor.Hdbextractor_testGet5(self, dv)
+
+    def testSimpleClass(self, sv):
+        return _hdbextractor.Hdbextractor_testSimpleClass(self, sv)
+
+    def testSimpleClassRef(self, sv):
+        return _hdbextractor.Hdbextractor_testSimpleClassRef(self, sv)
 Hdbextractor_swigregister = _hdbextractor.Hdbextractor_swigregister
 Hdbextractor_swigregister(Hdbextractor)
 

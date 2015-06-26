@@ -28,6 +28,12 @@ MyHdbExtractorImpl::MyHdbExtractorImpl(const char *dbuser, const char *dbpass,
 
 }
 
+MyHdbExtractorImpl::~MyHdbExtractorImpl()
+{
+        printf("DELETING mExtractor\n");
+        delete mExtractor;
+}
+
 void MyHdbExtractorImpl::getData(std::vector<std::string> sources, const char* start_date, const char *stop_date)
 {
 

@@ -9,6 +9,8 @@ class HdbXSettings
 public:
     HdbXSettings();
 
+    ~HdbXSettings();
+
     void loadFromFile(const char *filename);
 
     void set(const char* key, const char *value);

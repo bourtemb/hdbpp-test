@@ -236,7 +236,6 @@ bool MySqlHdbppSchema::getData(const char *source,
     bool notifyOnNewTimestamp = false;
     int rows_from_the_past = 0;
     char query[MAXQUERYLEN];
-    char errmsg[256];
     char timestamp[32];
     char table_name[32];
     char data_type[32];
@@ -308,7 +307,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                                      " AND data_time <= '%s' ORDER BY data_time ASC",
                                  table_name, id, start_date, stop_date);
 
-                    pinfo("\e[1;32mquery: %s\e[0m\n", query);
+                    printf("\e[1;32mquery: %s\e[0m\n", query);
 
                     res = connection->query(query);
                     if(!res)
@@ -446,7 +445,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                                                      " AND data_time <= '%s' ORDER BY data_time ASC",
                                  column_value_w, table_name, id, start_date, stop_date);
 
-                    pinfo("\e[1;32mquery: %s\e[0m\n", query);
+                    printf("\e[1;32mquery: %s\e[0m\n", query);
 
                     res = connection->query(query);
                     if(!res)
@@ -586,7 +585,7 @@ bool MySqlHdbppSchema::getData(const char *source,
     {
         success = false;
         snprintf(d_ptr->errorMessage, MAXERRORLEN, "MySqlHdbppSchema: no attribute \"%s\" in adt", source);
-        perr("%s", errmsg);
+        perr("%s", d_ptr->errorMessage);
     }
 
     /* compute elapsed time */

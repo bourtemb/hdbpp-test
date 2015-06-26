@@ -1257,7 +1257,7 @@ void XVariant::delete_wdata()
  * \note <strong>Calling setQuality with value 1 (ATTR_INVALID) will set the flag isValid to false</strong>.
  *
  */
-XVariant& XVariant::setQuality(const char *quality)
+void XVariant::setQuality(const char *quality)
 {
     if(quality)
     {
@@ -1268,7 +1268,6 @@ XVariant& XVariant::setQuality(const char *quality)
         else
             d->mQuality = (short) val;
     }
-    return *this;
 }
 
 /** \brief Sets the error message associated to this XVariant
@@ -1281,10 +1280,9 @@ XVariant& XVariant::setQuality(const char *quality)
  * @see setQuality
  * @see getQuality
  */
-XVariant& XVariant::setError(const char *error)
+void XVariant::setError(const char *error)
 {
     mMakeError(error);
-    return *this;
 }
 
 /** \brief This method allows changing the timestamp of the XVariant
@@ -1297,10 +1295,9 @@ XVariant& XVariant::setError(const char *error)
  * @see getTime_tTimestamp
  * @see getTimevalTimestamp
  */
-XVariant &XVariant::setTimestamp(const char* ts)
+void XVariant::setTimestamp(const char* ts)
 {
     strncpy(d->mTimestamp, ts, TIMESTAMPLEN);
-    return *this;
 }
 
 /** \brief Changes the XVariant timestamp according to the time expressed in a double format,
@@ -1312,12 +1309,12 @@ XVariant &XVariant::setTimestamp(const char* ts)
  * @return A reference to the same object with the timestamp changed.
  *
  */
-XVariant & XVariant::setTimestamp(double tsmicro)
+void XVariant::setTimestamp(double tsmicro)
 {
     struct timeval tv;
     tv.tv_sec = (time_t) tsmicro;
     tv.tv_usec = (tsmicro - tv.tv_sec) * 1e6;
-    return setTimestamp(&tv);
+    setTimestamp(&tv);
 }
 
 /** \brief Changes the XVariant timestamp according to the timeval passed as argument.
@@ -1328,10 +1325,9 @@ XVariant & XVariant::setTimestamp(double tsmicro)
  * @return A reference to the same object with the timestamp changed.
  *
  */
-XVariant &XVariant::setTimestamp(const struct timeval* tv)
+void XVariant::setTimestamp(const struct timeval* tv)
 {
     DateTimeUtils().toString(tv, d->mTimestamp, TIMESTAMPLEN);
-    return *this;
 }
 
 /** \brief Returns the timestamp associated to the data stored by XVariant, in the form

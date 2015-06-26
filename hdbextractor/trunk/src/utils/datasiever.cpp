@@ -143,7 +143,9 @@ void DataSiever::fill()
             {
                 if((*tsiter) >  data_timestamp_0 && (*tsiter) < data_timestamp_1)
                 {
-                    datait = data.insert(datait, XVariant(*datait).setTimestamp((*tsiter)));
+                    XVariant xv(*datait);
+                    xv.setTimestamp((*tsiter));
+                    datait = data.insert(datait, xv);
                 }
                 else if(*tsiter == data_timestamp_1) /* simply skip */
                 {
