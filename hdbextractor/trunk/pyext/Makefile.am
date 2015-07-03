@@ -13,7 +13,7 @@ pkgpyexec_LTLIBRARIES = _hdbextractor.la
 
 _hdbextractor_la_SOURCES = swig_wrap.cpp $(SWIG_SOURCES)
 _hdbextractor_la_CPPFLAGS = $(AX_SWIG_PYTHON_CPPFLAGS) $(INCLUDEDIRS)
-_hdbextractor_la_LDFLAGS = -module -DUSE_TCL_STUBS 
+_hdbextractor_la_LDFLAGS = -module -classic -DUSE_TCL_STUBS 
 _hdbextractor_la_LIBADD = ../src/libhdbextractor++.la
 
 swig_wrap.cpp : $(SWIG_SOURCES)
