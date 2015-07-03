@@ -32,8 +32,8 @@ LT_INIT
 
 AM_INIT_AUTOMAKE(foreign subdir-objects)
 
+AC_CONFIG_MACRO_DIR([m4])
 # AC_CONFIG_MACRO_DIRS([m4])
-AC_CONFIG_MACRO_DIRS([m4])
 
 
 # Checks for programs.
@@ -58,9 +58,6 @@ AC_CHECK_HEADERS([float.h limits.h stdlib.h string.h strings.h sys/time.h unistd
 
 # Checks for typedefs, structures, and compiler characteristics.
 # AC_CHECK_HEADER_STDBOOL
-
-# AX_CXX_COMPILE_STDCXX_11([],[optional])
-
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 
