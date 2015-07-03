@@ -311,32 +311,6 @@ class XVariant(_object):
 XVariant_swigregister = _hdbextractor.XVariant_swigregister
 XVariant_swigregister(XVariant)
 
-class SimpleClass(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, SimpleClass, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, SimpleClass, name)
-    __repr__ = _swig_repr
-    __swig_destroy__ = _hdbextractor.delete_SimpleClass
-    __del__ = lambda self: None
-
-    def __init__(self, *args):
-        this = _hdbextractor.new_SimpleClass(*args)
-        try:
-            self.this.append(this)
-        except:
-            self.this = this
-    __swig_setmethods__["a"] = _hdbextractor.SimpleClass_a_set
-    __swig_getmethods__["a"] = _hdbextractor.SimpleClass_a_get
-    if _newclass:
-        a = _swig_property(_hdbextractor.SimpleClass_a_get, _hdbextractor.SimpleClass_a_set)
-    __swig_setmethods__["b"] = _hdbextractor.SimpleClass_b_set
-    __swig_getmethods__["b"] = _hdbextractor.SimpleClass_b_get
-    if _newclass:
-        b = _swig_property(_hdbextractor.SimpleClass_b_get, _hdbextractor.SimpleClass_b_set)
-SimpleClass_swigregister = _hdbextractor.SimpleClass_swigregister
-SimpleClass_swigregister(SimpleClass)
-
 class IntVector(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, IntVector, name, value)
@@ -1243,119 +1217,6 @@ class StringStringMap(_object):
 StringStringMap_swigregister = _hdbextractor.StringStringMap_swigregister
 StringStringMap_swigregister(StringStringMap)
 
-class SimpleClassVector(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, SimpleClassVector, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, SimpleClassVector, name)
-    __repr__ = _swig_repr
-
-    def iterator(self):
-        return _hdbextractor.SimpleClassVector_iterator(self)
-    def __iter__(self):
-        return self.iterator()
-
-    def __nonzero__(self):
-        return _hdbextractor.SimpleClassVector___nonzero__(self)
-
-    def __bool__(self):
-        return _hdbextractor.SimpleClassVector___bool__(self)
-
-    def __len__(self):
-        return _hdbextractor.SimpleClassVector___len__(self)
-
-    def pop(self):
-        return _hdbextractor.SimpleClassVector_pop(self)
-
-    def __getslice__(self, i, j):
-        return _hdbextractor.SimpleClassVector___getslice__(self, i, j)
-
-    def __setslice__(self, *args):
-        return _hdbextractor.SimpleClassVector___setslice__(self, *args)
-
-    def __delslice__(self, i, j):
-        return _hdbextractor.SimpleClassVector___delslice__(self, i, j)
-
-    def __delitem__(self, *args):
-        return _hdbextractor.SimpleClassVector___delitem__(self, *args)
-
-    def __getitem__(self, *args):
-        return _hdbextractor.SimpleClassVector___getitem__(self, *args)
-
-    def __setitem__(self, *args):
-        return _hdbextractor.SimpleClassVector___setitem__(self, *args)
-
-    def append(self, x):
-        return _hdbextractor.SimpleClassVector_append(self, x)
-
-    def empty(self):
-        return _hdbextractor.SimpleClassVector_empty(self)
-
-    def size(self):
-        return _hdbextractor.SimpleClassVector_size(self)
-
-    def clear(self):
-        return _hdbextractor.SimpleClassVector_clear(self)
-
-    def swap(self, v):
-        return _hdbextractor.SimpleClassVector_swap(self, v)
-
-    def get_allocator(self):
-        return _hdbextractor.SimpleClassVector_get_allocator(self)
-
-    def begin(self):
-        return _hdbextractor.SimpleClassVector_begin(self)
-
-    def end(self):
-        return _hdbextractor.SimpleClassVector_end(self)
-
-    def rbegin(self):
-        return _hdbextractor.SimpleClassVector_rbegin(self)
-
-    def rend(self):
-        return _hdbextractor.SimpleClassVector_rend(self)
-
-    def pop_back(self):
-        return _hdbextractor.SimpleClassVector_pop_back(self)
-
-    def erase(self, *args):
-        return _hdbextractor.SimpleClassVector_erase(self, *args)
-
-    def __init__(self, *args):
-        this = _hdbextractor.new_SimpleClassVector(*args)
-        try:
-            self.this.append(this)
-        except:
-            self.this = this
-
-    def push_back(self, x):
-        return _hdbextractor.SimpleClassVector_push_back(self, x)
-
-    def front(self):
-        return _hdbextractor.SimpleClassVector_front(self)
-
-    def back(self):
-        return _hdbextractor.SimpleClassVector_back(self)
-
-    def assign(self, n, x):
-        return _hdbextractor.SimpleClassVector_assign(self, n, x)
-
-    def resize(self, *args):
-        return _hdbextractor.SimpleClassVector_resize(self, *args)
-
-    def insert(self, *args):
-        return _hdbextractor.SimpleClassVector_insert(self, *args)
-
-    def reserve(self, n):
-        return _hdbextractor.SimpleClassVector_reserve(self, n)
-
-    def capacity(self):
-        return _hdbextractor.SimpleClassVector_capacity(self)
-    __swig_destroy__ = _hdbextractor.delete_SimpleClassVector
-    __del__ = lambda self: None
-SimpleClassVector_swigregister = _hdbextractor.SimpleClassVector_swigregister
-SimpleClassVector_swigregister(SimpleClassVector)
-
 class DataSieverProgressListener(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, DataSieverProgressListener, name, value)
@@ -1913,27 +1774,6 @@ class Hdbextractor(ResultListener):
 
     def extractionIsCancelled(self):
         return _hdbextractor.Hdbextractor_extractionIsCancelled(self)
-
-    def testGet(self, variantli):
-        return _hdbextractor.Hdbextractor_testGet(self, variantli)
-
-    def testGet2(self, var):
-        return _hdbextractor.Hdbextractor_testGet2(self, var)
-
-    def testGet3(self, d):
-        return _hdbextractor.Hdbextractor_testGet3(self, d)
-
-    def testGet4(self, dv):
-        return _hdbextractor.Hdbextractor_testGet4(self, dv)
-
-    def testGet5(self, dv):
-        return _hdbextractor.Hdbextractor_testGet5(self, dv)
-
-    def testSimpleClass(self, sv):
-        return _hdbextractor.Hdbextractor_testSimpleClass(self, sv)
-
-    def testSimpleClassRef(self, sv):
-        return _hdbextractor.Hdbextractor_testSimpleClassRef(self, sv)
 Hdbextractor_swigregister = _hdbextractor.Hdbextractor_swigregister
 Hdbextractor_swigregister(Hdbextractor)
 

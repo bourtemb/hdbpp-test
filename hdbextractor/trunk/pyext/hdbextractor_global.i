@@ -19,7 +19,6 @@ namespace std {
     %template(XVariantVector) vector<XVariant>;
     %template(StringVector) vector<string>;
     %template(StringStringMap) map<string,string>;
-    %template(SimpleClassVector) vector<SimpleClass>;
 }
 
 %include datasieverprogresslistener.i 

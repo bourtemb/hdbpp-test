@@ -56,8 +56,7 @@ libhdbextractor___la_SOURCES = hdbextractor.cpp \
     db/datetimeutils.h \ \
     db/xvariantdatainfo.cpp \
     sharedpointer.cpp \
-    test/xvariantstatstest.cpp \
-    simpleclass.cpp
+    test/xvariantstatstest.cpp
 
 # Header files that must be installed are specified by the HEADERS family of variables.
 # Headers can be installed in
@@ -88,8 +87,7 @@ db/timeinterval.h \
 db/datetimeutils.h \
 sharedpointer.h \
 test/xvariantstatstest.h \
-db/xvariantdatainfo.h \
-simpleclass.h
+db/xvariantdatainfo.h 
 
 
 libhdbextractor___la_CXXFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/db \
