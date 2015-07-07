@@ -297,7 +297,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                 {
                     snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
                     if(format == XVariant::Vector)
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,dim_x,idx,quality,error_desc FROM "
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time,value_r,dim_x_r,idx,quality,error_desc FROM "
                                                      " %s WHERE att_conf_id=%d AND data_time >='%s' "
                                                      " AND data_time <= '%s' ORDER BY data_time,idx ASC",
                                  table_name, id, start_date, stop_date);
@@ -435,7 +435,7 @@ bool MySqlHdbppSchema::getData(const char *source,
                     snprintf(table_name, MAXTABLENAMELEN, "att_%s", data_type);
 
                     if(format == XVariant::Vector)
-                        snprintf(query, MAXQUERYLEN, "SELECT data_time, value_r, %s dim_x, idx, quality,error_desc FROM "
+                        snprintf(query, MAXQUERYLEN, "SELECT data_time, value_r, %s dim_x_r, idx, quality,error_desc FROM "
                                                      " %s WHERE att_conf_id=%d AND data_time >='%s' "
                                                      " AND data_time <= '%s' ORDER BY data_time,idx ASC",
                                  column_value_w, table_name, id, start_date, stop_date);
@@ -897,28 +897,28 @@ int MySqlHdbppSchema::fetchInThePast(const char *source,
     pinfo("\e[1;4;35mfetching in the past \"%s\" before %s\e[0m\n", source, start_date);
     if(writable == XVariant::RO && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r,quality,error_desc FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x_r,idx,value_r,quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time = "
                                      " '%s' ORDER BY idx ASC",
                  table_name, att_id, timestamp);
     }
     else if(writable == XVariant::RO)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r,quality,error_desc FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x_r, 0 AS idx,value_r,quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time <= "
                                      " '%s' ORDER BY data_time DESC LIMIT 1",
                  table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW && format != XVariant::Scalar)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x,idx,value_r, %s quality,error_desc FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time,dim_x_r,idx,value_r, %s quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time = "
                                      " '%s' ORDER BY idx ASC",
                  column_value_w, table_name, att_id, start_date);
     }
     else if(writable == XVariant::RW)
     {
-        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x, 0 AS idx,value_r, %s quality,error_desc FROM "
+        snprintf(query, MAXQUERYLEN, "SELECT data_time, 1 AS dim_x_r, 0 AS idx,value_r, %s quality,error_desc FROM "
                                      " %s WHERE att_conf_id=%d AND data_time  <= "
                                      " '%s' ORDER BY data_time DESC LIMIT 1",
                  column_value_w, table_name, att_id, start_date);
