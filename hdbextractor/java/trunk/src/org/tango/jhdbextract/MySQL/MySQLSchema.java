@@ -35,18 +35,18 @@ package org.tango.jhdbextract.MySQL;
 import org.tango.jhdbextract.DbSchema;
 import org.tango.jhdbextract.HdbFailed;
 import org.tango.jhdbextract.HdbSigInfo;
+import org.tango.jhdbextract.HdbSigParam;
 import org.tango.jhdbextract.data.HdbData;
-import org.tango.jhdbextract.data.HdbDouble;
-import org.tango.jhdbextract.data.HdbDoubleArray;
+import org.tango.jhdbextract.data.HdbDataSet;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
 
 /**
- * MySQL databse access
+ * MySQL database access
  */
-public class MySQLSchema implements DbSchema {
+public class MySQLSchema extends DbSchema {
 
   public static final String DEFAULT_DB_NAME = "hdb";
   public static final String DEFAULT_DB_USER = "hdbreader";
@@ -54,7 +54,7 @@ public class MySQLSchema implements DbSchema {
   public static final String DEFAULT_DB_URL_PREFIX = "jdbc:mysql://";
   public static final int    DEFAULT_DB_PORT = 3306;
 
-  final static String[] tableNames = {
+  private final static String[] tableNames = {
 
       "NONE",
       "att_scalar_double_ro",
@@ -94,17 +94,42 @@ public class MySQLSchema implements DbSchema {
 
   public MySQLSchema(String host,String db,String user,String passwd,short port) throws HdbFailed {
 
-    if(user==null || user.length()==0)
-      user = DEFAULT_DB_USER;
+    if(host==null || host.isEmpty()) {
+      host = System.getenv("HDB_HOST");
+      if (host==null || host.isEmpty())
+        throw new HdbFailed("host cannot be null if HDB_HOST variable not defined");
+    }
 
-    if(passwd==null || passwd.length()==0)
-      passwd = DEFAULT_DB_PASSWORD;
+    if(user==null || user.isEmpty()) {
+      user = System.getenv("HDB_USER");
+      if (user==null || user.isEmpty())
+        user = DEFAULT_DB_USER;
+    }
 
-    if(port==0)
-      port = DEFAULT_DB_PORT;
+    if(passwd==null || passwd.isEmpty()) {
+      passwd = System.getenv("HDB_PASSWORD");
+      if (passwd==null || passwd.isEmpty())
+        passwd = DEFAULT_DB_PASSWORD;
+    }
 
-    if(db==null || db.length()==0)
-      db = DEFAULT_DB_NAME;
+    if(db==null || db.isEmpty()) {
+      db = System.getenv("HDB_NAME");
+      if (db==null || db.isEmpty())
+        db = DEFAULT_DB_NAME;
+    }
+
+    if(port==0) {
+      String pStr = System.getenv("HDB_PORT");
+      if(pStr==null || passwd.isEmpty())
+        port = DEFAULT_DB_PORT;
+      else {
+        try {
+          port = (short)Integer.parseInt(pStr);
+        } catch (NumberFormatException e) {
+          throw new HdbFailed("Invalid HDB_PORT variable " + e.getMessage());
+        }
+      }
+    }
 
     try {
 
@@ -126,7 +151,7 @@ public class MySQLSchema implements DbSchema {
 
   }
 
-  public String[] getSourcesList() throws HdbFailed {
+  public String[] getAttributeList() throws HdbFailed {
 
     ArrayList<String> list = new ArrayList<String>();
 
@@ -137,6 +162,7 @@ public class MySQLSchema implements DbSchema {
       ResultSet resultSet = statement.executeQuery(query);
       while (resultSet.next())
         list.add(resultSet.getString(1));
+      statement.close();
     } catch (SQLException e) {
       throw new HdbFailed("Failed to retrieve attribute list: "+e.getMessage());
     }
@@ -164,6 +190,7 @@ public class MySQLSchema implements DbSchema {
       } else {
         throw new HdbFailed("Signal not found");
       }
+      statement.close();
     } catch (SQLException e) {
       throw new HdbFailed("Failed to retrieve signal id: "+e.getMessage());
     }
@@ -172,28 +199,69 @@ public class MySQLSchema implements DbSchema {
 
   }
 
-  public ArrayList<HdbData> getData(String attName,
-                                    String start_date,
-                                    String stop_date,
-                                    boolean notifyEveryRows) throws HdbFailed {
+  public HdbDataSet getData(String attName,
+                            String start_date,
+                            String stop_date,
+                            boolean notify) throws HdbFailed {
 
     HdbSigInfo sigInfo = getSigInfo(attName);
     if(HdbSigInfo.isArrayType(sigInfo.type)) {
-      return getArrayData(sigInfo.type, sigInfo.sigId, start_date, stop_date, notifyEveryRows);
+      return getArrayData(sigInfo.type, sigInfo.sigId, start_date, stop_date, notify);
     } else {
-      return getScalarData(sigInfo.type, sigInfo.sigId, start_date, stop_date, notifyEveryRows);
+      return getScalarData(sigInfo.type, sigInfo.sigId, start_date, stop_date, notify);
     }
 
   }
 
-  public ArrayList<HdbData>[] getData(String[] attNames,
-                                      String start_date,
-                                      String stop_date,
-                                      boolean notifyEveryRows) throws HdbFailed {
-    throw new HdbFailed("Not implemented");
+  public ArrayList<HdbSigParam> getParams(String attName,
+                                          String start_date,
+                                          String stop_date) throws HdbFailed {
+
+    HdbSigInfo sigInfo = getSigInfo(attName);
+
+    String query = "SELECT recv_time,insert_time,label,unit,standard_unit,display_unit,format,"+
+                          "archive_rel_change,archive_abs_change,archive_period,description" +
+        " FROM att_parameter " +
+        " WHERE att_conf_id='" + sigInfo.sigId + "'" +
+        " AND recv_time>='" + toDBDate(start_date) + "'" +
+        " AND recv_time<='" + toDBDate(stop_date) + "'" +
+        " ORDER BY recv_time ASC";
+
+    ArrayList<HdbSigParam> ret = new ArrayList<HdbSigParam>();
+
+    try {
+
+      Statement statement = connection.createStatement();
+      ResultSet rs = statement.executeQuery(query);
+      while(rs.next()) {
+
+        HdbSigParam hd = new HdbSigParam();
+        hd.recvTime = timeValue(rs.getTimestamp(1));
+        hd.insertTime = timeValue(rs.getTimestamp(2));
+        hd.label = rs.getString(3);
+        hd.unit = rs.getString(4);
+        hd.standard_unit = rs.getString(5);
+        hd.display_unit = rs.getString(6);
+        hd.format = rs.getString(7);
+        hd.archive_rel_change = rs.getString(8);
+        hd.archive_abs_change = rs.getString(9);
+        hd.archive_period = rs.getString(10);
+        hd.description = rs.getString(11);
+
+        ret.add(hd);
+
+      }
+
+      statement.close();
+
+    } catch (SQLException e) {
+      throw new HdbFailed("Failed to get parameter history: "+e.getMessage());
+    }
+
+    return ret;
   }
 
-  public ArrayList<HdbData> findErrors(String attName,
+  public HdbDataSet findErrors(String attName,
                                        String start_date,
                                        String stop_date) throws HdbFailed {
     throw new HdbFailed("Not implemented");
@@ -201,11 +269,11 @@ public class MySQLSchema implements DbSchema {
 
   // ---------------------------------------------------------------------------------------
 
-  private ArrayList<HdbData> getArrayData(int type,
-                                          String sigId,
-                                          String start_date,
-                                          String stop_date,
-                                          boolean notifyEveryRows) throws HdbFailed {
+  private HdbDataSet getArrayData(int type,
+                                  String sigId,
+                                  String start_date,
+                                  String stop_date,
+                                  boolean notify) throws HdbFailed {
 
     boolean isRW = HdbSigInfo.isRWType(type);
 
@@ -213,14 +281,14 @@ public class MySQLSchema implements DbSchema {
     String query = "SELECT data_time,recv_time,insert_time,error_desc,quality,idx,value_r"+rwField+
         " FROM " + tableNames[type] +
         " WHERE att_conf_id='" + sigId + "'" +
-        " AND data_time>'" + toMySqlDate(start_date) + "'" +
-        " AND data_time<'" + toMySqlDate(stop_date) + "'" +
+        " AND data_time>='" + toDBDate(start_date) + "'" +
+        " AND data_time<='" + toDBDate(stop_date) + "'" +
         " ORDER BY data_time,idx ASC";
 
     ArrayList<HdbData> ret = new ArrayList<HdbData>();
-    ArrayList<String> value = new ArrayList<String>();
-    ArrayList<String> wvalue = null;
-    if(isRW) wvalue = new ArrayList<String>();
+    ArrayList<Object> value = new ArrayList<Object>();
+    ArrayList<Object> wvalue = null;
+    if(isRW) wvalue = new ArrayList<Object>();
 
     try {
 
@@ -229,7 +297,7 @@ public class MySQLSchema implements DbSchema {
       long recvTime = 0;
       long insertTime = 0;
       String errorMsg = null;
-      String qualityStr = null;
+      int quality = 0;
       boolean newItem = false;
 
       Statement statement = connection.createStatement();
@@ -249,7 +317,7 @@ public class MySQLSchema implements DbSchema {
                 recvTime,  //Event recieve timestamp
                 insertTime,//Recording timestamp
                 errorMsg,  // Error string
-                qualityStr,// Quality value
+                quality,   // Quality value
                 value,     // Read value
                 wvalue     // Write value
             );
@@ -261,7 +329,7 @@ public class MySQLSchema implements DbSchema {
           recvTime = timeValue(rs.getTimestamp(2));
           insertTime = timeValue(rs.getTimestamp(3));
           errorMsg = rs.getString(4);
-          qualityStr = rs.getString(5);
+          quality = rs.getInt(5);
           newItem = true;
 
           value.clear();
@@ -282,11 +350,11 @@ public class MySQLSchema implements DbSchema {
         // Store last item
         HdbData hd = HdbData.createData(type);
         hd.parse(
-            dTime,     //Tango timestamp
-            recvTime,  //Event recieve timestamp
-            insertTime,//Recording timestamp
+            dTime,     // Tango timestamp
+            recvTime,  // Event receive timestamp
+            insertTime,// Recording timestamp
             errorMsg,  // Error string
-            qualityStr,// Quality value
+            quality,   // Quality value
             value,     // Read value
             wvalue     // Write value
         );
@@ -297,35 +365,35 @@ public class MySQLSchema implements DbSchema {
       statement.close();
 
     } catch (SQLException e) {
-      throw new HdbFailed("Failed to retrieve signal id: "+e.getMessage());
+      throw new HdbFailed("Failed to get data: "+e.getMessage());
     }
 
-    return ret;
+    return new HdbDataSet(ret);
 
   }
 
 
   // ---------------------------------------------------------------------------------------
 
-  private ArrayList<HdbData> getScalarData(int type,
-                                           String sigId,
-                                           String start_date,
-                                           String stop_date,
-                                           boolean notifyEveryRows) throws HdbFailed {
+  private HdbDataSet getScalarData(int type,
+                                   String sigId,
+                                   String start_date,
+                                   String stop_date,
+                                   boolean notify) throws HdbFailed {
 
     boolean isRW = HdbSigInfo.isRWType(type);
     String rwField = isRW?",value_w":"";
     String query = "SELECT data_time,recv_time,insert_time,error_desc,quality,value_r"+rwField+
         " FROM " + tableNames[type] +
         " WHERE att_conf_id='" + sigId + "'" +
-        " AND data_time>'" + toMySqlDate(start_date) + "'" +
-        " AND data_time<'" + toMySqlDate(stop_date) + "'" +
+        " AND data_time>'" + toDBDate(start_date) + "'" +
+        " AND data_time<'" + toDBDate(stop_date) + "'" +
         " ORDER BY data_time ASC";
 
     ArrayList<HdbData> ret = new ArrayList<HdbData>();
-    ArrayList<String> value = new ArrayList<String>();
-    ArrayList<String> wvalue = null;
-    if(isRW) wvalue = new ArrayList<String>();
+    ArrayList<Object> value = new ArrayList<Object>();
+    ArrayList<Object> wvalue = null;
+    if(isRW) wvalue = new ArrayList<Object>();
 
     try {
 
@@ -346,7 +414,7 @@ public class MySQLSchema implements DbSchema {
             timeValue(rs.getTimestamp(2)),     //Event recieve timestamp
             timeValue(rs.getTimestamp(3)),     //Recording timestamp
             rs.getString(4),                   // Error string
-            rs.getString(5),                   // Quality value
+            rs.getInt(5),                      // Quality value
             value,                             // Read value
             wvalue                             // Write value
         );
@@ -357,10 +425,10 @@ public class MySQLSchema implements DbSchema {
       statement.close();
 
     } catch (SQLException e) {
-      throw new HdbFailed("Failed to retrieve signal id: "+e.getMessage());
+      throw new HdbFailed("Failed to get data: "+e.getMessage());
     }
 
-    return ret;
+    return new HdbDataSet(ret);
 
   }
 
@@ -377,7 +445,7 @@ public class MySQLSchema implements DbSchema {
 
   }
 
-  private String toMySqlDate(String date) {
+  private String toDBDate(String date) {
 
    // In:   09/07/2015 12:00:00
    // Out:  2015-07-09 12:00:00

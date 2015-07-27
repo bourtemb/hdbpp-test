@@ -1,3 +1,35 @@
+//+======================================================================
+// $Source: $
+//
+// Project:   Tango
+//
+// Description:  java source code for HDB extraction library.
+//
+// $Author: pons $
+//
+// Copyright (C) :      2015
+//						European Synchrotron Radiation Facility
+//                      BP 220, Grenoble 38043
+//                      FRANCE
+//
+// This file is part of Tango.
+//
+// Tango is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tango is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tango.  If not, see <http://www.gnu.org/licenses/>.
+//
+// $Revision $
+//
+//-======================================================================
 package org.tango.jhdbextract.data;
 
 import org.tango.jhdbextract.HdbFailed;
@@ -33,34 +65,46 @@ public class HdbDoubleArray extends HdbData {
 
   }
 
-  public void parseValue(ArrayList<String> value) throws HdbFailed {
+  public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    this.value = parseArray(value);
+    this.value = parseDoubleArray(value);
 
   }
 
-  public void parseWriteValue(ArrayList<String> value) throws HdbFailed {
+  public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null)
-      this.wvalue = parseArray(value);
+      this.wvalue = parseDoubleArray(value);
 
   }
 
-  private double[] parseArray(ArrayList<String> value) throws HdbFailed {
+  private double[] parseDoubleArray(ArrayList<Object> value) throws HdbFailed {
 
     double[] ret = new double[value.size()];
+    if(value.size()==0)
+      return ret;
 
     try {
-      for(int i=0;i<value.size();i++) {
-        String str = value.get(i);
-        if(str==null) {
-          ret[i] = Double.NaN;
-        } else {
-          ret[i] = Double.parseDouble(str);
+
+      if (value.get(0) instanceof String) {
+        // Value given as string
+        for (int i = 0; i < value.size(); i++) {
+          String str = (String)value.get(i);
+          if (str == null) {
+            ret[i] = Double.NaN;
+          } else {
+            ret[i] = Double.parseDouble(str);
+          }
+        }
+      } else {
+        for (int i = 0; i < value.size(); i++) {
+          Double d = (Double)value.get(i);
+          ret[i] = d.doubleValue();
         }
       }
+
     } catch(NumberFormatException e) {
-      throw new HdbFailed("Invalid number syntax");
+      throw new HdbFailed("parseDoubleArray: Invalid number syntax");
     }
 
     return ret;
@@ -78,6 +122,29 @@ public class HdbDoubleArray extends HdbData {
       return timeToStr(dataTime)+": dim="+Integer.toString(value.length)+","+Integer.toString(wvalue.length)+" "+
           qualitytoStr(qualityFactor);
 
+  }
+
+  // Convenience function
+  public double getValueAsDouble() throws HdbFailed {
+    throw new HdbFailed("This datum is not scalar");
+  }
+
+  public double getWriteValueAsDouble() throws HdbFailed {
+    throw new HdbFailed("This datum is not scalar");
+  }
+
+  public double[] getValueAsDoubleArray() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    return value;
+  }
+
+  public double[] getWriteValueAsDoubleArray() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    if(!hasWriteValue())
+      throw new HdbFailed("This datum has no write value");
+    return wvalue;
   }
 
 }

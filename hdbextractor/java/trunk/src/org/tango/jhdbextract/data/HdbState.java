@@ -38,14 +38,14 @@ import org.tango.jhdbextract.HdbSigInfo;
 import java.util.ArrayList;
 
 /**
- * HDB long data (32 bits integer)
+ * Tango HDB state data
  */
-public class HdbLong extends HdbData {
+public class HdbState extends HdbData {
 
   int value = 0;
   int wvalue = 0;
 
-  public HdbLong(int type) {
+  public HdbState(int type) {
     this.type = type;
   }
 
@@ -67,18 +67,18 @@ public class HdbLong extends HdbData {
 
   public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    this.value = parseLong(value.get(0));
+    this.value = parseState(value.get(0));
 
   }
 
   public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null)
-      this.wvalue = parseLong(value.get(0));
+      this.wvalue = parseState(value.get(0));
 
   }
 
-  private int parseLong(Object value) throws HdbFailed {
+  private int parseState(Object value) throws HdbFailed {
 
     int ret;
 
@@ -92,7 +92,7 @@ public class HdbLong extends HdbData {
         else
           ret = Integer.parseInt(str);
       } catch (NumberFormatException e) {
-        throw new HdbFailed("parseLong: Invalid number syntax for value");
+        throw new HdbFailed("parseState: Invalid number syntax for value");
       }
 
     } else {
@@ -106,15 +106,56 @@ public class HdbLong extends HdbData {
 
   }
 
+  /**
+   * Returns String corresponding to given state
+   * @param value State as int value
+   */
+  public static String getStateString(int value) {
+
+    switch (value) {
+      case 0:
+        return "ON";
+      case 1:
+        return "OFF";
+      case 2:
+        return "CLOSE";
+      case 3:
+        return "OPEN";
+      case 4:
+        return "INSERT";
+      case 5:
+        return "EXTRACT";
+      case 6:
+        return "MOVING";
+      case 7:
+        return "STANDBY";
+      case 8:
+        return "FAULT";
+      case 9:
+        return "INIT";
+      case 10:
+        return "RUNNING";
+      case 11:
+        return "ALARM";
+      case 12:
+        return "DISABLE";
+      case 13:
+        return "UNKNOWN";
+      default:
+        return "Unknown code";
+    }
+
+  }
+
   public String toString() {
 
     if(hasFailed())
       return timeToStr(dataTime)+": "+errorMessage;
 
-    if(type== HdbSigInfo.TYPE_SCALAR_LONG_RO)
-      return timeToStr(dataTime)+": "+Integer.toString(value)+" "+qualitytoStr(qualityFactor);
+    if(type== HdbSigInfo.TYPE_SCALAR_STATE_RO)
+      return timeToStr(dataTime)+": "+getStateString(value)+" "+qualitytoStr(qualityFactor);
     else
-      return timeToStr(dataTime)+": "+Integer.toString(value)+";"+Integer.toString(wvalue)+" "+
+      return timeToStr(dataTime)+": "+getStateString(value)+";"+getStateString(wvalue)+" "+
           qualitytoStr(qualityFactor);
 
   }

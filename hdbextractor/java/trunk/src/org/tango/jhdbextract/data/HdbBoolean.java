@@ -38,18 +38,18 @@ import org.tango.jhdbextract.HdbSigInfo;
 import java.util.ArrayList;
 
 /**
- * HDB long data (32 bits integer)
+ * HDB boolean data (8bit integer)
  */
-public class HdbLong extends HdbData {
+public class HdbBoolean extends HdbData {
 
-  int value = 0;
-  int wvalue = 0;
+  boolean value = false;
+  boolean wvalue = false;
 
-  public HdbLong(int type) {
+  public HdbBoolean(int type) {
     this.type = type;
   }
 
-  public int getValue() throws HdbFailed {
+  public boolean getValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -57,7 +57,7 @@ public class HdbLong extends HdbData {
 
   }
 
-  public int getWriteValue() throws HdbFailed {
+  public boolean getWriteValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -67,38 +67,38 @@ public class HdbLong extends HdbData {
 
   public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    this.value = parseLong(value.get(0));
+    this.value = parseBoolean(value.get(0));
 
   }
 
   public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null)
-      this.wvalue = parseLong(value.get(0));
+      this.wvalue = parseBoolean(value.get(0));
 
   }
 
-  private int parseLong(Object value) throws HdbFailed {
+  private boolean parseBoolean(Object value) throws HdbFailed {
 
-    int ret;
+    boolean ret;
 
-    if (value instanceof String) {
+    if( value instanceof String ) {
 
       // Value given as string
       try {
-        String str = (String) value;
-        if (str == null)
-          ret = 0;
+        String str = (String)value;
+        if(str==null)
+          ret = false;
         else
-          ret = Integer.parseInt(str);
-      } catch (NumberFormatException e) {
-        throw new HdbFailed("parseLong: Invalid number syntax for value");
+          ret = Boolean.parseBoolean(str);
+      } catch(NumberFormatException e) {
+        throw new HdbFailed("parseBoolean: Invalid number syntax for value");
       }
 
     } else {
 
-      Integer i = (Integer) value;
-      ret = i.intValue();
+      Boolean b = (Boolean)value;
+      ret = b.booleanValue();
 
     }
 
@@ -111,10 +111,10 @@ public class HdbLong extends HdbData {
     if(hasFailed())
       return timeToStr(dataTime)+": "+errorMessage;
 
-    if(type== HdbSigInfo.TYPE_SCALAR_LONG_RO)
-      return timeToStr(dataTime)+": "+Integer.toString(value)+" "+qualitytoStr(qualityFactor);
+    if(type== HdbSigInfo.TYPE_SCALAR_BOOLEAN_RO)
+      return timeToStr(dataTime)+": "+Boolean.toString(value)+" "+qualitytoStr(qualityFactor);
     else
-      return timeToStr(dataTime)+": "+Integer.toString(value)+";"+Integer.toString(wvalue)+" "+
+      return timeToStr(dataTime)+": "+Boolean.toString(value)+";"+Boolean.toString(wvalue)+" "+
           qualitytoStr(qualityFactor);
 
   }
@@ -123,14 +123,14 @@ public class HdbLong extends HdbData {
   public double getValueAsDouble() throws HdbFailed {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
-    return (double)value;
+    return (value)?1:0;
   }
 
   public double getWriteValueAsDouble() throws HdbFailed {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
     if(hasWriteValue()) {
-      return (double)wvalue;
+      return (wvalue)?1:0;
     } else {
       throw new HdbFailed("This datum has no write value");
     }

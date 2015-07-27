@@ -38,18 +38,18 @@ import org.tango.jhdbextract.HdbSigInfo;
 import java.util.ArrayList;
 
 /**
- * HDB long data (32 bits integer)
+ * HDB float data
  */
-public class HdbLong extends HdbData {
+public class HdbFloat extends HdbData {
 
-  int value = 0;
-  int wvalue = 0;
+  float value = Float.NaN;
+  float wvalue = Float.NaN;
 
-  public HdbLong(int type) {
+  public HdbFloat(int type) {
     this.type = type;
   }
 
-  public int getValue() throws HdbFailed {
+  public float getValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -57,7 +57,7 @@ public class HdbLong extends HdbData {
 
   }
 
-  public int getWriteValue() throws HdbFailed {
+  public float getWriteValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -67,38 +67,38 @@ public class HdbLong extends HdbData {
 
   public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    this.value = parseLong(value.get(0));
+    this.value = parseFloat(value.get(0));
 
   }
 
   public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null)
-      this.wvalue = parseLong(value.get(0));
+      this.wvalue = parseFloat(value.get(0));
 
   }
 
-  private int parseLong(Object value) throws HdbFailed {
+  private float parseFloat(Object value) throws HdbFailed {
 
-    int ret;
+    float ret;
 
     if (value instanceof String) {
 
-      // Value given as string
+      // Value given as String
       try {
-        String str = (String) value;
+        String str = (String)value;
         if (str == null)
-          ret = 0;
+          ret = Float.NaN;
         else
-          ret = Integer.parseInt(str);
+          ret = Float.parseFloat(str);
       } catch (NumberFormatException e) {
-        throw new HdbFailed("parseLong: Invalid number syntax for value");
+        throw new HdbFailed("parseFloat: Invalid number syntax for write value");
       }
 
     } else {
 
-      Integer i = (Integer) value;
-      ret = i.intValue();
+      Float f = (Float)value;
+      ret = f.floatValue();
 
     }
 
@@ -111,10 +111,10 @@ public class HdbLong extends HdbData {
     if(hasFailed())
       return timeToStr(dataTime)+": "+errorMessage;
 
-    if(type== HdbSigInfo.TYPE_SCALAR_LONG_RO)
-      return timeToStr(dataTime)+": "+Integer.toString(value)+" "+qualitytoStr(qualityFactor);
+    if(type== HdbSigInfo.TYPE_SCALAR_FLOAT_RO)
+      return timeToStr(dataTime)+": "+Double.toString(value)+" "+qualitytoStr(qualityFactor);
     else
-      return timeToStr(dataTime)+": "+Integer.toString(value)+";"+Integer.toString(wvalue)+" "+
+      return timeToStr(dataTime)+": "+Double.toString(value)+";"+Double.toString(wvalue)+" "+
           qualitytoStr(qualityFactor);
 
   }

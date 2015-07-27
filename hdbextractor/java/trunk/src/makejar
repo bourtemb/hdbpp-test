@@ -1,0 +1,12 @@
+#!/bin/sh
+VERSION=`grep "LIB_RELEASE" org/tango/jhdbextract/HdbExtractor.java | awk '{print $7}'`
+echo "Building HDB++ v$VERSION"
+TARGET_DIR=/segfs/tango/release/java/lib/hdb
+
+jar cvf $TARGET_DIR/HDB++-$VERSION.jar org/tango/jhdbextract/*.class org/tango/jhdbextract/data/*.class org/tango/jhdbextract/MySQL/*.class org/tango/jhdbextract/Cassandra/*.class
+
+cd $TARGET_DIR
+rm -f HDB++.jar
+ln -s HDB++-$VERSION.jar HDB++.jar
+chmod g+w HDB++-$VERSION.jar
+ls -l HDB++*.jar

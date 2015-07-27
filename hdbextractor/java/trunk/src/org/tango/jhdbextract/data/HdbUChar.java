@@ -38,18 +38,18 @@ import org.tango.jhdbextract.HdbSigInfo;
 import java.util.ArrayList;
 
 /**
- * HDB long data (32 bits integer)
+ * HDB byte data (8bit unsigned integer)
  */
-public class HdbLong extends HdbData {
+public class HdbUChar extends HdbData {
 
-  int value = 0;
-  int wvalue = 0;
+  short value = 0;
+  short wvalue = 0;
 
-  public HdbLong(int type) {
+  public HdbUChar(int type) {
     this.type = type;
   }
 
-  public int getValue() throws HdbFailed {
+  public short getValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -57,7 +57,7 @@ public class HdbLong extends HdbData {
 
   }
 
-  public int getWriteValue() throws HdbFailed {
+  public short getWriteValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -67,20 +67,20 @@ public class HdbLong extends HdbData {
 
   public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    this.value = parseLong(value.get(0));
+    this.value = parseUChar(value.get(0));
 
   }
 
   public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null)
-      this.wvalue = parseLong(value.get(0));
+      this.wvalue = parseUChar(value.get(0));
 
   }
 
-  private int parseLong(Object value) throws HdbFailed {
+  private short parseUChar(Object value) throws HdbFailed {
 
-    int ret;
+    short ret;
 
     if (value instanceof String) {
 
@@ -90,15 +90,15 @@ public class HdbLong extends HdbData {
         if (str == null)
           ret = 0;
         else
-          ret = Integer.parseInt(str);
+          ret = Short.parseShort(str);
       } catch (NumberFormatException e) {
-        throw new HdbFailed("parseLong: Invalid number syntax for value");
+        throw new HdbFailed("parseUChar: Invalid number syntax for value");
       }
 
     } else {
 
-      Integer i = (Integer) value;
-      ret = i.intValue();
+      Short s = (Short) value;
+      ret = s.shortValue();
 
     }
 
@@ -111,10 +111,10 @@ public class HdbLong extends HdbData {
     if(hasFailed())
       return timeToStr(dataTime)+": "+errorMessage;
 
-    if(type== HdbSigInfo.TYPE_SCALAR_LONG_RO)
-      return timeToStr(dataTime)+": "+Integer.toString(value)+" "+qualitytoStr(qualityFactor);
+    if(type== HdbSigInfo.TYPE_SCALAR_UCHAR_RO)
+      return timeToStr(dataTime)+": "+Short.toString(value)+" "+qualitytoStr(qualityFactor);
     else
-      return timeToStr(dataTime)+": "+Integer.toString(value)+";"+Integer.toString(wvalue)+" "+
+      return timeToStr(dataTime)+": "+Short.toString(value)+";"+Long.toString(wvalue)+" "+
           qualitytoStr(qualityFactor);
 
   }

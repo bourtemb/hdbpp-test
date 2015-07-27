@@ -38,18 +38,18 @@ import org.tango.jhdbextract.HdbSigInfo;
 import java.util.ArrayList;
 
 /**
- * HDB long data (32 bits integer)
+ * HDB short array data (16 bits integer)
  */
-public class HdbLong extends HdbData {
+public class HdbShortArray extends HdbData {
 
-  int value = 0;
-  int wvalue = 0;
+  short[] value = null;
+  short[] wvalue = null;
 
-  public HdbLong(int type) {
+  public HdbShortArray(int type) {
     this.type = type;
   }
 
-  public int getValue() throws HdbFailed {
+  public short[] getValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -57,7 +57,7 @@ public class HdbLong extends HdbData {
 
   }
 
-  public int getWriteValue() throws HdbFailed {
+  public short[] getWriteValue() throws HdbFailed {
 
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
@@ -67,38 +67,45 @@ public class HdbLong extends HdbData {
 
   public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    this.value = parseLong(value.get(0));
+    this.value = parseShortArray(value);
 
   }
 
   public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null)
-      this.wvalue = parseLong(value.get(0));
+      this.wvalue = parseShortArray(value);
 
   }
 
-  private int parseLong(Object value) throws HdbFailed {
+  private short[] parseShortArray(ArrayList<Object> value) throws HdbFailed {
 
-    int ret;
+    short[] ret = new short[value.size()];
+    if(value.size()==0)
+      return ret;
 
-    if (value instanceof String) {
+    if( value.get(0) instanceof String ) {
 
       // Value given as string
       try {
-        String str = (String) value;
-        if (str == null)
-          ret = 0;
-        else
-          ret = Integer.parseInt(str);
-      } catch (NumberFormatException e) {
-        throw new HdbFailed("parseLong: Invalid number syntax for value");
+        for(int i=0;i<value.size();i++) {
+          String str = (String)value.get(i);
+          if(str==null) {
+            ret[i] = 0;
+          } else {
+            ret[i] = Short.parseShort(str);
+          }
+        }
+      } catch(NumberFormatException e) {
+        throw new HdbFailed("parseShortArray: Invalid number syntax");
       }
 
     } else {
 
-      Integer i = (Integer) value;
-      ret = i.intValue();
+      for(int i=0;i<value.size();i++) {
+        Short s = (Short)value.get(i);
+        ret[i] = s.shortValue();
+      }
 
     }
 
@@ -111,37 +118,41 @@ public class HdbLong extends HdbData {
     if(hasFailed())
       return timeToStr(dataTime)+": "+errorMessage;
 
-    if(type== HdbSigInfo.TYPE_SCALAR_LONG_RO)
-      return timeToStr(dataTime)+": "+Integer.toString(value)+" "+qualitytoStr(qualityFactor);
+    if(type== HdbSigInfo.TYPE_ARRAY_SHORT_RO)
+      return timeToStr(dataTime)+": dim="+Integer.toString(value.length)+" "+qualitytoStr(qualityFactor);
     else
-      return timeToStr(dataTime)+": "+Integer.toString(value)+";"+Integer.toString(wvalue)+" "+
+      return timeToStr(dataTime)+": dim="+Integer.toString(value.length)+","+Integer.toString(wvalue.length)+" "+
           qualitytoStr(qualityFactor);
 
   }
 
   // Convenience function
   public double getValueAsDouble() throws HdbFailed {
-    if(hasFailed())
-      throw new HdbFailed(this.errorMessage);
-    return (double)value;
+    throw new HdbFailed("This datum is not scalar");
   }
 
   public double getWriteValueAsDouble() throws HdbFailed {
-    if(hasFailed())
-      throw new HdbFailed(this.errorMessage);
-    if(hasWriteValue()) {
-      return (double)wvalue;
-    } else {
-      throw new HdbFailed("This datum has no write value");
-    }
+    throw new HdbFailed("This datum is not scalar");
   }
 
   public double[] getValueAsDoubleArray() throws HdbFailed {
-    throw new HdbFailed("This datum is not an array");
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    double[] ret = new double[value.length];
+    for(int i=0;i<value.length;i++)
+      ret[i] = (double)value[i];
+    return ret;
   }
 
   public double[] getWriteValueAsDoubleArray() throws HdbFailed {
-    throw new HdbFailed("This datum is not an array");
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    if(!hasWriteValue())
+      throw new HdbFailed("This datum has no write value");
+    double[] ret = new double[wvalue.length];
+    for(int i=0;i<wvalue.length;i++)
+      ret[i] = (double)wvalue[i];
+    return ret;
   }
 
 }

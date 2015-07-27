@@ -34,6 +34,7 @@
 package org.tango.jhdbextract;
 
 import org.tango.jhdbextract.data.HdbData;
+import org.tango.jhdbextract.data.HdbDataSet;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -46,56 +47,82 @@ import java.util.ArrayList;
  *
  * @author JL Pons
  */
-public interface DbSchema {
+public abstract class DbSchema {
 
   /**
    * Fetch data from the database.
    *
-   * @param attName         the fully qualified tango attribute
-   * @param start_date      the start date (begin of the requested data interval) as string, such as "2014-07-10 10:00:00"
-   * @param stop_date       the stop date (end of the requested data interval) as string, such as "2014-07-10 12:00:00"
-   * @param notifyEveryRows the number of rows that make up a block of data. Every time a block of data is complete
-   *                        notifications are sent to the listener of type ResultListener (HdbExtractor)
+   * @param attName         The fully qualified tango attribute name (eg: tango://hostname:port/domain/family/member/attname)
+   * @param start_date      Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
+   * @param stop_date       End of the requested time interval (as string eg: "10/07/2014 12:00:00")
+   * @param notify          Every time a block of data is complete, notifications are sent to the listener of type ProgressListener
+   *
    * @throws HdbFailed In case of failure
    */
-  public ArrayList<HdbData> getData(String attName,
-                                    String start_date,
-                                    String stop_date,
-                                    boolean notifyEveryRows) throws HdbFailed;
-
-  public ArrayList<HdbData>[] getData(String[] attNames,
-                                      String start_date,
-                                      String stop_date,
-                                      boolean notifyEveryRows) throws HdbFailed;
+  public abstract HdbDataSet getData(String attName,
+                                     String start_date,
+                                     String stop_date,
+                                     boolean notify) throws HdbFailed;
 
   /**
-   * Retrieves the list of archived sources, returning true if the query is successful.
+   * Fetch data from the database from several attributes.
+   *
+   * @param attNames        List of fully qualified tango attributes (eg: tango://hostname:port/domain/family/member/attname)
+   * @param start_date      Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
+   * @param stop_date       End of the requested time interval (as string eg: "10/07/2014 12:00:00")
+   * @param notify          Every time a block of data is complete, notifications are sent to the listener of type ProgressListener
+   *
    * @throws HdbFailed In case of failure
    */
-  public String[] getSourcesList() throws HdbFailed;
+  public HdbDataSet[] getData(String[] attNames,
+                              String start_date,
+                              String stop_date,
+                              boolean notify) throws HdbFailed {
+
+    HdbDataSet[] ret = new HdbDataSet[attNames.length];
+    for(int i=0;i<ret.length;i++)
+      ret[i] = getData(attNames[i], start_date, stop_date, notify);
+    return ret;
+
+  }
+
+  /**
+   * Retrieves the list of archived attributes (fully qualified name eg: tango://hostname:port/domain/family/member/attname).
+   * @throws HdbFailed In case of failure
+   */
+  public abstract String[] getAttributeList() throws HdbFailed;
 
   /**
    * Returns signal info
-   * @param attName the fully qualified tango attribute name
+   * @param attName The fully qualified tango attribute name (eg: tango://hostname:port/domain/family/member/attname)
    * @return The signal identifier
    * @throws HdbFailed In case of failure
    */
-  public HdbSigInfo getSigInfo(String attName) throws HdbFailed;
+  public abstract HdbSigInfo getSigInfo(String attName) throws HdbFailed;
 
   /**
-   * This method finds the errors occurred inside a time_interval window for the specified source
+   * Return history of configurations of the specified attribute
    *
-   * @param source     The name of the source to look for in the database
-   * @param start_date the start date (begin of the requested data interval) as string, such as "2014-07-10 10:00:00"
-   * @param stop_date  the stop date (end of the requested data interval) as string, such as "2014-07-10 12:00:00"
-   *                   <p/>
-   *                   The results can be obtained with the method get. The ResultListenerInterface::onProgressUpdate
-   *                   and ResultListenerInterface::onFinished can be used in order to receive notifications.
+   * @param attName The fully qualified tango attribute name (eg: tango://hostname:port/domain/family/member/attname)
+   * @param start_date Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
+   * @param stop_date End of the requested time interval (as string eg: "10/07/2014 12:00:00")
+   * @return
+   */
+  public abstract ArrayList<HdbSigParam> getParams(String attName,
+                                                   String start_date,
+                                                   String stop_date) throws HdbFailed;
+
+  /**
+   * This method finds the errors occurred inside a time interval for the specified attribute
+   *
+   * @param attName    The fully qualified tango attribute name (eg: tango://hostname:port/domain/family/member/attname)
+   * @param start_date Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
+   * @param stop_date  End of the requested time interval (as string eg: "10/07/2014 12:00:00")
    * @throws HdbFailed In case of failure
    */
-  public ArrayList<HdbData> findErrors(String source,
-                                       String start_date,
-                                       String stop_date) throws HdbFailed;
+  public abstract HdbDataSet findErrors(String attName,
+                                        String start_date,
+                                        String stop_date) throws HdbFailed;
 
 }
 

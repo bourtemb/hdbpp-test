@@ -1,3 +1,35 @@
+//+======================================================================
+// $Source: $
+//
+// Project:   Tango
+//
+// Description:  java source code for HDB extraction library.
+//
+// $Author: pons $
+//
+// Copyright (C) :      2015
+//						European Synchrotron Radiation Facility
+//                      BP 220, Grenoble 38043
+//                      FRANCE
+//
+// This file is part of Tango.
+//
+// Tango is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tango is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tango.  If not, see <http://www.gnu.org/licenses/>.
+//
+// $Revision $
+//
+//-======================================================================
 package org.tango.jhdbextract.data;
 
 import org.tango.jhdbextract.HdbFailed;
@@ -33,9 +65,9 @@ public class HdbString extends HdbData {
 
   }
 
-  public void parseValue(ArrayList<String> value) throws HdbFailed {
+  public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    String str = value.get(0);
+    String str = (String)value.get(0);
     if(str==null)
       this.value = "NULL";
     else
@@ -43,10 +75,10 @@ public class HdbString extends HdbData {
 
   }
 
-  public void parseWriteValue(ArrayList<String> value) throws HdbFailed {
+  public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null) {
-      String str = value.get(0);
+      String str = (String)value.get(0);
       if(str==null)
         this.wvalue = "NULL";
       else
@@ -66,6 +98,23 @@ public class HdbString extends HdbData {
       return timeToStr(dataTime)+": "+value+";"+wvalue+" "+
           qualitytoStr(qualityFactor);
 
+  }
+
+  // Convenience function
+  public double getValueAsDouble() throws HdbFailed {
+    throw new HdbFailed("This datum cannot be converted to double");
+  }
+
+  public double getWriteValueAsDouble() throws HdbFailed {
+    throw new HdbFailed("This datum cannot be converted to double");
+  }
+
+  public double[] getValueAsDoubleArray() throws HdbFailed {
+    throw new HdbFailed("This datum cannot be converted to double");
+  }
+
+  public double[] getWriteValueAsDoubleArray() throws HdbFailed {
+    throw new HdbFailed("This datum cannot be converted to double");
   }
 
 }

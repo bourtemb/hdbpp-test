@@ -30,7 +30,6 @@
 // $Revision $
 //
 //-======================================================================
-
 package org.tango.jhdbextract.data;
 
 import org.tango.jhdbextract.HdbFailed;
@@ -67,33 +66,44 @@ public class HdbDouble extends HdbData {
 
   }
 
-  public void parseValue(ArrayList<String> value) throws HdbFailed {
+  public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    try {
-      String str = value.get(0);
-      if(str==null)
-        this.value = Double.NaN;
-      else
-        this.value = Double.parseDouble(str);
-    } catch(NumberFormatException e) {
-      throw new HdbFailed("Invalid number syntax for value");
-    }
+    this.value = parseDouble(value.get(0));
 
   }
 
-  public void parseWriteValue(ArrayList<String> value) throws HdbFailed {
+  public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
-    if(value!=null) {
+    if(value!=null)
+      this.wvalue = parseDouble(value.get(0));
+
+  }
+
+  private double parseDouble(Object value) throws HdbFailed {
+
+    double ret;
+
+    if (value instanceof String) {
+
+      // Value given as String
       try {
-        String str = value.get(0);
-        if(str==null)
-          this.wvalue = Double.NaN;
+        String str = (String)value;
+        if (str == null)
+          ret = Double.NaN;
         else
-          this.wvalue = Double.parseDouble(str);
-      } catch(NumberFormatException e) {
-        throw new HdbFailed("Invalid number syntax for write value");
+          ret = Double.parseDouble(str);
+      } catch (NumberFormatException e) {
+        throw new HdbFailed("parseDouble: Invalid number syntax for write value");
       }
+
+    } else {
+
+      Double d = (Double)value;
+      ret = d.doubleValue();
+
     }
+
+    return ret;
 
   }
 
@@ -108,6 +118,31 @@ public class HdbDouble extends HdbData {
       return timeToStr(dataTime)+": "+Double.toString(value)+";"+Double.toString(wvalue)+" "+
              qualitytoStr(qualityFactor);
 
+  }
+
+  // Convenience function
+  public double getValueAsDouble() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    return value;
+  }
+
+  public double getWriteValueAsDouble() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    if(hasWriteValue()) {
+      return wvalue;
+    } else {
+      throw new HdbFailed("This datum has no write value");
+    }
+  }
+
+  public double[] getValueAsDoubleArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an array");
+  }
+
+  public double[] getWriteValueAsDoubleArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an array");
   }
 
 }

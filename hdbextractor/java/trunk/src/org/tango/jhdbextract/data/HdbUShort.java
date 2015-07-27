@@ -38,14 +38,14 @@ import org.tango.jhdbextract.HdbSigInfo;
 import java.util.ArrayList;
 
 /**
- * HDB long data (32 bits integer)
+ * HDB ushort data (16bit unsigned integer)
  */
-public class HdbLong extends HdbData {
+public class HdbUShort extends HdbData {
 
   int value = 0;
   int wvalue = 0;
 
-  public HdbLong(int type) {
+  public HdbUShort(int type) {
     this.type = type;
   }
 
@@ -67,18 +67,18 @@ public class HdbLong extends HdbData {
 
   public void parseValue(ArrayList<Object> value) throws HdbFailed {
 
-    this.value = parseLong(value.get(0));
+    this.value = parseUSHort(value.get(0));
 
   }
 
   public void parseWriteValue(ArrayList<Object> value) throws HdbFailed {
 
     if(value!=null)
-      this.wvalue = parseLong(value.get(0));
+      this.wvalue = parseUSHort(value.get(0));
 
   }
 
-  private int parseLong(Object value) throws HdbFailed {
+  private int parseUSHort(Object value) throws HdbFailed {
 
     int ret;
 
@@ -92,7 +92,7 @@ public class HdbLong extends HdbData {
         else
           ret = Integer.parseInt(str);
       } catch (NumberFormatException e) {
-        throw new HdbFailed("parseLong: Invalid number syntax for value");
+        throw new HdbFailed("parseUSHort: Invalid number syntax for value");
       }
 
     } else {
@@ -111,10 +111,10 @@ public class HdbLong extends HdbData {
     if(hasFailed())
       return timeToStr(dataTime)+": "+errorMessage;
 
-    if(type== HdbSigInfo.TYPE_SCALAR_LONG_RO)
-      return timeToStr(dataTime)+": "+Integer.toString(value)+" "+qualitytoStr(qualityFactor);
+    if(type== HdbSigInfo.TYPE_SCALAR_USHORT_RO)
+      return timeToStr(dataTime)+": "+Long.toString(value)+" "+qualitytoStr(qualityFactor);
     else
-      return timeToStr(dataTime)+": "+Integer.toString(value)+";"+Integer.toString(wvalue)+" "+
+      return timeToStr(dataTime)+": "+Long.toString(value)+";"+Long.toString(wvalue)+" "+
           qualitytoStr(qualityFactor);
 
   }

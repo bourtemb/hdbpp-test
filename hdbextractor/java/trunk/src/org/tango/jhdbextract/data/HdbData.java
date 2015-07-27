@@ -36,7 +36,6 @@ package org.tango.jhdbextract.data;
 import org.tango.jhdbextract.HdbFailed;
 import org.tango.jhdbextract.HdbSigInfo;
 
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,6 +83,13 @@ public abstract class HdbData {
   }
 
   /**
+   * Return data type
+   */
+  public int getType() {
+    return type;
+  }
+
+  /**
    * Returns true if this record has failed
    */
   public boolean hasFailed() {
@@ -98,16 +104,54 @@ public abstract class HdbData {
   }
 
   /**
-   * Parse value
-   * @param value Value to be parsed (separated by SEP for array)
+   * Returns true whether this datum has a write value
    */
-  public abstract void parseValue(ArrayList<String> value) throws HdbFailed;
+  public boolean hasWriteValue() {
+    return HdbSigInfo.isRWType(type);
+  }
+
+  /**
+   * Returns true whether this datum is an array
+   */
+  public boolean isArray() {
+    return HdbSigInfo.isArrayType(type);
+  }
+
+  /**
+   * Returns the value as double if it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract double getValueAsDouble() throws HdbFailed;
+
+  /**
+   * Returns the value as double array it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract double[] getValueAsDoubleArray() throws HdbFailed;
+
+  /**
+   * Returns the write value as double if it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract double getWriteValueAsDouble() throws HdbFailed;
+
+  /**
+   * Returns the write value as double array it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract double[] getWriteValueAsDoubleArray() throws HdbFailed;
+
+  /**
+   * Parse value
+   * @param value Value to be parsed
+   */
+  public abstract void parseValue(ArrayList<Object> value) throws HdbFailed;
 
   /**
    * Parse write value
-   * @param value Value to be parsed (separated by SEP for array)
+   * @param value Value to be parsed
    */
-  public abstract void parseWriteValue(ArrayList<String> value) throws HdbFailed;
+  public abstract void parseWriteValue(ArrayList<Object> value) throws HdbFailed;
 
   /**
    * Parse value
@@ -119,21 +163,18 @@ public abstract class HdbData {
    * @param value_r Read value
    * @param value_w Write value
    */
-  public void parse(long data_time,long recv_time,long insert_time,String error_desc,String quality,
-                    ArrayList<String> value_r,ArrayList<String> value_w) throws HdbFailed {
+  public void parse(long data_time,long recv_time,long insert_time,String error_desc,int quality,
+                    ArrayList<Object> value_r,ArrayList<Object> value_w) throws HdbFailed {
 
     dataTime = data_time;
     recvTime = recv_time;
     insertTime = insert_time;
+    if(error_desc!=null)
+      if(error_desc.isEmpty())
+        error_desc = null;
     errorMessage = error_desc;
-    try {
-      if(quality==null)
-        qualityFactor = 0;
-      else
-        qualityFactor = Integer.parseInt(quality);
-    } catch(NumberFormatException e) {
-      throw new HdbFailed("Invalid number syntax for quality factor");
-    }
+    qualityFactor = quality;
+
     if(!hasFailed()) {
       parseValue(value_r);
       parseWriteValue(value_w);
@@ -184,32 +225,103 @@ public abstract class HdbData {
   public static HdbData createData(int type) throws HdbFailed {
 
     switch(type) {
+
+      case HdbSigInfo.TYPE_SCALAR_BOOLEAN_RO:
+      case HdbSigInfo.TYPE_SCALAR_BOOLEAN_RW:
+        return new HdbBoolean(type);
+      case HdbSigInfo.TYPE_ARRAY_BOOLEAN_RO:
+      case HdbSigInfo.TYPE_ARRAY_BOOLEAN_RW:
+        return new HdbBooleanArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_CHAR_RO:
+      case HdbSigInfo.TYPE_SCALAR_CHAR_RW:
+        return new HdbByte(type);
+      case HdbSigInfo.TYPE_ARRAY_CHAR_RO:
+      case HdbSigInfo.TYPE_ARRAY_CHAR_RW:
+        return new HdbByteArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_UCHAR_RO:
+      case HdbSigInfo.TYPE_SCALAR_UCHAR_RW:
+        return new HdbUChar(type);
+      case HdbSigInfo.TYPE_ARRAY_UCHAR_RO:
+      case HdbSigInfo.TYPE_ARRAY_UCHAR_RW:
+        return new HdbUCharArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_SHORT_RO:
+      case HdbSigInfo.TYPE_SCALAR_SHORT_RW:
+        return new HdbShort(type);
+      case HdbSigInfo.TYPE_ARRAY_SHORT_RO:
+      case HdbSigInfo.TYPE_ARRAY_SHORT_RW:
+        return new HdbShortArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_USHORT_RO:
+      case HdbSigInfo.TYPE_SCALAR_USHORT_RW:
+        return new HdbUShort(type);
+      case HdbSigInfo.TYPE_ARRAY_USHORT_RO:
+      case HdbSigInfo.TYPE_ARRAY_USHORT_RW:
+        return new HdbUShortArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_LONG_RO:
+      case HdbSigInfo.TYPE_SCALAR_LONG_RW:
+        return new HdbLong(type);
+      case HdbSigInfo.TYPE_ARRAY_LONG_RO:
+      case HdbSigInfo.TYPE_ARRAY_LONG_RW:
+        return new HdbLongArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_ULONG_RO:
+      case HdbSigInfo.TYPE_SCALAR_ULONG_RW:
+        return new HdbULong(type);
+      case HdbSigInfo.TYPE_ARRAY_ULONG_RO:
+      case HdbSigInfo.TYPE_ARRAY_ULONG_RW:
+        return new HdbULongArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_LONG64_RO:
+      case HdbSigInfo.TYPE_SCALAR_LONG64_RW:
+        return new HdbLong64(type);
+      case HdbSigInfo.TYPE_ARRAY_LONG64_RO:
+      case HdbSigInfo.TYPE_ARRAY_LONG64_RW:
+        return new HdbLong64Array(type);
+
       case HdbSigInfo.TYPE_SCALAR_DOUBLE_RO:
       case HdbSigInfo.TYPE_SCALAR_DOUBLE_RW:
         return new HdbDouble(type);
       case HdbSigInfo.TYPE_ARRAY_DOUBLE_RO:
       case HdbSigInfo.TYPE_ARRAY_DOUBLE_RW:
         return new HdbDoubleArray(type);
-      case HdbSigInfo.TYPE_SCALAR_INT64_RO:
-      case HdbSigInfo.TYPE_SCALAR_INT64_RW:
-        return new HdbLong(type);
-      case HdbSigInfo.TYPE_ARRAY_INT64_RO:
-      case HdbSigInfo.TYPE_ARRAY_INT64_RW:
-        return new HdbLongArray(type);
-      case HdbSigInfo.TYPE_SCALAR_INT8_RO:
-      case HdbSigInfo.TYPE_SCALAR_INT8_RW:
-        return new HdbByte(type);
-      case HdbSigInfo.TYPE_ARRAY_INT8_RO:
-      case HdbSigInfo.TYPE_ARRAY_INT8_RW:
-        return new HdbByteArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_FLOAT_RO:
+      case HdbSigInfo.TYPE_SCALAR_FLOAT_RW:
+        return new HdbFloat(type);
+      case HdbSigInfo.TYPE_ARRAY_FLOAT_RO:
+      case HdbSigInfo.TYPE_ARRAY_FLOAT_RW:
+        return new HdbFloatArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_STATE_RO:
+      case HdbSigInfo.TYPE_SCALAR_STATE_RW:
+        return new HdbState(type);
+      case HdbSigInfo.TYPE_ARRAY_STATE_RO:
+      case HdbSigInfo.TYPE_ARRAY_STATE_RW:
+        return new HdbStateArray(type);
+
       case HdbSigInfo.TYPE_SCALAR_STRING_RO:
       case HdbSigInfo.TYPE_SCALAR_STRING_RW:
         return new HdbString(type);
       case HdbSigInfo.TYPE_ARRAY_STRING_RO:
       case HdbSigInfo.TYPE_ARRAY_STRING_RW:
         return new HdbStringArray(type);
+
+      case HdbSigInfo.TYPE_SCALAR_ENCODED_RO:
+      case HdbSigInfo.TYPE_SCALAR_ENCODED_RW:
+      case HdbSigInfo.TYPE_ARRAY_ENCODED_RO:
+      case HdbSigInfo.TYPE_ARRAY_ENCODED_RW:
+      case HdbSigInfo.TYPE_SCALAR_ULONG64_RO:
+      case HdbSigInfo.TYPE_SCALAR_ULONG64_RW:
+      case HdbSigInfo.TYPE_ARRAY_ULONG64_RO:
+      case HdbSigInfo.TYPE_ARRAY_ULONG64_RW:
+        throw new HdbFailed("Type " + HdbSigInfo.typeStr[type] + " not supported yet !");
+
       default:
-        throw new HdbFailed("Unknown signal type");
+        throw new HdbFailed("Unknown signal type code=" + type);
     }
 
   }
