@@ -178,6 +178,7 @@ public class MySQLSchema extends DbSchema {
   public HdbSigInfo getSigInfo(String attName) throws HdbFailed {
 
     HdbSigInfo ret = new HdbSigInfo();
+    ret.name = attName;
 
     String query = "SELECT att_conf_id,att_conf_data_type_id FROM att_conf WHERE att_name='" + attName + "'";
 
@@ -204,7 +205,24 @@ public class MySQLSchema extends DbSchema {
                             String stop_date,
                             boolean notify) throws HdbFailed {
 
+    if(attName==null)
+      throw new HdbFailed("attName input parameters is null");
+
     HdbSigInfo sigInfo = getSigInfo(attName);
+    return getData(sigInfo,start_date,stop_date,notify);
+
+  }
+
+  public HdbDataSet getData(HdbSigInfo sigInfo,
+                            String start_date,
+                            String stop_date,
+                            boolean notify) throws HdbFailed {
+
+    if(sigInfo==null)
+      throw new HdbFailed("sigInfo input parameters is null");
+
+    checkDates(start_date,stop_date);
+
     if(HdbSigInfo.isArrayType(sigInfo.type)) {
       return getArrayData(sigInfo.type, sigInfo.sigId, start_date, stop_date, notify);
     } else {
@@ -217,6 +235,7 @@ public class MySQLSchema extends DbSchema {
                                           String start_date,
                                           String stop_date) throws HdbFailed {
 
+    checkDates(start_date,stop_date);
     HdbSigInfo sigInfo = getSigInfo(attName);
 
     String query = "SELECT recv_time,insert_time,label,unit,standard_unit,display_unit,format,"+

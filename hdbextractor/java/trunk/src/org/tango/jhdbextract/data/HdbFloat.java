@@ -120,6 +120,21 @@ public class HdbFloat extends HdbData {
   }
 
   // Convenience function
+  public String getValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    return Float.toString(value);
+  }
+
+  public String getWriteValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    if(hasWriteValue())
+      return Float.toString(wvalue);
+    else
+      return "";
+  }
+
   public double getValueAsDouble() throws HdbFailed {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);

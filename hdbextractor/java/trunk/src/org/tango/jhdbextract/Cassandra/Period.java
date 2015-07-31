@@ -1,5 +1,6 @@
 package org.tango.jhdbextract.Cassandra;
 
+import org.tango.jhdbextract.DbSchema;
 import org.tango.jhdbextract.HdbFailed;
 
 import java.sql.Timestamp;
@@ -18,7 +19,6 @@ public class Period {
   final static long GRANULARITY = 60*60*24*1000;
 
   final static SimpleDateFormat periodFormat = new SimpleDateFormat("yyyy-MM-dd");
-  final static SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
   Timestamp start;
   Timestamp end;
@@ -60,15 +60,15 @@ public class Period {
     Date d1;
 
     try {
-      d0 = inputFormat.parse(startDate);
+      d0 = DbSchema.hdbDateFormat.parse(startDate);
     } catch( ParseException e ) {
-      throw new HdbFailed("Wrong start date format " + e.getMessage());
+      throw new HdbFailed("Wrong start date format : " + e.getMessage());
     }
 
     try {
-      d1 = inputFormat.parse(stopDate);
+      d1 = DbSchema.hdbDateFormat.parse(stopDate);
     } catch( ParseException e ) {
-      throw new HdbFailed("Wrong stop date format " + e.getMessage());
+      throw new HdbFailed("Wrong stop date format : " + e.getMessage());
     }
 
 

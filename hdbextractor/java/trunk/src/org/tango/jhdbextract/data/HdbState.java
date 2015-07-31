@@ -161,6 +161,21 @@ public class HdbState extends HdbData {
   }
 
   // Convenience function
+  public String getValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    return getStateString(value);
+  }
+
+  public String getWriteValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    if(hasWriteValue())
+      return getStateString(wvalue);
+    else
+      return "";
+  }
+
   public double getValueAsDouble() throws HdbFailed {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);

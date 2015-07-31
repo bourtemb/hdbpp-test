@@ -59,7 +59,7 @@ public class CassandraSchema extends DbSchema {
 
   private final static String[] tableNames = {
 
-      "NONE",
+      "",
       "att_scalar_devdouble_ro",
       "att_scalar_devdouble_rw",
       "att_array_devdouble_ro",
@@ -68,10 +68,10 @@ public class CassandraSchema extends DbSchema {
       "att_scalar_devlong64_rw",
       "att_array_devlong64_ro",
       "att_array_devlong64_rw",
-      "att_scalar_devchar_ro",
-      "att_scalar_devchar_rw",
-      "att_array_devchar_ro",
-      "att_array_devchar_rw",
+      "",
+      "",
+      "",
+      "",
       "att_scalar_devstring_ro",
       "att_scalar_devstring_rw",
       "att_array_devstring_ro",
@@ -118,6 +118,9 @@ public class CassandraSchema extends DbSchema {
       "att_array_devulong64_rw"
 
   };
+
+  // Prepared queries from getting data
+  private static PreparedStatement[] prepQueries = null;
 
   public CassandraSchema(String[] contacts,String db,String user,String passwd) throws HdbFailed {
 
@@ -166,6 +169,34 @@ public class CassandraSchema extends DbSchema {
       throw new HdbFailed(e.getMessage());
     }
 
+    // Build prepared statement for each type
+    if( prepQueries==null ) {
+
+      int nbType = tableNames.length;
+
+      prepQueries = new PreparedStatement[nbType];
+
+      for(int type=1;type<nbType;type++) {
+
+        boolean isRW = HdbSigInfo.isRWType(type);
+        String rwField = isRW?",value_w":"";
+        String tableName = tableNames[type];
+
+        if(!tableName.isEmpty()) {
+          String query = "SELECT data_time,data_time_us,recv_time,recv_time_us,insert_time,insert_time_us,error_desc,quality,value_r"+rwField+
+            " FROM " + tableName +
+            " WHERE att_conf_id = ?" +
+            " AND period = ?" +
+            " AND data_time >= ?" +
+            " AND data_time <= ?";
+
+          prepQueries[type] = session.prepare(query);
+        }
+
+      }
+
+    }
+
   }
   public String[] getAttributeList() throws HdbFailed {
 
@@ -196,14 +227,15 @@ public class CassandraSchema extends DbSchema {
   public HdbSigInfo getSigInfo(String attName) throws HdbFailed {
 
     HdbSigInfo ret = new HdbSigInfo();
+    ret.name = attName;
 
     if(!attName.startsWith("tango://"))
-      throw new HdbFailed("Fully qualified attribute name expected (eg:tango://hostname:port/domain/family/member)");
+      throw new HdbFailed("Fully qualified attribute name expected (eg:tango://hostname:port/domain/family/member/name)");
 
     attName = attName.substring(8);
     String[] fields = attName.split("/");
     if(fields.length!=5)
-      throw new HdbFailed("Invalid attribute name syntax (eg:tango://hostname:port/domain/family/member)");
+      throw new HdbFailed("Invalid attribute name syntax (eg:tango://hostname:port/domain/family/member/name)");
 
     String csName = fields[0];
     String shortAttName = fields[1] + "/" + fields[2] + "/" + fields[3] + "/" + fields[4];
@@ -241,6 +273,7 @@ public class CassandraSchema extends DbSchema {
                                           String start_date,
                                           String stop_date) throws HdbFailed {
 
+    checkDates(start_date,stop_date);
     HdbSigInfo sigInfo = getSigInfo(attName);
 
     String query = "SELECT recv_time,recv_time_us,insert_time,insert_time_us,label,unit,standard_unit,display_unit,format,"+
@@ -283,36 +316,43 @@ public class CassandraSchema extends DbSchema {
     return ret;
 
   }
-
   public HdbDataSet getData(String attName,
                             String start_date,
                             String stop_date,
                             boolean notify) throws HdbFailed {
 
+    if(attName==null)
+      throw new HdbFailed("attName input parameters is null");
+
     HdbSigInfo sigInfo = getSigInfo(attName);
+    return getData(sigInfo,start_date,stop_date,notify);
+
+  }
+
+  public HdbDataSet getData(HdbSigInfo sigInfo,
+                            String start_date,
+                            String stop_date,
+                            boolean notify) throws HdbFailed {
+
+    if(sigInfo==null)
+      throw new HdbFailed("sigInfo input parameters is null");
+
+    checkDates(start_date,stop_date);
 
     boolean isRW = HdbSigInfo.isRWType(sigInfo.type);
-    String rwField = isRW?",value_w":"";
-    String query = "SELECT data_time,data_time_us,recv_time,recv_time_us,insert_time,insert_time_us,error_desc,quality,value_r"+rwField+
-        " FROM " + tableNames[sigInfo.type] +
-        " WHERE att_conf_id = ?" +
-        " AND period = ?" +
-        " AND data_time >= ?" +
-        " AND data_time <= ?";
 
-    PreparedStatement preparedStatement = session.prepare(query);
     ArrayList<Period> periods = Period.getPeriods(start_date,stop_date);
     ArrayList<ResultSetFuture> resultSetFutures = new ArrayList<ResultSetFuture>();
 
     // Launch asynchronous calls
     for(Period p : periods) {
       for(String part: p.partitions) {
-        BoundStatement boundStatement = preparedStatement.bind(UUID.fromString(sigInfo.sigId),
-                                                               part,
-                                                               p.start,
-                                                               p.end);
+        BoundStatement boundStatement = prepQueries[sigInfo.type].bind(UUID.fromString(sigInfo.sigId),
+            part,
+            p.start,
+            p.end);
         boundStatement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
-        //boundStatement.setFetchSize(3600*24*10);
+        boundStatement.setFetchSize(3600*24*10);
         resultSetFutures.add(session.executeAsync(boundStatement));
       }
     }

@@ -66,7 +66,7 @@ import java.util.ArrayList;
 public class HdbExtractor {
 
   /** Verion Number */
-  public final static double LIB_RELEASE = 0.9 ; // Let the space before the ';'
+  public final static double LIB_RELEASE = 1.0 ; // Let the space before the ';'
 
   /** Cassandra HDB */
   public  static final int HDB_CASSANDRA = 1;

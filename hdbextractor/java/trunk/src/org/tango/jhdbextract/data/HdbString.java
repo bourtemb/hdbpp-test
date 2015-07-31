@@ -101,6 +101,21 @@ public class HdbString extends HdbData {
   }
 
   // Convenience function
+  public String getValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    return value;
+  }
+
+  public String getWriteValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    if(hasWriteValue())
+      return wvalue;
+    else
+      return "";
+  }
+
   public double getValueAsDouble() throws HdbFailed {
     throw new HdbFailed("This datum cannot be converted to double");
   }

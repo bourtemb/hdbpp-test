@@ -153,6 +153,17 @@ public abstract class HdbData {
    */
   public abstract void parseWriteValue(ArrayList<Object> value) throws HdbFailed;
 
+
+  /**
+   * Returns the value as a String
+   */
+  public abstract String getValueAsString();
+
+  /**
+   * Returns the write value as a String
+   */
+  public abstract String getWriteValueAsString();
+
   /**
    * Parse value
    * @param data_time Tango timestamp

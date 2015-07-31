@@ -120,6 +120,21 @@ public class HdbUChar extends HdbData {
   }
 
   // Convenience function
+  public String getValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    return Short.toString(value);
+  }
+
+  public String getWriteValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    if(hasWriteValue())
+      return Short.toString(wvalue);
+    else
+      return "";
+  }
+
   public double getValueAsDouble() throws HdbFailed {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);

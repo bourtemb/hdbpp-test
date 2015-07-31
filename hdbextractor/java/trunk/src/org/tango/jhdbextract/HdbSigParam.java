@@ -10,8 +10,6 @@ import java.util.Date;
  */
 public class HdbSigParam {
 
-  final static SimpleDateFormat dfr = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-
   public long   recvTime;
   public long   insertTime;
   public String label;
@@ -28,7 +26,7 @@ public class HdbSigParam {
 
     long ms = time/1000;
     Date d = new Date(ms);
-    String dStr = dfr.format(d);
+    String dStr = DbSchema.hdbDateFormat.format(d);
     String sStr = String.format("%06d",time%1000000);
     return dStr+"."+sStr;
 

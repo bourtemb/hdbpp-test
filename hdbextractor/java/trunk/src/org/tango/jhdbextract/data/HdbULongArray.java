@@ -127,6 +127,32 @@ public class HdbULongArray extends HdbData {
   }
 
   // Convenience function
+  public String getValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    return arrayValue(value);
+  }
+
+  public String getWriteValueAsString() {
+    if(hasFailed())
+      return errorMessage;
+    if(hasWriteValue())
+      return arrayValue(wvalue);
+    else
+      return "";
+  }
+
+  private String arrayValue(long[] b) {
+    StringBuffer ret = new StringBuffer();
+    ret.append("ULong["+b.length+"]\n");
+    for(int i=0;i<b.length;i++) {
+      ret.append(Long.toString(b[i]));
+      if(i<b.length-1)
+        ret.append("\n");
+    }
+    return ret.toString();
+  }
+
   public double getValueAsDouble() throws HdbFailed {
     throw new HdbFailed("This datum is not scalar");
   }
