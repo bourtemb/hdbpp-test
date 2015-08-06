@@ -72,6 +72,18 @@ public class HdbDataSet {
     return data.get(idx);
   }
 
+  /**
+   * Get last data of this data set
+   */
+  public HdbData getLast() {
+    int s = size();
+    if(s>0) {
+      return data.get(s-1);
+    } else {
+      return null;
+    }
+  }
+
 }
 
 

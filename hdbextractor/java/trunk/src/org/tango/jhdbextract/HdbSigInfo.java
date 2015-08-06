@@ -169,6 +169,24 @@ public class HdbSigInfo {
   };
 
   /**
+   * Returns true if type is a state type
+   * @param type Attribute type
+   */
+  public static boolean isStateType(int type) {
+
+    switch (type) {
+      case TYPE_SCALAR_STATE_RO:
+      case TYPE_SCALAR_STATE_RW:
+      case TYPE_ARRAY_STATE_RO:
+      case TYPE_ARRAY_STATE_RW:
+        return true;
+      default:
+        return false;
+    }
+
+  }
+
+  /**
    * Returns true if type is a string type
    * @param type Attribute type
    */
@@ -411,6 +429,41 @@ public class HdbSigInfo {
   public String name;   // Attribute name
   public String sigId;  // Identifier
   public int    type;   // Data type
+
+  /**
+   * Returns true if this attribute is read/write.
+   */
+  public boolean isRW() {
+    return isRWType(type);
+  }
+
+  /**
+   * Returns true if this attribute is an array.
+   */
+  public boolean isArray() {
+    return isArrayType(type);
+  }
+
+  /**
+   * Returns true if this attribute is numeric.
+   */
+  public boolean isNumeric() {
+    return isNumericType(type);
+  }
+
+  /**
+   * Returns true if this attribute is a string or string array.
+   */
+  public boolean isString() {
+    return isStringType(type);
+  }
+
+  /**
+   * Returns true if this attribute is a state or state array.
+   */
+  public boolean isState() {
+    return isStateType(type);
+  }
 
   public String toString() {
     return "Id=" + sigId + ",Type=" + Integer.toString(type);

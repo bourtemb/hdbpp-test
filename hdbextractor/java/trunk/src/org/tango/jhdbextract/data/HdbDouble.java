@@ -99,7 +99,10 @@ public class HdbDouble extends HdbData {
     } else {
 
       Double d = (Double)value;
-      ret = d.doubleValue();
+      if(d==null)
+        ret = Double.NaN;
+      else
+        ret = d.doubleValue();
 
     }
 

@@ -32,7 +32,7 @@
 //-======================================================================
 package org.tango.jhdbextract.MySQL;
 
-import org.tango.jhdbextract.DbSchema;
+import org.tango.jhdbextract.HDBReader;
 import org.tango.jhdbextract.HdbFailed;
 import org.tango.jhdbextract.HdbSigInfo;
 import org.tango.jhdbextract.HdbSigParam;
@@ -46,7 +46,7 @@ import java.util.Properties;
 /**
  * MySQL database access
  */
-public class MySQLSchema extends DbSchema {
+public class MySQLSchema extends HDBReader {
 
   public static final String DEFAULT_DB_NAME = "hdb";
   public static final String DEFAULT_DB_USER = "hdbreader";
@@ -95,9 +95,9 @@ public class MySQLSchema extends DbSchema {
   public MySQLSchema(String host,String db,String user,String passwd,short port) throws HdbFailed {
 
     if(host==null || host.isEmpty()) {
-      host = System.getenv("HDB_HOST");
+      host = System.getenv("HDB_MYSQL_HOST");
       if (host==null || host.isEmpty())
-        throw new HdbFailed("host cannot be null if HDB_HOST variable not defined");
+        throw new HdbFailed("host input parameter cannot be null if HDB_MYSQL_HOST variable is not defined");
     }
 
     if(user==null || user.isEmpty()) {
@@ -119,14 +119,14 @@ public class MySQLSchema extends DbSchema {
     }
 
     if(port==0) {
-      String pStr = System.getenv("HDB_PORT");
+      String pStr = System.getenv("HDB_MYSQL_PORT");
       if(pStr==null || passwd.isEmpty())
         port = DEFAULT_DB_PORT;
       else {
         try {
           port = (short)Integer.parseInt(pStr);
         } catch (NumberFormatException e) {
-          throw new HdbFailed("Invalid HDB_PORT variable " + e.getMessage());
+          throw new HdbFailed("Invalid HDB_MYSQL_PORT variable " + e.getMessage());
         }
       }
     }
@@ -200,23 +200,9 @@ public class MySQLSchema extends DbSchema {
 
   }
 
-  public HdbDataSet getData(String attName,
-                            String start_date,
-                            String stop_date,
-                            boolean notify) throws HdbFailed {
-
-    if(attName==null)
-      throw new HdbFailed("attName input parameters is null");
-
-    HdbSigInfo sigInfo = getSigInfo(attName);
-    return getData(sigInfo,start_date,stop_date,notify);
-
-  }
-
-  public HdbDataSet getData(HdbSigInfo sigInfo,
-                            String start_date,
-                            String stop_date,
-                            boolean notify) throws HdbFailed {
+  public HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
+                                  String start_date,
+                                  String stop_date) throws HdbFailed {
 
     if(sigInfo==null)
       throw new HdbFailed("sigInfo input parameters is null");
@@ -224,9 +210,9 @@ public class MySQLSchema extends DbSchema {
     checkDates(start_date,stop_date);
 
     if(HdbSigInfo.isArrayType(sigInfo.type)) {
-      return getArrayData(sigInfo.type, sigInfo.sigId, start_date, stop_date, notify);
+      return getArrayData(sigInfo.type, sigInfo.sigId, start_date, stop_date);
     } else {
-      return getScalarData(sigInfo.type, sigInfo.sigId, start_date, stop_date, notify);
+      return getScalarData(sigInfo.type, sigInfo.sigId, start_date, stop_date);
     }
 
   }
@@ -291,8 +277,7 @@ public class MySQLSchema extends DbSchema {
   private HdbDataSet getArrayData(int type,
                                   String sigId,
                                   String start_date,
-                                  String stop_date,
-                                  boolean notify) throws HdbFailed {
+                                  String stop_date) throws HdbFailed {
 
     boolean isRW = HdbSigInfo.isRWType(type);
 
@@ -397,8 +382,7 @@ public class MySQLSchema extends DbSchema {
   private HdbDataSet getScalarData(int type,
                                    String sigId,
                                    String start_date,
-                                   String stop_date,
-                                   boolean notify) throws HdbFailed {
+                                   String stop_date) throws HdbFailed {
 
     boolean isRW = HdbSigInfo.isRWType(type);
     String rwField = isRW?",value_w":"";

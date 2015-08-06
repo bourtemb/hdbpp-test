@@ -37,7 +37,7 @@ import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
-import org.tango.jhdbextract.DbSchema;
+import org.tango.jhdbextract.HDBReader;
 import org.tango.jhdbextract.HdbFailed;
 import org.tango.jhdbextract.HdbSigInfo;
 import org.tango.jhdbextract.HdbSigParam;
@@ -49,7 +49,7 @@ import java.util.*;
 /**
  * Cassandra database access
  */
-public class CassandraSchema extends DbSchema {
+public class CassandraSchema extends HDBReader {
 
   public static final String   DEFAULT_DB_NAME = "hdb";
   public static final String[] DEFAULT_CONTACT_POINTS = {"cassandra2"};
@@ -128,7 +128,7 @@ public class CassandraSchema extends DbSchema {
     if(contacts==null || contacts.length==0) {
 
       // Try to get contact points from environment variable
-      String str = System.getenv("CONTACT_POINTS");
+      String str = System.getenv("HDB_CONTACT_POINTS");
 
       if (str!=null && !str.isEmpty()) {
         StringTokenizer stk = new StringTokenizer(str, ",");
@@ -316,23 +316,10 @@ public class CassandraSchema extends DbSchema {
     return ret;
 
   }
-  public HdbDataSet getData(String attName,
-                            String start_date,
-                            String stop_date,
-                            boolean notify) throws HdbFailed {
 
-    if(attName==null)
-      throw new HdbFailed("attName input parameters is null");
-
-    HdbSigInfo sigInfo = getSigInfo(attName);
-    return getData(sigInfo,start_date,stop_date,notify);
-
-  }
-
-  public HdbDataSet getData(HdbSigInfo sigInfo,
-                            String start_date,
-                            String stop_date,
-                            boolean notify) throws HdbFailed {
+  public HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
+                                  String start_date,
+                                  String stop_date) throws HdbFailed {
 
     if(sigInfo==null)
       throw new HdbFailed("sigInfo input parameters is null");

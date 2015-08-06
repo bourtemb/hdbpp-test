@@ -35,7 +35,6 @@ package org.tango.jhdbextract;
 
 import org.tango.jhdbextract.Cassandra.CassandraSchema;
 import org.tango.jhdbextract.MySQL.MySQLSchema;
-import org.tango.jhdbextract.data.HdbData;
 import org.tango.jhdbextract.data.HdbDataSet;
 
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ import java.util.ArrayList;
  *
  *   hdb.connect();
  *   String[] attList = hdb.getDB().getAttributeList();
- *   ArrayList<HdbData> data = hdb.getDB().getData(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00",false);
+ *   ArrayList<HdbData> data = hdb.getDB().getDataFromDB(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00",false);
  *   for(int i=0;i<data.size();i++)
  *     System.out.println("  Rec #"+i+" :"+data.get(i));
  *
@@ -75,7 +74,7 @@ public class HdbExtractor {
 
   private int hdbType;
   private static final String[] hdbNames = { "No connection" , "Cassandra", "Mysql"};
-  private DbSchema schema;
+  private HDBReader schema;
 
   /**
    * Constructs a HdbExtractor.
@@ -85,9 +84,9 @@ public class HdbExtractor {
   }
 
   /**
-   * Returns a handle to the used schema
+   * Returns a handle to the HDB reader
    */
-  public DbSchema getDB() {
+  public HDBReader getReader() {
     return schema;
   }
 
@@ -113,6 +112,14 @@ public class HdbExtractor {
   }
 
   /**
+   * Connects to a MySQL HDB.
+   */
+  public void connectMySQL() throws HdbFailed {
+    hdbType = HDB_MYSQL;
+    schema = new MySQLSchema(null,null,null,null,(short)0);
+  }
+
+  /**
    * Connects to a Cassandra HDB.
    * @param contacts List of contact points (at least one of the hostname of the cassandra cluster)
    * @param db Database name (default is "hdb")
@@ -126,19 +133,27 @@ public class HdbExtractor {
   }
 
   /**
+   * Connects to a Cassandra HDB.
+   */
+  public void connectCassandra() throws HdbFailed {
+    hdbType = HDB_MYSQL;
+    schema = new CassandraSchema(null,null,null,null);
+  }
+
+  /**
    * Connect to HDB either using MySQL or Cassandra according to the following environment variables.
    *
-   * HDB_TYPE  Connection type (MYSQL or CASSANDRA, default is CASSANDRA)
+   * HDB_TYPE  Connection type (MYSQL or CASSANDRA)
    * HDB_NAME  Database name (default is "hdb")
    * HDB_USER
    * HDB_PASSWORD
    *
    * MySQL specific
-   * HDB_PORT
-   * HDB_HOST
+   * HDB_MYSQL_PORT
+   * HDB_MYSQL_HOST
    *
    * Cassandra specific
-   * CONTACT_POINTS
+   * HDB_CONTACT_POINTS
    *
    * @throws HdbFailed
    */
@@ -161,7 +176,7 @@ public class HdbExtractor {
   public static void test(HdbExtractor hdb,String start,String stop,String attName) throws HdbFailed {
 
     System.out.print("\n--------> " + attName + " ");
-    HdbDataSet data = hdb.getDB().getData(attName,start,stop,false);
+    HdbDataSet data = hdb.getReader().getData(attName,start,stop);
     String typeStr = "";
     if(data.size()>0) typeStr = HdbSigInfo.typeStr[data.get(0).getType()];
     System.out.println("(" + data.size() + " records) "  + typeStr);
@@ -236,7 +251,7 @@ public class HdbExtractor {
 
       System.out.println("\n--------> History config test: ");
 
-      ArrayList<HdbSigParam> l = hdb.getDB().getParams("tango://orion.esrf.fr:10000/sr/d-ct/1/current",
+      ArrayList<HdbSigParam> l = hdb.getReader().getParams("tango://orion.esrf.fr:10000/sr/d-ct/1/current",
           "05/06/2015 12:00:00",
           "10/07/2015 12:00:00");
       for(int i=0;i<l.size();i++)

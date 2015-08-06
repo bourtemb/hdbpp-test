@@ -19,5 +19,9 @@ export CLASSPATH
 echo $CLASSPATH
 echo   Compiling jhdbextract ...
 rm org/tango/jhdbextract/*.class
+rm org/tango/jhdbextract/MySQL/*.class
+rm org/tango/jhdbextract/data/*.class
+rm org/tango/jhdbextract/Cassandra/*.class
+
 
 javac -deprecation org/tango/jhdbextract/HdbExtractor.java

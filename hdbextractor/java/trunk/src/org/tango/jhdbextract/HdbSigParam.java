@@ -1,8 +1,5 @@
 package org.tango.jhdbextract;
 
-import org.tango.jhdbextract.data.HdbData;
-
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -26,7 +23,7 @@ public class HdbSigParam {
 
     long ms = time/1000;
     Date d = new Date(ms);
-    String dStr = DbSchema.hdbDateFormat.format(d);
+    String dStr = HDBReader.hdbDateFormat.format(d);
     String sStr = String.format("%06d",time%1000000);
     return dStr+"."+sStr;
 

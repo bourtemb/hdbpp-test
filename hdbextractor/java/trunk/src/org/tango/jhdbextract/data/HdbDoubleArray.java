@@ -86,7 +86,8 @@ public class HdbDoubleArray extends HdbData {
 
     try {
 
-      if (value.get(0) instanceof String) {
+      Object o0 = value.get(0);
+      if (o0==null || o0 instanceof String) {
         // Value given as string
         for (int i = 0; i < value.size(); i++) {
           String str = (String)value.get(i);
@@ -99,7 +100,10 @@ public class HdbDoubleArray extends HdbData {
       } else {
         for (int i = 0; i < value.size(); i++) {
           Double d = (Double)value.get(i);
-          ret[i] = d.doubleValue();
+          if(d==null)
+            ret[i] = Double.NaN;
+          else
+            ret[i] = d.doubleValue();
         }
       }
 
