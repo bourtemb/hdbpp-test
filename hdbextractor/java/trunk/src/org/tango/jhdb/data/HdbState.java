@@ -161,6 +161,11 @@ public class HdbState extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbState)src).value;
+    this.wvalue = ((HdbState)src).wvalue;
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

@@ -57,13 +57,13 @@ public class Period {
     Date d1;
 
     try {
-      d0 = HdbReader.hdbDateFormat.parse(startDate);
+      d0 = Hdb.hdbDateFormat.parse(startDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong start date format : " + e.getMessage());
     }
 
     try {
-      d1 = HdbReader.hdbDateFormat.parse(stopDate);
+      d1 = Hdb.hdbDateFormat.parse(stopDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong stop date format : " + e.getMessage());
     }

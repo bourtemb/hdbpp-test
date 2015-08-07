@@ -127,6 +127,11 @@ public class HdbBooleanArray extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbBooleanArray)src).value.clone();
+    this.wvalue = ((HdbBooleanArray)src).wvalue.clone();
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

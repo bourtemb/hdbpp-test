@@ -127,6 +127,11 @@ public class HdbUCharArray extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbUCharArray)src).value.clone();
+    this.wvalue = ((HdbUCharArray)src).wvalue.clone();
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

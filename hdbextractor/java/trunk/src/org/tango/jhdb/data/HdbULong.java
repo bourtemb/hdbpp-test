@@ -120,6 +120,11 @@ public class HdbULong extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbULong)src).value;
+    this.wvalue = ((HdbULong)src).wvalue;
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

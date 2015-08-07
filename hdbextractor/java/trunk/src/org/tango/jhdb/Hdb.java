@@ -34,10 +34,12 @@
 package org.tango.jhdb;
 
 import org.tango.jhdb.data.HdbDataSet;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
- * The HdbExtractor framework allows fetching data from Tango HDB++.
+ * The Hdb framework allows accessing data from Tango HDB++.
  *
  * <code>
  *
@@ -45,8 +47,8 @@ import java.util.ArrayList;
  * try {
  *
  *   hdb.connect();
- *   String[] attList = hdb.getDB().getAttributeList();
- *   ArrayList<HdbData> data = hdb.getDB().getDataFromDB(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00",false);
+ *   String[] attList = hdb.getReader().getAttributeList();
+ *   ArrayList<HdbData> data = hdb.getReader().getData(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00",false);
  *   for(int i=0;i<data.size();i++)
  *     System.out.println("  Rec #"+i+" :"+data.get(i));
  *
@@ -61,6 +63,11 @@ import java.util.ArrayList;
 
 public class Hdb {
 
+  /**
+   * Date format used in getDataFromDB calls
+   */
+  public final static SimpleDateFormat hdbDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
   /** Verion Number */
   public final static double LIB_RELEASE = 1.0 ; // Let the space before the ';'
 
@@ -74,7 +81,7 @@ public class Hdb {
   private HdbReader schema;
 
   /**
-   * Constructs a HdbExtractor.
+   * Constructs a Hdb Object
    */
   public Hdb() {
     hdbType = 0;
@@ -190,14 +197,25 @@ public class Hdb {
     try {
 
       //hdb.connectMySQL("cassandra1","","","",(short)0);
-      //hdb.connectCassandra(null,"","","");
-      hdb.connect();
+      hdb.connectCassandra();
+      //hdb.connect();
 
       //String[] attList = hdb.getDB().getAttributeList();
       //System.out.println("Got "+attList.length+" attributes");
       //HdbSigInfo info = hdb.getDB().getSigInfo("tango://orion.esrf.fr:10000/sr/d-ct/1/current");
       //System.out.println("Info="+info);
 
+      // Test correlated mode
+      System.out.print("\n--------> Correlated ");
+      HdbDataSet[] data = hdb.getReader().getData(new String[]{
+          "tango://orion.esrf.fr:10000/sr/d-ct/1/current",
+          "tango://orion.esrf.fr:10000/sr/d-ct/1/lifetime",
+      },"01/08/2015 23:00:00", "01/08/2015 23:10:00",HdbReader.MODE_CORRELATED);
+      System.out.println(" (" + data[0].size() + "/" + data[1].size());
+      for(int i=0;i<data[0].size() && i<10;i++)
+        System.out.println("  Rec #"+i+" :"+data[0].get(i) + " <=> " + data[1].get(i));
+
+      /*
       // Double RO
       test(hdb, "09/07/2015 23:00:00", "10/07/2015 01:00:00",
           "tango://orion.esrf.fr:10000/sr/d-ct/1/current");
@@ -253,6 +271,7 @@ public class Hdb {
           "10/07/2015 12:00:00");
       for(int i=0;i<l.size();i++)
         System.out.println(l.get(i));
+      */
 
     } catch (HdbFailed e) {
       System.out.println(e.getMessage());

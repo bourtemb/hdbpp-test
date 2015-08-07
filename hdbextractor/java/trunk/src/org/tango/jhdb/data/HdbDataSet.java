@@ -84,6 +84,64 @@ public class HdbDataSet {
     }
   }
 
+  /**
+   * Remove all HdbData which have failed
+   */
+  public void removeHasFailed() {
+
+    int i = 0;
+    while(i<size()) {
+      HdbData d = get(i);
+      if(d.hasFailed())
+        data.remove(i);
+      else
+        i++;
+    }
+
+  }
+
+  /**
+   * Remove first item
+   */
+  public void removeFirst() {
+    data.remove(0);
+  }
+
+  /**
+   * Return the HdbData just before the given time
+   * @param time time stamps in us since epoch
+   * @return null if no item exists before the given time
+   */
+  public HdbData getBefore(long time) {
+
+    int low = 0;
+    int high = data.size()-1;
+
+    while (low <= high) {
+      int mid = (low + high) >>> 1;
+      long midVal = data.get(mid).getDataTime();
+
+      if (midVal < time)
+        low = mid + 1;
+      else if (midVal > time)
+        high = mid - 1;
+      else
+        return data.get(mid); // Exact match
+    }
+
+    // r is the insertion position for an asc sort
+    int r = -(low + 1);
+    if(r<0) r = -(r+1);
+
+    if(r==0) {
+      // Nothing before
+      return null;
+    } else {
+      return get(r-1);
+    }
+
+  }
+
 }
 
 

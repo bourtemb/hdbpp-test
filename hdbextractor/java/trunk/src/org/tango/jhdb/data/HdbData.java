@@ -62,6 +62,13 @@ public abstract class HdbData {
   }
 
   /**
+   * Set the dataTime
+   */
+  public void setDataTime(long time) {
+    dataTime = time;
+  }
+
+  /**
    * Return reeive time of this datum
    */
   public long getRecvTime() {
@@ -227,6 +234,20 @@ public abstract class HdbData {
   }
 
   // Convenience functions
+  abstract void copyData(HdbData src);
+
+  public HdbData copy() throws HdbFailed {
+
+    HdbData ret = HdbData.createData(type);
+    ret.dataTime=dataTime;
+    ret.recvTime=recvTime;
+    ret.insertTime=insertTime;
+    ret.qualityFactor=qualityFactor;
+    ret.errorMessage=errorMessage;
+    ret.copyData(this);
+    return ret;
+
+  }
 
   /**
    * Create HdbData accroding to the given type

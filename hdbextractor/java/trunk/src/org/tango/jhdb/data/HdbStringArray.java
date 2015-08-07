@@ -109,6 +109,11 @@ public class HdbStringArray extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbStringArray)src).value.clone();
+    this.wvalue = ((HdbStringArray)src).wvalue.clone();
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

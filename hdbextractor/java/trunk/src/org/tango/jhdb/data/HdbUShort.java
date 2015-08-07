@@ -120,6 +120,11 @@ public class HdbUShort extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbUShort)src).value;
+    this.wvalue = ((HdbUShort)src).wvalue;
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

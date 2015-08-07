@@ -124,6 +124,11 @@ public class HdbDouble extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbDouble)src).value;
+    this.wvalue = ((HdbDouble)src).wvalue;
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

@@ -120,6 +120,11 @@ public class HdbBoolean extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbBoolean)src).value;
+    this.wvalue = ((HdbBoolean)src).wvalue;
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

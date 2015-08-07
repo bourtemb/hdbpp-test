@@ -127,6 +127,11 @@ public class HdbULongArray extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbULongArray)src).value.clone();
+    this.wvalue = ((HdbULongArray)src).wvalue.clone();
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

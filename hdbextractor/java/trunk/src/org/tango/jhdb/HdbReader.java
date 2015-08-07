@@ -37,7 +37,6 @@ import org.tango.jhdb.data.HdbData;
 import org.tango.jhdb.data.HdbDataSet;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -49,10 +48,12 @@ import java.util.Date;
  */
 public abstract class HdbReader {
 
-  /**
-   * Date format used in getDataFromDB calls
-   */
-  public final static SimpleDateFormat hdbDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+  /** Normal extraction mode */
+  public final static int MODE_NORMAL = 0;
+  /** Extract data and ignore errors (all HdbData which has failed are removed) */
+  public final static int MODE_IGNORE_ERROR = 1;
+  /** Correlate to the HdbDataSet which have to lowest number of data */
+  public final static int MODE_CORRELATED = 2;
 
   private long extraPointLookupPeriod = 3600;
   private boolean extraPointEnabled = false;
@@ -98,13 +99,13 @@ public abstract class HdbReader {
       // Try to find an extra point
       Date d;
       try {
-        d = HdbReader.hdbDateFormat.parse(startDate);
+        d = Hdb.hdbDateFormat.parse(startDate);
       } catch( ParseException e ) {
         throw new HdbFailed("Wrong startDate format : " + e.getMessage());
       }
       d.setTime(d.getTime()-extraPointLookupPeriod*1000);
 
-      String newStartDate = HdbReader.hdbDateFormat.format(d);
+      String newStartDate = Hdb.hdbDateFormat.format(d);
       stopDate = startDate;
 
       result = getDataFromDB(sigInfo,newStartDate,stopDate);
@@ -132,20 +133,23 @@ public abstract class HdbReader {
    * @param attNames       List of fully qualified tango attributes (eg: tango://hostname:port/domain/family/member/attname)
    * @param startDate      Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
    * @param stopDate       End of the requested time interval (as string eg: "10/07/2014 12:00:00")
+   * @param extractMode    Extraction mode MODE_NORMAL,MODE_IGNORE_ERROR or MODE_CORRELATED
    *
    * @throws HdbFailed In case of failure
    */
   public HdbDataSet[] getData(String[] attNames,
                               String startDate,
-                              String stopDate) throws HdbFailed {
+                              String stopDate,
+                              int extractMode) throws HdbFailed {
 
     if(attNames==null)
       throw new HdbFailed("getData(): attNames input parameters is null");
 
-    HdbDataSet[] ret = new HdbDataSet[attNames.length];
-    for(int i=0;i<ret.length;i++)
-      ret[i] = getData(attNames[i], startDate, stopDate);
-    return ret;
+    HdbSigInfo[] sigInfos = new HdbSigInfo[attNames.length];
+    for(int i=0;i<sigInfos.length;i++)
+      sigInfos[i] = getSigInfo(attNames[i]);
+
+    return getData(sigInfos,startDate,stopDate,extractMode);
 
   }
 
@@ -155,19 +159,34 @@ public abstract class HdbReader {
    * @param sigInfos       List of attribute info structure
    * @param startDate      Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
    * @param stopDate       End of the requested time interval (as string eg: "10/07/2014 12:00:00")
+   * @param extractMode    Extraction mode MODE_NORMAL,MODE_IGNORE_ERROR or MODE_CORRELATED
    *
    * @throws HdbFailed In case of failure
    */
   public HdbDataSet[] getData(HdbSigInfo[] sigInfos,
                               String startDate,
-                              String stopDate) throws HdbFailed {
+                              String stopDate,
+                              int extractMode) throws HdbFailed {
 
     if(sigInfos==null)
       throw new HdbFailed("getData(): sigInfos input parameters is null");
 
+    // Fetch data
     HdbDataSet[] ret = new HdbDataSet[sigInfos.length];
     for(int i=0;i<ret.length;i++)
       ret[i] = getData(sigInfos[i], startDate, stopDate);
+
+    // Remove hasFailed
+    if(extractMode==MODE_IGNORE_ERROR ||
+       extractMode==MODE_CORRELATED) {
+      for(int i=0;i<ret.length;i++)
+        ret[i].removeHasFailed();
+    }
+
+    // Correlated mode
+    if(extractMode==MODE_CORRELATED)
+      correlate(ret);
+
     return ret;
 
   }
@@ -240,6 +259,13 @@ public abstract class HdbReader {
   }
 
   /**
+   * Return true whether extra point lookup is enabled
+   */
+  public boolean isExtraPointEnabled() {
+    return extraPointEnabled;
+  }
+
+  /**
    * Check input dates
    * @param startDate Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
    * @param stopDate  End of the requested time interval (as string eg: "10/07/2014 12:00:00")
@@ -254,19 +280,81 @@ public abstract class HdbReader {
     Date d0,d1;
 
     try {
-      d0 = HdbReader.hdbDateFormat.parse(startDate);
+      d0 = Hdb.hdbDateFormat.parse(startDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong start date format : " + e.getMessage());
     }
 
     try {
-      d1 = HdbReader.hdbDateFormat.parse(stopDate);
+      d1 = Hdb.hdbDateFormat.parse(stopDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong stop date format : " + e.getMessage());
     }
 
     if(d1.compareTo(d0)<=0) {
       throw new HdbFailed("startDate must be before stopDate");
+    }
+
+  }
+
+  private boolean isBefore(HdbDataSet[] ret,int minIdx,long t0) {
+
+    boolean ok=true;
+
+    for(int i=0;i<ret.length && ok;i++) {
+      if(i!=minIdx)
+        ok = ok && (t0 < ret[i].get(0).getDataTime());
+    }
+
+    return ok;
+
+  }
+
+  private void correlate(HdbDataSet[] ret) throws HdbFailed {
+
+    // Select the base HdbDataSet
+    int min = Integer.MAX_VALUE;
+    int minIdx = 0;
+    for(int i=0;i<ret.length;i++) {
+      if(ret[i].size()<min) {
+        minIdx = i;
+        min = ret[i].size();
+      }
+    }
+
+    // We have to prevent that HdbDataSet.getBefore() will never return null
+    boolean ok = false;
+    while(!ok && ret[minIdx].size()>0) {
+      long t0 = ret[minIdx].get(0).getDataTime();
+      if(isBefore(ret,minIdx,t0))
+        ret[minIdx].removeFirst();
+      else
+        ok = true;
+    }
+
+    int newLength = ret[minIdx].size();
+
+    // Now truncate all other HdbDataSet
+    for(int i=0;i<ret.length;i++) {
+      if(i!=minIdx) {
+        ArrayList<HdbData> newSet = new ArrayList<HdbData>();
+        for(int j=0;j<newLength;j++) {
+          long t = ret[minIdx].get(j).getDataTime();
+          HdbData b = ret[i].getBefore(t).copy();
+          newSet.add(b);
+        }
+        ret[i] = new HdbDataSet(newSet);
+      }
+    }
+
+    // Update all timetamps
+    for(int i=0;i<ret.length;i++) {
+      if(i!=minIdx) {
+        for(int j=0;j<newLength;j++) {
+          long t = ret[minIdx].get(j).getDataTime();
+          ret[i].get(j).setDataTime(t);
+        }
+      }
     }
 
   }

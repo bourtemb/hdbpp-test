@@ -101,6 +101,11 @@ public class HdbString extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = new String(((HdbString)src).value);
+    this.wvalue = new String(((HdbString)src).wvalue);
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;

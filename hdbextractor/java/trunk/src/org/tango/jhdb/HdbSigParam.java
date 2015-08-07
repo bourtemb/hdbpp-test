@@ -23,7 +23,7 @@ public class HdbSigParam {
 
     long ms = time/1000;
     Date d = new Date(ms);
-    String dStr = HdbReader.hdbDateFormat.format(d);
+    String dStr = Hdb.hdbDateFormat.format(d);
     String sStr = String.format("%06d",time%1000000);
     return dStr+"."+sStr;
 

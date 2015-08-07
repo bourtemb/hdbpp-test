@@ -120,6 +120,11 @@ public class HdbFloat extends HdbData {
   }
 
   // Convenience function
+  void copyData(HdbData src) {
+    this.value = ((HdbFloat)src).value;
+    this.wvalue = ((HdbFloat)src).wvalue;
+  }
+
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;
