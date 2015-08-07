@@ -30,7 +30,7 @@
 // $Revision $
 //
 //-======================================================================
-package org.tango.jhdbextract.data;
+package org.tango.jhdb.data;
 
 import java.util.ArrayList;
 

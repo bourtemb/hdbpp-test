@@ -20,4 +20,4 @@ CLASSPATH=$CLASSPATH:$JAVALIB/lz4-1.2.0.jar
 export CLASSPATH
 echo $CLASSPATH
 
-java org.tango.jhdb.HdbExtractor
+java org.tango.jhdb.Hdb

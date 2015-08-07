@@ -1,7 +1,4 @@
-package org.tango.jhdbextract.Cassandra;
-
-import org.tango.jhdbextract.HDBReader;
-import org.tango.jhdbextract.HdbFailed;
+package org.tango.jhdb;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -60,13 +57,13 @@ public class Period {
     Date d1;
 
     try {
-      d0 = HDBReader.hdbDateFormat.parse(startDate);
+      d0 = HdbReader.hdbDateFormat.parse(startDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong start date format : " + e.getMessage());
     }
 
     try {
-      d1 = HDBReader.hdbDateFormat.parse(stopDate);
+      d1 = HdbReader.hdbDateFormat.parse(stopDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong stop date format : " + e.getMessage());
     }

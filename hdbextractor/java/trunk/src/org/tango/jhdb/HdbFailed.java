@@ -31,7 +31,7 @@
 //
 //-======================================================================
 
-package org.tango.jhdbextract;
+package org.tango.jhdb;
 
 /**
  * Exception used in HdbExtractor library

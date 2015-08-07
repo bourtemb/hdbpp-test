@@ -31,12 +31,9 @@
 //
 //-======================================================================
 
-package org.tango.jhdbextract;
+package org.tango.jhdb;
 
-import org.tango.jhdbextract.Cassandra.CassandraSchema;
-import org.tango.jhdbextract.MySQL.MySQLSchema;
-import org.tango.jhdbextract.data.HdbDataSet;
-
+import org.tango.jhdb.data.HdbDataSet;
 import java.util.ArrayList;
 
 /**
@@ -44,7 +41,7 @@ import java.util.ArrayList;
  *
  * <code>
  *
- * HdbExtractor hdb = new HdbExtractor();
+ * Hdb hdb = new Hdb();
  * try {
  *
  *   hdb.connect();
@@ -62,7 +59,7 @@ import java.util.ArrayList;
  * @author JL Pons
  */
 
-public class HdbExtractor {
+public class Hdb {
 
   /** Verion Number */
   public final static double LIB_RELEASE = 1.0 ; // Let the space before the ';'
@@ -74,19 +71,19 @@ public class HdbExtractor {
 
   private int hdbType;
   private static final String[] hdbNames = { "No connection" , "Cassandra", "Mysql"};
-  private HDBReader schema;
+  private HdbReader schema;
 
   /**
    * Constructs a HdbExtractor.
    */
-  public HdbExtractor() {
+  public Hdb() {
     hdbType = 0;
   }
 
   /**
    * Returns a handle to the HDB reader
    */
-  public HDBReader getReader() {
+  public HdbReader getReader() {
     return schema;
   }
 
@@ -173,7 +170,7 @@ public class HdbExtractor {
 
   }
 
-  public static void test(HdbExtractor hdb,String start,String stop,String attName) throws HdbFailed {
+  public static void test(Hdb hdb,String start,String stop,String attName) throws HdbFailed {
 
     System.out.print("\n--------> " + attName + " ");
     HdbDataSet data = hdb.getReader().getData(attName,start,stop);
@@ -188,7 +185,7 @@ public class HdbExtractor {
 
   public static void main(String[] args) {
 
-    HdbExtractor hdb = new HdbExtractor();
+    Hdb hdb = new Hdb();
 
     try {
 

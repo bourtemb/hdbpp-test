@@ -30,14 +30,10 @@
 // $Revision $
 //
 //-======================================================================
-package org.tango.jhdbextract.MySQL;
+package org.tango.jhdb;
 
-import org.tango.jhdbextract.HDBReader;
-import org.tango.jhdbextract.HdbFailed;
-import org.tango.jhdbextract.HdbSigInfo;
-import org.tango.jhdbextract.HdbSigParam;
-import org.tango.jhdbextract.data.HdbData;
-import org.tango.jhdbextract.data.HdbDataSet;
+import org.tango.jhdb.data.HdbData;
+import org.tango.jhdb.data.HdbDataSet;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -46,7 +42,7 @@ import java.util.Properties;
 /**
  * MySQL database access
  */
-public class MySQLSchema extends HDBReader {
+public class MySQLSchema extends HdbReader {
 
   public static final String DEFAULT_DB_NAME = "hdb";
   public static final String DEFAULT_DB_USER = "hdbreader";
@@ -89,7 +85,7 @@ public class MySQLSchema extends HDBReader {
    * @param user MySQL user name
    * @param passwd MySQL user password
    * @param port MySQL databse port (pass 0 for default Mysql port)
-   * @throws org.tango.jhdbextract.HdbFailed in case of failure
+   * @throws HdbFailed in case of failure
    */
 
   public MySQLSchema(String host,String db,String user,String passwd,short port) throws HdbFailed {
@@ -200,9 +196,9 @@ public class MySQLSchema extends HDBReader {
 
   }
 
-  public HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
-                                  String start_date,
-                                  String stop_date) throws HdbFailed {
+  HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
+                           String start_date,
+                           String stop_date) throws HdbFailed {
 
     if(sigInfo==null)
       throw new HdbFailed("sigInfo input parameters is null");

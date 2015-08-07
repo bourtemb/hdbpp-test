@@ -17,9 +17,9 @@ CLASSPATH=$CLASSPATH:$JAVALIB/lz4-1.2.0.jar
 
 export CLASSPATH
 echo $CLASSPATH
-echo   Compiling jhdbextract ...
+echo   Compiling jhdb ...
 rm org/tango/jhdb/*.class
 rm org/tango/jhdb/data/*.class
 
 
-javac -deprecation org/tango/jhdbextract/HdbExtractor.java
+javac -deprecation org/tango/jhdb/Hdb.java

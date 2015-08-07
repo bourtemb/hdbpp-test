@@ -30,31 +30,26 @@
 // $Revision $
 //
 //-======================================================================
-package org.tango.jhdbextract.Cassandra;
+package org.tango.jhdb;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
-import org.tango.jhdbextract.HDBReader;
-import org.tango.jhdbextract.HdbFailed;
-import org.tango.jhdbextract.HdbSigInfo;
-import org.tango.jhdbextract.HdbSigParam;
-import org.tango.jhdbextract.data.HdbData;
-import org.tango.jhdbextract.data.HdbDataSet;
+import org.tango.jhdb.data.HdbData;
+import org.tango.jhdb.data.HdbDataSet;
 
 import java.util.*;
 
 /**
  * Cassandra database access
  */
-public class CassandraSchema extends HDBReader {
+public class CassandraSchema extends HdbReader {
 
   public static final String   DEFAULT_DB_NAME = "hdb";
   public static final String[] DEFAULT_CONTACT_POINTS = {"cassandra2"};
 
-  private Cluster cluster;
   private Session session;
 
   private final static String[] tableNames = {
@@ -151,6 +146,8 @@ public class CassandraSchema extends HDBReader {
 
     //  Build cluster from contact points
     try {
+
+      Cluster cluster;
 
       Cluster.Builder builder = Cluster.builder();
       for (String contactPoint : contacts)
@@ -317,9 +314,9 @@ public class CassandraSchema extends HDBReader {
 
   }
 
-  public HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
-                                  String start_date,
-                                  String stop_date) throws HdbFailed {
+  HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
+                           String start_date,
+                           String stop_date) throws HdbFailed {
 
     if(sigInfo==null)
       throw new HdbFailed("sigInfo input parameters is null");

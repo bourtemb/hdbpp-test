@@ -1,7 +1,7 @@
-package org.tango.jhdbextract.data;
+package org.tango.jhdb.data;
 
-import org.tango.jhdbextract.HdbFailed;
-import org.tango.jhdbextract.HdbSigInfo;
+import org.tango.jhdb.HdbFailed;
+import org.tango.jhdb.HdbSigInfo;
 
 import java.util.ArrayList;
 

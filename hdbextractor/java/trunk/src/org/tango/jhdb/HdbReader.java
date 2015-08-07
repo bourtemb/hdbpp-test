@@ -31,10 +31,10 @@
 //
 //-======================================================================
 
-package org.tango.jhdbextract;
+package org.tango.jhdb;
 
-import org.tango.jhdbextract.data.HdbData;
-import org.tango.jhdbextract.data.HdbDataSet;
+import org.tango.jhdb.data.HdbData;
+import org.tango.jhdb.data.HdbDataSet;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -47,7 +47,7 @@ import java.util.Date;
  *
  * @author JL Pons
  */
-public abstract class HDBReader {
+public abstract class HdbReader {
 
   /**
    * Date format used in getDataFromDB calls
@@ -98,13 +98,13 @@ public abstract class HDBReader {
       // Try to find an extra point
       Date d;
       try {
-        d = HDBReader.hdbDateFormat.parse(startDate);
+        d = HdbReader.hdbDateFormat.parse(startDate);
       } catch( ParseException e ) {
         throw new HdbFailed("Wrong startDate format : " + e.getMessage());
       }
       d.setTime(d.getTime()-extraPointLookupPeriod*1000);
 
-      String newStartDate = HDBReader.hdbDateFormat.format(d);
+      String newStartDate = HdbReader.hdbDateFormat.format(d);
       stopDate = startDate;
 
       result = getDataFromDB(sigInfo,newStartDate,stopDate);
@@ -123,19 +123,9 @@ public abstract class HDBReader {
   }
 
 
-  /**
-   * Fetch data from the database (low level function, expert usage).
-   *
-   * @param sigInfo        Attribute info structure
-   * @param startDate      Beginning of the requested time interval (as string eg: "10/07/2014 10:00:00")
-   * @param stopDate       End of the requested time interval (as string eg: "10/07/2014 12:00:00")
-   *
-   * @throws HdbFailed In case of failure
-   */
-  public abstract HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
-                                           String startDate,
-                                           String stopDate) throws HdbFailed;
-
+  abstract HdbDataSet getDataFromDB(HdbSigInfo sigInfo,
+                                    String startDate,
+                                    String stopDate) throws HdbFailed;
   /**
    * Fetch data from the database from several attributes.
    *
@@ -264,13 +254,13 @@ public abstract class HDBReader {
     Date d0,d1;
 
     try {
-      d0 = HDBReader.hdbDateFormat.parse(startDate);
+      d0 = HdbReader.hdbDateFormat.parse(startDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong start date format : " + e.getMessage());
     }
 
     try {
-      d1 = HDBReader.hdbDateFormat.parse(stopDate);
+      d1 = HdbReader.hdbDateFormat.parse(stopDate);
     } catch( ParseException e ) {
       throw new HdbFailed("Wrong stop date format : " + e.getMessage());
     }
