@@ -77,7 +77,7 @@ public class Hdb {
   public  static final int HDB_MYSQL     = 2;
 
   private int hdbType;
-  private static final String[] hdbNames = { "No connection" , "Cassandra", "Mysql"};
+  private static final String[] hdbNames = { "No DB" , "Cassandra", "MySQL"};
   private HdbReader schema;
 
   /**
@@ -99,6 +99,13 @@ public class Hdb {
    */
   public int getDBType() {
     return hdbType;
+  }
+
+  /**
+   * Returns type of connection
+   */
+  public String getDBTypeName() {
+    return hdbNames[hdbType];
   }
 
   /**
