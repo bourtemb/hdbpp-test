@@ -1,9 +1,29 @@
 #!/bin/sh
-VERSION=`grep "LIB_RELEASE" org/tango/jhdb/HdbExtractor.java | awk '{print $7}'`
+VERSION=`grep "LIB_RELEASE" org/tango/jhdb/Hdb.java | awk '{print $7}'`
 echo "Building HDB++ v$VERSION"
 TARGET_DIR=/segfs/tango/release/java/lib/hdb
 
-jar cvf $TARGET_DIR/HDB++-$VERSION.jar org/tango/jhdb/*.class org/tango/jhdb/data/*.class
+# extract needed jar to build
+
+JAVALIB=/segfs/tango/release/java/lib/hdb
+
+#cd build
+#jar xvf $JAVALIB/cassandra-driver-core-2.1.6.jar
+#jar xvf $JAVALIB/guava-14.0.1.jar
+#jar xvf $JAVALIB/lz4-1.2.0.jar
+#jar xvf $JAVALIB/metrics-core-3.0.2.jar
+#jar xvf $JAVALIB/mysql-connector-java-5.1.31-bin.jar
+#jar xvf $JAVALIB/netty-buffer-4.0.27.Final.jar
+#jar xvf $JAVALIB/netty-codec-4.0.27.Final.jar
+#jar xvf $JAVALIB/netty-common-4.0.27.Final.jar
+#jar xvf $JAVALIB/netty-handler-4.0.27.Final.jar
+#jar xvf $JAVALIB/netty-transport-4.0.27.Final.jar
+#jar xvf $JAVALIB/slf4j-api-1.7.12.jar
+#jar xvf $JAVALIB/slf4j-simple-1.7.12.jar
+#jar xvf $JAVALIB/lz4-1.2.0.jar
+#cd ..
+
+jar cvf $TARGET_DIR/HDB++-$VERSION.jar org/tango/jhdb/*.class org/tango/jhdb/data/*.class build
 
 cd $TARGET_DIR
 rm -f HDB++.jar

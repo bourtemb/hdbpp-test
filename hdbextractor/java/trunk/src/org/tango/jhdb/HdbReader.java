@@ -52,8 +52,10 @@ public abstract class HdbReader {
   public final static int MODE_NORMAL = 0;
   /** Extract data and ignore errors (all HdbData which has failed are removed) */
   public final static int MODE_IGNORE_ERROR = 1;
-  /** Correlate to the HdbDataSet which have to lowest number of data */
-  public final static int MODE_CORRELATED = 2;
+  /** Filling gaps by correlating to the last known value of the HdbDataSet */
+  public final static int MODE_FILLED = 2;
+  /** Correlate all HdbDataSet to the HdbDataSet which have the lowest number of data */
+  public final static int MODE_CORRELATED = 3;
 
   private long extraPointLookupPeriod = 3600;
   private boolean extraPointEnabled = false;
@@ -114,11 +116,13 @@ public abstract class HdbReader {
         // Return the last point
         ArrayList<HdbData> lastPoint = new  ArrayList<HdbData>();
         lastPoint.add(result.getLast());
-        return new HdbDataSet(lastPoint);
+        result = new HdbDataSet(lastPoint);
       }
 
     }
 
+    result.setName(sigInfo.name);
+    result.setType(sigInfo.type);
     return result;
 
   }
@@ -178,7 +182,8 @@ public abstract class HdbReader {
 
     // Remove hasFailed
     if(extractMode==MODE_IGNORE_ERROR ||
-       extractMode==MODE_CORRELATED) {
+       extractMode==MODE_CORRELATED ||
+       extractMode==MODE_FILLED) {
       for(int i=0;i<ret.length;i++)
         ret[i].removeHasFailed();
     }
@@ -186,6 +191,9 @@ public abstract class HdbReader {
     // Correlated mode
     if(extractMode==MODE_CORRELATED)
       correlate(ret);
+
+    if(extractMode==MODE_FILLED)
+      fill(ret);
 
     return ret;
 
@@ -322,7 +330,8 @@ public abstract class HdbReader {
       }
     }
 
-    // We have to prevent that HdbDataSet.getBefore() will never return null
+    // We have to prevent that HdbDataSet.getBefore() will never return null or
+    // an 'non significant' value
     boolean ok = false;
     while(!ok && ret[minIdx].size()>0) {
       long t0 = ret[minIdx].get(0).getDataTime();
@@ -343,7 +352,12 @@ public abstract class HdbReader {
           HdbData b = ret[i].getBefore(t).copy();
           newSet.add(b);
         }
-        ret[i] = new HdbDataSet(newSet);
+
+        HdbDataSet newDataSet = new HdbDataSet(newSet);
+        newDataSet.setType(ret[i].getType());
+        newDataSet.setName(ret[i].getName());
+        ret[i] = newDataSet;
+
       }
     }
 
@@ -354,6 +368,70 @@ public abstract class HdbReader {
           long t = ret[minIdx].get(j).getDataTime();
           ret[i].get(j).setDataTime(t);
         }
+      }
+    }
+
+  }
+
+  private void insertTime(ArrayList<Long> list,long value) {
+
+    int low = 0;
+    int high = list.size()-1;
+
+    while (low <= high) {
+      int mid = (low + high) >>> 1;
+      long midVal = list.get(mid);
+
+      if (midVal < value)
+        low = mid + 1;
+      else if (midVal > value)
+        high = mid - 1;
+      else
+        return; // item found (do nothing)
+    }
+
+    // r is the insertion position
+    int r = -(low + 1);
+    if(r<0) r=  -(r+1);
+
+    list.add(r,value);
+
+  }
+
+  private void fill(HdbDataSet[] ret) throws HdbFailed {
+
+    // Ensure that no DataSet is empty
+    for(int i=0;i<ret.length;i++) {
+      if(ret[i].isEmpty())
+        throw new HdbFailed("FILLED mode cannot be done on empty HdbDataSet");
+    }
+
+    // Start by creating an array of all timestamps
+    ArrayList<Long> allTime = new ArrayList<Long>();
+    for(int i=0;i<ret.length;i++) {
+      for(int j=0;j<ret[i].size();j++) {
+        HdbData d = ret[i].get(j);
+        insertTime(allTime,d.getDataTime());
+      }
+    }
+
+    // Now extend all HdbDataSet
+    for(int i=0;i<ret.length;i++) {
+      ArrayList<HdbData> newSet = new ArrayList<HdbData>();
+      for(int j=0;j<allTime.size();j++) {
+        HdbData b = ret[i].getBefore(allTime.get(j)).copy();
+        newSet.add(b);
+      }
+      HdbDataSet newDataSet = new HdbDataSet(newSet);
+      newDataSet.setType(ret[i].getType());
+      newDataSet.setName(ret[i].getName());
+      ret[i] = newDataSet;
+    }
+
+    // Update all timetamps
+    for(int i=0;i<ret.length;i++) {
+      for(int j=0;j<allTime.size();j++) {
+        ret[i].get(j).setDataTime(allTime.get(j));
       }
     }
 

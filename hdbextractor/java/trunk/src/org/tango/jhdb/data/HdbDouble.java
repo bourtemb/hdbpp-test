@@ -35,7 +35,6 @@ package org.tango.jhdb.data;
 import org.tango.jhdb.HdbFailed;
 import org.tango.jhdb.HdbSigInfo;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 /**

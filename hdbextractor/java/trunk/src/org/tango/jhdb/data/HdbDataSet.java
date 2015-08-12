@@ -40,11 +40,14 @@ import java.util.ArrayList;
 public class HdbDataSet {
 
   ArrayList<HdbData> data;
+  String name;
+  int type;
 
   /**
    * Construct an empty HdbDataSet
    */
   public HdbDataSet() {
+    name = "";
     data = new ArrayList<HdbData>();
   }
 
@@ -52,7 +55,39 @@ public class HdbDataSet {
    * Construct a HdbDataSet with the given HdbData
    */
   public HdbDataSet(ArrayList<HdbData> data) {
+    name = "";
     this.data = data;
+  }
+
+  /**
+   * Set the type of this dataset
+   * @param type Type
+   */
+  public void setType(int type) {
+    this.type = type;
+  }
+
+  /**
+   * Get the name of this dataset
+   * @return
+   */
+  public int getType() {
+    return type;
+  }
+  /**
+   * Set the name of this dataset
+   * @param name Name
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  /**
+   * Get the name of this dataset
+   * @return
+   */
+  public String getName() {
+    return name;
   }
 
   /**
@@ -85,6 +120,13 @@ public class HdbDataSet {
   }
 
   /**
+   * Returns true whether this dataset is empty
+   */
+  public boolean isEmpty() {
+    return data.size()==0;
+  }
+
+  /**
    * Remove all HdbData which have failed
    */
   public void removeHasFailed() {
@@ -109,13 +151,16 @@ public class HdbDataSet {
 
   /**
    * Return the HdbData just before the given time
+   * if no data exists before, return the first item, null if the list is empty
    * @param time time stamps in us since epoch
-   * @return null if no item exists before the given time
    */
   public HdbData getBefore(long time) {
 
     int low = 0;
-    int high = data.size()-1;
+    int high = size()-1;
+
+    if(size()<=0)
+      return null;
 
     while (low <= high) {
       int mid = (low + high) >>> 1;
@@ -135,7 +180,7 @@ public class HdbDataSet {
 
     if(r==0) {
       // Nothing before
-      return null;
+      return get(0);
     } else {
       return get(r-1);
     }
