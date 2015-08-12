@@ -23,7 +23,10 @@ JAVALIB=/segfs/tango/release/java/lib/hdb
 #jar xvf $JAVALIB/lz4-1.2.0.jar
 #cd ..
 
-jar cvf $TARGET_DIR/HDB++-$VERSION.jar org/tango/jhdb/*.class org/tango/jhdb/data/*.class build
+jar cvf $TARGET_DIR/HDB++-$VERSION.jar org/tango/jhdb/*.class org/tango/jhdb/data/*.class
+
+cd build
+jar uvf $TARGET_DIR/HDB++-$VERSION.jar *
 
 cd $TARGET_DIR
 rm -f HDB++.jar
