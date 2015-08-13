@@ -49,6 +49,11 @@ public class HdbUShort extends HdbData {
     this.type = type;
   }
 
+  public HdbUShort(int type,int value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public int getValue() throws HdbFailed {
 
     if(hasFailed())

@@ -51,6 +51,7 @@ public class CassandraSchema extends HdbReader {
   public static final String[] DEFAULT_CONTACT_POINTS = {"cassandra2"};
 
   private Session session;
+  private AttributeBrowser browser=null;
 
   private final static String[] tableNames = {
 
@@ -195,6 +196,7 @@ public class CassandraSchema extends HdbReader {
     }
 
   }
+
   public String[] getAttributeList() throws HdbFailed {
 
     ArrayList<String> list = new ArrayList<String>();
@@ -219,6 +221,36 @@ public class CassandraSchema extends HdbReader {
 
     return retStr;
 
+  }
+
+  private void constructBrowser() throws HdbFailed {
+    if( browser==null )
+      browser = AttributeBrowser.constructBrowser(this);
+  }
+
+  public String[] getHosts() throws HdbFailed {
+    constructBrowser();
+    return browser.getHosts();
+  }
+
+  public String[] getDomains(String host) throws HdbFailed {
+    constructBrowser();
+    return browser.getDomains(host);
+  }
+
+  public String[] getFamilies(String host,String domain) throws HdbFailed {
+    constructBrowser();
+    return browser.getFamilies(host,domain);
+  }
+
+  public String[] getMembers(String host,String domain,String family) throws HdbFailed {
+    constructBrowser();
+    return browser.getMembers(host,domain,family);
+  }
+
+  public String[] getNames(String host,String domain,String family,String member) throws HdbFailed {
+    constructBrowser();
+    return browser.getNames(host,domain,family,member);
   }
 
   public HdbSigInfo getSigInfo(String attName) throws HdbFailed {

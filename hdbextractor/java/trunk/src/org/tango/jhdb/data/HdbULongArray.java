@@ -49,6 +49,11 @@ public class HdbULongArray extends HdbData {
     this.type = type;
   }
 
+  public HdbULongArray(int type,long[] value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public long[] getValue() throws HdbFailed {
 
     if(hasFailed())

@@ -49,6 +49,11 @@ public class HdbDoubleArray extends HdbData {
     this.type = type;
   }
 
+  public HdbDoubleArray(int type,double[] value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public double[] getValue() throws HdbFailed {
 
     if(hasFailed())

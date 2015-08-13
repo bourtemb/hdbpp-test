@@ -48,7 +48,7 @@ import java.util.ArrayList;
  *
  *   hdb.connect();
  *   String[] attList = hdb.getReader().getAttributeList();
- *   ArrayList<HdbData> data = hdb.getReader().getData(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00",false);
+ *   ArrayList<HdbData> data = hdb.getReader().getData(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00");
  *   for(int i=0;i<data.size();i++)
  *     System.out.println("  Rec #"+i+" :"+data.get(i));
  *
@@ -71,13 +71,15 @@ public class Hdb {
   /** Verion Number */
   public final static double LIB_RELEASE = 1.0 ; // Let the space before the ';'
 
-  /** Cassandra HDB */
+  /** Cassandra HDB++ */
   public  static final int HDB_CASSANDRA = 1;
-  /** MySQL HDB */
+  /** MySQL HDB++ */
   public  static final int HDB_MYSQL     = 2;
+  /** Oracle HDB */
+  public  static final int HDB_ORACLE    = 3;
 
   private int hdbType;
-  private static final String[] hdbNames = { "No DB" , "Cassandra", "MySQL"};
+  private static final String[] hdbNames = { "No DB" , "Cassandra", "MySQL", "Oracle"};
   private HdbReader schema;
 
   /**
@@ -147,8 +149,16 @@ public class Hdb {
    * Connects to a Cassandra HDB.
    */
   public void connectCassandra() throws HdbFailed {
-    hdbType = HDB_MYSQL;
+    hdbType = HDB_CASSANDRA;
     schema = new CassandraSchema(null,null,null,null);
+  }
+
+  /**
+   * Connects to a Oracle HDB.
+   */
+  public void connectOracle() throws HdbFailed {
+    hdbType = HDB_ORACLE;
+    schema = new OracleSchema();
   }
 
   /**
@@ -178,6 +188,8 @@ public class Hdb {
       connectMySQL(null,null,null,null,(short)0);
     } else if(hdb.equalsIgnoreCase("CASSANDRA")) {
       connectCassandra(null, null, null, null);
+    } else if(hdb.equalsIgnoreCase("ORACLE")) {
+      connectOracle();
     } else {
       throw new HdbFailed("Wrong HDB_TYPE , MYSQL or CASSANDRA expected");
     }
@@ -204,15 +216,20 @@ public class Hdb {
     try {
 
       //hdb.connectMySQL("cassandra1","","","",(short)0);
-      hdb.connectCassandra();
+      //hdb.connectCassandra();
+      hdb.connectOracle();
       //hdb.connect();
 
-      //String[] attList = hdb.getDB().getAttributeList();
-      //System.out.println("Got "+attList.length+" attributes");
+      long t0 = System.currentTimeMillis();
+      String[] attList = hdb.getReader().getAttributeList();
+      long t1 = System.currentTimeMillis();
+      System.out.println("Got "+attList.length+" attributes in " + (t1-t0) + "ms");
+
       //HdbSigInfo info = hdb.getDB().getSigInfo("tango://orion.esrf.fr:10000/sr/d-ct/1/current");
       //System.out.println("Info="+info);
 
       // Test correlated mode
+      /*
       System.out.print("\n--------> Correlated ");
       HdbDataSet[] data = hdb.getReader().getData(new String[]{
           "tango://orion.esrf.fr:10000/sr/d-ct/1/current",
@@ -221,6 +238,7 @@ public class Hdb {
       System.out.println(" (" + data[0].size() + "/" + data[1].size());
       for(int i=0;i<data[0].size() && i<10;i++)
         System.out.println("  Rec #"+i+" :"+data[0].get(i) + " <=> " + data[1].get(i));
+      */
 
       /*
       // Double RO

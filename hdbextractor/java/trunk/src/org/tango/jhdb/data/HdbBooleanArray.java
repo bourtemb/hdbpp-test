@@ -49,6 +49,11 @@ public class HdbBooleanArray extends HdbData {
     this.type = type;
   }
 
+  public HdbBooleanArray(int type,boolean[] value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public boolean[] getValue() throws HdbFailed {
 
     if(hasFailed())

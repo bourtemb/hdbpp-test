@@ -49,6 +49,11 @@ public class HdbDouble extends HdbData {
     this.type = type;
   }
 
+  public HdbDouble(int type,double value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public double getValue() throws HdbFailed {
 
     if(hasFailed())

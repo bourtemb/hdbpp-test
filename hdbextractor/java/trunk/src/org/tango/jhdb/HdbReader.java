@@ -200,10 +200,35 @@ public abstract class HdbReader {
   }
 
   /**
-   * Retrieves the list of archived attributes (fully qualified name eg: tango://hostname:port/domain/family/member/attname).
+   * Retrieves the list of all archived attributes (fully qualified name eg: tango://hostname:port/domain/family/member/attname).
    * @throws HdbFailed In case of failure
    */
   public abstract String[] getAttributeList() throws HdbFailed;
+
+  /**
+   * Returns the list hostname.
+   */
+  public abstract String[] getHosts() throws HdbFailed;
+
+  /**
+   * Returns the domain list for the specified host.
+   */
+  public abstract String[] getDomains(String host) throws HdbFailed;
+
+  /**
+   * Returns the family list for the specified host/domain.
+   */
+  public abstract String[] getFamilies(String host,String domain) throws HdbFailed;
+
+  /**
+   * Returns the member list for the specified host/domain/family.
+   */
+  public abstract String[] getMembers(String host,String domain,String family) throws HdbFailed;
+
+  /**
+   * Returns the name list for the specified host/domain/family/member.
+   */
+  public abstract String[] getNames(String host,String domain,String family,String member) throws HdbFailed;
 
   /**
    * Returns signal info

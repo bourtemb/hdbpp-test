@@ -35,6 +35,7 @@ package org.tango.jhdb;
 import org.tango.jhdb.data.HdbData;
 import org.tango.jhdb.data.HdbDataSet;
 
+import javax.management.Attribute;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -77,6 +78,7 @@ public class MySQLSchema extends HdbReader {
 
 
   private Connection connection;
+  private AttributeBrowser browser=null;
 
   /**
    * Connects to a MySQL HDB.
@@ -169,6 +171,36 @@ public class MySQLSchema extends HdbReader {
 
     return retStr;
 
+  }
+
+  private void constructBrowser() throws HdbFailed {
+    if( browser==null )
+      browser = AttributeBrowser.constructBrowser(this);
+  }
+
+  public String[] getHosts() throws HdbFailed {
+    constructBrowser();
+    return browser.getHosts();
+  }
+
+  public String[] getDomains(String host) throws HdbFailed {
+    constructBrowser();
+    return browser.getDomains(host);
+  }
+
+  public String[] getFamilies(String host,String domain) throws HdbFailed {
+    constructBrowser();
+    return browser.getFamilies(host, domain);
+  }
+
+  public String[] getMembers(String host,String domain,String family) throws HdbFailed {
+    constructBrowser();
+    return browser.getMembers(host, domain, family);
+  }
+
+  public String[] getNames(String host,String domain,String family,String member) throws HdbFailed {
+    constructBrowser();
+    return browser.getNames(host, domain, family, member);
   }
 
   public HdbSigInfo getSigInfo(String attName) throws HdbFailed {

@@ -49,6 +49,11 @@ public class HdbState extends HdbData {
     this.type = type;
   }
 
+  public HdbState(int type,int value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public int getValue() throws HdbFailed {
 
     if(hasFailed())

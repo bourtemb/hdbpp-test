@@ -49,6 +49,11 @@ public class HdbByteArray extends HdbData {
     this.type = type;
   }
 
+  public HdbByteArray(int type,byte[] value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public byte[] getValue() throws HdbFailed {
 
     if(hasFailed())

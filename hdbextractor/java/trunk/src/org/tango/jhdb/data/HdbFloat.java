@@ -49,6 +49,11 @@ public class HdbFloat extends HdbData {
     this.type = type;
   }
 
+  public HdbFloat(int type,float value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public float getValue() throws HdbFailed {
 
     if(hasFailed())

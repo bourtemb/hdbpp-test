@@ -49,6 +49,11 @@ public class HdbULong extends HdbData {
     this.type = type;
   }
 
+  public HdbULong(int type,long value) {
+    this.type = type;
+    this.value = value;
+  }
+
   public long getValue() throws HdbFailed {
 
     if(hasFailed())
