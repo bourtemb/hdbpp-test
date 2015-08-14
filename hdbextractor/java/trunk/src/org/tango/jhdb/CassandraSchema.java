@@ -115,7 +115,7 @@ public class CassandraSchema extends HdbReader {
   };
 
   // Prepared queries from getting data
-  private static PreparedStatement[] prepQueries = null;
+  private static PreparedStatement[] prepQueries = new PreparedStatement[tableNames.length];
 
   public CassandraSchema(String[] contacts,String db,String user,String passwd) throws HdbFailed {
 
@@ -166,33 +166,37 @@ public class CassandraSchema extends HdbReader {
       throw new HdbFailed(e.getMessage());
     }
 
-    // Build prepared statement for each type
-    if( prepQueries==null ) {
+    for(int i=0;i<prepQueries.length;i++)
+      prepQueries[i] = null;
 
-      int nbType = tableNames.length;
+  }
 
-      prepQueries = new PreparedStatement[nbType];
+  private PreparedStatement getPreparedQuery(int type) throws HdbFailed {
 
-      for(int type=1;type<nbType;type++) {
+    if( prepQueries[type]!=null )
+      // Query has been already prepared
+      return prepQueries[type];
 
-        boolean isRW = HdbSigInfo.isRWType(type);
-        String rwField = isRW?",value_w":"";
-        String tableName = tableNames[type];
+    if(type<0 || type>=tableNames.length)
+      throw new HdbFailed("Invalid type code=" + type);
 
-        if(!tableName.isEmpty()) {
-          String query = "SELECT data_time,data_time_us,recv_time,recv_time_us,insert_time,insert_time_us,error_desc,quality,value_r"+rwField+
-            " FROM " + tableName +
-            " WHERE att_conf_id = ?" +
-            " AND period = ?" +
-            " AND data_time >= ?" +
-            " AND data_time <= ?";
+    boolean isRW = HdbSigInfo.isRWType(type);
+    String rwField = isRW?",value_w":"";
+    String tableName = tableNames[type];
+    if(!tableName.isEmpty()) {
+      String query = "SELECT data_time,data_time_us,recv_time,recv_time_us,insert_time,insert_time_us,error_desc,quality,value_r"+rwField+
+          " FROM " + tableName +
+          " WHERE att_conf_id = ?" +
+          " AND period = ?" +
+          " AND data_time >= ?" +
+          " AND data_time <= ?";
 
-          prepQueries[type] = session.prepare(query);
-        }
-
-      }
-
+      prepQueries[type] = session.prepare(query);
+    } else {
+      throw new HdbFailed("Invalid request on a not supported type " + HdbSigInfo.typeStr[type]);
     }
+
+    return prepQueries[type];
 
   }
 
@@ -388,7 +392,7 @@ public class CassandraSchema extends HdbReader {
     // Launch asynchronous calls
     for(Period p : periods) {
       for(String part: p.partitions) {
-        BoundStatement boundStatement = prepQueries[sigInfo.type].bind(UUID.fromString(sigInfo.sigId),
+        BoundStatement boundStatement = getPreparedQuery(sigInfo.type).bind(UUID.fromString(sigInfo.sigId),
             part,
             p.start,
             p.end);
