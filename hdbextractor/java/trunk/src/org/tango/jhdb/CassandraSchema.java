@@ -51,7 +51,6 @@ public class CassandraSchema extends HdbReader {
   public static final String[] DEFAULT_CONTACT_POINTS = {"cassandra2"};
 
   private Session session;
-  private AttributeBrowser browser=null;
 
   private final static String[] tableNames = {
 
@@ -223,34 +222,60 @@ public class CassandraSchema extends HdbReader {
 
   }
 
-  private void constructBrowser() throws HdbFailed {
-    if( browser==null )
-      browser = AttributeBrowser.constructBrowser(this);
+  private String[] getList(String query) throws HdbFailed {
+
+    ArrayList<String> restStr = new ArrayList<String>();
+
+    ResultSet resultSet;
+    try {
+
+      resultSet = session.execute(query);
+      for(Row rw:resultSet)
+        restStr.add(rw.getString(0));
+
+    } catch (DriverException e) {
+      throw new HdbFailed(e.getMessage());
+    }
+
+    String[] ret = new String[restStr.size()];
+    for(int i=0;i<ret.length;i++)
+      ret[i] = restStr.get(i);
+
+    return ret;
+
   }
 
   public String[] getHosts() throws HdbFailed {
-    constructBrowser();
-    return browser.getHosts();
+
+    return getList("select distinct cs_name from att_conf");
+
   }
 
   public String[] getDomains(String host) throws HdbFailed {
-    constructBrowser();
-    return browser.getDomains(host);
+
+    return getList("select domain from domains where cs_name='"+host+"'");
+
   }
 
   public String[] getFamilies(String host,String domain) throws HdbFailed {
-    constructBrowser();
-    return browser.getFamilies(host,domain);
+
+    return getList("select family from families where cs_name='"+host+
+                   "' and domain='" + domain + "'");
+
   }
 
   public String[] getMembers(String host,String domain,String family) throws HdbFailed {
-    constructBrowser();
-    return browser.getMembers(host,domain,family);
+
+    return getList("select member from members where cs_name='"+host+
+                   "' and domain='" + domain + "' and family='" + family + "'");
+
   }
 
   public String[] getNames(String host,String domain,String family,String member) throws HdbFailed {
-    constructBrowser();
-    return browser.getNames(host,domain,family,member);
+
+    return getList("select name from att_names where cs_name='"+host+
+        "' and domain='" + domain + "' and family='" + family + "' and member='" + member + "'");
+
   }
 
   public HdbSigInfo getSigInfo(String attName) throws HdbFailed {
