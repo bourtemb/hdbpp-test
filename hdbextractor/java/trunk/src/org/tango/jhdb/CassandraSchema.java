@@ -114,8 +114,8 @@ public class CassandraSchema extends HdbReader {
 
   };
 
-  // Prepared queries from getting data
-  private static PreparedStatement[] prepQueries = new PreparedStatement[tableNames.length];
+  // Prepared queries for getting data
+  private static PreparedStatement[] prepQueries = new PreparedStatement[tableNames.length*2];
 
   public CassandraSchema(String[] contacts,String db,String user,String passwd) throws HdbFailed {
 
@@ -171,32 +171,50 @@ public class CassandraSchema extends HdbReader {
 
   }
 
-  private PreparedStatement getPreparedQuery(int type) throws HdbFailed {
+  private PreparedStatement getPreparedQuery(int type,boolean fullPeriod) throws HdbFailed {
 
-    if( prepQueries[type]!=null )
-      // Query has been already prepared
-      return prepQueries[type];
+    int statementIdx = (fullPeriod?2*type+1:2*type);
 
     if(type<0 || type>=tableNames.length)
       throw new HdbFailed("Invalid type code=" + type);
+
+    if( prepQueries[statementIdx]!=null )
+      // Query has been already prepared
+      return prepQueries[statementIdx];
 
     boolean isRW = HdbSigInfo.isRWType(type);
     String rwField = isRW?",value_w":"";
     String tableName = tableNames[type];
     if(!tableName.isEmpty()) {
-      String query = "SELECT data_time,data_time_us,recv_time,recv_time_us,insert_time,insert_time_us,error_desc,quality,value_r"+rwField+
+
+      String query;
+      if( fullPeriod ) {
+
+        // Full period query
+        query = "SELECT data_time,data_time_us,recv_time,recv_time_us,insert_time,insert_time_us,error_desc,quality,value_r"+rwField+
           " FROM " + tableName +
           " WHERE att_conf_id = ?" +
-          " AND period = ?" +
-          " AND data_time >= ?" +
-          " AND data_time <= ?";
+          " AND period = ?";
 
-      prepQueries[type] = session.prepare(query);
+      } else {
+
+        // Query for a part of the period
+        query = "SELECT data_time,data_time_us,recv_time,recv_time_us,insert_time,insert_time_us,error_desc,quality,value_r"+rwField+
+            " FROM " + tableName +
+            " WHERE att_conf_id = ?" +
+            " AND period = ?" +
+            " AND data_time >= ?" +
+            " AND data_time <= ?";
+
+      }
+
+      prepQueries[statementIdx] = session.prepare(query);
+
     } else {
       throw new HdbFailed("Invalid request on a not supported type " + HdbSigInfo.typeStr[type]);
     }
 
-    return prepQueries[type];
+    return prepQueries[statementIdx];
 
   }
 
@@ -391,16 +409,25 @@ public class CassandraSchema extends HdbReader {
 
     // Launch asynchronous calls
     for(Period p : periods) {
-      for(String part: p.partitions) {
-        BoundStatement boundStatement = getPreparedQuery(sigInfo.type).bind(UUID.fromString(sigInfo.sigId),
-            part,
+
+      BoundStatement boundStatement;
+
+      if(p.isFull) {
+        boundStatement = getPreparedQuery(sigInfo.type,p.isFull).bind(UUID.fromString(sigInfo.sigId),
+            p.partitionDate);
+      } else {
+        boundStatement = getPreparedQuery(sigInfo.type,p.isFull).bind(UUID.fromString(sigInfo.sigId),
+            p.partitionDate,
             p.start,
             p.end);
-        boundStatement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
-        boundStatement.setFetchSize(3600*24*10);
-        resultSetFutures.add(session.executeAsync(boundStatement));
       }
+
+      boundStatement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
+      boundStatement.setFetchSize(3600*24*10);
+      resultSetFutures.add(session.executeAsync(boundStatement));
+
     }
+
 
     // Wait end of result
     ArrayList<ResultSet> resultSets = new ArrayList<ResultSet>();

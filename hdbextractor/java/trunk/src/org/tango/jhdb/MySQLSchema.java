@@ -35,7 +35,6 @@ package org.tango.jhdb;
 import org.tango.jhdb.data.HdbData;
 import org.tango.jhdb.data.HdbDataSet;
 
-import javax.management.Attribute;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -76,7 +75,8 @@ public class MySQLSchema extends HdbReader {
 
   };
 
-
+  // Notify every PROGRESS_SIZE rows
+  private final static int PROGRESS_SIZE =10000;
   private Connection connection;
   private AttributeBrowser browser=null;
 
@@ -156,7 +156,7 @@ public class MySQLSchema extends HdbReader {
     String query = "SELECT att_name FROM att_conf ORDER BY att_name";
 
     try {
-      Statement statement = connection.createStatement();
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
       ResultSet resultSet = statement.executeQuery(query);
       while (resultSet.next())
         list.add(resultSet.getString(1));
@@ -211,7 +211,7 @@ public class MySQLSchema extends HdbReader {
     String query = "SELECT att_conf_id,att_conf_data_type_id FROM att_conf WHERE att_name='" + attName + "'";
 
     try {
-      Statement statement = connection.createStatement();
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
       ResultSet resultSet = statement.executeQuery(query);
       if(resultSet.next()) {
         ret.sigId = resultSet.getString(1);
@@ -264,7 +264,7 @@ public class MySQLSchema extends HdbReader {
 
     try {
 
-      Statement statement = connection.createStatement();
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
       ResultSet rs = statement.executeQuery(query);
       while(rs.next()) {
 
@@ -309,8 +309,33 @@ public class MySQLSchema extends HdbReader {
 
     boolean isRW = HdbSigInfo.isRWType(type);
 
+    String query;
+
+    // Get a count of the request
+    int queryCount;
+
+    query = "SELECT count(*) FROM " + tableNames[type] +
+        " WHERE att_conf_id='" + sigId + "'" +
+        " AND data_time>='" + toDBDate(start_date) + "'" +
+        " AND data_time<='" + toDBDate(stop_date) + "'";
+
+    try {
+
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+
+      ResultSet rs = statement.executeQuery(query);
+      rs.next();
+      queryCount = rs.getInt(1);
+      statement.close();
+
+    } catch (SQLException e) {
+      throw new HdbFailed("Failed to get data: "+e.getMessage());
+    }
+
+    // Fetch data
+
     String rwField = isRW?",value_w":"";
-    String query = "SELECT data_time,recv_time,insert_time,error_desc,quality,idx,value_r"+rwField+
+    query = "SELECT data_time,recv_time,insert_time,error_desc,quality,idx,value_r"+rwField+
         " FROM " + tableNames[type] +
         " WHERE att_conf_id='" + sigId + "'" +
         " AND data_time>='" + toDBDate(start_date) + "'" +
@@ -330,9 +355,11 @@ public class MySQLSchema extends HdbReader {
       long insertTime = 0;
       String errorMsg = null;
       int quality = 0;
+      int nbRow = 0;
       boolean newItem = false;
 
-      Statement statement = connection.createStatement();
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+      statement.setFetchSize(Integer.MIN_VALUE);
       ResultSet rs = statement.executeQuery(query);
       while(rs.next()) {
 
@@ -375,6 +402,11 @@ public class MySQLSchema extends HdbReader {
         if(isRW)
             wvalue.add(rs.getString(8));
 
+        if(nbRow% PROGRESS_SIZE ==0)
+          fireProgressListener((double)nbRow/(double)queryCount);
+
+        nbRow++;
+
       }
 
       if( newItem ) {
@@ -412,9 +444,31 @@ public class MySQLSchema extends HdbReader {
                                    String start_date,
                                    String stop_date) throws HdbFailed {
 
+    String query;
+
+    // Get a count of the request
+    int queryCount;
+
+    query = "SELECT count(*) FROM " + tableNames[type] +
+        " WHERE att_conf_id='" + sigId + "'" +
+        " AND data_time>='" + toDBDate(start_date) + "'" +
+        " AND data_time<='" + toDBDate(stop_date) + "'";
+
+    try {
+
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+      ResultSet rs = statement.executeQuery(query);
+      rs.next();
+      queryCount = rs.getInt(1);
+      statement.close();
+
+    } catch (SQLException e) {
+      throw new HdbFailed("Failed to get data: "+e.getMessage());
+    }
+
     boolean isRW = HdbSigInfo.isRWType(type);
     String rwField = isRW?",value_w":"";
-    String query = "SELECT data_time,recv_time,insert_time,error_desc,quality,value_r"+rwField+
+    query = "SELECT data_time,recv_time,insert_time,error_desc,quality,value_r"+rwField+
         " FROM " + tableNames[type] +
         " WHERE att_conf_id='" + sigId + "'" +
         " AND data_time>'" + toDBDate(start_date) + "'" +
@@ -425,10 +479,12 @@ public class MySQLSchema extends HdbReader {
     ArrayList<Object> value = new ArrayList<Object>();
     ArrayList<Object> wvalue = null;
     if(isRW) wvalue = new ArrayList<Object>();
+    int nbRow=0;
 
     try {
 
-      Statement statement = connection.createStatement();
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+      statement.setFetchSize(Integer.MIN_VALUE);
       ResultSet rs = statement.executeQuery(query);
       while(rs.next()) {
 
@@ -449,7 +505,13 @@ public class MySQLSchema extends HdbReader {
             value,                             // Read value
             wvalue                             // Write value
         );
+
         ret.add(hd);
+
+        if(nbRow% PROGRESS_SIZE==0)
+          fireProgressListener((double)nbRow/(double)queryCount);
+
+        nbRow++;
 
       }
 

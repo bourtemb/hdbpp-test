@@ -59,6 +59,7 @@ public abstract class HdbReader {
 
   private long extraPointLookupPeriod = 3600;
   private boolean extraPointEnabled = false;
+  private ArrayList<HdbProgressListener> prgListeners=null;
 
   /**
    * Fetch data from the database.
@@ -328,6 +329,33 @@ public abstract class HdbReader {
       throw new HdbFailed("startDate must be before stopDate");
     }
 
+  }
+
+  /**
+   * Add a progress listener on this HdbReader
+   * @param l HdbProgressListener to be added
+   */
+  public void addProgressListener(HdbProgressListener l) {
+    if(prgListeners==null)
+      prgListeners = new ArrayList<HdbProgressListener>();
+    if(!prgListeners.contains(l))
+      prgListeners.add(l);
+  }
+
+  /**
+   * Remove a progress listener from this HdbReader
+   * @param l HdbProgressListener to be removed
+   */
+  public void removeProgressListener(HdbProgressListener l) {
+    if(prgListeners!=null)
+      prgListeners.remove(l);
+  }
+
+  void fireProgressListener(double p) {
+    if(prgListeners==null)
+      return;
+    for(HdbProgressListener l:prgListeners)
+      l.progress(this,p);
   }
 
   private boolean isBefore(HdbDataSet[] ret,int minIdx,long t0) {

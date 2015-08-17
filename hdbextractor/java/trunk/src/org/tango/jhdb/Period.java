@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -19,29 +20,65 @@ public class Period {
 
   Timestamp start;
   Timestamp end;
-  String[] partitions;
+  String    partitionDate;
+  boolean   isFull;
+
+  private static Date tmpDate = new Date();
+
 
   /**
    * Create a period object
+   * Assume that start date and end date are in the same partition
    * @param start Start date (number of millisecond since epoch)
    * @param end Stop date (number of millisecond since epoch)
    */
 
-   Period(long start, long end) {
+   Period(long start, long end, boolean isFull) {
 
      this.start = new Timestamp(start);
      this.end   = new Timestamp(end);
+     this.isFull = isFull;
+     tmpDate.setTime(start);
+     this.partitionDate = periodFormat.format(tmpDate);
 
-     Date   startDate = new Date(start);
-     String p0 = periodFormat.format(startDate);
-     Date   endDate = new Date(end);
-     String p1 = periodFormat.format(endDate);
+  }
 
-     if (p0.equals(p1)) {
-       partitions = new String[] { p0 };
-     } else {
-       partitions = new String[] { p0, p1 };
-     }
+  public String toString() {
+
+    String startDate = Hdb.hdbDateFormat.format(start);
+    String stopDate = Hdb.hdbDateFormat.format(end);
+    return "Full:" + Boolean.toString(isFull) + " Start:" + startDate +
+           " Stop:"+stopDate+" Partition:"+partitionDate;
+
+  }
+
+  private static Date getEndOfPeriod(Date date) {
+
+    // This code should be adapted every time GRANULARITY is changed
+    // Here gets end of period for a day
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(date);
+    calendar.set(Calendar.HOUR_OF_DAY, 23);
+    calendar.set(Calendar.MINUTE, 59);
+    calendar.set(Calendar.SECOND, 59);
+    calendar.set(Calendar.MILLISECOND, 999);
+    return calendar.getTime();
+
+  }
+
+  private static Date getStartOfPeriod(Date date) {
+
+    // This code should be adapted every time GRANULARITY is changed
+    // Here gets end of period for a day
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(date);
+    calendar.set(Calendar.HOUR_OF_DAY, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    calendar.set(Calendar.SECOND, 0);
+    calendar.set(Calendar.MILLISECOND, 0);
+    return calendar.getTime();
 
   }
 
@@ -70,15 +107,32 @@ public class Period {
 
 
     long start = d0.getTime();
+    long stop = getEndOfPeriod(d0).getTime();
     long endTime = d1.getTime();
-    long end = start + GRANULARITY;
 
-    while (end<endTime) {
-      periods.add(new Period(start, end));
-      start = end + 1000;
-      end = start + GRANULARITY;
+    // First period
+    if(endTime>stop) {
+      periods.add(new Period(start, stop,false));
+    } else {
+      periods.add(new Period(start, endTime,false));
     }
-    periods.add(new Period(start, endTime));
+
+    while( endTime>stop ) {
+
+      tmpDate.setTime(stop+1000);
+      start = getStartOfPeriod(tmpDate).getTime();
+      stop = getEndOfPeriod(tmpDate).getTime();
+
+      if(endTime>stop) {
+        // Full period
+        periods.add(new Period(start, stop,true));
+      } else {
+        // Last period
+        periods.add(new Period(start, endTime,false));
+      }
+
+    }
+
     return periods;
 
   }

@@ -210,7 +210,7 @@ public class OracleSchema extends HdbReader {
               retList.add(d);
             }
             break;
-          case HdbSigInfo.TYPE_SCALAR_LONG_RO:
+          case HdbSigInfo.TYPE_SCALAR_LONG64_RO:
             long[] sl = ((LongScalarHistoryData) data).extractData();
             for (int i = 0; i < recNb; i++) {
               HdbLong64 d = new HdbLong64(type, sl[i]);
@@ -258,7 +258,7 @@ public class OracleSchema extends HdbReader {
               retList.add(d);
             }
             break;
-          case HdbSigInfo.TYPE_ARRAY_LONG_RO:
+          case HdbSigInfo.TYPE_ARRAY_LONG64_RO:
             long[][] al = ((LongArrayHistoryData)data).extractData();
             for (int i = 0; i < recNb; i++) {
               HdbLong64Array d = new HdbLong64Array(type, al[i]);
