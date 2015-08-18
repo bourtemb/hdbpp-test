@@ -61,6 +61,9 @@ public abstract class HdbReader {
   private boolean extraPointEnabled = false;
   private ArrayList<HdbProgressListener> prgListeners=null;
 
+  int totalRequest;
+  int currentRequest;
+
   /**
    * Fetch data from the database.
    *
@@ -95,36 +98,9 @@ public abstract class HdbReader {
                             String startDate,
                             String stopDate) throws HdbFailed {
 
-    HdbDataSet result = getDataFromDB(sigInfo,startDate,stopDate);
-
-    if(result.size()==0 && extraPointEnabled) {
-
-      // Try to find an extra point
-      Date d;
-      try {
-        d = Hdb.hdbDateFormat.parse(startDate);
-      } catch( ParseException e ) {
-        throw new HdbFailed("Wrong startDate format : " + e.getMessage());
-      }
-      d.setTime(d.getTime()-extraPointLookupPeriod*1000);
-
-      String newStartDate = Hdb.hdbDateFormat.format(d);
-      stopDate = startDate;
-
-      result = getDataFromDB(sigInfo,newStartDate,stopDate);
-
-      if(result.size()>0) {
-        // Return the last point
-        ArrayList<HdbData> lastPoint = new  ArrayList<HdbData>();
-        lastPoint.add(result.getLast());
-        result = new HdbDataSet(lastPoint);
-      }
-
-    }
-
-    result.setName(sigInfo.name);
-    result.setType(sigInfo.type);
-    return result;
+    totalRequest = 1;
+    currentRequest = 1;
+    return getDataPrivate(sigInfo,startDate,stopDate);
 
   }
 
@@ -176,10 +152,14 @@ public abstract class HdbReader {
     if(sigInfos==null)
       throw new HdbFailed("getData(): sigInfos input parameters is null");
 
+    totalRequest = sigInfos.length;
+
     // Fetch data
     HdbDataSet[] ret = new HdbDataSet[sigInfos.length];
-    for(int i=0;i<ret.length;i++)
-      ret[i] = getData(sigInfos[i], startDate, stopDate);
+    for(int i=0;i<ret.length;i++) {
+      currentRequest = i+1;
+      ret[i] = getDataPrivate(sigInfos[i], startDate, stopDate);
+    }
 
     // Remove hasFailed
     if(extractMode==MODE_IGNORE_ERROR ||
@@ -365,13 +345,53 @@ public abstract class HdbReader {
       prgListeners.remove(l);
   }
 
+  // Send progress listener event
   void fireProgressListener(double p) {
     if(prgListeners==null)
       return;
     for(HdbProgressListener l:prgListeners)
-      l.progress(this,p);
+      l.progress(this,p,currentRequest,totalRequest);
   }
 
+  // Fetch data
+  private HdbDataSet getDataPrivate(HdbSigInfo sigInfo,
+                                    String startDate,
+                                    String stopDate) throws HdbFailed {
+
+    HdbDataSet result = getDataFromDB(sigInfo,startDate,stopDate);
+
+    if(result.size()==0 && extraPointEnabled) {
+
+      // Try to find an extra point
+      Date d;
+      try {
+        d = Hdb.hdbDateFormat.parse(startDate);
+      } catch( ParseException e ) {
+        throw new HdbFailed("Wrong startDate format : " + e.getMessage());
+      }
+      d.setTime(d.getTime()-extraPointLookupPeriod*1000);
+
+      String newStartDate = Hdb.hdbDateFormat.format(d);
+      stopDate = startDate;
+
+      result = getDataFromDB(sigInfo,newStartDate,stopDate);
+
+      if(result.size()>0) {
+        // Return the last point
+        ArrayList<HdbData> lastPoint = new  ArrayList<HdbData>();
+        lastPoint.add(result.getLast());
+        result = new HdbDataSet(lastPoint);
+      }
+
+    }
+
+    result.setName(sigInfo.name);
+    result.setType(sigInfo.type);
+    return result;
+
+  }
+
+  // Return true if HdbDataSet[i!=minIdx] start time is lower than t0
   private boolean isBefore(HdbDataSet[] ret,int minIdx,long t0) {
 
     boolean ok=true;
@@ -385,6 +405,7 @@ public abstract class HdbReader {
 
   }
 
+  // Correlate the HdbDataSet
   private void correlate(HdbDataSet[] ret) throws HdbFailed {
 
     // Select the base HdbDataSet
@@ -459,12 +480,13 @@ public abstract class HdbReader {
 
     // r is the insertion position
     int r = -(low + 1);
-    if(r<0) r=  -(r+1);
+    if(r<0) r= -(r+1);
 
     list.add(r,value);
 
   }
 
+  // Fill the HdbDataSet
   private void fill(HdbDataSet[] ret) throws HdbFailed {
 
     // Ensure that no DataSet is empty
