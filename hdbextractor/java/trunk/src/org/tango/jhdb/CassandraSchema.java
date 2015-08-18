@@ -114,8 +114,12 @@ public class CassandraSchema extends HdbReader {
 
   };
 
+  // Maximum number of asynchronous call launched simultaneously
+  private final static int  MAX_ASYNCH_CALL = 3;
+
   // Prepared queries for getting data
   private static PreparedStatement[] prepQueries = new PreparedStatement[tableNames.length*2];
+
 
   public CassandraSchema(String[] contacts,String db,String user,String passwd) throws HdbFailed {
 
@@ -404,177 +408,193 @@ public class CassandraSchema extends HdbReader {
 
     boolean isRW = HdbSigInfo.isRWType(sigInfo.type);
 
+    // Compute periods according to HDB partitioning
     ArrayList<Period> periods = Period.getPeriods(start_date,stop_date);
-    ArrayList<ResultSetFuture> resultSetFutures = new ArrayList<ResultSetFuture>();
-
-    // Launch asynchronous calls
-    for(Period p : periods) {
-
-      BoundStatement boundStatement;
-
-      if(p.isFull) {
-        boundStatement = getPreparedQuery(sigInfo.type,p.isFull).bind(UUID.fromString(sigInfo.sigId),
-            p.partitionDate);
-      } else {
-        boundStatement = getPreparedQuery(sigInfo.type,p.isFull).bind(UUID.fromString(sigInfo.sigId),
-            p.partitionDate,
-            p.start,
-            p.end);
-      }
-
-      boundStatement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
-      boundStatement.setFetchSize(3600*24*10);
-      resultSetFutures.add(session.executeAsync(boundStatement));
-
-    }
-
-
-    // Wait end of result
-    ArrayList<ResultSet> resultSets = new ArrayList<ResultSet>();
-
-    try {
-      for(ResultSetFuture sf: resultSetFutures)
-        resultSets.add(sf.getUninterruptibly());
-    } catch (NoHostAvailableException e1) {
-      throw new HdbFailed("Error (NoHostAvailable): " + e1.getMessage());
-    } catch (QueryExecutionException e2) {
-      throw new HdbFailed("Error (QueryExecution): " + e2.getMessage());
-    } catch (QueryValidationException e3) {
-      throw new HdbFailed("Error (QueryValidation): " + e3.getMessage());
-    }
+    int nbPeriod = periods.size();
 
     ArrayList<HdbData> ret = new ArrayList<HdbData>();
     ArrayList<Object> value = new ArrayList<Object>();
     ArrayList<Object> wvalue = null;
     if(isRW) wvalue = new ArrayList<Object>();
 
-    try {
+    for(int i=0;i<nbPeriod;i+=MAX_ASYNCH_CALL) {
 
-      for (ResultSet rs : resultSets) {
-        for (Row rw : rs) {
+      ArrayList<ResultSetFuture> resultSetFutures = new ArrayList<ResultSetFuture>();
 
-          HdbData hd = HdbData.createData(sigInfo.type);
+      int j;
+      for(j=0;j<MAX_ASYNCH_CALL && j+i<nbPeriod;j++) {
 
-          switch(sigInfo.type) {
+        // Get prepared statements
+        Period p = periods.get(i+j);
 
-            case HdbSigInfo.TYPE_SCALAR_BOOLEAN_RO:
-            case HdbSigInfo.TYPE_SCALAR_BOOLEAN_RW:
-              setValue(value,rw.getBool(8));
-              if(isRW) setValue(wvalue,rw.getBool(9));
-              break;
+        BoundStatement boundStatement;
 
-            case HdbSigInfo.TYPE_ARRAY_BOOLEAN_RO:
-            case HdbSigInfo.TYPE_ARRAY_BOOLEAN_RW:
-              setValueBoolean(value, rw.getList(8, Boolean.class));
-              if(isRW) setValueBoolean(wvalue, rw.getList(9, Boolean.class));
-              break;
-
-            case HdbSigInfo.TYPE_SCALAR_SHORT_RO:
-            case HdbSigInfo.TYPE_SCALAR_SHORT_RW:
-            case HdbSigInfo.TYPE_SCALAR_UCHAR_RO:
-            case HdbSigInfo.TYPE_SCALAR_UCHAR_RW:
-              setValue(value,(short)rw.getInt(8));
-              if(isRW) setValue(wvalue,(short)rw.getInt(9));
-              break;
-
-            case HdbSigInfo.TYPE_ARRAY_SHORT_RO:
-            case HdbSigInfo.TYPE_ARRAY_SHORT_RW:
-            case HdbSigInfo.TYPE_ARRAY_UCHAR_RO:
-            case HdbSigInfo.TYPE_ARRAY_UCHAR_RW:
-              setValueShort(value, rw.getList(8, Integer.class));
-              if(isRW) setValueShort(wvalue, rw.getList(9, Integer.class));
-              break;
-
-            case HdbSigInfo.TYPE_SCALAR_LONG_RO:
-            case HdbSigInfo.TYPE_SCALAR_LONG_RW:
-            case HdbSigInfo.TYPE_SCALAR_USHORT_RO:
-            case HdbSigInfo.TYPE_SCALAR_USHORT_RW:
-            case HdbSigInfo.TYPE_SCALAR_STATE_RO:
-            case HdbSigInfo.TYPE_SCALAR_STATE_RW:
-              setValue(value, rw.getInt(8));
-              if(isRW) setValue(wvalue, rw.getInt(9));
-              break;
-
-            case HdbSigInfo.TYPE_ARRAY_LONG_RO:
-            case HdbSigInfo.TYPE_ARRAY_LONG_RW:
-            case HdbSigInfo.TYPE_ARRAY_USHORT_RO:
-            case HdbSigInfo.TYPE_ARRAY_USHORT_RW:
-            case HdbSigInfo.TYPE_ARRAY_STATE_RO:
-            case HdbSigInfo.TYPE_ARRAY_STATE_RW:
-              setValueInteger(value, rw.getList(8, Integer.class));
-              if(isRW) setValueInteger(wvalue, rw.getList(9, Integer.class));
-              break;
-
-            case HdbSigInfo.TYPE_SCALAR_LONG64_RO:
-            case HdbSigInfo.TYPE_SCALAR_LONG64_RW:
-            case HdbSigInfo.TYPE_SCALAR_ULONG_RO:
-            case HdbSigInfo.TYPE_SCALAR_ULONG_RW:
-              setValue(value, rw.getLong(8));
-              if(isRW) setValue(wvalue, rw.getLong(9));
-              break;
-
-            case HdbSigInfo.TYPE_ARRAY_LONG64_RO:
-            case HdbSigInfo.TYPE_ARRAY_LONG64_RW:
-            case HdbSigInfo.TYPE_ARRAY_ULONG_RO:
-            case HdbSigInfo.TYPE_ARRAY_ULONG_RW:
-              setValueLong(value, rw.getList(8, Long.class));
-              if(isRW) setValueLong(wvalue, rw.getList(9, Long.class));
-              break;
-
-            case HdbSigInfo.TYPE_SCALAR_DOUBLE_RO:
-            case HdbSigInfo.TYPE_SCALAR_DOUBLE_RW:
-              setValue(value,rw.getDouble(8));
-              if(isRW) setValue(wvalue,rw.getDouble(9));
-              break;
-
-            case HdbSigInfo.TYPE_ARRAY_DOUBLE_RO:
-            case HdbSigInfo.TYPE_ARRAY_DOUBLE_RW:
-              setValueDouble(value, rw.getList(8, Double.class));
-              if(isRW) setValueDouble(wvalue, rw.getList(9, Double.class));
-              break;
-
-            case HdbSigInfo.TYPE_SCALAR_FLOAT_RO:
-            case HdbSigInfo.TYPE_SCALAR_FLOAT_RW:
-              setValue(value,rw.getFloat(8));
-              if(isRW) setValue(wvalue,rw.getFloat(9));
-              break;
-
-            case HdbSigInfo.TYPE_ARRAY_FLOAT_RO:
-            case HdbSigInfo.TYPE_ARRAY_FLOAT_RW:
-              setValueFloat(value, rw.getList(8, Float.class));
-              if(isRW) setValueFloat(wvalue, rw.getList(9, Float.class));
-              break;
-
-            case HdbSigInfo.TYPE_SCALAR_STRING_RO:
-            case HdbSigInfo.TYPE_SCALAR_STRING_RW:
-              setValue(value,rw.getString(8));
-              if(isRW) setValue(wvalue,rw.getString(9));
-              break;
-
-            case HdbSigInfo.TYPE_ARRAY_STRING_RO:
-            case HdbSigInfo.TYPE_ARRAY_STRING_RW:
-              setValueString(value, rw.getList(8, String.class));
-              if(isRW) setValueString(wvalue, rw.getList(9, String.class));
-              break;
-
-          }
-
-          hd.parse(
-              timeValue(rw.getDate(0), rw.getInt(1)), //Tango timestamp
-              timeValue(rw.getDate(2), rw.getInt(3)), //Event receive timestamp
-              timeValue(rw.getDate(4), rw.getInt(5)), //Recording timestamp
-              rw.getString(6),                   // Error string
-              rw.getInt(7),                      // Quality value
-              value,                             // Read value
-              wvalue                             // Write value
-          );
-          ret.add(hd);
-
+        if(p.isFull) {
+          boundStatement = getPreparedQuery(sigInfo.type,p.isFull).bind(
+              UUID.fromString(sigInfo.sigId),
+              p.partitionDate);
+        } else {
+          boundStatement = getPreparedQuery(sigInfo.type,p.isFull).bind(
+              UUID.fromString(sigInfo.sigId),
+              p.partitionDate,
+              p.start,
+              p.end);
         }
+
+        // Launch asynchronous calls
+        boundStatement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
+        boundStatement.setFetchSize(Integer.MAX_VALUE);
+        resultSetFutures.add(session.executeAsync(boundStatement));
+
       }
 
-    } catch (DriverException e) {
-      throw new HdbFailed("Failed to get data: " + e.getMessage());
+      // Wait end of result
+      ArrayList<ResultSet> resultSets = new ArrayList<ResultSet>();
+
+      try {
+        for(ResultSetFuture sf: resultSetFutures)
+          resultSets.add(sf.getUninterruptibly());
+      } catch (NoHostAvailableException e1) {
+        throw new HdbFailed("Error (NoHostAvailable): " + e1.getMessage());
+      } catch (QueryExecutionException e2) {
+        throw new HdbFailed("Error (QueryExecution): " + e2.getMessage());
+      } catch (QueryValidationException e3) {
+        throw new HdbFailed("Error (QueryValidation): " + e3.getMessage());
+      }
+
+      if(hasProgressListener())
+        fireProgressListener((double)(i+j)/nbPeriod);
+
+      // Build HdbDataSet
+      try {
+
+        for (ResultSet rs : resultSets) {
+          for (Row rw : rs) {
+
+            HdbData hd = HdbData.createData(sigInfo.type);
+
+            switch (sigInfo.type) {
+
+              case HdbSigInfo.TYPE_SCALAR_BOOLEAN_RO:
+              case HdbSigInfo.TYPE_SCALAR_BOOLEAN_RW:
+                setValue(value, rw.getBool(8));
+                if (isRW) setValue(wvalue, rw.getBool(9));
+                break;
+
+              case HdbSigInfo.TYPE_ARRAY_BOOLEAN_RO:
+              case HdbSigInfo.TYPE_ARRAY_BOOLEAN_RW:
+                setValueBoolean(value, rw.getList(8, Boolean.class));
+                if (isRW) setValueBoolean(wvalue, rw.getList(9, Boolean.class));
+                break;
+
+              case HdbSigInfo.TYPE_SCALAR_SHORT_RO:
+              case HdbSigInfo.TYPE_SCALAR_SHORT_RW:
+              case HdbSigInfo.TYPE_SCALAR_UCHAR_RO:
+              case HdbSigInfo.TYPE_SCALAR_UCHAR_RW:
+                setValue(value, (short) rw.getInt(8));
+                if (isRW) setValue(wvalue, (short) rw.getInt(9));
+                break;
+
+              case HdbSigInfo.TYPE_ARRAY_SHORT_RO:
+              case HdbSigInfo.TYPE_ARRAY_SHORT_RW:
+              case HdbSigInfo.TYPE_ARRAY_UCHAR_RO:
+              case HdbSigInfo.TYPE_ARRAY_UCHAR_RW:
+                setValueShort(value, rw.getList(8, Integer.class));
+                if (isRW) setValueShort(wvalue, rw.getList(9, Integer.class));
+                break;
+
+              case HdbSigInfo.TYPE_SCALAR_LONG_RO:
+              case HdbSigInfo.TYPE_SCALAR_LONG_RW:
+              case HdbSigInfo.TYPE_SCALAR_USHORT_RO:
+              case HdbSigInfo.TYPE_SCALAR_USHORT_RW:
+              case HdbSigInfo.TYPE_SCALAR_STATE_RO:
+              case HdbSigInfo.TYPE_SCALAR_STATE_RW:
+                setValue(value, rw.getInt(8));
+                if (isRW) setValue(wvalue, rw.getInt(9));
+                break;
+
+              case HdbSigInfo.TYPE_ARRAY_LONG_RO:
+              case HdbSigInfo.TYPE_ARRAY_LONG_RW:
+              case HdbSigInfo.TYPE_ARRAY_USHORT_RO:
+              case HdbSigInfo.TYPE_ARRAY_USHORT_RW:
+              case HdbSigInfo.TYPE_ARRAY_STATE_RO:
+              case HdbSigInfo.TYPE_ARRAY_STATE_RW:
+                setValueInteger(value, rw.getList(8, Integer.class));
+                if (isRW) setValueInteger(wvalue, rw.getList(9, Integer.class));
+                break;
+
+              case HdbSigInfo.TYPE_SCALAR_LONG64_RO:
+              case HdbSigInfo.TYPE_SCALAR_LONG64_RW:
+              case HdbSigInfo.TYPE_SCALAR_ULONG_RO:
+              case HdbSigInfo.TYPE_SCALAR_ULONG_RW:
+                setValue(value, rw.getLong(8));
+                if (isRW) setValue(wvalue, rw.getLong(9));
+                break;
+
+              case HdbSigInfo.TYPE_ARRAY_LONG64_RO:
+              case HdbSigInfo.TYPE_ARRAY_LONG64_RW:
+              case HdbSigInfo.TYPE_ARRAY_ULONG_RO:
+              case HdbSigInfo.TYPE_ARRAY_ULONG_RW:
+                setValueLong(value, rw.getList(8, Long.class));
+                if (isRW) setValueLong(wvalue, rw.getList(9, Long.class));
+                break;
+
+              case HdbSigInfo.TYPE_SCALAR_DOUBLE_RO:
+              case HdbSigInfo.TYPE_SCALAR_DOUBLE_RW:
+                setValue(value, rw.getDouble(8));
+                if (isRW) setValue(wvalue, rw.getDouble(9));
+                break;
+
+              case HdbSigInfo.TYPE_ARRAY_DOUBLE_RO:
+              case HdbSigInfo.TYPE_ARRAY_DOUBLE_RW:
+                setValueDouble(value, rw.getList(8, Double.class));
+                if (isRW) setValueDouble(wvalue, rw.getList(9, Double.class));
+                break;
+
+              case HdbSigInfo.TYPE_SCALAR_FLOAT_RO:
+              case HdbSigInfo.TYPE_SCALAR_FLOAT_RW:
+                setValue(value, rw.getFloat(8));
+                if (isRW) setValue(wvalue, rw.getFloat(9));
+                break;
+
+              case HdbSigInfo.TYPE_ARRAY_FLOAT_RO:
+              case HdbSigInfo.TYPE_ARRAY_FLOAT_RW:
+                setValueFloat(value, rw.getList(8, Float.class));
+                if (isRW) setValueFloat(wvalue, rw.getList(9, Float.class));
+                break;
+
+              case HdbSigInfo.TYPE_SCALAR_STRING_RO:
+              case HdbSigInfo.TYPE_SCALAR_STRING_RW:
+                setValue(value, rw.getString(8));
+                if (isRW) setValue(wvalue, rw.getString(9));
+                break;
+
+              case HdbSigInfo.TYPE_ARRAY_STRING_RO:
+              case HdbSigInfo.TYPE_ARRAY_STRING_RW:
+                setValueString(value, rw.getList(8, String.class));
+                if (isRW) setValueString(wvalue, rw.getList(9, String.class));
+                break;
+
+            }
+
+            hd.parse(
+                timeValue(rw.getDate(0), rw.getInt(1)), //Tango timestamp
+                timeValue(rw.getDate(2), rw.getInt(3)), //Event receive timestamp
+                timeValue(rw.getDate(4), rw.getInt(5)), //Recording timestamp
+                rw.getString(6),                   // Error string
+                rw.getInt(7),                      // Quality value
+                value,                             // Read value
+                wvalue                             // Write value
+            );
+            ret.add(hd);
+
+          }
+        }
+
+      } catch (DriverException e) {
+        throw new HdbFailed("Failed to get data: " + e.getMessage());
+      }
+
     }
 
     return new HdbDataSet(ret);

@@ -75,8 +75,8 @@ public class MySQLSchema extends HdbReader {
 
   };
 
-  // Notify every PROGRESS_SIZE rows
-  private final static int PROGRESS_SIZE =10000;
+  // Notify every PROGRESS_NBROW rows
+  private final static int PROGRESS_NBROW =10000;
   private Connection connection;
   private AttributeBrowser browser=null;
 
@@ -310,26 +310,29 @@ public class MySQLSchema extends HdbReader {
     boolean isRW = HdbSigInfo.isRWType(type);
 
     String query;
+    int queryCount=0;
 
-    // Get a count of the request
-    int queryCount;
+    if (hasProgressListener()) {
 
-    query = "SELECT count(*) FROM " + tableNames[type] +
-        " WHERE att_conf_id='" + sigId + "'" +
-        " AND data_time>='" + toDBDate(start_date) + "'" +
-        " AND data_time<='" + toDBDate(stop_date) + "'";
+      // Get a count of the request
+      query = "SELECT count(*) FROM " + tableNames[type] +
+          " WHERE att_conf_id='" + sigId + "'" +
+          " AND data_time>='" + toDBDate(start_date) + "'" +
+          " AND data_time<='" + toDBDate(stop_date) + "'";
 
-    try {
+      try {
 
-      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+        Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
-      ResultSet rs = statement.executeQuery(query);
-      rs.next();
-      queryCount = rs.getInt(1);
-      statement.close();
+        ResultSet rs = statement.executeQuery(query);
+        rs.next();
+        queryCount = rs.getInt(1);
+        statement.close();
 
-    } catch (SQLException e) {
-      throw new HdbFailed("Failed to get data: "+e.getMessage());
+      } catch (SQLException e) {
+        throw new HdbFailed("Failed to get data: " + e.getMessage());
+      }
+
     }
 
     // Fetch data
@@ -402,7 +405,7 @@ public class MySQLSchema extends HdbReader {
         if(isRW)
             wvalue.add(rs.getString(8));
 
-        if(nbRow% PROGRESS_SIZE ==0)
+        if(hasProgressListener() && (nbRow% PROGRESS_NBROW ==0))
           fireProgressListener((double)nbRow/(double)queryCount);
 
         nbRow++;
@@ -445,25 +448,28 @@ public class MySQLSchema extends HdbReader {
                                    String stop_date) throws HdbFailed {
 
     String query;
+    int queryCount=0;
 
-    // Get a count of the request
-    int queryCount;
+    if (hasProgressListener()) {
 
-    query = "SELECT count(*) FROM " + tableNames[type] +
-        " WHERE att_conf_id='" + sigId + "'" +
-        " AND data_time>='" + toDBDate(start_date) + "'" +
-        " AND data_time<='" + toDBDate(stop_date) + "'";
+      // Get a count of the request
+      query = "SELECT count(*) FROM " + tableNames[type] +
+          " WHERE att_conf_id='" + sigId + "'" +
+          " AND data_time>='" + toDBDate(start_date) + "'" +
+          " AND data_time<='" + toDBDate(stop_date) + "'";
 
-    try {
+      try {
 
-      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
-      ResultSet rs = statement.executeQuery(query);
-      rs.next();
-      queryCount = rs.getInt(1);
-      statement.close();
+        Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        ResultSet rs = statement.executeQuery(query);
+        rs.next();
+        queryCount = rs.getInt(1);
+        statement.close();
 
-    } catch (SQLException e) {
-      throw new HdbFailed("Failed to get data: "+e.getMessage());
+      } catch (SQLException e) {
+        throw new HdbFailed("Failed to get data: " + e.getMessage());
+      }
+
     }
 
     boolean isRW = HdbSigInfo.isRWType(type);
@@ -508,7 +514,7 @@ public class MySQLSchema extends HdbReader {
 
         ret.add(hd);
 
-        if(nbRow% PROGRESS_SIZE==0)
+        if(hasProgressListener() && (nbRow% PROGRESS_NBROW==0))
           fireProgressListener((double)nbRow/(double)queryCount);
 
         nbRow++;

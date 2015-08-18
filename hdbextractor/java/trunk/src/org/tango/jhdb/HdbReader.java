@@ -331,6 +331,15 @@ public abstract class HdbReader {
 
   }
 
+
+  /**
+   * Return true if this reader has a progress listener
+   * @return
+   */
+  public boolean hasProgressListener() {
+    return (prgListeners!=null) && (prgListeners.size()>0);
+  }
+
   /**
    * Add a progress listener on this HdbReader
    * @param l HdbProgressListener to be added
