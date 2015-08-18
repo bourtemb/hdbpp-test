@@ -126,6 +126,11 @@ public class Period {
       if(endTime>stop) {
         // Full period
         periods.add(new Period(start, stop,true));
+        /*
+        long middle = start+12*60*60*1000;
+        periods.add(new Period(start, middle,false));
+        periods.add(new Period(middle, stop,false));
+        */
       } else {
         // Last period
         periods.add(new Period(start, endTime,false));

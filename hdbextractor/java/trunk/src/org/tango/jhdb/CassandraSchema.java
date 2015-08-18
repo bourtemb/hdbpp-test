@@ -115,7 +115,7 @@ public class CassandraSchema extends HdbReader {
   };
 
   // Maximum number of asynchronous call launched simultaneously
-  private final static int  MAX_ASYNCH_CALL = 3;
+  private final static int  MAX_ASYNCH_CALL = 6;
 
   // Prepared queries for getting data
   private static PreparedStatement[] prepQueries = new PreparedStatement[tableNames.length*2];
@@ -444,6 +444,7 @@ public class CassandraSchema extends HdbReader {
         // Launch asynchronous calls
         boundStatement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
         boundStatement.setFetchSize(Integer.MAX_VALUE);
+        //boundStatement.setFetchSize(3600*24*100);
         resultSetFutures.add(session.executeAsync(boundStatement));
 
       }
