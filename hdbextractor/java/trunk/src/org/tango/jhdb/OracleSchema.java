@@ -33,6 +33,22 @@ public class OracleSchema extends HdbReader {
 
   }
 
+  public String getInfo() throws HdbFailed {
+
+    try {
+
+      String v = String.format("%.1f",Hdb.LIB_RELEASE);
+      String version =  "Oracle HDB API v" + v + "\n";
+      String host = "Host:" + connection.getDb().getHost() + "\n";
+      String service = "Service:" + connection.getDb().getServiceName();
+      return version + host + service;
+
+    } catch (HdbException e) {
+      throw new HdbFailed(buildMessage(e));
+    }
+
+  }
+
   public String[] getHosts() throws HdbFailed {
 
    try {

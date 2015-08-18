@@ -331,6 +331,11 @@ public abstract class HdbReader {
 
   }
 
+  /**
+   * Returns information on this connection.
+   */
+  public abstract String getInfo() throws HdbFailed;
+
 
   /**
    * Return true if this reader has a progress listener

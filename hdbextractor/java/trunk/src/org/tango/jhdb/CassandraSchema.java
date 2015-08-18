@@ -222,6 +222,15 @@ public class CassandraSchema extends HdbReader {
 
   }
 
+  public String getInfo() throws HdbFailed {
+
+    String v = String.format("%.1f",Hdb.LIB_RELEASE);
+    String version =  "Cassandra HDB++ API v" + v + "\n";
+    String url = "Cluster:" + session.getCluster().getClusterName();
+    return version + url;
+
+  }
+
   public String[] getAttributeList() throws HdbFailed {
 
     ArrayList<String> list = new ArrayList<String>();

@@ -79,6 +79,7 @@ public class MySQLSchema extends HdbReader {
   private final static int PROGRESS_NBROW =10000;
   private Connection connection;
   private AttributeBrowser browser=null;
+  private String dbURL;
 
   /**
    * Connects to a MySQL HDB.
@@ -138,7 +139,7 @@ public class MySQLSchema extends HdbReader {
       connectProperties.setProperty("tcpKeepAlive ", "true"); //Enable TCP keep-alive probe
 
       // URL example: jdbc:postgresql://host:port/database
-      String  dbURL = DEFAULT_DB_URL_PREFIX + host + ":" +
+      dbURL = DEFAULT_DB_URL_PREFIX + host + ":" +
           Integer.toString(port) + "/" + db;
 
       connection = DriverManager.getConnection(dbURL, connectProperties);
@@ -146,6 +147,15 @@ public class MySQLSchema extends HdbReader {
     } catch (SQLException e) {
       throw new HdbFailed("Failed to connect to MySQL: "+e.getMessage());
     }
+
+  }
+
+  public String getInfo() throws HdbFailed {
+
+    String v = String.format("%.1f",Hdb.LIB_RELEASE);
+    String version =  "MySQL HDB++ API v" + v + "\n";
+    String url = "URL:" + dbURL;
+    return version + url;
 
   }
 
