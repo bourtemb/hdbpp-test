@@ -104,6 +104,28 @@ public abstract class HdbData {
   }
 
   /**
+   * Return number of item of the read value of this HdbData (1 is returned in case of scalar data).
+   */
+  public int size() {
+
+    if(hasFailed())
+      return 0;
+    return dataSize();
+
+  }
+
+  /**
+   * Return number of item of the write value of this HdbData (1 is returned in case of scalar data).
+   */
+  public int sizeW() {
+
+    if(hasFailed())
+      return 0;
+    return dataSizeW();
+
+  }
+
+  /**
    * Returns error message if this record has failed
    */
   public String getErrorMessage() {
@@ -234,6 +256,9 @@ public abstract class HdbData {
   }
 
   // Convenience functions
+  abstract int dataSize();
+  abstract int dataSizeW();
+
   abstract void copyData(HdbData src);
 
   public HdbData copy() throws HdbFailed {

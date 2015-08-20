@@ -132,6 +132,22 @@ public class HdbUShortArray extends HdbData {
   }
 
   // Convenience function
+  int dataSize() {
+    if(value==null)
+      return 0;
+    else
+      return value.length;
+  }
+  int dataSizeW() {
+    if(HdbSigInfo.isRWType(type))
+      if(wvalue==null)
+        return 0;
+      else
+        return wvalue.length;
+    else
+      return 0;
+  }
+
   void copyData(HdbData src) {
     this.value = ((HdbUShortArray)src).value.clone();
     this.wvalue = ((HdbUShortArray)src).wvalue.clone();

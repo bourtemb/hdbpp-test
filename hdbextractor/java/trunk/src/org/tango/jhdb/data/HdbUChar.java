@@ -125,6 +125,17 @@ public class HdbUChar extends HdbData {
   }
 
   // Convenience function
+  int dataSize() {
+    return 1;
+  }
+  int dataSizeW() {
+    if(HdbSigInfo.isRWType(type))
+      return 1;
+    else
+      return 0;
+  }
+
+
   void copyData(HdbData src) {
     this.value = ((HdbUChar)src).value;
     this.wvalue = ((HdbUChar)src).wvalue;

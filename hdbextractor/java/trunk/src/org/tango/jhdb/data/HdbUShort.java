@@ -125,6 +125,16 @@ public class HdbUShort extends HdbData {
   }
 
   // Convenience function
+  int dataSize() {
+    return 1;
+  }
+  int dataSizeW() {
+    if(HdbSigInfo.isRWType(type))
+      return 1;
+    else
+      return 0;
+  }
+
   void copyData(HdbData src) {
     this.value = ((HdbUShort)src).value;
     this.wvalue = ((HdbUShort)src).wvalue;

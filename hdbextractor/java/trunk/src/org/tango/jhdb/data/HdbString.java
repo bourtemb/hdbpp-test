@@ -106,6 +106,17 @@ public class HdbString extends HdbData {
   }
 
   // Convenience function
+  int dataSize() {
+    return 1;
+  }
+  int dataSizeW() {
+    if(HdbSigInfo.isRWType(type))
+      return 1;
+    else
+      return 0;
+  }
+
+
   void copyData(HdbData src) {
     this.value = new String(((HdbString)src).value);
     this.wvalue = new String(((HdbString)src).wvalue);
