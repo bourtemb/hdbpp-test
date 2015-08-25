@@ -150,7 +150,8 @@ public class HdbULongArray extends HdbData {
 
   void copyData(HdbData src) {
     this.value = ((HdbULongArray)src).value.clone();
-    this.wvalue = ((HdbULongArray)src).wvalue.clone();
+    if(((HdbULongArray)src).wvalue!=null)
+      wvalue = ((HdbULongArray)src).wvalue.clone();
   }
 
   public String getValueAsString() {

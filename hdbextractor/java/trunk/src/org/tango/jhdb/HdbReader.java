@@ -170,10 +170,10 @@ public abstract class HdbReader {
     }
 
     // Correlated mode
-    if(extractMode==MODE_CORRELATED)
+    if(extractMode==MODE_CORRELATED && ret.length>1)
       correlate(ret);
 
-    if(extractMode==MODE_FILLED)
+    if(extractMode==MODE_FILLED && ret.length>1)
       fill(ret);
 
     return ret;

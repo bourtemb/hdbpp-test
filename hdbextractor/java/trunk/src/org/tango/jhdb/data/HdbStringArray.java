@@ -131,8 +131,9 @@ public class HdbStringArray extends HdbData {
   }
 
   void copyData(HdbData src) {
-    this.value = ((HdbStringArray)src).value.clone();
-    this.wvalue = ((HdbStringArray)src).wvalue.clone();
+    value = ((HdbStringArray)src).value.clone();
+    if(((HdbStringArray)src).wvalue!=null)
+      wvalue = ((HdbStringArray)src).wvalue.clone();
   }
 
   public String getValueAsString() {

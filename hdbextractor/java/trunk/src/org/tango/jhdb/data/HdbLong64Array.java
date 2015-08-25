@@ -117,8 +117,9 @@ public class HdbLong64Array extends HdbData {
   }
 
   void copyData(HdbData src) {
-    this.value = ((HdbLong64Array)src).value.clone();
-    this.wvalue = ((HdbLong64Array)src).wvalue.clone();
+    value = ((HdbLong64Array)src).value.clone();
+    if(((HdbLong64Array)src).wvalue!=null)
+      wvalue = ((HdbLong64Array)src).wvalue.clone();
   }
 
   public String getValueAsString() {

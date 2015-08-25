@@ -149,8 +149,9 @@ public class HdbBooleanArray extends HdbData {
   }
 
   void copyData(HdbData src) {
-    this.value = ((HdbBooleanArray)src).value.clone();
-    this.wvalue = ((HdbBooleanArray)src).wvalue.clone();
+    value = ((HdbBooleanArray)src).value.clone();
+    if(((HdbBooleanArray)src).wvalue!=null)
+      wvalue = ((HdbBooleanArray)src).wvalue.clone();
   }
 
   public String getValueAsString() {
