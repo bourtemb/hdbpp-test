@@ -540,7 +540,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevUChar ReadOnly Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevUChar_rw (
+CREATE TABLE IF NOT EXISTS att_array_devuchar_rw (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -696,7 +696,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevULong ReadOnly Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevULong_rw (
+CREATE TABLE IF NOT EXISTS att_array_devulong_rw (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -735,7 +735,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevLong64 ReadOnly Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevLong64_rw (
+CREATE TABLE IF NOT EXISTS att_array_devlong64_rw (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -833,7 +833,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevFloat ReadWrite Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevDouble_ro (
+CREATE TABLE IF NOT EXISTS att_array_devdouble_ro (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -852,7 +852,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevDouble ReadOnly Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevDouble_rw (
+CREATE TABLE IF NOT EXISTS att_array_devdouble_rw (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -872,7 +872,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevDouble ReadWrite Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevString_ro (
+CREATE TABLE IF NOT EXISTS att_array_devstring_ro (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -891,7 +891,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevString ReadOnly Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevString_rw (
+CREATE TABLE IF NOT EXISTS att_array_devstring_rw (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -911,7 +911,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevString ReadWrite Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevState_ro (
+CREATE TABLE IF NOT EXISTS att_array_devstate_ro (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -931,7 +931,7 @@ PRIMARY KEY ((att_conf_id ,period),data_time,data_time_us)
 WITH comment='Array DevState ReadOnly Values Table'
 AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 
-CREATE TABLE IF NOT EXISTS att_array_DevState_rw (
+CREATE TABLE IF NOT EXISTS att_array_devstate_rw (
 att_conf_id timeuuid,
 period text,
 data_time timestamp,
@@ -993,8 +993,7 @@ AND compaction = {  'class' :  'DateTieredCompactionStrategy' };
 -------------------------
 -- att_parameter table --
 -------------------------
-CREATE TABLE IF NOT EXISTS att_parameter
-(
+CREATE TABLE IF NOT EXISTS att_parameter (
 att_conf_id timeuuid,
 recv_time timestamp,
 recv_time_us int,
@@ -1011,3 +1010,48 @@ archive_period text,
 description text,
 PRIMARY KEY((att_conf_id), recv_time, recv_time_us)
 ) WITH COMMENT='Attribute configuration parameters';
+
+--------------------------------
+-- Attributes browsing tables --
+--------------------------------
+CREATE TABLE IF NOT EXISTS domains ( 
+cs_name text,
+domain text,
+PRIMARY KEY (cs_name, domain)
+)
+WITH CLUSTERING ORDER BY (domain ASC)
+AND WITH comment='Domains Table'
+AND caching = {'keys' : 'NONE', 'rows_per_partition': 'ALL' };
+
+CREATE TABLE IF NOT EXISTS families ( 
+cs_name text,
+domain text,
+family text,
+PRIMARY KEY ((cs_name, domain),family)
+)
+WITH CLUSTERING ORDER BY (family ASC)
+AND WITH comment='Families Table'
+AND caching = {'keys' : 'NONE', 'rows_per_partition': 'ALL' };
+
+CREATE TABLE IF NOT EXISTS members (
+cs_name text,
+domain text,
+family text,
+member text,
+PRIMARY KEY ((cs_name, domain,family),member)
+)
+WITH CLUSTERING ORDER BY (member ASC)
+AND WITH comment='Members Table'
+AND caching = {'keys' : 'NONE', 'rows_per_partition': 'ALL' };
+
+CREATE TABLE IF NOT EXISTS att_names (
+cs_name text,
+domain text,
+family text,
+member text,
+name text,
+PRIMARY KEY ((cs_name, domain,family,member),name)
+)
+WITH CLUSTERING ORDER BY (name ASC)
+AND WITH comment='Attributes Names Table'
+AND caching = {'keys' : 'NONE', 'rows_per_partition': 'ALL' };
