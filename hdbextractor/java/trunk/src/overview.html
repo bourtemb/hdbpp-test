@@ -1,0 +1,43 @@
+<html>
+<body>
+
+The Hdb framework allows accessing data from Tango HDB++.Here is a small code example:
+
+<pre>
+<code>
+ Hdb hdb = new Hdb();
+ try {
+
+   // Connect to HDB ++ using system variables
+   hdb.connect();
+   String[] attList = hdb.getReader().getAttributeList();
+   ArrayList&lt;HdbData&gt; data = hdb.getReader().getData(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00");
+   for(int i=0;i&lt;data.size();i++)
+     System.out.println("  Rec #"+i+" :"+data.get(i));
+
+ } catch (HdbFailed e) {
+   System.out.println(e.getMessage());
+ }
+</code>
+</pre>
+
+System environment variables that may need to be defined:
+
+<pre>
+
+<b>HDB_TYPE</b> MYSQL,CASSANDRA or ORACLE
+<b>HDB_NAME</b> HDB++ Database name
+<b>HDB_USER</b> MySQL username
+<b>HDB_PASSWORD</b> MySQL passwrod
+
+Cassandra specific system variables:
+<b>HDB_CONTACT_POINTS</b> List of contact points separated by a ','
+
+MySQL specific system variables:
+<b>HDB_MYSQL_HOST</b>  MySQL hostname
+<b>HDB_MYSQL_PORT</b> MySQL TCP connection port
+
+</pre>
+
+</body>
+</html>

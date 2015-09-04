@@ -41,8 +41,8 @@ import java.util.ArrayList;
 /**
  * The Hdb framework allows accessing data from Tango HDB++.
  *
- * <code>
- *
+ * <pre>
+ * {@code
  * Hdb hdb = new Hdb();
  * try {
  *
@@ -55,8 +55,8 @@ import java.util.ArrayList;
  * } catch (HdbFailed e) {
  *   System.out.println(e.getMessage());
  * }
- *
- * </code>
+ *}
+ * </pre>
  *
  * @author JL Pons
  */
