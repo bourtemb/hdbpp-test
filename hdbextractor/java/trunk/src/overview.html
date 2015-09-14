@@ -1,25 +1,61 @@
 <html>
+<STYLE>
+body {
+    background: ivory;
+    color: black;
+}
+DIV.description {
+    color: maroon;
+    margin-top: -0.4cm;
+}
+SPAN.linenumber {
+    color: maroon;
+}
+SPAN.string {
+    color: #008080;
+}
+SPAN.comment {
+    color: green;
+}
+SPAN.keyword {
+    color: blue;
+    font-weight: bold;
+}
+SPAN.userkeyword {
+    color: purple;
+    font-weight: bold;
+}
+</STYLE>
 <body>
 
 The Hdb framework allows accessing data from Tango HDB++.Here is a small code example:
 
-<pre>
-<code>
- Hdb hdb = new Hdb();
- try {
+<PRE>
+  Hdb hdb = <SPAN class="keyword">new</SPAN> Hdb();
 
-   // Connect to HDB ++ using system variables
-   hdb.connect();
-   String[] attList = hdb.getReader().getAttributeList();
-   ArrayList&lt;HdbData&gt; data = hdb.getReader().getData(attName[0],"09/07/2015 12:00:00","10/07/2015 12:00:00");
-   for(int i=0;i&lt;data.size();i++)
-     System.out.println("  Rec #"+i+" :"+data.get(i));
+  <SPAN class="keyword">try</SPAN> {
 
- } catch (HdbFailed e) {
-   System.out.println(e.getMessage());
- }
-</code>
-</pre>
+   <SPAN class="comment">// Connect to HDB ++ using system variables
+</SPAN>   hdb.connect();
+
+   <SPAN class="comment">// Get list of archived attributes
+</SPAN>   String[] attList = hdb.getReader().getAttributeList();
+
+   <SPAN class="comment">// Fetch data
+</SPAN>   HdbDataSet data = hdb.getReader().getData(attList[0],<SPAN class="string">"09/07/2015 12:00:00"</SPAN>,<SPAN class="string">"10/07/2015 12:00:00"</SPAN>);
+
+   <SPAN class="comment">// Display data
+</SPAN>   <SPAN class="keyword">for</SPAN>(<SPAN class="keyword">int</SPAN> i=0;i&lt;data.size();i++) {
+     HdbData d = data.get(i);
+     <SPAN class="keyword">long</SPAN> ms = d.getDataTime()/1000;
+     System.out.println(<SPAN class="string">"  Rec #"</SPAN>+i+<SPAN class="string">" :"</SPAN>+Hdb.hdbDateFormat.format(ms)+<SPAN class="string">" "</SPAN>+d.getValueAsDouble());
+   }
+
+
+  } <SPAN class="keyword">catch</SPAN> (HdbFailed e) {
+    System.out.println(e.getMessage());
+  }
+</PRE>
 
 System environment variables that may need to be defined:
 
