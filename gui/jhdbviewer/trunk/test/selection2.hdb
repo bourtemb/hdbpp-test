@@ -1,0 +1,24 @@
+HDBfile v1.0 {
+  Global {
+    script:"/mntdirect/_segfs/tango/jclient/jhdbviewer/test.py"
+    showError:true
+    timeInterval:1
+    hdbMode:2
+  }
+  Attribute {
+    host:"orion.esrf.fr:10000"
+    name:"sr/d-ct/1/current"
+    step:false
+    table:false
+    selection:1
+    wselection:0
+  }
+  Attribute {
+    host:"orion.esrf.fr:10000"
+    name:"sr/d-ct/1/lifetime"
+    step:false
+    table:false
+    selection:2
+    wselection:0
+  }
+}

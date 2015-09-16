@@ -1,0 +1,42 @@
+HDBfile v1.0 {
+  Global {
+    script:""
+    showError:false
+    timeInterval:2
+    hdbMode:0
+  }
+  Attribute {
+    host:"orion.esrf.fr:10000"
+    name:"sr/st-h/all/current"
+    step:false
+    table:false
+    selection:0
+    wselection:0
+    expanded: {
+    idx 1 {
+      step:false
+      table:false
+      selection:1
+      wselection:0
+    }
+    idx 2 {
+      step:false
+      table:false
+      selection:2
+      wselection:0
+    }
+    idx 3 {
+      step:false
+      table:false
+      selection:1
+      wselection:0
+    }
+    idx 45 {
+      step:false
+      table:false
+      selection:2
+      wselection:0
+    }
+    }
+  }
+}
