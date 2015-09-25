@@ -433,17 +433,17 @@ public class PropertyDialog extends JDialog implements TangoConst {
             try {
                 //	Get property values.
                 boolean changed = false;
-                if (attributeInfoEx.events.arch_event.abs_change!=null ||
+                if (attributeInfoEx.events.arch_event.abs_change!=null &&
                    !attributeInfoEx.events.arch_event.abs_change.equals(absTxt.getText().trim())) {
                     attributeInfoEx.events.arch_event.abs_change = absTxt.getText().trim();
                     changed = true;
                 }
-                if (attributeInfoEx.events.arch_event.rel_change!=null ||
+                if (attributeInfoEx.events.arch_event.rel_change!=null &&
                    !attributeInfoEx.events.arch_event.rel_change.equals(relTxt.getText().trim())) {
                     attributeInfoEx.events.arch_event.rel_change = relTxt.getText().trim();
                      changed = true;
                 }
-                if (attributeInfoEx.events.arch_event.period!=null ||
+                if (attributeInfoEx.events.arch_event.period!=null &&
                    !attributeInfoEx.events.arch_event.period.equals(eventPeriodTxt.getText().trim())) {
                     attributeInfoEx.events.arch_event.period = eventPeriodTxt.getText().trim();
                     changed = true;
@@ -523,7 +523,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
     private void displayProperty() throws DevFailed {
         if (!manageProperties)
             return;
-
+// ToDo
         if (attributeProxy== null)
             attributeProxy = new AttributeProxy(attributeName);
         attributeInfoEx = attributeProxy.get_info_ex();
