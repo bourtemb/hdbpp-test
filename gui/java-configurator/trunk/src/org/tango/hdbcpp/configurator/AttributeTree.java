@@ -585,6 +585,7 @@ public class AttributeTree extends JTree {
     private class Attribute extends PathComponent {
         Member member;
         String archiver = null;
+        boolean checked = false;
         //===========================================================
         private Attribute(String name, Member member) {
             this.name = name;
@@ -598,7 +599,9 @@ public class AttributeTree extends JTree {
             Runnable doItLater = new Runnable() {
                 public void run() {
                     parent.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+                    checked = false;
                     checkIfSubscribed();
+                    checked = true;
                     repaint();
                     parent.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
@@ -731,10 +734,15 @@ public class AttributeTree extends JTree {
                     Attribute attribute = (Attribute) node.getUserObject();
                     setIcon(attribute.getIcon());
                     setToolTipText(attribute.getToolTip());
-                    if (attribute.archiver==null)
-                        setFont(attributeFont);
-                    else
+                    if (!attribute.checked)
                         setFont(deviceFont);    //  BOLD
+                    else
+                    if (attribute.archiver!=null) {
+                        setFont(deviceFont);    //  BOLD
+                    }
+                    else {
+                        setFont(attributeFont);
+                    }
                 }
                 else {
                     setFont(deviceFont);
