@@ -63,6 +63,7 @@ public class CassandraSchema extends HdbReader {
       "att_scalar_devlong64_rw",
       "att_array_devlong64_ro",
       "att_array_devlong64_rw",
+      // OLD INT8 type (no longer used)
       "",
       "",
       "",

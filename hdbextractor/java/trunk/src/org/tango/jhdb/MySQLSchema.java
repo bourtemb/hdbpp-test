@@ -52,26 +52,64 @@ public class MySQLSchema extends HdbReader {
 
   private final static String[] tableNames = {
 
-      "NONE",
-      "att_scalar_double_ro",
-      "att_scalar_double_rw",
-      "att_array_double_ro",
-      "att_array_double_rw",
-
-      "att_scalar_int64_ro",
-      "att_scalar_int64_rw",
-      "att_array_int64_ro",
-      "att_array_int64_rw",
-
-      "att_scalar_int8_ro",
-      "att_scalar_int8_rw",
-      "att_array_int8_ro",
-      "att_array_int8_rw",
-
-      "att_scalar_string_ro",
-      "att_scalar_string_rw",
-      "att_array_string_ro",
-      "att_array_string_rw"
+      "",
+      "att_scalar_devdouble_ro",
+      "att_scalar_devdouble_rw",
+      "att_array_devdouble_ro",
+      "att_array_devdouble_rw",
+      "att_scalar_devlong64_ro",
+      "att_scalar_devlong64_rw",
+      "att_array_devlong64_ro",
+      "att_array_devlong64_rw",
+      // OLD INT8 type (no longer used)
+      "",
+      "",
+      "",
+      "",
+      "att_scalar_devstring_ro",
+      "att_scalar_devstring_rw",
+      "att_array_devstring_ro",
+      "att_array_devstring_rw",
+      "att_scalar_devfloat_ro",
+      "att_scalar_devfloat_rw",
+      "att_array_devfloat_ro",
+      "att_array_devfloat_rw",
+      "att_scalar_devuchar_ro",
+      "att_scalar_devuchar_rw",
+      "att_array_devuchar_ro",
+      "att_array_devuchar_rw",
+      "att_scalar_devshort_ro",
+      "att_scalar_devshort_rw",
+      "att_array_devshort_ro",
+      "att_array_devshort_rw",
+      "att_scalar_devushort_ro",
+      "att_scalar_devushort_rw",
+      "att_array_devushort_ro",
+      "att_array_devushort_rw",
+      "att_scalar_devlong_ro",
+      "att_scalar_devlong_rw",
+      "att_array_devlong_ro",
+      "att_array_devlong_rw",
+      "att_scalar_devulong_ro",
+      "att_scalar_devulong_rw",
+      "att_array_devulong_ro",
+      "att_array_devulong_rw",
+      "att_scalar_devstate_ro",
+      "att_scalar_devstate_rw",
+      "att_array_devstate_ro",
+      "att_array_devstate_rw",
+      "att_scalar_devboolean_ro",
+      "att_scalar_devboolean_rw",
+      "att_array_devboolean_ro",
+      "att_array_devboolean_rw",
+      "att_scalar_devencoded_ro",
+      "att_scalar_devencoded_rw",
+      "att_array_devencoded_ro",
+      "att_array_devencoded_rw",
+      "att_scalar_devulong64_ro",
+      "att_scalar_devulong64_rw",
+      "att_array_devulong64_ro",
+      "att_array_devulong64_rw"
 
   };
 
@@ -218,14 +256,16 @@ public class MySQLSchema extends HdbReader {
     HdbSigInfo ret = new HdbSigInfo();
     ret.name = attName;
 
-    String query = "SELECT att_conf_id,att_conf_data_type_id FROM att_conf WHERE att_name='" + attName + "'";
+    String query = "SELECT att_conf.att_conf_id,att_conf_data_type.data_type FROM att_conf,att_conf_data_type WHERE " +
+                   "att_conf.att_conf_data_type_id=att_conf_data_type.att_conf_data_type_id " +
+                   "AND att_name='" + attName + "'";
 
     try {
       Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
       ResultSet resultSet = statement.executeQuery(query);
       if(resultSet.next()) {
         ret.sigId = resultSet.getString(1);
-        ret.type = resultSet.getInt(2);
+        ret.type = HdbSigInfo.typeFromName(resultSet.getString(2));
       } else {
         throw new HdbFailed("Signal not found");
       }
