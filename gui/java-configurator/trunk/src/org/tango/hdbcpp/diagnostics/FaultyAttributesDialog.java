@@ -40,9 +40,7 @@ import fr.esrf.TangoApi.DeviceData;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.hdbcpp.common.Subscriber;
-import org.tango.hdbcpp.common.SubscriberMap;
-import org.tango.hdbcpp.tools.*;
+import org.tango.hdbcpp.common.*;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

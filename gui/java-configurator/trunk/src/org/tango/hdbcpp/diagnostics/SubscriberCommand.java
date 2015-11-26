@@ -40,8 +40,8 @@ import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import org.tango.hdbcpp.common.Subscriber;
 import org.tango.hdbcpp.common.SubscriberMap;
-import org.tango.hdbcpp.tools.TangoUtils;
-import org.tango.hdbcpp.tools.Utils;
+import org.tango.hdbcpp.common.TangoUtils;
+import org.tango.hdbcpp.common.Utils;
 
 import java.util.Date;
 import java.util.List;

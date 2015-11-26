@@ -41,9 +41,7 @@ import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.hdbcpp.atktable.TableScalarViewer;
-import org.tango.hdbcpp.common.Subscriber;
-import org.tango.hdbcpp.common.SubscriberMap;
-import org.tango.hdbcpp.tools.*;
+import org.tango.hdbcpp.common.*;
 
 import javax.swing.*;
 import java.util.ArrayList;

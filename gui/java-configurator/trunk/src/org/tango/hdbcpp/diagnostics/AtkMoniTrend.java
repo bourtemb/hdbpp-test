@@ -35,7 +35,7 @@ package org.tango.hdbcpp.diagnostics;
 
 import fr.esrf.tangoatk.widget.attribute.Trend;
 import fr.esrf.tangoatk.widget.util.Gradient;
-import org.tango.hdbcpp.tools.SplashUtils;
+import org.tango.hdbcpp.common.SplashUtils;
 
 import java.awt.*;
 import java.util.ArrayList;

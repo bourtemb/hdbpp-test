@@ -38,7 +38,7 @@ package org.tango.hdbcpp.diagnostics;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import org.tango.hdbcpp.tools.SplashUtils;
+import org.tango.hdbcpp.common.SplashUtils;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
