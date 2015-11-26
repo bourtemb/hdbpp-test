@@ -38,6 +38,7 @@ package org.tango.hdbcpp.tools;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 //======================================================
 /**
@@ -66,7 +67,7 @@ public class StringComparator implements Comparator<String> {
     //======================================================
     //======================================================
     public static String[] sortArray(String[] inArray) {
-        ArrayList<String>   list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         Collections.addAll(list, inArray);
         Collections.sort(list, new StringComparator());
         String[]    outArray = new String[list.size()];

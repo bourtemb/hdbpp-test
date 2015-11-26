@@ -58,7 +58,7 @@ public class SplashUtils {
     private static boolean splashActive = false;
     private static final String packageName = "org.tango.hdbcpp";
     public static final String revNumber =
-            "2.1  -  Tue May 19 14:31:09 CEST 2015";
+            "2.3  -  Thu Nov 26 10:20:05 CET 2015";
 
     private static SplashUtils instance = new SplashUtils();
     private static final String imageFile = "FullTangoLogo.gif";
@@ -154,6 +154,7 @@ public class SplashUtils {
 
     //=======================================================
     //=======================================================
+    @SuppressWarnings("unused")
     public void showSplash(boolean b) {
         if (splash != null)
             splash.setVisible(b);
@@ -171,17 +172,20 @@ public class SplashUtils {
 
     //=======================================================
     //=======================================================
+    @SuppressWarnings("unused")
     public boolean getSplashActive() {
         return splashActive;
     }
 
     //=======================================================
     //=======================================================
+    @SuppressWarnings("unused")
     public void setSplashActive(boolean b) {
         splashActive = b;
     }
     //=======================================================
     //=======================================================
+    @SuppressWarnings("unused")
     public void startAutoUpdate() {
         new UpdateThread().start();
     }

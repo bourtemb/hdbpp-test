@@ -47,6 +47,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class Utils {
@@ -183,8 +184,8 @@ public class Utils {
      * @throws DevFailed in case of failure during read file.
      */
     //===============================================================
-    public static ArrayList<String> readFileLines(String fileName) throws DevFailed {
-        ArrayList<String>   lines = new ArrayList<String>();
+    public static List<String> readFileLines(String fileName) throws DevFailed {
+        List<String>   lines = new ArrayList<>();
         String code = readFile(fileName);
         StringTokenizer stringTokenizer = new StringTokenizer(code, "\n");
         while (stringTokenizer.hasMoreTokens())
@@ -230,7 +231,7 @@ public class Utils {
     //======================================================================
     //======================================================================
     public static String[] matchFilter(String[] attributes, String pattern) {
-        ArrayList<String>   list = new ArrayList<String>();
+        List<String>   list = new ArrayList<>();
         for (String attribute : attributes) {
             if (matches(attribute.substring("tango://".length()), pattern)) {
                 list.add(attribute);
@@ -245,11 +246,11 @@ public class Utils {
     //======================================================================
     public static boolean matches(String attributeName, String pattern) {
         StringTokenizer stk = new StringTokenizer(attributeName, "/");
-        ArrayList<String>   attributeTokens = new ArrayList<String>();
+        List<String>   attributeTokens = new ArrayList<>();
         while (stk.hasMoreTokens())  attributeTokens.add(stk.nextToken());
 
         stk = new StringTokenizer(pattern, "/");
-        ArrayList<String>   patternTokens = new ArrayList<String>();
+        List<String>   patternTokens = new ArrayList<>();
         while (stk.hasMoreTokens())  patternTokens.add(stk.nextToken());
 
         int index = 0;
@@ -374,8 +375,37 @@ public class Utils {
 
     //======================================================================
     //======================================================================
+    public static void startHdbViewer(String fullAttributeName) throws DevFailed {
+        //  Split tango host and attribute name
+        String tangoHost = TangoUtils.getOnlyTangoHost(fullAttributeName);
+        String attributeName = TangoUtils.getOnlyDeviceName(fullAttributeName);
+        System.out.println(attributeName);
+        System.out.println(tangoHost);
+
+        //  Start hdb viewer
+        try {
+            HDBViewer.MainPanel hdbViewer = new HDBViewer.MainPanel(false, true);
+            hdbViewer.setTimeInterval(3); // Last day
+            hdbViewer.addAttribute(tangoHost, attributeName);
+            hdbViewer.setVisible(true);
+            hdbViewer.performSearch();
+        }
+        catch (Exception | Error e) {
+            Except.throw_exception("HdbFailed", e.toString());
+        }
+    }
+    //======================================================================
+    //======================================================================
     public static void main(String[] args) {
+        /*
         boolean b = matches("a/b/v-rga/d", "a/b/*rga/d");
         System.out.println(b);
+        */
+        try {
+            startHdbViewer("tango://orion.esrf.fr:10000/sr/d-ct/1/current");
+        }
+        catch (DevFailed  e) {
+            ErrorPane.showErrorMessage(new JFrame(), null, e);
+        }
     }
 }

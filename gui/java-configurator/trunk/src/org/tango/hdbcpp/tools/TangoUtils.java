@@ -252,7 +252,7 @@ public class TangoUtils {
     public static List<String[]> getSubscriberLabels() throws DevFailed {
         DbDatum datum = ApiUtil.get_db_obj().get_property(
                 "HdbConfigurator", "ArchiverLabels");
-        ArrayList<String[]> labels = new ArrayList<String[]>();
+        List<String[]> labels = new ArrayList<>();
         if (datum.is_empty())
             return labels;
 
@@ -298,7 +298,7 @@ public class TangoUtils {
         if (!header.isEmpty() && !header.endsWith("/"))
             header += "/";
         //  For each device name
-        ArrayList<String>   fields = new ArrayList<String>();
+        List<String>   fields = new ArrayList<>();
         for (String deviceName : deviceNames) {
             //  Start with header ?
             if (deviceName.startsWith(header)) {
@@ -316,7 +316,7 @@ public class TangoUtils {
     }
     //======================================================================
     //======================================================================
-    private static boolean mustBeAdded(String str, ArrayList<String> list) {
+    private static boolean mustBeAdded(String str, List<String> list) {
         if (str==null)
             return false;
         for (String s : list) {
@@ -374,7 +374,7 @@ public class TangoUtils {
     //======================================================================
     //======================================================================
     public static List<String> getDefaultTangoHostList() throws DevFailed {
-        ArrayList<String>   list = new ArrayList<String>();
+        List<String>   list = new ArrayList<>();
         Database database = ApiUtil.get_db_obj();
         String[]    tangoHosts = database.getPossibleTangoHosts();
         Collections.addAll(list, tangoHosts);
