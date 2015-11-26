@@ -42,7 +42,6 @@ import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.hdbcpp.common.*;
-import org.tango.hdbcpp.tools.*;
 
 import javax.swing.*;
 import java.awt.*;

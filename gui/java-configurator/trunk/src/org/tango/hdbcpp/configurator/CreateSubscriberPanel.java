@@ -42,8 +42,8 @@ import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.hdbcpp.common.Subscriber;
 import org.tango.hdbcpp.common.SubscriberMap;
-import org.tango.hdbcpp.tools.ArchiverUtils;
-import org.tango.hdbcpp.tools.TangoUtils;
+import org.tango.hdbcpp.common.ArchiverUtils;
+import org.tango.hdbcpp.common.TangoUtils;
 
 import javax.swing.*;
 import java.awt.*;

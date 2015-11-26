@@ -38,9 +38,9 @@ import fr.esrf.TangoApi.AttributeProxy;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import org.tango.hdbcpp.common.Subscriber;
-import org.tango.hdbcpp.tools.ArchiverUtils;
-import org.tango.hdbcpp.tools.SplashUtils;
-import org.tango.hdbcpp.tools.TangoUtils;
+import org.tango.hdbcpp.common.ArchiverUtils;
+import org.tango.hdbcpp.common.SplashUtils;
+import org.tango.hdbcpp.common.TangoUtils;
 
 import java.util.ArrayList;
 import java.util.List;
