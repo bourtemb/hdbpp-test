@@ -73,15 +73,14 @@ import java.util.List;
 @SuppressWarnings("MagicConstant")
 public class StatisticsDialog extends JDialog {
 
-    private ArrayList<HdbAttribute> filteredHdbAttributes;
-    private ArrayList<HdbAttribute> hdbAttributes;
+    private List<HdbAttribute> filteredHdbAttributes;
+    private List<HdbAttribute> hdbAttributes;
     private JTable table;
     private DataTableModel model;
     private TablePopupMenu popupMenu = new TablePopupMenu();
     private ArrayList<Subscriber> subscribers;
     private int selectedRow    = -1;
     private int selectedColumn = EVENTS_RESET;
-    private String extractionClass = null;
     private String subscriberName = null;
     private long resetTime = 0;
     private long readTime = 0;
@@ -139,7 +138,7 @@ public class StatisticsDialog extends JDialog {
             defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
             initComponents();
             subscriberName = subscriber.getLabel();
-            subscribers = new ArrayList<Subscriber>(1);
+            subscribers = new ArrayList<>(1);
             subscribers.add(subscriber);
             finalizeConstruction(statisticsTimeWindow, "Subscriber " + subscriber.getLabel(), false);
         }
@@ -173,8 +172,8 @@ public class StatisticsDialog extends JDialog {
         resetItem.setVisible(allowReset);
 
         //  Check if extraction available
-        extractionClass = System.getenv("ExtractionClass");
-        readHdbItem.setVisible(extractionClass!=null && !extractionClass.isEmpty());
+        String s = System.getProperty("HDB_TYPE");
+        readHdbItem.setVisible(s!=null && !s.isEmpty());
 
         pack();
         ATKGraphicsUtils.centerDialog(this);
@@ -189,7 +188,7 @@ public class StatisticsDialog extends JDialog {
     public static String formatResetTime(long ms)
     {
         StringTokenizer st = new StringTokenizer(new Date(ms).toString());
-        ArrayList<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         while (st.hasMoreTokens())
             list.add(st.nextToken());
 
@@ -238,7 +237,7 @@ public class StatisticsDialog extends JDialog {
         String[] statAttributeNames = {
                 "AttributeList", "AttributeRecordFreqList", "AttributeEventNumberList" };
         String errorMessage = "";
-        hdbAttributes = new ArrayList<HdbAttribute>();
+        hdbAttributes = new ArrayList<>();
         for (Subscriber subscriber : subscribers) {
             try {
                 //  Read statistic attributes
@@ -278,7 +277,7 @@ public class StatisticsDialog extends JDialog {
         Collections.sort(hdbAttributes, new AttributeComparator());
 
         //  Copy to filtered (no filter at start up)
-        filteredHdbAttributes = new ArrayList<HdbAttribute>();
+        filteredHdbAttributes = new ArrayList<>();
         for (HdbAttribute hdbAttribute : hdbAttributes) {
             filteredHdbAttributes.add(hdbAttribute);
         }
@@ -618,7 +617,6 @@ public class StatisticsDialog extends JDialog {
     //===============================================================
     @SuppressWarnings("UnusedParameters")
     private void readHdbItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_readHdbItemActionPerformed
-        // TODO add your handling code here:
         if (selectedRow<0) {
             Utils.popupError(this, "No attribute selected !");
             return;
@@ -626,9 +624,13 @@ public class StatisticsDialog extends JDialog {
         HdbAttribute    attribute = filteredHdbAttributes.get(selectedRow);
         System.out.println("Display " + attribute.name);
         try {
+            //  ToDo use new HDB API
+            Utils.startHdbViewer(attribute.name);
+            /*
             Component extractor = Utils.getInstance().startExternalApplication(
                     new JFrame(), extractionClass, new String[] {attribute.name});
             extractor.setVisible(false);
+            */
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, e.toString(), e);
@@ -639,7 +641,7 @@ public class StatisticsDialog extends JDialog {
 	//===============================================================
     private void applyFilter() {
         String  filter = filterTextField.getText();
-        filteredHdbAttributes = new ArrayList<HdbAttribute>();
+        filteredHdbAttributes = new ArrayList<>();
         for (HdbAttribute hdbAttribute : hdbAttributes) {
             if (hdbAttribute.shortName.contains(filter)) {
                 filteredHdbAttributes.add(hdbAttribute);
@@ -942,7 +944,7 @@ public class StatisticsDialog extends JDialog {
                 }
             }
             //  Check if extraction available
-            String s = System.getenv("ExtractionClass");
+            String s = System.getProperty("HDB_TYPE");
             getComponent(OFFSET + READ_HDB).setVisible(s!=null && !s.isEmpty());
         }
         //======================================================

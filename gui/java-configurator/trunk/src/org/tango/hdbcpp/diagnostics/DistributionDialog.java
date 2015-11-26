@@ -74,7 +74,7 @@ public class DistributionDialog extends JDialog {
     private SubscriberMap subscriberMap;
     private AttributeChart attributeChartChart;
     private PerformancesChart performancesChart;
-    private ArrayList<Archiver> archivers = new ArrayList<Archiver>();
+    private List<Archiver> archivers = new ArrayList<>();
     private JTable table;
     private int selectedColumn = SUBSCRIBER_NAME;
 
@@ -448,7 +448,7 @@ public class DistributionDialog extends JDialog {
      */
     //===============================================================
     private class DistributionChart extends JLChart{
-        protected ArrayList<JLDataView> dataViews = new ArrayList<JLDataView>();
+        protected List<JLDataView> dataViews = new ArrayList<>();
         protected Archiver selectedArchiver = null;
         protected final String[] labels = {
                 "========================",
@@ -654,7 +654,7 @@ public class DistributionDialog extends JDialog {
                     return null;
 
                 //  Display archiver info
-                ArrayList<String>   lines = new ArrayList<String>();
+                List<String>   lines = new ArrayList<>();
                 lines.add(archiver.title);
                 if (archiver.resetTime>0) {
                     lines.add("Since " + archiver.getResetTime() +
@@ -755,7 +755,7 @@ public class DistributionDialog extends JDialog {
                     return null;
 
                 //  Display archiver info
-                ArrayList<String>   lines = new ArrayList<String>();
+                List<String>   lines = new ArrayList<>();
                 lines.add(archiver.title);
                 if (archiver.resetTime>0) {
                     lines.add("Since " + archiver.getResetTime() +

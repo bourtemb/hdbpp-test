@@ -108,6 +108,11 @@ public class HdbDiagnostics extends JFrame {
         if (!archiveName.isEmpty()) {
             title += "  ("+archiveName+")";
             titleLabel.setText(title);
+
+            //  Check if extraction available
+            String s = System.getenv("HdbExtraction");
+            if (s!=null && s.equals("true"))
+                System.setProperty("HDB_TYPE", archiveName);
         }
         ImageIcon icon = Utils.getInstance().getIcon("hdbcpp.gif", 0.75);
         titleLabel.setIcon(icon);
@@ -127,7 +132,7 @@ public class HdbDiagnostics extends JFrame {
         //  Get subscriber labels if any
         subscriberMap = new SubscriberMap(configuratorProxy);
         labels = subscriberMap.getLabelList();
-        ArrayList<String> deviceNames = new ArrayList<String>();
+        List<String> deviceNames = new ArrayList<>();
         for (String label : labels) {
             deviceNames.add( TangoUtils.getOnlyDeviceName(
                     subscriberMap.getSubscriber(label).name));
@@ -153,7 +158,7 @@ public class HdbDiagnostics extends JFrame {
         }
 
         //  A list of lines (a line per device)
-        ArrayList<String[]> attributeNames = new ArrayList<String[]>();
+        List<String[]> attributeNames = new ArrayList<>();
         for (String deviceName : deviceNames) {
             // Build an array with attribute names
             String[]    line = new String[ATTRIBUTES.length];
@@ -181,9 +186,9 @@ public class HdbDiagnostics extends JFrame {
         for (String attribute :ATTRIBUTES) {
             line[i++] = configuratorDeviceName+'/'+attribute;
         }
-        ArrayList<String[]>   managerAttributes = new ArrayList<String[]>();
+        List<String[]>   managerAttributes = new ArrayList<>();
         managerAttributes.add(line);
-        ArrayList<String>   rows = new ArrayList<String>();
+        List<String>   rows = new ArrayList<>();
         rows.add("E.S.  Manager");
 
         TableScalarViewer   table = new TableScalarViewer(rows, columnNames, managerAttributes, columnWiths);
@@ -459,7 +464,7 @@ public class HdbDiagnostics extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void frequencyTrendItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_frequencyTrendItemActionPerformed
         try {
-            List<String> attributeNames = new ArrayList<String>();
+            List<String> attributeNames = new ArrayList<>();
             attributeNames.add(configuratorProxy.name() + "/" + ATTRIBUTES[RECORD_FREQUENCY]);
             for (String label : labels) {
                 attributeNames.add( TangoUtils.getOnlyDeviceName(
