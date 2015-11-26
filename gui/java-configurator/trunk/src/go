@@ -3,8 +3,12 @@ TANGO_HOME=/segfs/tango/release/java
 Appli=../bin
 
 CLASSPATH=$TANGO_HOME/lib/TangORB.jar:$TANGO_HOME/lib/ATKWidget.jar:$TANGO_HOME/lib/ATKCore.jar
-CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Jive.jar:$Appli
-#CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Astor.jar
+#CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/jhdbviewer.jar
+#CLASSPATH=$CLASSPATH:$TANGO_HOME/lib/HDB++.jar
+#CLASSPATH=$CLASSPATH:$TANGO_HOME/lib/JCalendar/lib/jcalendar-1.4.jar
+CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Jive.jar
+CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Astor.jar
+CLASSPATH=$Appli:$CLASSPATH:
 
 echo "CLASSPATH=$CLASSPATH"
 
@@ -18,7 +22,10 @@ HdbManager=tango/hdb/manager
 HdbManager=tango/hdb-cassandra/manager
 export HdbManager
 
-export ExtractionClass=org.tango.jhdbextract.gui.HdbBrowser
+
+export HdbExtraction=true
+export HDB_MYSQL_HOST=hdbplus
+
 
 if [ "$#" -lt 1 ]
 then

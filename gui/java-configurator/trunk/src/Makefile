@@ -18,7 +18,7 @@
 #-======================================================================
 
 MAJOR_RELEASE = 2
-MINOR_RELEASE  = 1
+MINOR_RELEASE  = 3
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 
@@ -85,7 +85,7 @@ diags:
 
 
 img:
-	cp  $(PACKAGE_HOME)/img/* $(BIN_DIR)/$(PACKAGE_HOME)
+	cp  $(PACKAGE_HOME)/img/* $(BIN_DIR)/$(PACKAGE_HOME)/img
 
 clean:
 	rm  -f $(BIN_DIR)/$(PACKAGE)/tools/*.class

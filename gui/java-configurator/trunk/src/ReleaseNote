@@ -17,6 +17,12 @@
 
 
 
+jhdbcpp-2.3 - 26/11/15:
+	Interface with jhdbvewer to read attribute in hdb.
+
+jhdbcpp-2.2 - 24/09/15:
+	Fix a little bug on plain/bold attribute display
+
 jhdbcpp-2.1 - 19/05/15:
 	Subscriber alias management added.
 	Performance view added in distribution
