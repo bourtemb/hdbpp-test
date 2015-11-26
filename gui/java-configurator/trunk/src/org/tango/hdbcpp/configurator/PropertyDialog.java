@@ -96,7 +96,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
      * Creates new form PropertyDialog for a list of attributes
      */
     //===============================================================
-    public PropertyDialog(JFrame parent, ArrayList<String> attributeNames,
+    public PropertyDialog(JFrame parent, List<String> attributeNames,
                           List<String> subscribers, String defaultItem) {
         super(parent, true);
         this.parent = parent;
@@ -605,7 +605,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
 
         try {
             String signal = "pv/ps/1/current";
-            ArrayList<String>   list = new ArrayList<String>();
+            List<String>   list = new ArrayList<>();
             list.add("Subscriber 1");
             list.add("Subscriber 2");
             list.add("Subscriber 3");

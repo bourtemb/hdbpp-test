@@ -160,6 +160,11 @@ public class HdbConfigurator extends JFrame {
         if (!archiveName.isEmpty()) {
             title += "  ("+archiveName+")";
             titleLabel.setText(title);
+
+            //  Check if extraction available
+            String s = System.getenv("HdbExtraction");
+            if (s!=null && s.equals("true"))
+                System.setProperty("HDB_TYPE", archiveName);
         }
         ImageIcon icon = Utils.getInstance().getIcon("hdbcpp.gif", 0.75);
         titleLabel.setIcon(icon);
@@ -363,6 +368,7 @@ public class HdbConfigurator extends JFrame {
             ErrorPane.showErrorMessage(this, null, e);
         }
     }
+    @SuppressWarnings("Convert2Diamond")
 	//=======================================================
     /** This method is called from within the constructor to
      * initialize the form.
@@ -844,7 +850,7 @@ public class HdbConfigurator extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void addAttributeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAttributeButtonActionPerformed
 
-        ArrayList<String>   attributeNames = attributeTree.getSelectedAttributes();
+        List<String>   attributeNames = attributeTree.getSelectedAttributes();
         if (attributeNames.size()==0)   // nothing to do
             return;
         if (attributeNames.size()==1)   {
@@ -886,7 +892,7 @@ public class HdbConfigurator extends JFrame {
                 if (file.isFile()) {
                     try {
                         String	filename = file.getAbsolutePath();
-                        ArrayList<String>   attributeNames = Utils.readFileLines(filename);
+                        List<String>   attributeNames = Utils.readFileLines(filename);
                         addAttributeList(attributeNames);
                     }
                     catch (DevFailed e) {
@@ -1079,7 +1085,7 @@ public class HdbConfigurator extends JFrame {
     }
     //=======================================================
     //=======================================================
-    private void addAttributeList(ArrayList<String> attributeNames) {
+    private void addAttributeList(List<String> attributeNames) {
          //  Get info for selected attributes
         PropertyDialog  propertyDialog = new PropertyDialog(
                 this, attributeNames, subscriberMap.getLabelList(),
@@ -1097,7 +1103,7 @@ public class HdbConfigurator extends JFrame {
             boolean startArchiving = propertyDialog.startArchiving();
 
             //  Build Hdb Attribute objects
-            ArrayList<HdbAttribute> attributes = new ArrayList<HdbAttribute>();
+            ArrayList<HdbAttribute> attributes = new ArrayList<>();
             for (String attributeName : attributeNames) {
                 attributes.add(new HdbAttribute(attributeName, pushedByCode, startArchiving));
             }
