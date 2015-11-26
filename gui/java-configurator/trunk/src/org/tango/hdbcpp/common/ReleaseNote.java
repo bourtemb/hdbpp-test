@@ -17,7 +17,11 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Tue May 19 14:31:09 CEST 2015)</Center><Br>\n" + 
+		"	(Generated Thu Nov 26 10:20:05 CET 2015)</Center><Br>\n" + 
+		"<li><b>jhdbcpp-2.3 - 26/11/15:</b><Br>\n" + 
+		"&nbsp; &nbsp; Interface with jhdbvewer to read hdb.<Br>\n" + 
+		"<li><b>jhdbcpp-2.2 - 24/09/15:</b><Br>\n" + 
+		"&nbsp; &nbsp; Fix a little bug on plain/bold attribute display<Br>\n" + 
 		"<li><b>jhdbcpp-2.1 - 19/05/15:</b><Br>\n" + 
 		"&nbsp; &nbsp; Subscriber alias management added.<Br>\n" + 
 		"&nbsp; &nbsp; Performance view added in distribution<Br>\n" + 

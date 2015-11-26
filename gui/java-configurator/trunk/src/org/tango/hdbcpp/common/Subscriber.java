@@ -167,7 +167,7 @@ public class Subscriber extends DeviceProxy {
     //======================================================
     //======================================================
     List<String> getTangoHostList() {
-        ArrayList<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         try {
             String[] attributeList = ArchiverUtils.getAttributeList(this, "");
             for (String attributeName : attributeList) {
