@@ -39,10 +39,6 @@ package org.tango.hdbcpp.common;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
-import org.tango.hdbcpp.tools.ArchiverUtils;
-import org.tango.hdbcpp.tools.SplashUtils;
-import org.tango.hdbcpp.tools.StringComparator;
-import org.tango.hdbcpp.tools.TangoUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,10 +54,10 @@ import java.util.List;
  */
 //======================================================
 public class SubscriberMap {
-    private ArrayList<String> labelList = new ArrayList<String>();
-    private Hashtable<String, Subscriber> label2device = new Hashtable<String, Subscriber>();
-    private Hashtable<String, String> deviceName2label = new Hashtable<String, String>();
-    private ArrayList<String> tangoHostList = new ArrayList<String>();
+    private List<String> labelList = new ArrayList<>();
+    private Hashtable<String, Subscriber> label2device = new Hashtable<>();
+    private Hashtable<String, String> deviceName2label = new Hashtable<>();
+    private List<String> tangoHostList = new ArrayList<>();
     //======================================================
     //======================================================
     public SubscriberMap(DeviceProxy configuratorProxy) throws DevFailed {
@@ -132,7 +128,7 @@ public class SubscriberMap {
     //======================================================
     public List<Subscriber> getSubscriberList() {
         Collection<Subscriber> collection = label2device.values();
-        ArrayList<Subscriber> subscribers = new ArrayList<Subscriber>();
+        List<Subscriber> subscribers = new ArrayList<>();
         for (Subscriber subscriber : collection)
             subscribers.add(subscriber);
         return subscribers;

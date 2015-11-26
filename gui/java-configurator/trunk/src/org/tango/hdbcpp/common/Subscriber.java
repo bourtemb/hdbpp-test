@@ -43,9 +43,6 @@ import fr.esrf.TangoApi.events.ITangoChangeListener;
 import fr.esrf.TangoApi.events.TangoChangeEvent;
 import fr.esrf.TangoApi.events.TangoEventsAdapter;
 import fr.esrf.TangoDs.TangoConst;
-import org.tango.hdbcpp.tools.ArchiverUtils;
-import org.tango.hdbcpp.tools.TangoUtils;
-import org.tango.hdbcpp.tools.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
