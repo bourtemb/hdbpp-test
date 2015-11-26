@@ -71,14 +71,12 @@
     <splitter split-orientation="horizontal" split-proportion="0.4984558">
       <split-first>
         <leaf>
-          <file leaf-file-name="HdbDiagnostics.java" pinned="false" current-in-tab="false">
+          <file leaf-file-name="HdbDiagnostics.java" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/HdbDiagnostics.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="0.0">
-                  <caret line="517" column="33" selection-start-line="517" selection-start-column="33" selection-end-line="517" selection-end-column="33" />
-                  <folding>
-                    <element signature="e#8918#9007#0" expanded="true" />
-                  </folding>
+                <state vertical-scroll-proportion="0.33333334">
+                  <caret line="106" column="40" selection-start-line="106" selection-start-column="40" selection-end-line="106" selection-end-column="40" />
+                  <folding />
                 </state>
               </provider>
             </entry>
@@ -86,21 +84,12 @@
           <file leaf-file-name="HdbConfigurator.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/HdbConfigurator.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="0.0">
-                  <caret line="1341" column="0" selection-start-line="1341" selection-start-column="0" selection-end-line="1341" selection-end-column="0" />
+                <state vertical-scroll-proportion="-9.103448">
+                  <caret line="162" column="0" selection-start-line="162" selection-start-column="0" selection-end-line="162" selection-end-column="0" />
                   <folding>
-                    <element signature="e#15351#15440#0" expanded="true" />
+                    <element signature="e#15227#15263#0" expanded="true" />
+                    <element signature="e#15600#15689#0" expanded="true" />
                   </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="PropertyDialog.java" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/PropertyDialog.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="0.0">
-                  <caret line="553" column="32" selection-start-line="553" selection-start-column="32" selection-end-line="553" selection-end-column="32" />
-                  <folding />
                 </state>
               </provider>
             </entry>
@@ -109,17 +98,42 @@
             <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/AttributeTree.java">
               <provider selected="true" editor-type-id="text-editor">
                 <state vertical-scroll-proportion="0.0">
-                  <caret line="454" column="36" selection-start-line="454" selection-start-column="36" selection-end-line="454" selection-end-column="36" />
-                  <folding />
+                  <caret line="302" column="50" selection-start-line="302" selection-start-column="50" selection-end-line="302" selection-end-column="50" />
+                  <folding>
+                    <element signature="e#3689#3690#0" expanded="true" />
+                    <element signature="e#3721#3722#0" expanded="true" />
+                    <element signature="e#4886#4887#0" expanded="true" />
+                    <element signature="e#4938#4939#0" expanded="true" />
+                    <element signature="e#5008#5209#0" expanded="true" />
+                    <element signature="e#5208#5209#0" expanded="true" />
+                    <element signature="e#11534#11535#0" expanded="true" />
+                    <element signature="e#11612#11613#0" expanded="true" />
+                    <element signature="e#18234#18661#0" expanded="true" />
+                    <element signature="e#18660#18661#0" expanded="true" />
+                    <element signature="e#22254#22255#0" expanded="true" />
+                    <element signature="e#22289#22290#0" expanded="true" />
+                    <element signature="e#22967#22968#0" expanded="true" />
+                    <element signature="e#23002#23003#0" expanded="true" />
+                    <element signature="e#23680#23681#0" expanded="true" />
+                    <element signature="e#23715#23716#0" expanded="true" />
+                    <element signature="e#24623#24995#0" expanded="true" />
+                    <element signature="e#24994#24995#0" expanded="true" />
+                    <element signature="e#26368#26369#0" expanded="true" />
+                    <element signature="e#26403#26404#0" expanded="true" />
+                    <element signature="e#26754#26755#0" expanded="true" />
+                    <element signature="e#26790#26791#0" expanded="true" />
+                    <element signature="e#32068#32263#0" expanded="true" />
+                    <element signature="e#32262#32263#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="DistributionDialog.java" pinned="false" current-in-tab="true">
+          <file leaf-file-name="DistributionDialog.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/DistributionDialog.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="0.7419355">
-                  <caret line="864" column="37" selection-start-line="864" selection-start-column="37" selection-end-line="864" selection-end-column="37" />
+                <state vertical-scroll-proportion="0.0">
+                  <caret line="757" column="16" selection-start-line="757" selection-start-column="16" selection-end-line="757" selection-end-column="16" />
                   <folding>
                     <element signature="imports" expanded="true" />
                   </folding>
@@ -135,37 +149,68 @@
             <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/common/Subscriber.java">
               <provider selected="true" editor-type-id="text-editor">
                 <state vertical-scroll-proportion="0.0">
-                  <caret line="259" column="59" selection-start-line="259" selection-start-column="59" selection-end-line="259" selection-end-column="59" />
+                  <caret line="169" column="8" selection-start-line="169" selection-start-column="8" selection-end-line="169" selection-end-column="8" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="Utils.java" pinned="false" current-in-tab="false">
+          <file leaf-file-name="Utils.java" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/Utils.java">
               <provider selected="true" editor-type-id="text-editor">
+                <state vertical-scroll-proportion="0.5964392">
+                  <caret line="393" column="48" selection-start-line="393" selection-start-column="48" selection-end-line="393" selection-end-column="48" />
+                  <folding>
+                    <element signature="imports" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="SplashUtils.java" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/SplashUtils.java">
+              <provider selected="true" editor-type-id="text-editor">
                 <state vertical-scroll-proportion="0.0">
-                  <caret line="313" column="20" selection-start-line="313" selection-start-column="20" selection-end-line="313" selection-end-column="20" />
+                  <caret line="35" column="19" selection-start-line="35" selection-start-column="19" selection-end-line="35" selection-end-column="19" />
+                  <folding>
+                    <element signature="e#5388#5415#0" expanded="true" />
+                    <element signature="e#5972#5999#0" expanded="true" />
+                    <element signature="e#6203#6230#0" expanded="true" />
+                    <element signature="e#6436#6463#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="TangoUtils.java" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/TangoUtils.java">
+              <provider selected="true" editor-type-id="text-editor">
+                <state vertical-scroll-proportion="0.0">
+                  <caret line="360" column="33" selection-start-line="360" selection-start-column="33" selection-end-line="360" selection-end-column="33" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="StatisticsDialog.java" pinned="false" current-in-tab="true">
+          <file leaf-file-name="StatisticsDialog.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/StatisticsDialog.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="0.16690043">
-                  <caret line="765" column="46" selection-start-line="765" selection-start-column="46" selection-end-line="765" selection-end-column="46" />
-                  <folding />
+                <state vertical-scroll-proportion="-8.793103">
+                  <caret line="48" column="36" selection-start-line="48" selection-start-column="36" selection-end-line="48" selection-end-column="36" />
+                  <folding>
+                    <element signature="e#15947#16036#0" expanded="true" />
+                    <element signature="e#20123#20307#0" expanded="true" />
+                    <element signature="e#20306#20307#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="StringComparator.java" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/StringComparator.java">
+          <file leaf-file-name="TestEvents.java" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/TestEvents.java">
               <provider selected="true" editor-type-id="text-editor">
                 <state vertical-scroll-proportion="0.0">
-                  <caret line="46" column="13" selection-start-line="46" selection-start-column="13" selection-end-line="46" selection-end-column="13" />
+                  <caret line="36" column="24" selection-start-line="36" selection-start-column="24" selection-end-line="36" selection-end-column="24" />
                   <folding />
                 </state>
               </provider>
@@ -190,27 +235,29 @@
       <list>
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/specific/HdbDiff.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/TestEvents.java" />
-        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/PropertyDialog.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/common/ICommonDefinitions.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/ArchiverUtils.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/common/SubscriberMap.java" />
-        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/TangoUtils.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/CreateSubscriberPanel.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/ArchiverAliasesDialog.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/FaultyAttributesDialog.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/AttributesTableDialog.java" />
-        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/HdbDiagnostics.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/atktable/TableConfig.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/atktable/ScrolledScalarViewer.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/atktable/TableScalarViewer.java" />
-        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/Utils.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/ManageAttributes.java" />
-        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/AttributeTree.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/Selector.java" />
-        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/HdbConfigurator.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/AttributeTree.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/PropertyDialog.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/StringComparator.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/TangoUtils.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/common/Subscriber.java" />
-        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/StatisticsDialog.java" />
         <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/DistributionDialog.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/HdbConfigurator.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/HdbDiagnostics.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/StatisticsDialog.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/SplashUtils.java" />
+        <option value="$PROJECT_DIR$/src/org/tango/hdbcpp/tools/Utils.java" />
       </list>
     </option>
   </component>
@@ -218,10 +265,8 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1936" />
-    <option name="height" value="1186" />
+    <option name="width" value="1920" />
+    <option name="height" value="1170" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -250,6 +295,7 @@
     </navigator>
     <panes>
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
@@ -435,7 +481,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -447,7 +492,7 @@
     <property name="recentsLimit" value="5" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="options.lastSelected" value="reference.settingsdialog.IDE.editor.colors.Java" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../release/java/appli/Astor.jar!/" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
@@ -458,6 +503,8 @@
     <property name="dynamic.classpath" value="false" />
     <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Language Defaults" />
+    <property name="settings.editor.splitter.proportion" value="0.2" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -468,7 +515,7 @@
       <recent name="org.tango.hdbcpp.configurator" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.HdbDiagnostics">
+  <component name="RunManager" selected="Application.HdbDiagnostics Mysql">
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m" />
@@ -645,7 +692,7 @@
       <ConfigurationWrapper RunnerId="Run" />
       <method />
     </configuration>
-    <configuration default="false" name="HdbDiagnostics" type="Application" factoryName="Application">
+    <configuration default="false" name="HdbDiagnostics Mysql" type="Application" factoryName="Application">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <option name="MAIN_CLASS_NAME" value="org.tango.hdbcpp.diagnostics.HdbDiagnostics" />
       <option name="VM_PARAMETERS" value="-DTANGO_HOST=orion:10000 -DEVENT_TANGO_HOST=id32:20000" />
@@ -658,10 +705,10 @@
       <option name="PASS_PARENT_ENVS" value="true" />
       <module name="jhdb_cpp" />
       <envs>
-        <env name="ExtractionClass" value="org.tango.jhdbextract.gui.HdbBrowser" />
         <env name="HdbManager" value="tango/hdb/manager" />
-        <env name="MySql" value="true" />
         <env name="__HdbManager" value="tango/hdb-cassandra/manager" />
+        <env name="HdbExtraction" value="true" />
+        <env name="HDB_MYSQL_HOST" value="hdbplus" />
       </envs>
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="" />
@@ -686,10 +733,10 @@
       <option name="PASS_PARENT_ENVS" value="true" />
       <module name="jhdb_cpp" />
       <envs>
-        <env name="ExtractionClass" value="org.tango.jhdbextract.gui.HdbBrowser" />
         <env name="HdbManager" value="tango/hdb-cassandra/manager" />
-        <env name="MySql" value="false" />
+        <env name="HdbExtraction" value="true" />
         <env name="_HdbManager" value="tango/hdb/manager" />
+        <env name="" value="" />
       </envs>
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="" />
@@ -864,7 +911,9 @@
       <option name="ENV_VARIABLES" />
       <option name="PASS_PARENT_ENVS" value="true" />
       <module name="jhdb_cpp" />
-      <envs />
+      <envs>
+        <env name="HDB_TYPE" value="cassandra" />
+      </envs>
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="" />
         <option name="TRANSPORT" value="0" />
@@ -966,7 +1015,7 @@
     </configuration>
     <list size="15">
       <item index="0" class="java.lang.String" itemvalue="Application.HdbConfigurator" />
-      <item index="1" class="java.lang.String" itemvalue="Application.HdbDiagnostics" />
+      <item index="1" class="java.lang.String" itemvalue="Application.HdbDiagnostics Mysql" />
       <item index="2" class="java.lang.String" itemvalue="Application.HdbDiagnostics  Cassandra" />
       <item index="3" class="java.lang.String" itemvalue="Application.HdbConfigurator  idlab" />
       <item index="4" class="java.lang.String" itemvalue="Application.HdbConfigurator  debian7" />
@@ -1000,26 +1049,26 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1186" extended-state="1" />
+    <frame x="0" y="0" width="1920" height="1170" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32994652" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3270142" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32627526" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29763034" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.27911454" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1391258" sideWeight="0.7326923" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13978495" sideWeight="0.7326923" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.13958444" sideWeight="0.6721154" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32994652" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.13958444" sideWeight="0.2673077" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39810428" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3974976" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="SVN Repositories" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32944608" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1047,7 +1096,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="4" />
+      <option name="time" value="7" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1056,13 +1105,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/atktable/TableConfig.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="53" column="0" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/DistributionDialog.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1075,7 +1117,8 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="229" column="8" selection-start-line="229" selection-start-column="8" selection-end-line="229" selection-end-column="8" />
           <folding>
-            <element signature="e#15351#15440#0" expanded="true" />
+            <element signature="e#15227#15263#0" expanded="true" />
+            <element signature="e#15600#15689#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1120,7 +1163,11 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="65" column="33" selection-start-line="65" selection-start-column="33" selection-end-line="65" selection-end-column="33" />
-          <folding />
+          <folding>
+            <element signature="e#15947#16036#0" expanded="true" />
+            <element signature="e#20123#20307#0" expanded="true" />
+            <element signature="e#20306#20307#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1149,7 +1196,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="69" column="13" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1157,7 +1203,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1165,9 +1213,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="189" column="9" selection-start-line="189" selection-start-column="9" selection-end-line="189" selection-end-column="9" />
-          <folding>
-            <element signature="e#8918#9007#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1211,7 +1257,11 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="65" column="33" selection-start-line="65" selection-start-column="33" selection-end-line="65" selection-end-column="33" />
-          <folding />
+          <folding>
+            <element signature="e#15947#16036#0" expanded="true" />
+            <element signature="e#20123#20307#0" expanded="true" />
+            <element signature="e#20306#20307#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1240,7 +1290,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="69" column="13" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1248,7 +1297,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1256,13 +1307,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.34216103">
           <caret line="25" column="11" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/TestEvents.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36135265">
-          <caret line="57" column="68" selection-start-line="57" selection-start-column="68" selection-end-line="57" selection-end-column="68" />
         </state>
       </provider>
     </entry>
@@ -1281,24 +1325,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/TangoUtils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="284" column="0" selection-start-line="284" selection-start-column="0" selection-end-line="284" selection-end-column="0" />
-          <folding>
-            <element signature="e#4773#4774#0" expanded="true" />
-            <element signature="e#4832#4833#0" expanded="true" />
-            <element signature="e#11865#11875#0" expanded="true" />
-            <element signature="e#13743#13751#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/PopupHtml.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="298" column="47" selection-start-line="298" selection-start-column="23" selection-end-line="298" selection-end-column="47" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1306,25 +1336,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="197" column="17" selection-start-line="197" selection-start-column="17" selection-end-line="197" selection-end-column="17" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2113#2123#0" expanded="true" />
-            <element signature="e#4291#4427#0" expanded="true" />
-            <element signature="e#4426#4427#0" expanded="true" />
-            <element signature="e#7898#7987#0" expanded="true" />
-            <element signature="e#8360#8490#0" expanded="true" />
-            <element signature="e#8489#8490#0" expanded="true" />
-            <element signature="e#8768#8946#0" expanded="true" />
-            <element signature="e#8945#8946#0" expanded="true" />
-            <element signature="e#9055#9237#0" expanded="true" />
-            <element signature="e#9236#9237#0" expanded="true" />
-            <element signature="e#12358#12359#0" expanded="true" />
-            <element signature="e#12392#12393#0" expanded="true" />
-            <element signature="e#12485#12486#0" expanded="true" />
-            <element signature="e#12517#12518#0" expanded="true" />
-            <element signature="e#14129#14252#0" expanded="true" />
-            <element signature="e#14251#14252#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1332,7 +1343,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33300394">
           <caret line="109" column="11" selection-start-line="109" selection-start-column="11" selection-end-line="109" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1340,11 +1350,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="120" column="29" selection-start-line="120" selection-start-column="29" selection-end-line="120" selection-end-column="29" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1948#1956#0" expanded="true" />
-            <element signature="e#4715#4804#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1356,40 +1361,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/StringComparator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="46" column="13" selection-start-line="46" selection-start-column="13" selection-end-line="46" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/atktable/TableScalarViewer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="203" column="16" selection-start-line="203" selection-start-column="16" selection-end-line="203" selection-end-column="16" />
-          <folding>
-            <element signature="e#3739#3917#0" expanded="true" />
-            <element signature="e#3916#3917#0" expanded="true" />
-            <element signature="e#5204#5205#0" expanded="true" />
-            <element signature="e#5244#5245#0" expanded="true" />
-            <element signature="e#5418#5419#0" expanded="true" />
-            <element signature="e#5470#5471#0" expanded="true" />
-            <element signature="e#5936#5937#0" expanded="true" />
-            <element signature="e#5975#5976#0" expanded="true" />
-            <element signature="e#6413#6414#0" expanded="true" />
-            <element signature="e#6447#6448#0" expanded="true" />
-            <element signature="e#7045#7046#0" expanded="true" />
-            <element signature="e#7120#7121#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/Utils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="313" column="20" selection-start-line="313" selection-start-column="20" selection-end-line="313" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1397,18 +1372,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="231" column="23" selection-start-line="231" selection-start-column="23" selection-end-line="231" selection-end-column="23" />
-          <folding>
-            <element signature="e#7552#7553#0" expanded="true" />
-            <element signature="e#7586#7587#0" expanded="true" />
-            <element signature="e#7682#7683#0" expanded="true" />
-            <element signature="e#7716#7717#0" expanded="true" />
-            <element signature="e#7836#7837#0" expanded="true" />
-            <element signature="e#7886#7887#0" expanded="true" />
-            <element signature="e#7991#7992#0" expanded="true" />
-            <element signature="e#8031#8032#0" expanded="true" />
-            <element signature="e#8131#8132#0" expanded="true" />
-            <element signature="e#8166#8167#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1423,7 +1386,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="291" column="40" selection-start-line="291" selection-start-column="40" selection-end-line="291" selection-end-column="40" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1443,60 +1405,135 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/PropertyDialog.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="553" column="32" selection-start-line="553" selection-start-column="32" selection-end-line="553" selection-end-column="32" />
+        <state vertical-scroll-proportion="0.5610119">
+          <caret line="152" column="55" selection-start-line="152" selection-start-column="55" selection-end-line="152" selection-end-column="55" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/HdbConfigurator.java">
+    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/StringComparator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="1341" column="0" selection-start-line="1341" selection-start-column="0" selection-end-line="1341" selection-end-column="0" />
-          <folding>
-            <element signature="e#15351#15440#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.5548961">
+          <caret line="69" column="8" selection-start-line="69" selection-start-column="8" selection-end-line="69" selection-end-column="8" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/common/Subscriber.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="259" column="59" selection-start-line="259" selection-start-column="59" selection-end-line="259" selection-end-column="59" />
+          <caret line="169" column="8" selection-start-line="169" selection-start-column="8" selection-end-line="169" selection-end-column="8" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/DistributionDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="757" column="16" selection-start-line="757" selection-start-column="16" selection-end-line="757" selection-end-column="16" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/AttributeTree.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="454" column="36" selection-start-line="454" selection-start-column="36" selection-end-line="454" selection-end-column="36" />
+          <caret line="302" column="50" selection-start-line="302" selection-start-column="50" selection-end-line="302" selection-end-column="50" />
+          <folding>
+            <element signature="e#3689#3690#0" expanded="true" />
+            <element signature="e#3721#3722#0" expanded="true" />
+            <element signature="e#4886#4887#0" expanded="true" />
+            <element signature="e#4938#4939#0" expanded="true" />
+            <element signature="e#5008#5209#0" expanded="true" />
+            <element signature="e#5208#5209#0" expanded="true" />
+            <element signature="e#11534#11535#0" expanded="true" />
+            <element signature="e#11612#11613#0" expanded="true" />
+            <element signature="e#18234#18661#0" expanded="true" />
+            <element signature="e#18660#18661#0" expanded="true" />
+            <element signature="e#22254#22255#0" expanded="true" />
+            <element signature="e#22289#22290#0" expanded="true" />
+            <element signature="e#22967#22968#0" expanded="true" />
+            <element signature="e#23002#23003#0" expanded="true" />
+            <element signature="e#23680#23681#0" expanded="true" />
+            <element signature="e#23715#23716#0" expanded="true" />
+            <element signature="e#24623#24995#0" expanded="true" />
+            <element signature="e#24994#24995#0" expanded="true" />
+            <element signature="e#26368#26369#0" expanded="true" />
+            <element signature="e#26403#26404#0" expanded="true" />
+            <element signature="e#26754#26755#0" expanded="true" />
+            <element signature="e#26790#26791#0" expanded="true" />
+            <element signature="e#32068#32263#0" expanded="true" />
+            <element signature="e#32262#32263#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/TestEvents.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="36" column="24" selection-start-line="36" selection-start-column="24" selection-end-line="36" selection-end-column="24" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/configurator/HdbConfigurator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-9.103448">
+          <caret line="162" column="0" selection-start-line="162" selection-start-column="0" selection-end-line="162" selection-end-column="0" />
+          <folding>
+            <element signature="e#15227#15263#0" expanded="true" />
+            <element signature="e#15600#15689#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/StatisticsDialog.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.16690043">
-          <caret line="765" column="46" selection-start-line="765" selection-start-column="46" selection-end-line="765" selection-end-column="46" />
+        <state vertical-scroll-proportion="-8.793103">
+          <caret line="48" column="36" selection-start-line="48" selection-start-column="36" selection-end-line="48" selection-end-column="36" />
+          <folding>
+            <element signature="e#15947#16036#0" expanded="true" />
+            <element signature="e#20123#20307#0" expanded="true" />
+            <element signature="e#20306#20307#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/TangoUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="360" column="33" selection-start-line="360" selection-start-column="33" selection-end-line="360" selection-end-column="33" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/HdbDiagnostics.java">
       <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="106" column="40" selection-start-line="106" selection-start-column="40" selection-end-line="106" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/SplashUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="517" column="33" selection-start-line="517" selection-start-column="33" selection-end-line="517" selection-end-column="33" />
+          <caret line="35" column="19" selection-start-line="35" selection-start-column="19" selection-end-line="35" selection-end-column="19" />
           <folding>
-            <element signature="e#8918#9007#0" expanded="true" />
+            <element signature="e#5388#5415#0" expanded="true" />
+            <element signature="e#5972#5999#0" expanded="true" />
+            <element signature="e#6203#6230#0" expanded="true" />
+            <element signature="e#6436#6463#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/diagnostics/DistributionDialog.java">
+    <entry file="file://$PROJECT_DIR$/src/org/tango/hdbcpp/tools/Utils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7419355">
-          <caret line="864" column="37" selection-start-line="864" selection-start-column="37" selection-end-line="864" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.5964392">
+          <caret line="393" column="48" selection-start-line="393" selection-start-column="48" selection-end-line="393" selection-end-column="48" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
