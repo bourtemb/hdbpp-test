@@ -299,8 +299,8 @@ public class AttributeTree extends JTree {
 
     //===============================================================
     //===============================================================
-    public ArrayList<String> getSelectedAttributes() {
-        ArrayList<String>   attributes = new ArrayList<String>();
+    public List<String> getSelectedAttributes() {
+        List<String>   attributes = new ArrayList<>();
         TreePath[]  paths = getSelectionPaths();
         if (paths!=null) {
             for (TreePath path : paths) {
@@ -315,13 +315,13 @@ public class AttributeTree extends JTree {
         }
         return attributes;
     }
-   //===============================================================
+    //===============================================================
     //===============================================================
     public void goToNode(String path) {
 
         //  Split path
         StringTokenizer stk = new StringTokenizer(path, "/");
-        ArrayList<String> fields = new ArrayList<String>(stk.countTokens());
+        List<String> fields = new ArrayList<>(stk.countTokens());
         while (stk.hasMoreTokens())
             fields.add(stk.nextToken().toLowerCase());
         if (fields.isEmpty())
@@ -376,7 +376,7 @@ public class AttributeTree extends JTree {
     //===============================================================
     //===============================================================
     private void expandNode(DefaultMutableTreeNode node) {
-        ArrayList<DefaultMutableTreeNode> nodes = new ArrayList<DefaultMutableTreeNode>();
+        List<DefaultMutableTreeNode> nodes = new ArrayList<>();
         nodes.add(node);
         while (node!=root) {
             node = (DefaultMutableTreeNode) node.getParent();
