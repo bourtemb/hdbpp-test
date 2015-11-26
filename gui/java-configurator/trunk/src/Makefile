@@ -18,7 +18,7 @@
 #-======================================================================
 
 MAJOR_RELEASE = 2
-MINOR_RELEASE  = 3
+MINOR_RELEASE  = 4
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 
@@ -48,28 +48,22 @@ JAVAC     = javac  $(JAVAFLAGS)
 
 #-----------------------------------------------------------------
 
-all:	 tools  common config diags
+all:	table common config diags
 
 trace:
 	@echo $(CLASSPATH)
-
-tools:
-	@echo "-----------------------------------------"
-	@echo "	Building $(PACKAGE).tools"
-	@echo "-----------------------------------------"
-	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/tools/*.java
-
-common:
-	@echo "-----------------------------------------"
-	@echo "	Building $(PACKAGE).common"
-	@echo "-----------------------------------------"
-	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/common/*.java
 
 table:
 	@echo "-----------------------------------------"
 	@echo "	Building $(PACKAGE).atktable"
 	@echo "-----------------------------------------"
 	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/atktable/*.java
+
+common:
+	@echo "-----------------------------------------"
+	@echo "	Building $(PACKAGE).common"
+	@echo "-----------------------------------------"
+	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/common/*.java
 
 config:
 	@echo "-----------------------------------------"

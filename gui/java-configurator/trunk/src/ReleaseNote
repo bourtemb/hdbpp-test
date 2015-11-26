@@ -17,6 +17,9 @@
 
 
 
+jhdbcpp-2.4 - 26/11/15:
+	Refactor to remove cross links.
+
 jhdbcpp-2.3 - 26/11/15:
 	Interface with jhdbvewer to read attribute in hdb.
 
