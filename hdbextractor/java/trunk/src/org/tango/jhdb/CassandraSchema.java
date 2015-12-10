@@ -47,7 +47,6 @@ import java.util.*;
  */
 public class CassandraSchema extends HdbReader {
 
-  public static final String   DEFAULT_DB_NAME = "hdb";
   public static final String[] DEFAULT_CONTACT_POINTS = {"cassandra2"};
 
   private Session session;
@@ -142,6 +141,18 @@ public class CassandraSchema extends HdbReader {
 
     }
 
+    if(user==null || user.isEmpty()) {
+      user = System.getenv("HDB_USER");
+      if (user==null || user.isEmpty())
+        user = DEFAULT_DB_USER;
+    }
+
+    if(passwd==null || passwd.isEmpty()) {
+      passwd = System.getenv("HDB_PASSWORD");
+      if (passwd==null || passwd.isEmpty())
+        passwd = DEFAULT_DB_PASSWORD;
+    }
+
     // Databse name
     if(db==null || db.isEmpty()) {
       db = System.getenv("HDB_NAME");
@@ -153,8 +164,13 @@ public class CassandraSchema extends HdbReader {
     try {
 
       Cluster cluster;
+      Cluster.Builder builder;
 
-      Cluster.Builder builder = Cluster.builder();
+      if(user.equalsIgnoreCase("anonymous"))
+        builder = Cluster.builder();
+      else
+        builder = Cluster.builder().withCredentials(user,passwd);
+
       for (String contactPoint : contacts)
         builder.addContactPoint(contactPoint);
       cluster = builder.build();

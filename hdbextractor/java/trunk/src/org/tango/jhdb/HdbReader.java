@@ -64,6 +64,11 @@ public abstract class HdbReader {
   int totalRequest;
   int currentRequest;
 
+  // Default user and password
+  static final String DEFAULT_DB_NAME = "hdb";
+  static final String DEFAULT_DB_USER = "hdbreader";
+  static final String DEFAULT_DB_PASSWORD ="R3aderP4ss";
+
   /**
    * Fetch data from the database.
    *

@@ -69,7 +69,7 @@ public class Hdb {
   public final static SimpleDateFormat hdbDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
   /** Verion Number */
-  public final static double LIB_RELEASE = 1.3 ; // Let the space before the ';'
+  public final static double LIB_RELEASE = 1.4 ; // Let the space before the ';'
 
   /** Cassandra HDB++ */
   public  static final int HDB_CASSANDRA = 1;
@@ -216,8 +216,8 @@ public class Hdb {
     try {
 
       //hdb.connectMySQL("cassandra1","","","",(short)0);
-      //hdb.connectCassandra();
-      hdb.connectOracle();
+      hdb.connectCassandra();
+      //hdb.connectOracle();
       //hdb.connect();
 
       long t0 = System.currentTimeMillis();

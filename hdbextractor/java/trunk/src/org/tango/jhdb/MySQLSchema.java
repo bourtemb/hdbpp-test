@@ -44,9 +44,6 @@ import java.util.Properties;
  */
 public class MySQLSchema extends HdbReader {
 
-  public static final String DEFAULT_DB_NAME = "hdb";
-  public static final String DEFAULT_DB_USER = "hdbreader";
-  public static final String DEFAULT_DB_PASSWORD ="R3aderP4ss";
   public static final String DEFAULT_DB_URL_PREFIX = "jdbc:mysql://";
   public static final int    DEFAULT_DB_PORT = 3306;
 
