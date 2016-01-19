@@ -17,6 +17,12 @@
 
 
 
+jhdbcpp-2.6 - 19/12/16:
+	Remove event tester launch in StatisticsDialog menu (does not work fine).
+
+jhdbcpp-2.5 - 16/12/15:
+	Fix a problem when moving paused attributes
+
 jhdbcpp-2.4 - 26/11/15:
 	Refactor to remove cross links.
 

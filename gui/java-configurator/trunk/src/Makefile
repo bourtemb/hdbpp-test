@@ -18,7 +18,7 @@
 #-======================================================================
 
 MAJOR_RELEASE = 2
-MINOR_RELEASE  = 4
+MINOR_RELEASE = 6
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 
@@ -106,7 +106,7 @@ version:
 	@echo "-----------------------------------------"
 	@echo "	Patching Version"
 	@echo "-----------------------------------------"
-	cd $(PACKAGE_HOME)/tools; upd_rev  -f SplashUtils.java  -r $(APPLI_VERS)
+	cd $(PACKAGE_HOME)/common; upd_rev  -f SplashUtils.java  -r $(APPLI_VERS)
 	$(JAVA) -classpath $(CLP)  pogo.make_util.ReleaseNote2html -java  "$(PACKAGE).tools Release Note"   $(PACKAGE).common
 	mv ReleaseNote.java  $(PACKAGE_HOME)/common
 
@@ -116,6 +116,12 @@ install_op:
 	@segfs2operation $(JAR_DIR) $(JAR_NAME) $(APPLI_VERS) $(OPERATION)
 
 
+FTP_TARGET	=	ftpserv:/ftp/anonymous/pub/cs/tango/hdb++
+JAR_FILE	=	$(JAR_NAME)-$(APPLI_VERS).jar
+install_ftp:
+	@echo "rcp $(JAR_FILE) $(FTP_TARGET)"
+	@cd $(JAR_DIR); rcp $(JAR_FILE) $(FTP_TARGET)
+	rcp ReleaseNote $(FTP_TARGET)
 
 
 POGO=/segfs/tango/release/java/appli/org.tango.pogo.jar
