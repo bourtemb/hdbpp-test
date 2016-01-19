@@ -952,8 +952,8 @@ public class StatisticsDialog extends JDialog {
         private void showMenu(MouseEvent event, HdbAttribute hdbAttribute) {
             title.setText(hdbAttribute.shortName);
             selectedAttribute = hdbAttribute;
-
-            getComponent(OFFSET + TEST_EVENT).setVisible(Utils.getTestEvents()!=null);
+            // Too much subscriptions already done -> does not work
+            getComponent(OFFSET + TEST_EVENT).setVisible(false/*Utils.getTestEvents()!=null*/);
             getComponent(OFFSET + CONFIGURE).setEnabled(hdbAttribute.useDefaultTangoHost);
             show(table, event.getX(), event.getY());
         }
