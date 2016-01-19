@@ -400,11 +400,15 @@ public class Utils {
         boolean b = matches("a/b/v-rga/d", "a/b/*rga/d");
         System.out.println(b);
         */
-        try {
-            startHdbViewer("tango://orion.esrf.fr:10000/sr/d-ct/1/current");
+        //try {
+            //startHdbViewer("tango://orion.esrf.fr:10000/sr/d-ct/1/current");
+            Utils.getTestEvents().add("sr/rf-tun/cav6-2/position");
+        /*
         }
         catch (DevFailed  e) {
             ErrorPane.showErrorMessage(new JFrame(), null, e);
         }
+        */
     }
+
 }

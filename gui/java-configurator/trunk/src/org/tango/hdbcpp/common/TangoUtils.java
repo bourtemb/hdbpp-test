@@ -98,7 +98,11 @@ public class TangoUtils {
                     //  Get FQDN and append to alias name
                     String alias = InetAddress.getByName(hostName).getCanonicalHostName();
                     System.err.println(hostName);
-                    String fqdn = alias.substring(alias.indexOf('.'));
+                    int idx = alias.indexOf('.');
+                    String fqdn = "";
+                    if (idx>0) {
+                        fqdn = alias.substring(idx);
+                    }
                     p = tangoHost.indexOf(':');
                     return hostName+fqdn+tangoHost.substring(p);
                 }

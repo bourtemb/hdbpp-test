@@ -50,7 +50,7 @@ import java.util.List;
 //===============================================================
 
 
-public class TestEvents extends JDialog {
+public class TestEvents {
 
     private EventsTable eventsTable;
     private static final int ARCHIVE = 2;
@@ -87,7 +87,6 @@ public class TestEvents extends JDialog {
         else
             eventsTable.add(attributeName, ARCHIVE);
     }
-
     //===============================================================
     //===============================================================
 }
