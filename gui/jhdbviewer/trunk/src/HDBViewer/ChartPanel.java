@@ -9,15 +9,61 @@ import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 import fr.esrf.tangoatk.widget.util.chart.JLChart;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+class XAxisItem {
+  
+  AttributeInfo ai;
+  ArrayAttributeInfo aai;
+  
+  XAxisItem() {
+    ai = null;
+    aai = null;
+  }
+  
+  XAxisItem(AttributeInfo ai) {
+    this.ai = ai;
+    this.aai = null;
+  }
+
+  XAxisItem(AttributeInfo ai,ArrayAttributeInfo aai) {
+    this.ai = ai;
+    this.aai = aai;
+  }
+  
+  public boolean isScalar() {
+    return ai!=null && aai==null;
+  }
+  
+  public boolean isEmpty() {
+    return ai==null && aai==null;    
+  }
+
+  public boolean isArrayItem() {
+    return ai!=null && aai!=null;    
+  }
+  
+  public String toString() {
+    if( isScalar() )
+      return ai.name;    
+    else if (isArrayItem())
+      return ai.name + " [" + aai.idx + "]";
+    else
+      return "None";
+  }
+  
+}
 
 /**
  *
  * @author pons
  */
-public class ChartPanel extends javax.swing.JPanel {
+public class ChartPanel extends javax.swing.JPanel implements ActionListener {
   
   JLChart chart;
   MainPanel parent;
+  boolean updateXCombo = false;
 
   /**
    * Creates new form ChartPanel
@@ -40,6 +86,9 @@ public class ChartPanel extends javax.swing.JPanel {
     chart.getXAxis().setAutoScale(true);
     chart.setJLChartListener(parent);
     chartPanel.add(chart, BorderLayout.CENTER);
+    xViewCombo.removeAllItems();
+    xViewCombo.addItem(new XAxisItem());
+    xViewCombo.addActionListener(this);
         
   }
   
@@ -90,6 +139,51 @@ public class ChartPanel extends javax.swing.JPanel {
 
   }
 
+  public void actionPerformed(ActionEvent e) {
+    
+    if (!updateXCombo) {
+      
+      XAxisItem src = (XAxisItem) xViewCombo.getSelectedItem();
+
+      if (src.isEmpty()) {
+        
+        // Return to normal mode
+        chart.getXAxis().clearDataView();      
+        
+      } else {
+        
+        // Switch to XY mode             
+        if(src.isScalar())
+          chart.getXAxis().addDataView(src.ai.chartData);
+        else if(src.isArrayItem())
+          chart.getXAxis().addDataView(src.aai.chartData);
+        
+      }
+      chart.repaint();
+      
+    }
+    
+  }
+
+  public void resetXItem() {
+    updateXCombo = true;
+    xViewCombo.removeAllItems();
+    xViewCombo.addItem(new XAxisItem());    
+    updateXCombo = false;
+  }
+  
+  public void addXItem(AttributeInfo ai) {
+    updateXCombo = true;
+    xViewCombo.addItem(new XAxisItem(ai));    
+    updateXCombo = false;
+  }
+
+  public void addXArrayItem(AttributeInfo ai,ArrayAttributeInfo aai) {
+    updateXCombo = true;
+    xViewCombo.addItem(new XAxisItem(ai,aai));    
+    updateXCombo = false;
+  }
+
   /**
    * This method is called from within the constructor to initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is always
@@ -104,6 +198,8 @@ public class ChartPanel extends javax.swing.JPanel {
     showGridCheckBox = new javax.swing.JCheckBox();
     onlyErrorCheck = new javax.swing.JCheckBox();
     chartErrorCheck = new javax.swing.JCheckBox();
+    jLabel1 = new javax.swing.JLabel();
+    xViewCombo = new javax.swing.JComboBox();
     chartPanel = new javax.swing.JPanel();
 
     setLayout(new java.awt.BorderLayout());
@@ -147,6 +243,14 @@ public class ChartPanel extends javax.swing.JPanel {
     });
     chartBtnPanel.add(chartErrorCheck);
 
+    jLabel1.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    jLabel1.setText("   X Axis");
+    chartBtnPanel.add(jLabel1);
+
+    xViewCombo.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    xViewCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+    chartBtnPanel.add(xViewCombo);
+
     add(chartBtnPanel, java.awt.BorderLayout.SOUTH);
 
     chartPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
@@ -183,8 +287,11 @@ public class ChartPanel extends javax.swing.JPanel {
   private javax.swing.JPanel chartBtnPanel;
   javax.swing.JCheckBox chartErrorCheck;
   private javax.swing.JPanel chartPanel;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.JCheckBox onlyErrorCheck;
   private javax.swing.JCheckBox showGridCheckBox;
   private javax.swing.JCheckBox showLegendCheckBox;
+  private javax.swing.JComboBox xViewCombo;
   // End of variables declaration//GEN-END:variables
+
 }

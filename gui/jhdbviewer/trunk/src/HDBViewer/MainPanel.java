@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import org.tango.jhdb.Hdb;
@@ -35,7 +36,7 @@ import org.tango.jhdb.data.HdbStateArray;
 
 public class MainPanel extends javax.swing.JFrame implements IJLChartListener,HdbProgressListener {
 
-  static final String APP_RELEASE = "1.6";
+  static final String APP_RELEASE = "1.7";
     
   // Panels
   DockedPanel viewDockedPanel;
@@ -183,6 +184,9 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
     try{Thread.sleep(50);}catch(Exception e){};
     if(showSplash) splash.setVisible(false);
 
+    ImageIcon icon = new ImageIcon(getClass().getResource("/HDBViewer/hdbpp.gif"));
+    setIconImage(icon.getImage());
+
   }
 
   /**
@@ -231,7 +235,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
   }
   
   /**
-   * Add a antributte to the selection list
+   * Add a attribute to the selection list
    * @param host Host name (hostname:port)
    * @param name Attribute name (domain/family/member/attname)
    * @return the created AttributeInfo object
@@ -749,6 +753,11 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
     Thread doSearch = new Thread() {
       public void run() {
 
+        // Wait for panel to be visible
+        try {
+          Thread.sleep(150);
+        } catch(Exception e) {}
+      
         // Array of sigIds
         HdbSigInfo[] sigIn = new HdbSigInfo[selection.size()];
         for (int i = 0; i < sigIn.length; i++) {
@@ -807,12 +816,11 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
             
           }
           
-          
         } catch (HdbFailed e) {
           Utils.showError("HDB getData failed\n" + e.getMessage());
         } catch(Exception e2) {
           Utils.showError("HDB getData failed\nUnexpected exception " + e2);
-          e2.printStackTrace();          
+          e2.printStackTrace();
         }
         
         searchDlg.hideDlg();
@@ -1157,6 +1165,43 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
     tablePanel.table.setColumnName(colNames);
     tablePanel.table.dataChanged();
     errorDialog.commit();
+    
+    // Update XAxis selection
+    chartPanel.resetXItem();
+    for(AttributeInfo ai:selection) {
+      
+      if(ai.isNumeric()) {
+        
+        if(ai.isArray()) {
+          if(ai.isExpanded()) {
+            for(int i=0;i<ai.arrAttInfos.size();i++) {
+              ArrayAttributeInfo aai = ai.arrAttInfos.get(i);
+              chartPanel.addXArrayItem(ai,aai);
+            }            
+          }
+        } else {          
+          chartPanel.addXItem(ai);          
+        }        
+        
+      }
+      
+      // Select normal attribute
+      selectAttribute(ai,-1,ai.selection,false);
+      if(ai.isRW())
+        selectAttribute(ai,-1,ai.wselection,true);
+      
+      // Select expanded attribute
+      if(ai.isExpanded()) {
+        for(int i=0;i<ai.arrAttInfos.size();i++) {
+          ArrayAttributeInfo aai = ai.arrAttInfos.get(i);
+          selectAttribute(ai,i,aai.selection,false);
+          if(ai.isRW())
+            selectAttribute(ai,i,aai.wselection,true);
+        }
+      }
+      
+    }
+    
     
     // Focus on panel
     if(hasChart)
@@ -1566,7 +1611,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
           p.setVisibleView(view);          
         } else {
           System.out.println("Unknown option " + args[i]);
-          System.out.print("Usage jhdbviewer [-f filename] [-p (panel=tree|sel|view)] -[v view]");
+          System.out.print("Usage jhdbviewer [-f selection_filename] [-p (panel=tree|sel|view)] -[v view]");
           System.exit(0);
         }
                 
