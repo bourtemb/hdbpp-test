@@ -621,7 +621,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
    */
   public void reset() {
     
-    chartPanel.chart.reset(false);
+    chartPanel.resetAll();
     tablePanel.table.reset();
     errorDialog.reset();
     if(selection!=null) {

@@ -7,10 +7,12 @@ package HDBViewer;
 
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 import fr.esrf.tangoatk.widget.util.chart.JLChart;
+import fr.esrf.tangoatk.widget.util.chart.JLDataView;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JOptionPane;
 
 class XAxisItem {
   
@@ -148,20 +150,45 @@ public class ChartPanel extends javax.swing.JPanel implements ActionListener {
       if (src.isEmpty()) {
         
         // Return to normal mode
-        chart.getXAxis().clearDataView();      
+        chart.getXAxis().setAnnotation(JLAxis.TIME_ANNO);
+        chart.getXAxis().clearDataView();
         
       } else {
+
         
         // Switch to XY mode             
-        if(src.isScalar())
-          chart.getXAxis().addDataView(src.ai.chartData);
-        else if(src.isArrayItem())
-          chart.getXAxis().addDataView(src.aai.chartData);
+        JLDataView dvx = null;
+        
+        if(src.isScalar()) {
+          dvx = src.ai.chartData;
+        } else if(src.isArrayItem()) {
+          dvx = src.aai.chartData;
+        }
+        
+        if(dvx!=null) {
+          JLAxis oldAxis = dvx.getAxis();
+          if(oldAxis!=null) {
+            JOptionPane.showMessageDialog(this,"This view is already selected on an other axis.","Error",JOptionPane.ERROR_MESSAGE );
+          } else {
+            chart.getXAxis().addDataView(dvx);
+          }
+        }
         
       }
       chart.repaint();
       
     }
+    
+  }
+  
+  public void resetAll() {
+    
+    if(chart.getXAxis().isXY()) {
+      chart.getXAxis().setAnnotation(JLAxis.TIME_ANNO);
+      chart.getXAxis().clearDataView();
+    }
+      
+    chart.reset(false);
     
   }
 
