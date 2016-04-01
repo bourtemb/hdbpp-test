@@ -70,7 +70,7 @@ format VARCHAR(64) NOT NULL DEFAULT '',
 archive_rel_change VARCHAR(64) NOT NULL DEFAULT '',
 archive_abs_change VARCHAR(64) NOT NULL DEFAULT '',
 archive_period VARCHAR(64) NOT NULL DEFAULT '',
-description VARCHAR(255) NOT NULL DEFAULT '',
+description VARCHAR(1024) NOT NULL DEFAULT '',
 INDEX(recv_time),
 INDEX(att_conf_id)
 ) ENGINE=MyISAM COMMENT='Attribute configuration parameters';
