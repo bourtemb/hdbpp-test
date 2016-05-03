@@ -17,8 +17,10 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Tue Jan 19 10:17:25 CET 2016)</Center><Br>\n" + 
-		"<li><b>jhdbcpp-2.6 - 19/12/16:</b><Br>\n" + 
+		"	(Generated Tue May 03 15:18:43 CEST 2016)</Center><Br>\n" + 
+		"<li><b>jhdbcpp-2.7 - 19/12/16:</b><Br>\n" + 
+		"&nbsp; &nbsp; few methods added for external class.<Br>\n" + 
+		"<li><b>jhdbcpp-2.6 - 19/12/15:</b><Br>\n" + 
 		"&nbsp; &nbsp; Remove event tester launch in StatisticsDialog menu (does not work fine).<Br>\n" + 
 		"<li><b>jhdbcpp-2.5 - 16/12/15:</b><Br>\n" + 
 		"&nbsp; &nbsp; Fix a problem when moving paused attributes<Br>\n" + 
