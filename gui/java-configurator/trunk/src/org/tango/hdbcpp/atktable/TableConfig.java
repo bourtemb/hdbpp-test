@@ -36,10 +36,13 @@
 
 package org.tango.hdbcpp.atktable;
 
+import org.tango.hdbcpp.common.Utils;
+
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 //===============================================================
 /**
@@ -61,7 +64,7 @@ class TableConfig {
     private int[] columnWidth;
     private int rowTitleWidth = 200;
 
-    private ArrayList<Attribute>    attributes = new ArrayList<Attribute>();
+    private List<Attribute> attributes = new ArrayList<>();
     //==========================================================
     //==========================================================
     public TableConfig() {
@@ -89,12 +92,14 @@ class TableConfig {
             TableColumn tableColumn;
             width = 0;
 
+            //  Check for row title width and it as first column
+            rowTitleWidth = Utils.getLongestLine(rowNames).length()*7+30;
             if (columns.hasMoreElements()) {
                 tableColumn = (TableColumn) columns.nextElement();
                 tableColumn.setPreferredWidth(rowTitleWidth);
                 width += rowTitleWidth;
             }
-
+            //  Set other columns width
             for (int i=0 ; columns.hasMoreElements() && i<columnWidth.length ; i++) {
                 tableColumn = (TableColumn) columns.nextElement();
                 if (columnWidth[i]==0)
@@ -102,7 +107,8 @@ class TableConfig {
                 tableColumn.setPreferredWidth(columnWidth[i]);
                 width += columnWidth[i];
             }
-        } else if (width<0)
+        }
+        else if (width<0)
             width = (nbColumns() + 1) * 180;
 
         int h = table.getRowHeight();
