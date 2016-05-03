@@ -603,7 +603,7 @@ public class DistributionDialog extends JDialog {
             int x = 0;
             for (String label : labels) {
                 SplashUtils.getInstance().increaseSplashProgressForLoop(labels.size(), "Reading " + label);
-                Archiver archiver = new Archiver(subscriberMap.getSubscriber(label));
+                Archiver archiver = new Archiver(subscriberMap.getSubscriberByLabel(label));
 
                 okDataView.add(x, archiver.attributeOk.length);
                 failedDataView.add(x + 0.2, archiver.attributeFailed.length);
@@ -730,7 +730,7 @@ public class DistributionDialog extends JDialog {
             int x = 0;
             for (String label : labels) {
                 SplashUtils.getInstance().increaseSplashProgressForLoop(labels.size(), "Reading " + label);
-                Archiver archiver = new Archiver(subscriberMap.getSubscriber(label));
+                Archiver archiver = new Archiver(subscriberMap.getSubscriberByLabel(label));
 
                 processDataView.add(x, archiver.maxProcess*1000.0);
                 storeDataView.add(x + 0.2, archiver.maxStore*1000.0);

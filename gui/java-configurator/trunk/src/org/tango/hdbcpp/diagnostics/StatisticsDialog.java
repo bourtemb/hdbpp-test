@@ -982,8 +982,6 @@ public class StatisticsDialog extends JDialog {
         }
     }
 
-
-
     //=========================================================================
     /**
      * Comparator to sort attribute list

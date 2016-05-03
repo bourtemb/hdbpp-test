@@ -130,16 +130,17 @@ public class HdbDiagnostics extends JFrame {
         //  Get subscriber labels if any
         subscriberMap = new SubscriberMap(configuratorProxy);
         labels = subscriberMap.getLabelList();
+        //  And get subscriber device names
         List<String> deviceNames = new ArrayList<>();
         for (String label : labels) {
             deviceNames.add( TangoUtils.getOnlyDeviceName(
-                    subscriberMap.getSubscriber(label).name));
+                    subscriberMap.getSubscriberByLabel(label).name));
         }
 
         //  Set the frequency column label
         if (labels.size()>0) {
             //  Get the duration from first subscriber
-            Subscriber subscriber = subscriberMap.getSubscriber(labels.get(0));
+            Subscriber subscriber = subscriberMap.getSubscriberByLabel(labels.get(0));
             statisticsTimeWindow = subscriber.getStatisticsTimeWindow();
             columnNames[RECORD_FREQUENCY] = "ev/";
             columnNames[FAILURE_FREQUENCY] = "Fail./";
@@ -207,7 +208,7 @@ public class HdbDiagnostics extends JFrame {
             return;
 
         try {
-            Subscriber subscriber =  subscriberMap.getSubscriber(label);
+            Subscriber subscriber =  subscriberMap.getSubscriberByLabel(label);
 
             if (evt.getClickCount()==2 && (mask & MouseEvent.BUTTON1_MASK)!=0) {
                 if (column>0) { //  Not the line label
@@ -466,7 +467,7 @@ public class HdbDiagnostics extends JFrame {
             attributeNames.add(configuratorProxy.name() + "/" + ATTRIBUTES[RECORD_FREQUENCY]);
             for (String label : labels) {
                 attributeNames.add( TangoUtils.getOnlyDeviceName(
-                        subscriberMap.getSubscriber(label).name) + "/" + ATTRIBUTES[RECORD_FREQUENCY]);
+                        subscriberMap.getSubscriberByLabel(label).name) + "/" + ATTRIBUTES[RECORD_FREQUENCY]);
             }
             new AtkMoniDialog(this, attributeNames, "HDB storage frequency").setVisible(true);
         }
