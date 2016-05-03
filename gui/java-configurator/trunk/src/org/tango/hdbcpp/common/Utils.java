@@ -393,6 +393,20 @@ public class Utils {
             Except.throw_exception("HdbFailed", e.toString());
         }
     }
+    //===============================================================
+    //===============================================================
+    public static String getLongestLine(List<String> lines) {
+        return getLongestLine(lines.toArray(new String[lines.size()]));
+    }
+    //===============================================================
+    //===============================================================
+    public static String getLongestLine(String[] lines) {
+        String  longest = "";
+        for (String line : lines)
+            if (line.length()>longest.length())
+                longest = line;
+        return longest;
+    }
     //======================================================================
     //======================================================================
     public static void main(String[] args) {

@@ -52,8 +52,8 @@ import java.util.StringTokenizer;
 
 
 public class TangoUtils {
-    private static final         String deviceHeader = "tango://";
 
+    public static final String deviceHeader = "tango://";
     //======================================================================
     //======================================================================
     public static String getDefaultTangoHost() throws DevFailed {

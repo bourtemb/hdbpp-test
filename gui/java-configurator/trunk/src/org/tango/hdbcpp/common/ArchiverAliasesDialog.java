@@ -103,7 +103,7 @@ public class ArchiverAliasesDialog extends JDialog {
 		}
 		List<String> labels = subscriberMap.getLabelList();
 		for (String label : labels) {
-			archivers.add(new Archiver(subscriberMap.getSubscriber(label).name, label));
+			archivers.add(new Archiver(subscriberMap.getSubscriberByLabel(label).name, label));
 		}
 		buildTable();
 

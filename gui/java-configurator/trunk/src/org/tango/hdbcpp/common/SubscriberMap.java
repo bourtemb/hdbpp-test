@@ -117,12 +117,21 @@ public class SubscriberMap {
     }
     //======================================================
     //======================================================
-    public Subscriber getSubscriber(String label) throws DevFailed {
+    public Subscriber getSubscriberByLabel(String label) throws DevFailed {
         Subscriber subscriber = label2device.get(label);
         if (subscriber==null)
-            Except.throw_exception("NO_DEVICE",
+            Except.throw_exception("NO_ARCHIVER",
                     "Subscriber \"" + label + "\" not found !");
         return subscriber;
+    }
+    //======================================================
+    //======================================================
+    public Subscriber getSubscriberByDevice(String deviceName) throws DevFailed {
+        String label = getLabel(deviceName);
+        if (label==null)
+            Except.throw_exception("NO_ARCHIVER",
+                    "Subscriber \"" + deviceName + "\" not found !");
+        return getSubscriberByLabel(label);
     }
     //======================================================
     //======================================================
