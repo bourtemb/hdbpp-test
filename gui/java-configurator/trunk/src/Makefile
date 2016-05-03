@@ -18,7 +18,7 @@
 #-======================================================================
 
 MAJOR_RELEASE = 2
-MINOR_RELEASE = 6
+MINOR_RELEASE = 7
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 
@@ -69,6 +69,7 @@ config:
 	@echo "-----------------------------------------"
 	@echo "	Building $(PACKAGE)/"configurator
 	@echo "-----------------------------------------"
+	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/configurator/strategy/*.java
 	$(JAVAC) -d $(BIN_DIR) $(PACKAGE_HOME)/configurator/*.java
 
 diags:
@@ -85,6 +86,7 @@ clean:
 	rm  -f $(BIN_DIR)/$(PACKAGE)/tools/*.class
 	rm  -f $(BIN_DIR)/$(PACKAGE)/common/*.class
 	rm  -f $(BIN_DIR)/$(PACKAGE)/atktable/*.class
+	rm  -f $(BIN_DIR)/$(PACKAGE)/configurator/strategy/*.class
 	rm  -f $(BIN_DIR)/$(PACKAGE)/configurator/*.class
 	rm  -f $(BIN_DIR)/$(PACKAGE)/diagnostics/*.class
 
@@ -138,12 +140,10 @@ doc:
 	-group "HDB++ configurator classes"    "org.tango.hdbcpp.configurator" \
 	-group "HDB++ diagnostics classes"     "org.tango.hdbcpp.diagnostics"  \
 	-group "HDB++ common classes"          "org.tango.hdbcpp.common"  \
-	-group "HDB++ tools classes"           "org.tango.hdbcpp.tools"   \
 	-overview overview.html	\
 		org/tango/hdbcpp/configurator/*.java \
 		org/tango/hdbcpp/diagnostics/*.java  \
-		org/tango/hdbcpp/common/*.java  \
-		org/tango/hdbcpp/tools/*.java
+		org/tango/hdbcpp/common/*.java
 	java -classpath $(POGO) pogo.make_util.ReleaseNote2html -html  "HDB++ Configurator Release Note"
 	@mv ReleaseNote.html $(DOC_DIR)
 

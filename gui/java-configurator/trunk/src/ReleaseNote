@@ -17,7 +17,10 @@
 
 
 
-jhdbcpp-2.6 - 19/12/16:
+jhdbcpp-2.7 - 19/12/16:
+	few methods added for external class.
+
+jhdbcpp-2.6 - 19/12/15:
 	Remove event tester launch in StatisticsDialog menu (does not work fine).
 
 jhdbcpp-2.5 - 16/12/15:

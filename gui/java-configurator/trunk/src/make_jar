@@ -41,10 +41,11 @@ EOF
 PATH=$PATH:/segfs/tango/jdk/Linux/jdk1.6.0/bin/
 cd $JAR_HOME
 pwd
-jar cmvf  $MANIF_FILE   \
-		$JAR_DIR/$JAR_FILE              \
-		$PACK_HOME/common/*.class       \
-		$PACK_HOME/atktable/*.class     \
+jar cmvf  $MANIF_FILE      \
+		$JAR_DIR/$JAR_FILE \
+		$PACK_HOME/common/*.class   \
+		$PACK_HOME/atktable/*.class \
+		$PACK_HOME/configurator/strategy/*.class \
 		$PACK_HOME/configurator/*.class \
 		$PACK_HOME/diagnostics/*.class  \
 		$PACK_HOME/img/*
