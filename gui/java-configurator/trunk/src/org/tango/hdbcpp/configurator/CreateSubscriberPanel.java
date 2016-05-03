@@ -415,7 +415,7 @@ public class CreateSubscriberPanel extends JDialog {
             Except.throw_exception("SyntaxError", "Label is not defined");
 
         //  Get confirmation
-        Subscriber subscriber  = subscriberMap.getSubscriber(label);
+        Subscriber subscriber  = subscriberMap.getSubscriberByLabel(label);
         checkManagedAttributes(subscriber);
 
         String message = "Remove subscriber  " + label + "  (" + subscriber.name + ") ?";

@@ -45,10 +45,7 @@ import org.tango.hdbcpp.common.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
@@ -227,11 +224,15 @@ public class HdbConfigurator extends JFrame {
         if (attributeName.startsWith("!!!"))
             return;
 
-
         //  Check button clicked
         if ((event.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
             menu.showMenu(event, attributeName);
         }
+    }
+	//=======================================================
+	//=======================================================
+    private void changeArchivingStrategy(List<String> attributeList) throws DevFailed {
+
     }
 	//=======================================================
 	//=======================================================
@@ -317,9 +318,9 @@ public class HdbConfigurator extends JFrame {
 
 
             List<String>   attributeList = selectedList.getSelectedValuesList();
-            Subscriber targetSubscriber = subscriberMap.getSubscriber(targetSubscriberLabel);
+            Subscriber targetSubscriber = subscriberMap.getSubscriberByLabel(targetSubscriberLabel);
             Subscriber srcSubscriber =
-                    subscriberMap.getSubscriber((String) archiverComboBox.getSelectedItem());
+                    subscriberMap.getSubscriberByLabel((String) archiverComboBox.getSelectedItem());
 
             //  Before everything, check if target is alive
             targetSubscriber.ping();
@@ -351,8 +352,11 @@ public class HdbConfigurator extends JFrame {
             else
             //  or pause if they were paused
             if (selectedList==pausedAttrJList) {
-                for (String attribute : attributeList)
+                for (String attribute : attributeList) {
+                    //  Start before (cannot set to pause from stopped)
+                    targetSubscriber.startAttribute(attribute);
                     targetSubscriber.pauseAttribute(attribute);
+                }
             }
 
             //  Set combo box selection to src subscriber
@@ -815,12 +819,12 @@ public class HdbConfigurator extends JFrame {
     //=======================================================
     private void manageSubscriberChanged(String archiverLabel) {
         try {
-            Subscriber subscriber = subscriberMap.getSubscriber(archiverLabel);
+            Subscriber subscriber = subscriberMap.getSubscriberByLabel(archiverLabel);
             startedFilterText.setText(subscriber.getStartedFilter());
             stoppedFilterText.setText(subscriber.getStoppedFilter());
             pausedFilterText.setText(subscriber.getPausedFilter());
 
-            updateAttributeList(subscriberMap.getSubscriber(archiverLabel));
+            updateAttributeList(subscriberMap.getSubscriberByLabel(archiverLabel));
         }
         catch (DevFailed e) {
             String[]    filtered = new String[0];
@@ -907,8 +911,8 @@ public class HdbConfigurator extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void stoppedFilterTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stoppedFilterTextActionPerformed
         try {
-            Subscriber subscriber = subscriberMap.getSubscriber(
-                    (String)archiverComboBox.getSelectedItem());
+            Subscriber subscriber = subscriberMap.getSubscriberByLabel(
+                    (String) archiverComboBox.getSelectedItem());
             subscriber.setStoppedFilter(stoppedFilterText.getText());
             updateAttributeList(subscriber);
         }
@@ -922,8 +926,8 @@ public class HdbConfigurator extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void pausedFilterTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pausedFilterTextActionPerformed
         try {
-            Subscriber subscriber = subscriberMap.getSubscriber(
-                    (String)archiverComboBox.getSelectedItem());
+            Subscriber subscriber = subscriberMap.getSubscriberByLabel(
+                    (String) archiverComboBox.getSelectedItem());
             subscriber.setPausedFilter(pausedFilterText.getText());
             updateAttributeList(subscriber);
         }
@@ -937,8 +941,8 @@ public class HdbConfigurator extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void startedFilterTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startedFilterTextActionPerformed
         try {
-            Subscriber subscriber = subscriberMap.getSubscriber(
-                    (String)archiverComboBox.getSelectedItem());
+            Subscriber subscriber = subscriberMap.getSubscriberByLabel(
+                    (String) archiverComboBox.getSelectedItem());
             subscriber.setStartedFilter(startedFilterText.getText());
             updateAttributeList(subscriber);
         }
@@ -1036,7 +1040,7 @@ public class HdbConfigurator extends JFrame {
         if (subscriberMap==null)
             return;
         try {
-            Subscriber subscriber = subscriberMap.getSubscriber(
+            Subscriber subscriber = subscriberMap.getSubscriberByLabel(
                     (String) archiverComboBox.getSelectedItem());
             updateAttributeList(subscriber);
         }
@@ -1097,7 +1101,7 @@ public class HdbConfigurator extends JFrame {
         String archiverName = propertyDialog.getSubscriber();
 
         try {
-            Subscriber  subscriber = subscriberMap.getSubscriber(archiverName);
+            Subscriber  subscriber = subscriberMap.getSubscriberByLabel(archiverName);
             boolean pushedByCode = propertyDialog.isPushedByCode();
             boolean startArchiving = propertyDialog.startArchiving();
 
@@ -1168,7 +1172,7 @@ public class HdbConfigurator extends JFrame {
 
             boolean pushedByCode = propertyDialog.isPushedByCode();
             boolean startArchiving = propertyDialog.startArchiving();
-            Subscriber subscriber  = subscriberMap.getSubscriber(propertyDialog.getSubscriber());
+            Subscriber subscriber  = subscriberMap.getSubscriberByLabel(propertyDialog.getSubscriber());
 
             //  If OK add the attribute
             ArchiverUtils.addAttribute(configuratorProxy,
@@ -1273,16 +1277,18 @@ public class HdbConfigurator extends JFrame {
      * Popup menu class
      */
     //======================================================
-    private static final int START_ARCHIVING  = 0;
-    private static final int STOP_ARCHIVING   = 1;
-    private static final int PAUSE_ARCHIVING  = 2;
-    private static final int REMOVE_ATTRIBUTE = 3;
-    private static final int MOVE_TO = 4;
-    private static final int COPY_AS_TEXT = 5;
+    private static final int ARCHIVING_STRATEGY  = 0;
+    private static final int START_ARCHIVING  = 1;
+    private static final int STOP_ARCHIVING   = 2;
+    private static final int PAUSE_ARCHIVING  = 3;
+    private static final int REMOVE_ATTRIBUTE = 4;
+    private static final int MOVE_TO = 5;
+    private static final int COPY_AS_TEXT = 6;
 
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
+            "Change Archiving Strategy",
             "Start Archiving", "Stop Archiving", "Pause Archiving",
             "Remove Attribute", "Move Attribute To ", "Copy as Text",
     };
@@ -1366,6 +1372,7 @@ public class HdbConfigurator extends JFrame {
                 getComponent(OFFSET + STOP_ARCHIVING).setVisible(true);
                 getComponent(OFFSET + PAUSE_ARCHIVING).setVisible(false);
             }
+            getComponent(OFFSET + ARCHIVING_STRATEGY).setVisible(PropertyDialog.useStrategy);
             show(selectedList, event.getX(), event.getY());
         }
         //======================================================
@@ -1386,9 +1393,12 @@ public class HdbConfigurator extends JFrame {
 
             try {
                 Subscriber  archiver =
-                        subscriberMap.getSubscriber((String) archiverComboBox.getSelectedItem());
+                        subscriberMap.getSubscriberByLabel((String) archiverComboBox.getSelectedItem());
                 List<String> attributeList = selectedList.getSelectedValuesList();
                 switch (itemIndex) {
+                    case ARCHIVING_STRATEGY:
+                        changeArchivingStrategy(attributeList);
+                        break;
                     case START_ARCHIVING:
                         ManageAttributes.startAttributes(attributeList);
                         updateAttributeList(archiver);
@@ -1457,7 +1467,7 @@ public class HdbConfigurator extends JFrame {
                 String  archiverLabel = (String) archiverComboBox.getSelectedItem();
                 if (archiverLabel!=null) {
                     try {
-                        Subscriber subscriber = subscriberMap.getSubscriber(archiverLabel);
+                        Subscriber subscriber = subscriberMap.getSubscriberByLabel(archiverLabel);
 
                         //  Get displayed list
                         int selection = tabbedPane.getSelectedIndex();

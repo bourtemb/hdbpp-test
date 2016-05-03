@@ -73,7 +73,7 @@ import java.util.List;
                         //  These attributes are pushed by the device code and
                         they will be started later<br>
                 </Font>
-                        ArrayList&lt;HdbAttribute&gt; hdbAttributes = new ArrayList&lt;HdbAttribute&gt;();<br>
+                        List&lt;HdbAttribute&gt; hdbAttributes = new ArrayList&lt;HdbAttribute&gt;();<br>
                         hdbAttributes.add(new HdbAttribute("sr/v-rga/c1-cv6000/mass12",
                                  ManageAttributes.PUSHED_BY_CODE, ManageAttributes.STOP_ARCHIVING));<br>
                         hdbAttributes.add(new HdbAttribute("sr/v-rga/c1-cv6000/mass14",
@@ -93,7 +93,7 @@ import java.util.List;
                 <FONT COLOR="#3b648b">
                 //  Create a attribute name list to be started<br>
                 </Font>
-                        ArrayList&lt;String&gt; attributeNames = new ArrayList&lt;String&gt;();<br>
+                        List&lt;String&gt; attributeNames = new ArrayList&lt;String&gt;();<br>
                         attributeNames.add("sr/v-rga/c1-cv6000/mass12");<br>
                         attributeNames.add("sr/v-rga/c1-cv6000/mass14");<br>
                         attributeNames.add("sr/v-rga/c1-cv6000/mass15");<br>
@@ -102,7 +102,7 @@ import java.util.List;
                 <FONT COLOR="#3b648b">
                 // Start archiving<br>
                 </Font>
-                        ManageAttributes.addAttributes(attributeNames);<br>
+                        ManageAttributes.startAttributes(attributeNames);<br>
                 </ul>
             }
             catch (DevFailed e) {
@@ -147,7 +147,7 @@ public class ManageAttributes {
      */
     //===============================================================
     public static void addAttributes(String subscriberName,
-                                     ArrayList<HdbAttribute> hdbAttributes) throws DevFailed {
+                                     List<HdbAttribute> hdbAttributes) throws DevFailed {
         if (hdbAttributes.size()==0)
             return;
         if (display) {
@@ -340,7 +340,7 @@ public class ManageAttributes {
     //===============================================================
     public static void main(String[] args) {
 
-        ArrayList<String> attributes = new ArrayList<String>();
+        List<String> attributes = new ArrayList<String>();
         attributes.add("sr/v-rga/c1-cv6000/mass12");
         attributes.add("sr/v-rga/c1-cv6000/mass14");
         attributes.add("sr/v-rga/c1-cv6000/mass15");

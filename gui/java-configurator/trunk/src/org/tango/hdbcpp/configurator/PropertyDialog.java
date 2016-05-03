@@ -41,8 +41,12 @@ import fr.esrf.TangoDs.Except;
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
+import org.tango.hdbcpp.common.Utils;
+import org.tango.hdbcpp.configurator.strategy.Strategy;
+import org.tango.hdbcpp.configurator.strategy.StrategyPanel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +60,7 @@ import java.util.List;
 //===============================================================
 
 
-@SuppressWarnings("MagicConstant")
+@SuppressWarnings({"MagicConstant", "Convert2Diamond"})
 public class PropertyDialog extends JDialog implements TangoConst {
     private JFrame parent;
     private String attributeName;
@@ -66,6 +70,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
 
     private boolean canceled = false;
     private static final int MaxRows = 30;
+    static final boolean useStrategy = false;
     //===============================================================
     /**
      * Creates new form PropertyDialog for one attribute
@@ -77,6 +82,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
         this.parent = parent;
         this.attributeName = attributeName;
         initComponents();
+        initOwnComponents();
 
         subscriberComboBox.removeAllItems();
         for (String subscriber : subscribers)
@@ -101,6 +107,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
         super(parent, true);
         this.parent = parent;
         initComponents();
+        initOwnComponents();
 
         subscriberComboBox.removeAllItems();
         for (String subscriber : subscribers)
@@ -122,12 +129,54 @@ public class PropertyDialog extends JDialog implements TangoConst {
         if (attributeNames.size()>MaxRows)
             nbRows = MaxRows;
         attributeListArea.setRows(nbRows);
-        attributeListArea.setColumns(length+1);
+        attributeListArea.setColumns(length + 1);
         attributeListArea.setText(sb.toString().trim());
         attributeListArea.setEditable(false);
 
         pack();
         ATKGraphicsUtils.centerDialog(this);
+    }
+    //===============================================================
+    //===============================================================
+    private void initOwnComponents() {
+        //  Change panel look for property and subscription panels
+        propertyPanel.setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Event Properties"));
+        subscriptionPanel.setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Events Subscription"));
+
+        // Add tooltips
+        pushedByCodeButton.setToolTipText(Utils.buildTooltip("Select if event is pushed by code"));
+        startArchivingButton.setToolTipText(Utils.buildTooltip("Select to start archiving at subscription"));
+        archiverLabel.setToolTipText(Utils.buildTooltip("Select archiver to manage storage"));
+        subscriberComboBox.setToolTipText(Utils.buildTooltip("Select archiver to manage storage"));
+
+        //  Add strategy panel
+        if (useStrategy)
+            addStrategyPanel();
+    }
+    //===============================================================
+    //===============================================================
+    private void addStrategyPanel() {
+        //  ToDo get strategy list/info from property ?
+        List<Strategy>	list = new ArrayList<>();
+        list.add(new Strategy("Shutdown", true,
+                "Accelerator is shutdown\n" +
+                        "A majority of equipments are down\nand attributes must not be stored in HDB"));
+        list.add(new Strategy("USM", true,
+                "User mode\nAccelerator is running for users."));
+        list.add(new Strategy("MDT", true,
+                "Machine Dedicated Day\nAccelerator is used for tests or short maintenance"));
+        list.add(new Strategy("Safety tests", false, "Safety group is doing measurements"));
+        list.add(new Strategy("ID tests", false, "Insertion devices group is doing measurements"));
+
+        StrategyPanel strategyPanel = new StrategyPanel(list);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 3;
+        gbc.gridy = 0;
+        gbc.gridheight = 4;
+        gbc.insets = new java.awt.Insets(10, 30, 0, 0);
+        subscriptionPanel.add(strategyPanel, gbc);
     }
     //===============================================================
     /**
@@ -148,10 +197,12 @@ public class PropertyDialog extends JDialog implements TangoConst {
         titleLabel = new javax.swing.JLabel();
         attributeListScrollPane = new javax.swing.JScrollPane();
         attributeListArea = new javax.swing.JTextArea();
-        javax.swing.JPanel archiverPanel = new javax.swing.JPanel();
-        javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
-        subscriberComboBox = new javax.swing.JComboBox<String>();
         javax.swing.JPanel centerPanel = new javax.swing.JPanel();
+        subscriptionPanel = new javax.swing.JPanel();
+        startArchivingButton = new javax.swing.JRadioButton();
+        pushedByCodeButton = new javax.swing.JRadioButton();
+        subscriberComboBox = new javax.swing.JComboBox<String>();
+        archiverLabel = new javax.swing.JLabel();
         propertyPanel = new javax.swing.JPanel();
         javax.swing.JLabel absLbl = new javax.swing.JLabel();
         javax.swing.JLabel relLbl = new javax.swing.JLabel();
@@ -162,13 +213,9 @@ public class PropertyDialog extends JDialog implements TangoConst {
         javax.swing.JButton resetAbsBtn = new javax.swing.JButton();
         javax.swing.JButton resetRelBtn = new javax.swing.JButton();
         javax.swing.JButton resetPerBtn = new javax.swing.JButton();
-        javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
         javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
         pollingPeriodTxt = new javax.swing.JTextField();
-        javax.swing.JPanel pushedPanel = new javax.swing.JPanel();
-        pushedByCodeButton = new javax.swing.JRadioButton();
-        javax.swing.JPanel startPanel = new javax.swing.JPanel();
-        startArchivingButton = new javax.swing.JRadioButton();
+        javax.swing.JLabel dummyLabel = new javax.swing.JLabel();
         javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
         javax.swing.JButton updateBtn = new javax.swing.JButton();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
@@ -183,7 +230,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
         topPanel.setLayout(new java.awt.BorderLayout());
 
         titleLabel1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        titleLabel1.setText("Archive  Event  for");
+        titleLabel1.setText("Archive  Events  for");
         jPanel5.add(titleLabel1);
 
         topPanel.add(jPanel5, java.awt.BorderLayout.NORTH);
@@ -202,17 +249,47 @@ public class PropertyDialog extends JDialog implements TangoConst {
 
         topPanel.add(jPanel2, java.awt.BorderLayout.CENTER);
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel2.setText("Archiver: ");
-        archiverPanel.add(jLabel2);
-
-        archiverPanel.add(subscriberComboBox);
-
-        topPanel.add(archiverPanel, java.awt.BorderLayout.SOUTH);
-
         getContentPane().add(topPanel, java.awt.BorderLayout.NORTH);
 
         centerPanel.setLayout(new java.awt.BorderLayout());
+
+        subscriptionPanel.setLayout(new java.awt.GridBagLayout());
+
+        startArchivingButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        startArchivingButton.setSelected(true);
+        startArchivingButton.setText("Start Archiving");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 0);
+        subscriptionPanel.add(startArchivingButton, gridBagConstraints);
+
+        pushedByCodeButton.setText("Event pushed by code");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        subscriptionPanel.add(pushedByCodeButton, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        subscriptionPanel.add(subscriberComboBox, gridBagConstraints);
+
+        archiverLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        archiverLabel.setText("Archiver: ");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 22, 0, 0);
+        subscriptionPanel.add(archiverLabel, gridBagConstraints);
+
+        centerPanel.add(subscriptionPanel, java.awt.BorderLayout.NORTH);
 
         propertyPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -234,13 +311,13 @@ public class PropertyDialog extends JDialog implements TangoConst {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         propertyPanel.add(relLbl, gridBagConstraints);
 
-        periodLbl.setText("event period (milliseconds):");
+        periodLbl.setText("event period (ms):");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 20, 10);
         propertyPanel.add(periodLbl, gridBagConstraints);
 
         absTxt.setColumns(12);
@@ -263,7 +340,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 20, 10);
         propertyPanel.add(eventPeriodTxt, gridBagConstraints);
 
         resetAbsBtn.setText("Reset");
@@ -305,22 +382,15 @@ public class PropertyDialog extends JDialog implements TangoConst {
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 20, 10);
         propertyPanel.add(resetPerBtn, gridBagConstraints);
 
-        jLabel3.setText("Event Properties:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.insets = new java.awt.Insets(30, 10, 0, 0);
-        propertyPanel.add(jLabel3, gridBagConstraints);
-
-        jLabel4.setText("Attribute polling period (milliseconds):");
+        jLabel4.setText("Attribute polling period (ms):");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(5, 10, 30, 0);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 15, 10);
         propertyPanel.add(jLabel4, gridBagConstraints);
 
         pollingPeriodTxt.setColumns(12);
@@ -328,22 +398,13 @@ public class PropertyDialog extends JDialog implements TangoConst {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 30, 10);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 15, 10);
         propertyPanel.add(pollingPeriodTxt, gridBagConstraints);
 
-        centerPanel.add(propertyPanel, java.awt.BorderLayout.CENTER);
+        centerPanel.add(propertyPanel, java.awt.BorderLayout.SOUTH);
 
-        pushedByCodeButton.setText("Event pushed by code");
-        pushedPanel.add(pushedByCodeButton);
-
-        centerPanel.add(pushedPanel, java.awt.BorderLayout.SOUTH);
-
-        startArchivingButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        startArchivingButton.setSelected(true);
-        startArchivingButton.setText("Start Archiving");
-        startPanel.add(startArchivingButton);
-
-        centerPanel.add(startPanel, java.awt.BorderLayout.PAGE_START);
+        dummyLabel.setText("     ");
+        centerPanel.add(dummyLabel, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(centerPanel, java.awt.BorderLayout.CENTER);
 
@@ -515,8 +576,6 @@ public class PropertyDialog extends JDialog implements TangoConst {
         setVisible(false);
         dispose();
     }
-
-
     //===============================================================
     //===============================================================
     private int pollingPeriod = 0;
@@ -584,6 +643,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
     //===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField absTxt;
+    private javax.swing.JLabel archiverLabel;
     private javax.swing.JTextArea attributeListArea;
     private javax.swing.JScrollPane attributeListScrollPane;
     private javax.swing.JTextField eventPeriodTxt;
@@ -593,6 +653,7 @@ public class PropertyDialog extends JDialog implements TangoConst {
     private javax.swing.JTextField relTxt;
     private javax.swing.JRadioButton startArchivingButton;
     private javax.swing.JComboBox<String> subscriberComboBox;
+    private javax.swing.JPanel subscriptionPanel;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
     //===============================================================
@@ -604,13 +665,16 @@ public class PropertyDialog extends JDialog implements TangoConst {
     public static void main(String[] args) {
 
         try {
-            String signal = "pv/ps/1/current";
-            List<String>   list = new ArrayList<>();
-            list.add("Subscriber 1");
-            list.add("Subscriber 2");
-            list.add("Subscriber 3");
-            new PropertyDialog(null, signal, list, list.get(2)).setVisible(true);
-        } catch (DevFailed e) {
+            String signal = "sy/ps-rips/manager/state";
+            List<String> signals = new ArrayList<>();
+            signals.add("sy/ps-rips/manager/state");
+            signals.add("sy/ps-rips/manager/status");
+            List<String> subscribers = new ArrayList<>();
+            subscribers.add("Subscriber 1");
+            subscribers.add("Subscriber 2");
+            subscribers.add("Subscriber 3");
+            new PropertyDialog(null, signal, subscribers, subscribers.get(2)).setVisible(true);
+        } catch (Exception e) {
             ErrorPane.showErrorMessage(null, null, e);
         }
 
