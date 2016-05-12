@@ -31,17 +31,17 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.diagnostics;
+package org.tango.hdb_configurator.diagnostics;
 
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
-import org.tango.hdbcpp.common.Subscriber;
-import org.tango.hdbcpp.common.SubscriberMap;
-import org.tango.hdbcpp.common.TangoUtils;
-import org.tango.hdbcpp.common.Utils;
+import org.tango.hdb_configurator.common.Subscriber;
+import org.tango.hdb_configurator.common.SubscriberMap;
+import org.tango.hdb_configurator.common.TangoUtils;
+import org.tango.hdb_configurator.common.Utils;
 
 import java.util.Date;
 import java.util.List;

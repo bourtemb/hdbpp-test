@@ -33,15 +33,15 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.diagnostics;
+package org.tango.hdb_configurator.diagnostics;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.hdbcpp.atktable.TableScalarViewer;
-import org.tango.hdbcpp.common.*;
+import org.tango.hdb_configurator.atktable.TableScalarViewer;
+import org.tango.hdb_configurator.common.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class HdbDiagnostics extends JFrame {
             if (s!=null && s.equals("true"))
                 System.setProperty("HDB_TYPE", archiveName);
         }
-        ImageIcon icon = Utils.getInstance().getIcon("hdbcpp.gif", 0.75);
+        ImageIcon icon = Utils.getInstance().getIcon("hdb++.gif", 0.75);
         titleLabel.setIcon(icon);
         setIconImage(icon.getImage());
 

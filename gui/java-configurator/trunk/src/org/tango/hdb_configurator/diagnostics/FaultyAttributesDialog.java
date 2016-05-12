@@ -33,14 +33,14 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.diagnostics;
+package org.tango.hdb_configurator.diagnostics;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceData;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.hdbcpp.common.*;
+import org.tango.hdb_configurator.common.*;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

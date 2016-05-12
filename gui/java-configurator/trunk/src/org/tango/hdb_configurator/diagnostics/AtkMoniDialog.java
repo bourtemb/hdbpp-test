@@ -31,11 +31,11 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.diagnostics;
+package org.tango.hdb_configurator.diagnostics;
 
 
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import org.tango.hdbcpp.common.SplashUtils;
+import org.tango.hdb_configurator.common.SplashUtils;
 
 import javax.swing.*;
 import java.util.List;
