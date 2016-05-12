@@ -137,13 +137,13 @@ doc:
 	-header $(DOC_HEADER)	\
 	-d $(DOC_DIR)			\
 	-link  .				\
-	-group "HDB++ configurator classes"    "org.tango.hdbcpp.configurator" \
-	-group "HDB++ diagnostics classes"     "org.tango.hdbcpp.diagnostics"  \
-	-group "HDB++ common classes"          "org.tango.hdbcpp.common"  \
+	-group "HDB++ configurator classes"    "org.tango.hdb_configurator.configurator" \
+	-group "HDB++ diagnostics classes"     "org.tango.hdb_configurator .diagnostics"  \
+	-group "HDB++ common classes"          "org.tango.hdb_configurator .common"  \
 	-overview overview.html	\
-		org/tango/hdbcpp/configurator/*.java \
-		org/tango/hdbcpp/diagnostics/*.java  \
-		org/tango/hdbcpp/common/*.java
+		org/tango/hdb_configurator/configurator/*.java \
+		org/tango/hdb_configurator/diagnostics/*.java  \
+		org/tango/hdb_configurator/common/*.java
 	java -classpath $(POGO) pogo.make_util.ReleaseNote2html -html  "HDB++ Configurator Release Note"
 	@mv ReleaseNote.html $(DOC_DIR)
 
