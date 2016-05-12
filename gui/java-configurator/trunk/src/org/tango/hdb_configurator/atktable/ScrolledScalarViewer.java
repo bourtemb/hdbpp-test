@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.atktable;
+package org.tango.hdb_configurator.atktable;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.attribute.MultiScalarTableViewer;

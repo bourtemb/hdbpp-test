@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.atktable;
+package org.tango.hdb_configurator.atktable;
 
 import javax.swing.*;
 import java.awt.*;

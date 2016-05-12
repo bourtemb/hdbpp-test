@@ -34,9 +34,9 @@
 //-======================================================================
 
 
-package org.tango.hdbcpp.atktable;
+package org.tango.hdb_configurator.atktable;
 
-import org.tango.hdbcpp.common.Utils;
+import org.tango.hdb_configurator.common.Utils;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
