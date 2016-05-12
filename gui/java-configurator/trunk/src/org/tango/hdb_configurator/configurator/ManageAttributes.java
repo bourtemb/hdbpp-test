@@ -31,16 +31,16 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.configurator;
+package org.tango.hdb_configurator.configurator;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.AttributeProxy;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
-import org.tango.hdbcpp.common.Subscriber;
-import org.tango.hdbcpp.common.ArchiverUtils;
-import org.tango.hdbcpp.common.SplashUtils;
-import org.tango.hdbcpp.common.TangoUtils;
+import org.tango.hdb_configurator.common.Subscriber;
+import org.tango.hdb_configurator.common.ArchiverUtils;
+import org.tango.hdb_configurator.common.SplashUtils;
+import org.tango.hdb_configurator.common.TangoUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +57,8 @@ import java.util.List;
             package my_package;
             <br>
             <br>
-    import org.Tango.hdbcpp.configurator.HdbAttribute; <br>
-    import org.Tango.hdbcpp.configurator.ManageAttributes; <br>
+    import org.Tango.hdb_configurator.configurator.HdbAttribute; <br>
+    import org.Tango.hdb_configurator.configurator.ManageAttributes; <br>
     import fr.esrf.TangoDs.Except; <br>
     import fr.esrf.Tango.DevFailed; <br>
             <br>

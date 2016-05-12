@@ -33,14 +33,14 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.configurator;
+package org.tango.hdb_configurator.configurator;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.hdbcpp.common.ArchiverUtils;
-import org.tango.hdbcpp.common.SplashUtils;
-import org.tango.hdbcpp.common.TangoUtils;
-import org.tango.hdbcpp.common.Utils;
+import org.tango.hdb_configurator.common.ArchiverUtils;
+import org.tango.hdb_configurator.common.SplashUtils;
+import org.tango.hdb_configurator.common.TangoUtils;
+import org.tango.hdb_configurator.common.Utils;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;

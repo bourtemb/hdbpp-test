@@ -32,7 +32,7 @@
 //-======================================================================
 
 
-package org.tango.hdbcpp.configurator;
+package org.tango.hdb_configurator.configurator;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.AttributeInfoEx;
@@ -41,9 +41,9 @@ import fr.esrf.TangoDs.Except;
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.hdbcpp.common.Utils;
-import org.tango.hdbcpp.configurator.strategy.Strategy;
-import org.tango.hdbcpp.configurator.strategy.StrategyPanel;
+import org.tango.hdb_configurator.common.Utils;
+import org.tango.hdb_configurator.configurator.strategy.Strategy;
+import org.tango.hdb_configurator.configurator.strategy.StrategyPanel;
 
 import javax.swing.*;
 import java.awt.*;

@@ -32,7 +32,7 @@
 //-======================================================================
 
 
-package org.tango.hdbcpp.configurator;
+package org.tango.hdb_configurator.configurator;
 
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 

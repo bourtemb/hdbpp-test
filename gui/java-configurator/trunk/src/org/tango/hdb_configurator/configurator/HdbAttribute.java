@@ -31,7 +31,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.configurator;
+package org.tango.hdb_configurator.configurator;
 
 /**
  * This class defines an attribute to be added to a subscriber

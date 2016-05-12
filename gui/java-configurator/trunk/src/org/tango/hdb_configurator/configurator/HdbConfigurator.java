@@ -34,14 +34,14 @@
 //-======================================================================
 
 
-package org.tango.hdbcpp.configurator;
+package org.tango.hdb_configurator.configurator;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.hdbcpp.common.*;
+import org.tango.hdb_configurator.common.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -162,7 +162,7 @@ public class HdbConfigurator extends JFrame {
             if (s!=null && s.equals("true"))
                 System.setProperty("HDB_TYPE", archiveName);
         }
-        ImageIcon icon = Utils.getInstance().getIcon("hdbcpp.gif", 0.75);
+        ImageIcon icon = Utils.getInstance().getIcon("hdb++.gif", 0.75);
         titleLabel.setIcon(icon);
         setIconImage(icon.getImage());
 
@@ -983,7 +983,7 @@ public class HdbConfigurator extends JFrame {
     private void diagnosticsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_diagnosticsItemActionPerformed
         try {
             diagnosticsPanel = (JFrame) Utils.getInstance().startExternalApplication(
-                    this, "org.tango.hdbcpp.diagnostics.HdbDiagnostics");
+                    this, "org.tango.hdb_configurator.diagnostics.HdbDiagnostics");
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, e.toString(), e);
