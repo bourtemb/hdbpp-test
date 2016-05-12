@@ -33,11 +33,11 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.configurator.strategy;
+package org.tango.hdb_configurator.configurator.strategy;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.hdbcpp.common.Utils;
+import org.tango.hdb_configurator.common.Utils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

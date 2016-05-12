@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.configurator.strategy;
+package org.tango.hdb_configurator.configurator.strategy;
 
 
 
