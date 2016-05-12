@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.common;
+package org.tango.hdb_configurator.common;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.widget.util.JSmoothProgressBar;
@@ -56,9 +56,9 @@ public class SplashUtils {
     private static Splash splash = null;
     private static int splashProgress = 0;
     private static boolean splashActive = false;
-    private static final String packageName = "org.tango.hdbcpp";
+    private static final String packageName = "org.tango.hdb_configurator";
     public static final String revNumber =
-            "2.7  -  Tue May 03 15:18:43 CEST 2016";
+            "1.0  -  Thu May 12 14:53:39 CEST 2016";
 
     private static SplashUtils instance = new SplashUtils();
     private static final String imageFile = "FullTangoLogo.gif";

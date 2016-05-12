@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.common;
+package org.tango.hdb_configurator.common;
 
 import java.util.ArrayList;
 import java.util.Collections;

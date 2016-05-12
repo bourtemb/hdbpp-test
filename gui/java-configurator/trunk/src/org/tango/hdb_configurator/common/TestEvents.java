@@ -32,7 +32,7 @@
 //-======================================================================
 
 
-package org.tango.hdbcpp.common;
+package org.tango.hdb_configurator.common;
 
 import admin.astor.tools.EventsTable;
 import fr.esrf.Tango.DevFailed;

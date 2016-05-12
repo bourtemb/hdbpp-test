@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.common;
+package org.tango.hdb_configurator.common;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.*;

@@ -1,5 +1,5 @@
 
-package org.tango.hdbcpp.common;
+package org.tango.hdb_configurator.common;
 
 /**
  *	HTML code to display Release Notes for this package.
@@ -16,9 +16,11 @@ public interface ReleaseNote
 		"</HEAD>\n" + 
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
-		"<Center>	<h2>org.tango.hdbcpp.tools Release Note</h2>\n" + 
-		"	(Generated Tue May 03 15:18:43 CEST 2016)</Center><Br>\n" + 
-		"<li><b>jhdbcpp-2.7 - 19/12/16:</b><Br>\n" + 
+		"<Center>	<h2>org.tango.hdb_configurator.tools Release Note</h2>\n" + 
+		"	(Generated Thu May 12 14:53:39 CEST 2016)</Center><Br>\n" + 
+		"<li><b>hdb_configurator-1.0 - 12/05/16:</b><Br>\n" + 
+		"&nbsp; &nbsp; Change package name (reset revision number)<Br>\n" + 
+		"<li><b>jhdbcpp-2.7 - 03/05/16:</b><Br>\n" + 
 		"&nbsp; &nbsp; few methods added for external class.<Br>\n" + 
 		"<li><b>jhdbcpp-2.6 - 19/12/15:</b><Br>\n" + 
 		"&nbsp; &nbsp; Remove event tester launch in StatisticsDialog menu (does not work fine).<Br>\n" + 

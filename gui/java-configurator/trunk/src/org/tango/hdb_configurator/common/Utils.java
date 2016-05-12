@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.hdbcpp.common;
+package org.tango.hdb_configurator.common;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.Except;
@@ -51,7 +51,7 @@ import java.util.StringTokenizer;
 
 public class Utils {
     private static Utils instance = null;
-    private static final String DefaultImagePath = "/org/tango/hdbcpp/img/";
+    private static final String DefaultImagePath = "/org/tango/hdb_configurator/img/";
     private static MainPanel jive = null;
     //======================================================================
     //======================================================================

@@ -37,7 +37,7 @@
 //-======================================================================
 
 
-package org.tango.hdbcpp.common;
+package org.tango.hdb_configurator.common;
 
 
 import fr.esrf.TangoDs.TangoConst;
