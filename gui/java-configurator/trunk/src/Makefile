@@ -17,14 +17,14 @@
 #
 #-======================================================================
 
-MAJOR_RELEASE = 2
-MINOR_RELEASE = 7
+MAJOR_RELEASE = 1
+MINOR_RELEASE = 0
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 
-PACKAGE      = org.tango.hdbcpp
-PACKAGE_HOME = org/tango/hdbcpp
-JAR_NAME = jhdbcpp
+PACKAGE      = org.tango.hdb_configurator
+PACKAGE_HOME = org/tango/hdb_configurator
+JAR_NAME = hdb_configurator
 
 TANGO_HOME	=	/segfs/tango
 TANGO_LIB	=	$(TANGO_HOME)/lib/java

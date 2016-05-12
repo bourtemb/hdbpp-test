@@ -17,7 +17,10 @@
 
 
 
-jhdbcpp-2.7 - 19/12/16:
+hdb_configurator-1.0 - 12/05/16:
+	Change package name (reset revision number)
+
+jhdbcpp-2.7 - 03/05/16:
 	few methods added for external class.
 
 jhdbcpp-2.6 - 19/12/15:
