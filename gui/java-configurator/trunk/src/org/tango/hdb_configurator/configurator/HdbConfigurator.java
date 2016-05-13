@@ -1123,7 +1123,7 @@ public class HdbConfigurator extends JFrame {
         }
         //  And select archiver to display results
         selectArchiver(archiverName);
-        attributeTree.updateAttributeInfo(attributeNames);
+        new UpdateSubscribedThread(attributeNames).start();
     }
 	//=======================================================
 	//=======================================================
@@ -1181,6 +1181,8 @@ public class HdbConfigurator extends JFrame {
                 subscriber.startAttribute(attributeName);
 
             updateAttributeList(subscriber);
+            new UpdateSubscribedThread(attributeName).start();
+
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, null, e);
@@ -1414,11 +1416,13 @@ public class HdbConfigurator extends JFrame {
                     case REMOVE_ATTRIBUTE:
                         ManageAttributes.removeAttributes(attributeList);
                         updateAttributeList(archiver);
-                        attributeTree.updateAttributeInfo(attributeList);
+                        new UpdateSubscribedThread(attributeList).start();
+                        //attributeTree.updateAttributeInfo(attributeList);
                         break;
                     case MOVE_TO:
                         moveAttributeToSubscriber(targetSubscriber, selectedList);
-                        attributeTree.updateAttributeInfo(attributeList);
+                        new UpdateSubscribedThread(attributeList).start();
+                        //attributeTree.updateAttributeInfo(attributeList);
                         break;
                     case COPY_AS_TEXT:
                         copyAttributeAsText();
@@ -1461,7 +1465,7 @@ public class HdbConfigurator extends JFrame {
         //===================================================
         public void run() {
             while (!stopIt) {
-                try { sleep(1000); } catch (InterruptedException e) { /* */ }
+                try { sleep(500); } catch (InterruptedException e) { /* */ }
 
                 //  Get selected subscriber
                 String  archiverLabel = (String) archiverComboBox.getSelectedItem();
@@ -1472,9 +1476,9 @@ public class HdbConfigurator extends JFrame {
                         //  Get displayed list
                         int selection = tabbedPane.getSelectedIndex();
                         //  Get attribute list and check if has changed
-                        String[] attributeList = subscriber.getAttributeList(selection, false);
-                        if (attributeList!=displayedList) {
-                            displayedList = attributeList;
+                        String[] attributeNames = subscriber.getAttributeList(selection, false);
+                        if (attributeNames!=displayedList) {
+                            displayedList = attributeNames;
                             updateAttributeList(subscriber);
                         }
                     }
@@ -1482,6 +1486,40 @@ public class HdbConfigurator extends JFrame {
                         System.err.println(e.errors[0].desc);
                     }
                 }
+            }
+        }
+    }
+    //=======================================================
+    /**
+     * A thread to update Subscribe/Remove attribute on JTree
+     */
+    //=======================================================
+    private static final int executionTime = 15000;
+    private class UpdateSubscribedThread extends Thread {
+        private boolean stopIt = false;
+        private long t0 = System.currentTimeMillis();
+        private List<String> attributes;
+        //===================================================
+        private UpdateSubscribedThread(List<String> attributes) {
+            this.attributes = attributes;
+        }
+        //===================================================
+        private UpdateSubscribedThread(String attribute) {
+            this.attributes = new ArrayList<>();
+            attributes.add(attribute);
+        }
+        //===================================================
+        public void run() {
+            while (!stopIt) {
+                try { sleep(500); } catch (InterruptedException e) { /* */ }
+                if (attributes.size()==1)
+                    attributeTree.updateAttributeInfo(attributes.get(0));
+                else
+                    attributeTree.updateAttributeInfo(attributes);
+
+                //  After a while forget it
+                if (System.currentTimeMillis()-t0 > executionTime)
+                    stopIt = true;
             }
         }
     }

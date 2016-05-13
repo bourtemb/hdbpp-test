@@ -97,10 +97,6 @@ public class AttributeTree extends JTree {
 
         menu = new AttributeTreePopupMenu(this);
         setSelectionPath(null);
-
-        //	Enable Drag and drop
-        this.setDragEnabled(true);
-        setTransferHandler(new TransferHandler("Text"));
     }
     //======================================================
     //======================================================
@@ -452,14 +448,15 @@ public class AttributeTree extends JTree {
     }
     //===============================================================
     //===============================================================
-    public void updateAttributeInfo(List<String> attributeNames) {
+    public void updateAttributeInfo(final List<String> attributeNames) {
+        // ToDo
         for (String attributeName : attributeNames) {
             updateAttributeInfo(attributeName);
         }
     }
     //===============================================================
     //===============================================================
-    public void updateAttributeInfo(String attributeName) {
+    public void updateAttributeInfo(final String attributeName) {
         DefaultMutableTreeNode  attributeNode = getAttributeNode(attributeName);
         if (attributeNode!=null) {
             Attribute attribute = (Attribute) attributeNode.getUserObject();
@@ -620,7 +617,7 @@ public class AttributeTree extends JTree {
                 else
                     archiver = parent.getArchiverLabel(archiver);
             }
-            catch (DevFailed e) {
+            catch (Exception e) {
                 //  Do not know
                 archiver = null;
             }
