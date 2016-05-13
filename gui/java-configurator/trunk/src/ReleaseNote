@@ -17,6 +17,9 @@
 
 
 
+hdb_configurator-1.1 - 13/05/16:
+	Fix problem of refreshing in attribute tree.
+
 hdb_configurator-1.0 - 12/05/16:
 	Change package name (reset revision number)
 
