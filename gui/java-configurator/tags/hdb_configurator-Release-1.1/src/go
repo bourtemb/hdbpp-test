@@ -1,0 +1,43 @@
+TANGO_HOME=/segfs/tango/release/java
+
+Appli=../bin
+
+API=/segfs/tango/javaapi/bin
+CLASSPATH=$API:$TANGO_HOME/lib/JTango.jar:$TANGO_HOME/lib/ATKWidget.jar:$TANGO_HOME/lib/ATKCore.jar
+#CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/jhdbviewer.jar
+#CLASSPATH=$CLASSPATH:$TANGO_HOME/lib/HDB++.jar
+#CLASSPATH=$CLASSPATH:$TANGO_HOME/lib/JCalendar/lib/jcalendar-1.4.jar
+CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Jive.jar
+CLASSPATH=$CLASSPATH:$TANGO_HOME/appli/Astor.jar
+#CLASSPATH=$CLASSPATH:/segfs/tango/tools/admin/astor/bin
+CLASSPATH=$Appli:$CLASSPATH:
+
+echo "CLASSPATH=$CLASSPATH"
+
+
+TANGO_HOST=orion:10000
+#TANGO_HOST=idlab-db:10000
+#TANGO_HOST=acudebian7:10000
+
+HdbManager=hdb++/cm/1
+HdbManager=tango/hdb/manager
+HdbManager=tango/hdb-cassandra/manager-test
+export HdbManager
+
+
+export HdbExtraction=true
+export HDB_MYSQL_HOST=hdbplus
+
+PATH=/segfs/tango/jdk/Linux_64/jdk1.8.0_65/bin:$PATH
+
+if [ "$#" -lt 1 ]
+then
+	java  org.tango.hdb_configurator.configurator.HdbConfigurator
+else
+	if [ $1 = "-diag" ]
+	then
+		java  org.tango.hdb_configurator.diagnostics.HdbDiagnostics
+	else
+		java  org.tango.hdb_configurator.configurator.HdbConfigurator
+	fi
+fi
