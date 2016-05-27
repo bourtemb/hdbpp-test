@@ -37,6 +37,8 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.AttributeProxy;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
+import fr.esrf.TangoDs.NamedDevFailed;
+import fr.esrf.TangoDs.NamedDevFailedList;
 import org.tango.hdb_configurator.common.Subscriber;
 import org.tango.hdb_configurator.common.ArchiverUtils;
 import org.tango.hdb_configurator.common.SplashUtils;
@@ -185,7 +187,17 @@ public class ManageAttributes {
             }
             catch (DevFailed e) {
                 errors.append(hdbAttribute.getName());
-                errors.append("\n  (").append(e.errors[0].desc).append(")\n");
+                if (e instanceof NamedDevFailedList) {
+                    NamedDevFailedList devFailedList = (NamedDevFailedList) e;
+                    for (int i=0 ; i<devFailedList.get_faulty_attr_nb() ; i++) {
+                        NamedDevFailed namedDevFailed = devFailedList.elementAt(i);
+                        errors.append("\n  (").append(namedDevFailed.err_stack[0].origin).append(" : ")
+                                .append(namedDevFailed.err_stack[0].desc).append(")\n");
+                    }
+                }
+                else
+                    errors.append("\n  (").append(e.errors[0].origin).append(" : ")
+                            .append(e.errors[0].desc).append(")\n");
             }
         }
         if (display)
@@ -340,7 +352,7 @@ public class ManageAttributes {
     //===============================================================
     public static void main(String[] args) {
 
-        List<String> attributes = new ArrayList<String>();
+        List<String> attributes = new ArrayList<>();
         attributes.add("sr/v-rga/c1-cv6000/mass12");
         attributes.add("sr/v-rga/c1-cv6000/mass14");
         attributes.add("sr/v-rga/c1-cv6000/mass15");
@@ -349,7 +361,7 @@ public class ManageAttributes {
         attributes.add("sr/v-rga/c1-cv6000/mass18");
         attributes.add("sr/v-rga/c1-cv6000/mass19");
 
-        ArrayList<HdbAttribute> hdbAttributes = new ArrayList<HdbAttribute>();
+        ArrayList<HdbAttribute> hdbAttributes = new ArrayList<>();
         hdbAttributes.add(new HdbAttribute("sr/v-rga/c1-cv6000/mass12", PUSHED_BY_CODE, START_ARCHIVING));
         hdbAttributes.add(new HdbAttribute("sr/v-rga/c1-cv6000/mass14", PUSHED_BY_CODE, START_ARCHIVING));
         hdbAttributes.add(new HdbAttribute("sr/v-rga/c1-cv6000/mass15", PUSHED_BY_CODE, START_ARCHIVING));
