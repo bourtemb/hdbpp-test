@@ -123,7 +123,7 @@ public class ArchiverUtils {
      * @param configureProxy configurator device proxy
      * @param subscriberName specified subscriber
      * @param attributeName  specified attribute name
-     * @param codePushedEvent true if the event could be pushed by device code
+     * @param pushedByCode true if the event could be pushed by device code
      * @param lockIt true if the configurator device must be locked or false if already done.
      * @throws DevFailed in case of read device failed.
      */
@@ -131,7 +131,7 @@ public class ArchiverUtils {
     public static void addAttribute(DeviceProxy configureProxy,
                                             String subscriberName,
                                             String attributeName,
-                                            boolean codePushedEvent,
+                                            boolean pushedByCode,
                                             boolean lockIt) throws DevFailed {
         //  At first lock the device if needed
         if (lockIt) {
@@ -143,7 +143,7 @@ public class ArchiverUtils {
             DeviceAttribute[] deviceAttributeList = new DeviceAttribute[] {
                 new DeviceAttribute("SetAttributeName",   attributeName),
                 new DeviceAttribute("SetArchiver",        subscriberName),
-                new DeviceAttribute("SetCodePushedEvent", codePushedEvent)
+                new DeviceAttribute("SetCodePushedEvent", pushedByCode)
             };
             configureProxy.write_attribute(deviceAttributeList);
 

@@ -17,7 +17,9 @@ public interface ReleaseNote
 		"<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#0000FF\" VLINK=\"#7F00FF\" ALINK=\"#FF0000\">\n" + 
 		"<P><!-------TITLE------></P>\n" + 
 		"<Center>	<h2>org.tango.hdb_configurator.tools Release Note</h2>\n" + 
-		"	(Generated Fri May 13 15:41:21 CEST 2016)</Center><Br>\n" + 
+		"	(Generated Fri May 27 15:05:59 CEST 2016)</Center><Br>\n" + 
+		"<li><b>hdb_configurator-1.2 - 27/05/16:</b><Br>\n" + 
+		"&nbsp; &nbsp; Fix a problem for DevFailed/NamedDevFailedList exception<Br>\n" + 
 		"<li><b>hdb_configurator-1.1 - 13/05/16:</b><Br>\n" + 
 		"&nbsp; &nbsp; Fix problem of refreshing in attribute tree.<Br>\n" + 
 		"<li><b>hdb_configurator-1.0 - 12/05/16:</b><Br>\n" + 
