@@ -17,6 +17,9 @@
 
 
 
+hdb_configurator-1.2 - 27/05/16:
+	Fix a problem for DevFailed/NamedDevFailedList exception
+
 hdb_configurator-1.1 - 13/05/16:
 	Fix problem of refreshing in attribute tree.
 
