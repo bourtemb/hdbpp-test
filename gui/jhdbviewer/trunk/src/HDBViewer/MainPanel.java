@@ -20,6 +20,7 @@ import org.tango.jhdb.HdbFailed;
 import org.tango.jhdb.HdbProgressListener;
 import org.tango.jhdb.HdbReader;
 import org.tango.jhdb.HdbSigInfo;
+import org.tango.jhdb.HdbSigParam;
 import org.tango.jhdb.data.HdbData;
 import org.tango.jhdb.data.HdbDataSet;
 import org.tango.jhdb.data.HdbFloatArray;
@@ -36,7 +37,7 @@ import org.tango.jhdb.data.HdbStateArray;
 
 public class MainPanel extends javax.swing.JFrame implements IJLChartListener,HdbProgressListener {
 
-  static final String APP_RELEASE = "1.7";
+  static final String APP_RELEASE = "1.8";
     
   // Panels
   DockedPanel viewDockedPanel;
@@ -539,16 +540,24 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
     HdbDataSet set = ai.arrayData;
     ArrayAttributeInfo aai = ai.arrAttInfos.get(item);
     
-    aai.chartData = new JLDataView();
-    aai.chartData.setName(ai.name+"["+aai.idx+"]");
     Color c = defaultColor[dvIdx%defaultColor.length];
-    aai.chartData.setColor(c);
+    
+    if(aai.chartData!=null) {
+      aai.chartData = new JLDataView();
+      aai.chartData.setColor(c);
+      aai.chartData.setUnit(ai.unit);
+    }
+    
+    aai.chartData.setName(ai.name+"["+aai.idx+"]");
     dvIdx++;
     if(isRW) {
-      aai.wchartData = new JLDataView();
+      if(aai.wchartData!=null) {
+        aai.wchartData = new JLDataView();
+        c = defaultColor[dvIdx%defaultColor.length];
+        aai.wchartData.setColor(c);
+        aai.wchartData.setUnit(ai.unit);
+      }
       aai.wchartData.setName(ai.name+"_w["+aai.idx+"]");      
-      c = defaultColor[dvIdx%defaultColor.length];
-      aai.wchartData.setColor(c);
       dvIdx++;
     }
         
@@ -626,14 +635,19 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
     errorDialog.reset();
     if(selection!=null) {
       for(AttributeInfo ai:selection) {
-        ai.chartData = null;
-        ai.wchartData = null;
+        if(ai.chartData!=null)
+          ai.chartData.reset();        
+        if(ai.wchartData!=null)
+          ai.wchartData.reset();
         ai.arrayData = null;
-        ai.errorData = null;
+        if(ai.errorData!=null)
+          ai.errorData.reset();
         if(ai.isExpanded()) {
           for(ArrayAttributeInfo aai:ai.arrAttInfos) {
-            aai.chartData = null;
-            aai.wchartData = null;
+            if(aai.chartData!=null)
+              aai.chartData.reset();
+            if(aai.wchartData!=null)
+              aai.wchartData.reset();
           }
         }
       }
@@ -771,6 +785,16 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
           results = hdb.getReader().getData(sigIn, startDate, stopDate, hdbTreePanel.getHdbMode());
           stopR = System.currentTimeMillis();
           infoDialog.addText("Request time=" + (stopR-startR) + " ms");
+          
+          // retreive unit
+          for(int i=0;i<sigIn.length;i++) {
+            try {
+              HdbSigParam p = hdb.getReader().getLastParam(sigIn[i].name);
+              selection.get(i).unit = p.unit;
+            } catch(HdbFailed e) {
+              infoDialog.addText("Warning: " + e.getMessage());
+            }
+          }
   
           // Run python script (if any)
           if(!selPanel.getPyScript().isEmpty()) {
@@ -865,9 +889,11 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
     // Number of attribute in table
     for(AttributeInfo ai:selection) {      
       if(ai.table) nbTable++;
+      if(ai.isRW()) nbTable++;
       if(ai.isExpanded()) {
         for(ArrayAttributeInfo aai:ai.arrAttInfos) {
           if(aai.table) nbTable++;
+          if(ai.isRW()) nbTable++;
         }
       }
     }
@@ -902,23 +928,33 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
 
         // Numeric scalar data
         // Create the chart dataview
-        ai.chartData = new JLDataView();
-        ai.chartData.setName(ai.name);
         Color c = defaultColor[dvIdx%defaultColor.length];
-        ai.chartData.setColor(c);
-        ai.errorData = new JLDataView();
+          
+        if(ai.chartData==null) {
+          ai.chartData = new JLDataView();
+          ai.chartData.setColor(c);
+          ai.chartData.setUnit(ai.unit);
+        }
+        
+        ai.chartData.setName(ai.name);
+        
+        if(ai.errorData==null) {
+          ai.errorData = new JLDataView();
+          ai.errorData.setLineWidth(0);
+          ai.errorData.setMarker(JLDataView.MARKER_DOT);
+          ai.errorData.setLabelVisible(false);
+          ai.errorData.setMarkerColor(c.darker());
+        }
         ai.errorData.setName(ai.name+"_error");
-        ai.errorData.setLineWidth(0);
-        ai.errorData.setMarker(JLDataView.MARKER_DOT);
-        ai.errorData.setLabelVisible(false);
-        ai.errorData.setMarkerColor(c.darker());
         ai.errors = new ArrayList<HdbData>();
         
         dvIdx++;
         if(isRW) {
-          ai.wchartData = new JLDataView();
+          if(ai.wchartData==null) {
+            ai.wchartData = new JLDataView();
+            ai.wchartData.setColor(defaultColor[dvIdx%defaultColor.length]);
+          }
           ai.wchartData.setName(ai.name+"_w");          
-          ai.wchartData.setColor(defaultColor[dvIdx%defaultColor.length]);
           dvIdx++;
         }
         
@@ -978,38 +1014,41 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
 
         hasTable = true;
         
-        colNames[colIdx] = ai.name;
+        colNames[colIdx] = ai.name + " (" + ai.unit + ")";
+        if(isRW) colNames[colIdx+1] = ai.name + "_w" + " (" + ai.unit + ")";
+            
         for (int j = 0; j < results[i].size(); j++) {
-          HdbData d = results[i].get(j);
+          HdbData d = results[i].get(j);       
+        
           if(d.hasFailed()) {
-            tablePanel.table.add("/Err"+d.getErrorMessage(),d.getDataTime(),colIdx);                        
+            
+            String err = "/Err"+d.getErrorMessage();
+            tablePanel.table.add(err,d.getDataTime(),colIdx);
+            if(isRW) tablePanel.table.add(err,d.getDataTime(),colIdx+1);  
+            
           } else {
             if(ai.isState()) {
               
-              if(isRW) {
-                tablePanel.table.add("/State"+d.getValueAsString()+"\n"+
-                                     d.getWriteValueAsString(),
-                                     d.getDataTime(),colIdx);            
-              } else {
-                tablePanel.table.add("/State"+d.getValueAsString(),
-                                     d.getDataTime(),colIdx);
-              }
+              tablePanel.table.add("/State"+d.getValueAsString(),
+                                   d.getDataTime(),colIdx);            
+              if(isRW)
+                tablePanel.table.add("/State"+d.getWriteValueAsString(),
+                                     d.getDataTime(),colIdx+1);
               
             } else {       
               
-              if(isRW) {
-                tablePanel.table.add(d.getValueAsString()+"\n"+
-                                     d.getWriteValueAsString(),
-                                     d.getDataTime(),colIdx);            
-              } else {
-                tablePanel.table.add(d.getValueAsString(),
-                                     d.getDataTime(),colIdx);
-              }
+              tablePanel.table.add(d.getValueAsString(),
+                                   d.getDataTime(),colIdx);
+                
+              if(isRW)
+                tablePanel.table.add(d.getWriteValueAsString(),
+                                     d.getDataTime(),colIdx+1);            
               
             }
           }
         }
         colIdx++;
+        if(isRW) colIdx++;
         
       }
       
@@ -1023,27 +1062,33 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
             hasTable = true;
 
             int idx = aai.idx;
-            colNames[colIdx] = ai.name + "[" + aai.idx + "]";
+            colNames[colIdx] = ai.name + "[" + aai.idx + "] " + "(" + ai.unit + ")";
+            if(isRW) colNames[colIdx+1] = ai.name + "_w[" + aai.idx + "] " + "(" + ai.unit + ")";
 
             for (int j = 0; j < results[i].size(); j++) {
 
               HdbData d = results[i].get(j);
-              if (d.hasFailed()) {
-                tablePanel.table.add("/Err" + d.getErrorMessage(), d.getDataTime(), colIdx);
+              if (d.hasFailed()) {                
+                String err = "/Err" + d.getErrorMessage();
+                tablePanel.table.add(err, d.getDataTime(), colIdx);
+                if(isRW) tablePanel.table.add(err, d.getDataTime(), colIdx+1);
               } else if (idx >= d.size()) {
-                tablePanel.table.add("/Err" + "Index out of bounds", d.getDataTime(), colIdx);
+                String err = "/Err" + "Index out of bounds";
+                tablePanel.table.add(err, d.getDataTime(), colIdx);
+                if(isRW) tablePanel.table.add(err, d.getDataTime(), colIdx+1);
               } else {
 
                 try {
                   
                   String value;
+                  String valueW="";
 
                   if (ai.isState()) {
 
                     HdbStateArray hdbV = (HdbStateArray) d;
                     value = "/State" + HdbState.getStateString(hdbV.getValue()[idx]);
                     if (isRW && idx < d.sizeW()) {
-                      value += "\n" + HdbState.getStateString(hdbV.getWriteValue()[idx]);
+                      valueW = "/State" + HdbState.getStateString(hdbV.getWriteValue()[idx]);
                     }
 
                   } else {
@@ -1056,7 +1101,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
                       HdbFloatArray hdbV = (HdbFloatArray) d;
                       value = Float.toString(hdbV.getValue()[idx]);
                       if (isRW && idx < d.sizeW()) {
-                        value += Float.toString(hdbV.getValue()[idx]);
+                        valueW = Float.toString(hdbV.getWriteValue()[idx]);
                       }
 
                     } else if (d instanceof HdbLongArray) {
@@ -1064,7 +1109,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
                       HdbLongArray hdbV = (HdbLongArray) d;
                       value = Integer.toString(hdbV.getValue()[idx]);
                       if (isRW && idx < d.sizeW()) {
-                        value += Float.toString(hdbV.getValue()[idx]);
+                        valueW = Float.toString(hdbV.getWriteValue()[idx]);
                       }
 
                     } else if (d instanceof HdbLong64Array) {
@@ -1072,7 +1117,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
                       HdbLong64Array hdbV = (HdbLong64Array) d;
                       value = Long.toString(hdbV.getValue()[idx]);
                       if (isRW && idx < d.sizeW()) {
-                        value += Float.toString(hdbV.getValue()[idx]);
+                        valueW = Float.toString(hdbV.getWriteValue()[idx]);
                       }
 
                     } else if (d instanceof HdbShortArray) {
@@ -1080,20 +1125,23 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
                       HdbShortArray hdbV = (HdbShortArray) d;
                       value = Short.toString(hdbV.getValue()[idx]);
                       if (isRW && idx < d.sizeW()) {
-                        value += Float.toString(hdbV.getValue()[idx]);
+                        valueW = Float.toString(hdbV.getWriteValue()[idx]);
                       }
 
                     } else {
 
                       value = Double.toString(d.getValueAsDoubleArray()[idx]);
                       if (isRW && idx < d.sizeW()) {
-                        value += Double.toString(d.getValueAsDoubleArray()[idx]);
+                        valueW = Double.toString(d.getWriteValueAsDoubleArray()[idx]);
                       }
 
                     }
 
                   }
+                  
                   tablePanel.table.add(value, d.getDataTime(), colIdx);
+                  if(isRW) 
+                    tablePanel.table.add(valueW, d.getDataTime(), colIdx+1);
 
                 } catch (HdbFailed e) {
                   // should not happen !!!
@@ -1102,6 +1150,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
               }
             }
             colIdx++;
+            if(isRW) colIdx++;
           }
 
         }

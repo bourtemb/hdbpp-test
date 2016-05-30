@@ -20,6 +20,7 @@ public class AttributeInfo {
   public String  host;          // Tango HOST
   public String  name;          // 4 fields attribute name
   public String  type;          // HdbType of the signal
+  public String  unit;          // Unit
   public HdbSigInfo sigInfo;    // Signal info struct
   public boolean step;          // Step mode
   public boolean table;         // Display in HDB table
@@ -48,6 +49,7 @@ public class AttributeInfo {
     maxArraySize = -1;
     wchartData = null;
     arrAttInfos = null;
+    unit = "";
   }
   
   public String getFullName() {

@@ -52,7 +52,7 @@ class XAxisItem {
     else if (isArrayItem())
       return ai.name + " [" + aai.idx + "]";
     else
-      return "None";
+      return "Time";
   }
   
 }
