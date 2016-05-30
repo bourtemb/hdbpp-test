@@ -236,6 +236,15 @@ public abstract class HdbReader {
                                                    String startDate,
                                                    String stopDate) throws HdbFailed;
 
+
+  /**
+   * Return last known configurations of the specified attribute
+   *
+   * @param attName The fully qualified tango attribute name (eg: tango://hostname:port/domain/family/member/attname)
+   * @return
+   */
+  public abstract HdbSigParam getLastParam(String attName) throws HdbFailed;
+
   /**
    * This method finds the errors occurred inside a time interval for the specified attribute
    *

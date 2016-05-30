@@ -375,6 +375,50 @@ public class CassandraSchema extends HdbReader {
     throw new HdbFailed("Not implemented");
   }
 
+  public  HdbSigParam getLastParam(String attName) throws HdbFailed {
+
+    HdbSigInfo sigInfo = getSigInfo(attName);
+
+    String query = "SELECT recv_time,recv_time_us,insert_time,insert_time_us,label,unit,standard_unit,display_unit,format,"+
+        "archive_rel_change,archive_abs_change,archive_period,description" +
+        " FROM att_parameter " +
+        " WHERE att_conf_id=" + UUID.fromString(sigInfo.sigId) +
+        " ORDER BY recv_time desc limit 1;";
+
+    HdbSigParam ret = new HdbSigParam();
+
+    ResultSet resultSet;
+    try {
+
+      resultSet = session.execute(query);
+      Row rw = resultSet.one();
+
+      if(rw!=null) {
+
+        ret.recvTime = timeValue(rw.getDate(0), rw.getInt(1));
+        ret.insertTime = timeValue(rw.getDate(2), rw.getInt(3));
+        ret.label = rw.getString(4);
+        ret.unit = rw.getString(5);
+        ret.standard_unit = rw.getString(6);
+        ret.display_unit = rw.getString(7);
+        ret.format = rw.getString(8);
+        ret.archive_rel_change = rw.getString(9);
+        ret.archive_abs_change = rw.getString(10);
+        ret.archive_period = rw.getString(11);
+        ret.description = rw.getString(12);
+
+      } else {
+        throw new HdbFailed("Cannot get parameter for " + attName);
+      }
+
+    } catch (DriverException e) {
+      throw new HdbFailed("Failed to get parameter history: "+e.getMessage());
+    }
+
+    return ret;
+
+  }
+
   public ArrayList<HdbSigParam> getParams(String attName,
                                           String start_date,
                                           String stop_date) throws HdbFailed {

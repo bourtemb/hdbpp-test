@@ -1,5 +1,7 @@
 package org.tango.jhdb;
 
+import fr.esrf.Tango.DevFailed;
+import fr.esrf.TangoApi.*;
 import org.tango.jhdb.data.*;
 import tacoHdb.common.HdbBrowser;
 import tacoHdb.common.HdbConnection;
@@ -8,6 +10,7 @@ import tacoHdb.common.HdbException;
 import tacoHdb.config.HdbSignal;
 import tacoHdb.extract.sig.*;
 
+import javax.management.Attribute;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -397,6 +400,35 @@ public class OracleSchema extends HdbReader {
     } catch (Exception e) {
       throw new HdbFailed("tacoHDB.HdbSignal.getDefinition() failed.\n" + attName + "\n" + e.getMessage());
     }
+
+  }
+
+  public  HdbSigParam getLastParam(String attName) throws HdbFailed {
+
+    // We do not have this information in the DB
+    // Got it from Tango
+    HdbSigParam ret = new HdbSigParam();
+
+    try {
+
+      // Hack (to avoid mismatch between taco and tango)
+      if(attName.startsWith("tango://aries/"))
+        attName = attName.substring(14);
+
+      AttributeProxy a = new AttributeProxy(attName);
+      AttributeInfo ai = a.get_info();
+      ret.label = ai.label;
+      ret.unit = ai.unit;
+      ret.standard_unit = ai.standard_unit;
+      ret.display_unit = ai.display_unit;
+      ret.format = ai.format;
+      ret.description = ai.description;
+
+    } catch (DevFailed e) {
+      throw new HdbFailed("Cannot get parameter for " + attName + "\n" + e.errors[0].desc);
+    }
+
+    return ret;
 
   }
 

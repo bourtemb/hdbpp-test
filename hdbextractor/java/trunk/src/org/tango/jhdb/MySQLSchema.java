@@ -292,6 +292,50 @@ public class MySQLSchema extends HdbReader {
 
   }
 
+  public  HdbSigParam getLastParam(String attName) throws HdbFailed {
+
+    HdbSigInfo sigInfo = getSigInfo(attName);
+
+    String query = "SELECT recv_time,insert_time,label,unit,standard_unit,display_unit,format,"+
+        "archive_rel_change,archive_abs_change,archive_period,description" +
+        " FROM att_parameter " +
+        " WHERE att_conf_id='" + sigInfo.sigId + "'" +
+        " ORDER BY recv_time DESC limit 1";
+
+    HdbSigParam ret = new HdbSigParam();
+
+    try {
+
+      Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+      ResultSet rs = statement.executeQuery(query);
+      if(rs.next()) {
+
+        ret.recvTime = timeValue(rs.getTimestamp(1));
+        ret.insertTime = timeValue(rs.getTimestamp(2));
+        ret.label = rs.getString(3);
+        ret.unit = rs.getString(4);
+        ret.standard_unit = rs.getString(5);
+        ret.display_unit = rs.getString(6);
+        ret.format = rs.getString(7);
+        ret.archive_rel_change = rs.getString(8);
+        ret.archive_abs_change = rs.getString(9);
+        ret.archive_period = rs.getString(10);
+        ret.description = rs.getString(11);
+
+      } else {
+        throw new HdbFailed("Cannot get parameter for " + attName);
+      }
+
+      statement.close();
+
+    } catch (SQLException e) {
+      throw new HdbFailed("Failed to get parameter history: "+e.getMessage());
+    }
+
+    return ret;
+
+  }
+
   public ArrayList<HdbSigParam> getParams(String attName,
                                           String start_date,
                                           String stop_date) throws HdbFailed {
