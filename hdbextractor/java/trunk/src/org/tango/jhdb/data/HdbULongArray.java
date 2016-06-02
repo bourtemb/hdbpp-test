@@ -132,6 +132,10 @@ public class HdbULongArray extends HdbData {
   }
 
   // Convenience function
+  public void applyConversionFactor(double f) {
+    for(int i=0;i<dataSize();i++)
+      value[i] = (long)(value[i] * f);
+  }
   int dataSize() {
     if(value==null)
       return 0;

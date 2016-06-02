@@ -69,7 +69,7 @@ public class Hdb {
   public final static SimpleDateFormat hdbDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
   /** Verion Number */
-  public final static double LIB_RELEASE = 1.5 ; // Let the space before the ';'
+  public final static double LIB_RELEASE = 1.6 ; // Let the space before the ';'
 
   /** Cassandra HDB++ */
   public  static final int HDB_CASSANDRA = 1;

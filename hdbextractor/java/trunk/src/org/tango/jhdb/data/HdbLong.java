@@ -125,6 +125,9 @@ public class HdbLong extends HdbData {
   }
 
   // Convenience function
+  public void applyConversionFactor(double f) {
+    value = (int)(value * f);
+  }
   int dataSize() {
     return 1;
   }

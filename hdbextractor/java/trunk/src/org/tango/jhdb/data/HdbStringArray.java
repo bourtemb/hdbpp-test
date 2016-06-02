@@ -114,6 +114,9 @@ public class HdbStringArray extends HdbData {
   }
 
   // Convenience function
+  public void applyConversionFactor(double f) {
+    // Do nothing here
+  }
   int dataSize() {
     if(value==null)
       return 0;

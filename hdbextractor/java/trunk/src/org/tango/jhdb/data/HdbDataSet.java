@@ -99,6 +99,16 @@ public class HdbDataSet {
   }
 
   /**
+   * Apply a conversion factor to the data set.
+   * If the type cannot be converted, nothing happens.
+   * @param f Conversion factor
+   */
+  public void applyConversionFactor(double f) {
+    for(int i=0;i<data.size();i++)
+      data.get(i).applyConversionFactor(f);
+  }
+
+  /**
    * Return HdbData at the specified index
    * @param idx
    * @return

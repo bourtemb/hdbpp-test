@@ -274,6 +274,8 @@ public abstract class HdbData {
 
   }
 
+  public abstract void applyConversionFactor(double f);
+
   /**
    * Create HdbData accroding to the given type
    * @param type Data type

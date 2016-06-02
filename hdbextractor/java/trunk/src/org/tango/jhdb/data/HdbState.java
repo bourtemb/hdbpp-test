@@ -166,6 +166,9 @@ public class HdbState extends HdbData {
   }
 
   // Convenience function
+  public void applyConversionFactor(double f) {
+    // Do nothing here
+  }
   int dataSize() {
     return 1;
   }

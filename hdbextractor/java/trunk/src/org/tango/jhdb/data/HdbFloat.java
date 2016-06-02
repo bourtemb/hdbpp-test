@@ -125,6 +125,9 @@ public class HdbFloat extends HdbData {
   }
 
   // Convenience function
+  public void applyConversionFactor(double f) {
+    value = (float)(value * f);
+  }
   int dataSize() {
     return 1;
   }

@@ -125,6 +125,9 @@ public class HdbShort extends HdbData {
   }
 
   // Convenience function
+  public void applyConversionFactor(double f) {
+    value = (short)(value * f);
+  }
   int dataSize() {
     return 1;
   }
