@@ -37,7 +37,7 @@ import org.tango.jhdb.data.HdbStateArray;
 
 public class MainPanel extends javax.swing.JFrame implements IJLChartListener,HdbProgressListener {
 
-  static final String APP_RELEASE = "1.8";
+  static final String APP_RELEASE = "1.9";
     
   // Panels
   DockedPanel viewDockedPanel;
@@ -546,7 +546,6 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
       aai.chartData = new JLDataView();
       aai.chartData.setColor(c);
       aai.chartData.setUnit(ai.unit);
-      aai.chartData.setA1(ai.A1);
     }
     
     aai.chartData.setName(ai.name+"["+aai.idx+"]");
@@ -557,7 +556,6 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
         c = defaultColor[dvIdx%defaultColor.length];
         aai.wchartData.setColor(c);
         aai.wchartData.setUnit(ai.unit);
-        aai.wchartData.setA1(ai.A1);
       }
       aai.wchartData.setName(ai.name+"_w["+aai.idx+"]");      
       dvIdx++;
@@ -802,6 +800,13 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
               infoDialog.addText("Warning: " + e.getMessage());
             }
           }
+          
+          // Apply conversion factor
+          for(int i=0;i<sigIn.length;i++) {
+            double A1 = selection.get(i).A1;
+            if(A1!=1.0)
+              results[i].applyConversionFactor(A1);
+          }
   
           // Run python script (if any)
           if(!selPanel.getPyScript().isEmpty()) {
@@ -941,7 +946,6 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
           ai.chartData = new JLDataView();
           ai.chartData.setColor(c);
           ai.chartData.setUnit(ai.unit);
-          ai.chartData.setA1(ai.A1);
         }
         
         ai.chartData.setName(ai.name);
@@ -962,7 +966,6 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
             ai.wchartData = new JLDataView();
             ai.wchartData.setColor(defaultColor[dvIdx%defaultColor.length]);
             ai.wchartData.setUnit(ai.unit);
-            ai.wchartData.setA1(ai.A1);
           }
           ai.wchartData.setName(ai.name+"_w");          
           dvIdx++;
