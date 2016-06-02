@@ -491,13 +491,13 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
         dv = aai.wchartData;
       }
 
-      if (dv == null) {
+      if (dv == null || dv.getDataLength()==0) {
 
         if( ai.arrayData==null )
           // Search has not been performed yet
           return true;
         
-        // We need to create the DV
+        // We need to create/update the DV
         createDataviewExpanded(ai,item);
         if (!selectWrite) {
           dv = aai.chartData;
@@ -542,20 +542,22 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
     
     Color c = defaultColor[dvIdx%defaultColor.length];
     
-    if(aai.chartData!=null) {
+    if(aai.chartData==null) {
       aai.chartData = new JLDataView();
       aai.chartData.setColor(c);
       aai.chartData.setUnit(ai.unit);
+      aai.chartData.setA1(ai.A1);
     }
     
     aai.chartData.setName(ai.name+"["+aai.idx+"]");
     dvIdx++;
     if(isRW) {
-      if(aai.wchartData!=null) {
+      if(aai.wchartData==null) {
         aai.wchartData = new JLDataView();
         c = defaultColor[dvIdx%defaultColor.length];
         aai.wchartData.setColor(c);
         aai.wchartData.setUnit(ai.unit);
+        aai.wchartData.setA1(ai.A1);
       }
       aai.wchartData.setName(ai.name+"_w["+aai.idx+"]");      
       dvIdx++;
@@ -791,6 +793,11 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
             try {
               HdbSigParam p = hdb.getReader().getLastParam(sigIn[i].name);
               selection.get(i).unit = p.unit;
+              try {
+                selection.get(i).A1 = Double.parseDouble(p.display_unit);
+              } catch (NumberFormatException e) {
+                infoDialog.addText("Warning: " + e.getMessage());                
+              }
             } catch(HdbFailed e) {
               infoDialog.addText("Warning: " + e.getMessage());
             }
@@ -934,6 +941,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
           ai.chartData = new JLDataView();
           ai.chartData.setColor(c);
           ai.chartData.setUnit(ai.unit);
+          ai.chartData.setA1(ai.A1);
         }
         
         ai.chartData.setName(ai.name);
@@ -953,6 +961,8 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
           if(ai.wchartData==null) {
             ai.wchartData = new JLDataView();
             ai.wchartData.setColor(defaultColor[dvIdx%defaultColor.length]);
+            ai.wchartData.setUnit(ai.unit);
+            ai.wchartData.setA1(ai.A1);
           }
           ai.wchartData.setName(ai.name+"_w");          
           dvIdx++;

@@ -33,7 +33,12 @@ public class MultiLineTable extends JTable {
   
   public void doMicroSec(boolean doMicro) {
     tableModel.setDoMicroSec(doMicro);
-    dataChanged();
+    updateSize();
+  }
+  
+  public void showError(boolean show) {
+    tableModel.setShowError(show);
+    updateSize();
   }
   
   public void saveFile(String fileName) throws IOException {
@@ -47,6 +52,11 @@ public class MultiLineTable extends JTable {
   }
   
   public void dataChanged() {
+    tableModel.commit();
+    updateSize();
+  }
+  
+  private void updateSize() {
     updateRows();
     if(tableModel.getColumnCount()>0) {
       if(tableModel.isDoingMicroSec()) {
@@ -57,7 +67,7 @@ public class MultiLineTable extends JTable {
         getColumnModel().getColumn(0).setPreferredWidth(150);
       }
     }
-    validate();
+    validate();    
   }
 
   /*

@@ -32,6 +32,7 @@ public class TablePanel extends javax.swing.JPanel {
     this.parent = parent;
     initComponents();
     
+    displayErrorCheck.setSelected(true);
     table = new MultiLineTable();
     tableView = new JScrollPane(table);
     tablePanel.add(tableView, BorderLayout.CENTER);
@@ -53,6 +54,7 @@ public class TablePanel extends javax.swing.JPanel {
     tablePanel = new javax.swing.JPanel();
     tableBtnPanel = new javax.swing.JPanel();
     doMicroCheck = new javax.swing.JCheckBox();
+    displayErrorCheck = new javax.swing.JCheckBox();
     saveButton = new javax.swing.JButton();
     copyButton = new javax.swing.JButton();
 
@@ -72,6 +74,15 @@ public class TablePanel extends javax.swing.JPanel {
       }
     });
     tableBtnPanel.add(doMicroCheck);
+
+    displayErrorCheck.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    displayErrorCheck.setText("Display errors");
+    displayErrorCheck.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        displayErrorCheckActionPerformed(evt);
+      }
+    });
+    tableBtnPanel.add(displayErrorCheck);
 
     saveButton.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
     saveButton.setText("Save file");
@@ -121,9 +132,16 @@ public class TablePanel extends javax.swing.JPanel {
     
   }//GEN-LAST:event_copyButtonActionPerformed
 
+  private void displayErrorCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_displayErrorCheckActionPerformed
+   
+    table.showError(displayErrorCheck.isSelected());
+   
+  }//GEN-LAST:event_displayErrorCheckActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton copyButton;
+  private javax.swing.JCheckBox displayErrorCheck;
   private javax.swing.JCheckBox doMicroCheck;
   private javax.swing.JButton saveButton;
   private javax.swing.JPanel tableBtnPanel;

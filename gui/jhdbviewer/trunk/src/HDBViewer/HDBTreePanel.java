@@ -94,12 +94,8 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
     return lastTimeCombo.getSelectedIndex();
   }
   
-  public void actionPerformed(ActionEvent evt) {
-
-    Object src = evt.getSource();
-
-    if (src == lastTimeCombo) {
-
+  long getStepDuration() {
+    
       int idx = lastTimeCombo.getSelectedIndex();
       long time = 0;
 
@@ -123,7 +119,18 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
           time = 30 * 86400;
           break;
       }
+      
+      return time;
+    
+  }
+  
+  public void actionPerformed(ActionEvent evt) {
 
+    Object src = evt.getSource();
+
+    if (src == lastTimeCombo) {
+
+      long time = getStepDuration();
       long now = System.currentTimeMillis();
 
       startDateChooser.setDate(new Date(now - time * 1000));
@@ -185,6 +192,20 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
   void setHdbMode(int mode) {
     hdbModeCombo.setSelectedIndex(mode);
   }
+  
+  private void moveDate(long step) {
+  
+    long start = startDateChooser.getDate().getTime();    
+    long stop = stopDateChooser.getDate().getTime();    
+    start += step * 1000;    
+    stop += step * 1000;
+    startDateChooser.setDate(new Date(start));
+    stopDateChooser.setDate(new Date(stop));
+    parent.performSearch();
+    parent.selPanel.updateSelectionList();
+    
+  }
+
 
   /**
    * This method is called from within the constructor to initialize the form.
@@ -205,6 +226,8 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
     hdbModeCombo = new javax.swing.JComboBox();
     searchButton = new javax.swing.JButton();
     lastTimeCombo = new javax.swing.JComboBox();
+    forwardButton = new javax.swing.JButton();
+    backButton = new javax.swing.JButton();
 
     setLayout(new java.awt.BorderLayout());
 
@@ -217,7 +240,7 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
 
     selPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "HDB Search", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 10))); // NOI18N
     selPanel.setMinimumSize(new java.awt.Dimension(0, 0));
-    selPanel.setPreferredSize(new java.awt.Dimension(270, 140));
+    selPanel.setPreferredSize(new java.awt.Dimension(270, 165));
     selPanel.setLayout(null);
 
     startDateChooser.setDateFormatString("dd/MM/yyyy HH:mm:ss");
@@ -243,7 +266,7 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
     hdbModeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Normal", "Ignore errors", "Filled", "Correlated" }));
     hdbModeCombo.setToolTipText("Select HDB extraction mode");
     selPanel.add(hdbModeCombo);
-    hdbModeCombo.setBounds(10, 105, 122, 25);
+    hdbModeCombo.setBounds(10, 135, 120, 25);
 
     searchButton.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
     searchButton.setText("Perform search");
@@ -255,12 +278,32 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
       }
     });
     selPanel.add(searchButton);
-    searchButton.setBounds(135, 105, 125, 25);
+    searchButton.setBounds(135, 135, 125, 25);
 
     lastTimeCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
     lastTimeCombo.setSelectedIndex(-1);
     selPanel.add(lastTimeCombo);
     lastTimeCombo.setBounds(10, 75, 250, 24);
+
+    forwardButton.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    forwardButton.setText(">>");
+    forwardButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        forwardButtonActionPerformed(evt);
+      }
+    });
+    selPanel.add(forwardButton);
+    forwardButton.setBounds(135, 105, 125, 25);
+
+    backButton.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    backButton.setText("<<");
+    backButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        backButtonActionPerformed(evt);
+      }
+    });
+    selPanel.add(backButton);
+    backButton.setBounds(10, 105, 120, 25);
 
     add(selPanel, java.awt.BorderLayout.SOUTH);
   }// </editor-fold>//GEN-END:initComponents
@@ -270,8 +313,20 @@ public class HDBTreePanel extends javax.swing.JPanel implements ActionListener,T
     parent.selPanel.updateSelectionList();
   }//GEN-LAST:event_searchButtonActionPerformed
 
+  private void forwardButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forwardButtonActionPerformed
+    // TODO add your handling code here:    
+    moveDate(getStepDuration());
+  }//GEN-LAST:event_forwardButtonActionPerformed
+
+  private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
+    // TODO add your handling code here:
+    moveDate(-getStepDuration());
+  }//GEN-LAST:event_backButtonActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton backButton;
+  private javax.swing.JButton forwardButton;
   javax.swing.JComboBox hdbModeCombo;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;

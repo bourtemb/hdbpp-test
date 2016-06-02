@@ -21,6 +21,7 @@ public class AttributeInfo {
   public String  name;          // 4 fields attribute name
   public String  type;          // HdbType of the signal
   public String  unit;          // Unit
+  public double  A1;            // Conversion factor
   public HdbSigInfo sigInfo;    // Signal info struct
   public boolean step;          // Step mode
   public boolean table;         // Display in HDB table
@@ -50,6 +51,7 @@ public class AttributeInfo {
     wchartData = null;
     arrAttInfos = null;
     unit = "";
+    A1 = 1.0;
   }
   
   public String getFullName() {

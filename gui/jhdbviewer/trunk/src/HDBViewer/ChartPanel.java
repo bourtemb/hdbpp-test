@@ -12,6 +12,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 import javax.swing.JOptionPane;
 
 class XAxisItem {
@@ -183,12 +184,18 @@ public class ChartPanel extends javax.swing.JPanel implements ActionListener {
   
   public void resetAll() {
     
+    // Remove views
+    Vector<JLDataView> views = new Vector<JLDataView>();
+    views.addAll(chart.getY1Axis().getViews());
+    views.addAll(chart.getY2Axis().getViews());
+    for (int i = 0; i < views.size(); i++)
+      chart.removeDataView( views.get(i) );
+
+    // Reset XY
     if(chart.getXAxis().isXY()) {
       chart.getXAxis().setAnnotation(JLAxis.TIME_ANNO);
       chart.getXAxis().clearDataView();
     }
-      
-    chart.reset(false);
     
   }
 

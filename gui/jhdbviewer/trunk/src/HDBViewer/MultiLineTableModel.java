@@ -23,6 +23,7 @@ class RowItem {
   
   long   time;
   ArrayList<CellItem> value;
+  int nbError = 0;
   
   String getValueAt(int column) {
     
@@ -40,17 +41,24 @@ class RowItem {
     
   }
   
+  boolean hasOnlyError() {
+    return nbError == value.size();
+  }
+    
 }
 
 public class MultiLineTableModel extends AbstractTableModel {
   
   private ArrayList<RowItem> data;
+  private int[] errorIndex;
   private String[] colNames;
   private boolean doMicroSec = false;
+  private boolean showError = true;
   
   public MultiLineTableModel() {
     data = new ArrayList<RowItem>();
     colNames = new String[0];
+    errorIndex = new int[0];
   }
   
   public void setDoMicroSec(boolean doMicro) {
@@ -62,6 +70,15 @@ public class MultiLineTableModel extends AbstractTableModel {
     return doMicroSec;
   }
   
+  public void setShowError(boolean show) {
+    showError = show;
+    fireTableDataChanged();
+  }
+  
+  public boolean isShowingError() {
+    return showError;
+  }
+  
   public void setColumnNames(String[] names) {
     colNames = names;
     fireTableStructureChanged();
@@ -70,7 +87,8 @@ public class MultiLineTableModel extends AbstractTableModel {
   public void reset() {
     data = new ArrayList<RowItem>();
     colNames = new String[0];    
-  }
+    errorIndex = new int[0];
+ }
   
   private RowItem binarySearch(long time) {
     
@@ -108,11 +126,34 @@ public class MultiLineTableModel extends AbstractTableModel {
     c.column = colIdx;
     c.value = value;
     n.value.add(c);
+    if(value.startsWith("/Err"))
+      n.nbError++;
                 
+  }
+  
+  public void commit() {
+    
+    // Build error index
+    int nbIdx = 0;
+    for(int i=0;i<data.size();i++) {
+      if(!data.get(i).hasOnlyError()) nbIdx++;
+    }
+    errorIndex = new int[nbIdx];
+    int nb = 0;
+    for(int i=0;i<data.size();i++) {
+      if(!data.get(i).hasOnlyError()) {
+        errorIndex[nb] = i;
+        nb++;
+      }
+    }
+        
   }
 
   public int getRowCount() {
-    return data.size();
+    if(showError)
+      return data.size();
+    else
+      return errorIndex.length;
   }
 
   public int getColumnCount() {
@@ -133,12 +174,26 @@ public class MultiLineTableModel extends AbstractTableModel {
 
   public Object getValueAt(int rowIndex, int columnIndex) {
     
-    RowItem i = data.get(rowIndex);
+    int row;
+    if(showError) 
+      row = rowIndex;
+    else
+      row = errorIndex[rowIndex];
+    
+    RowItem i = data.get(row);
     if(columnIndex==0) {
       // Timestamp
       return Utils.formatTime(i.time,(doMicroSec?Utils.FORMAT_US:Utils.FORMAT_SEC));
     } else {
-      return i.getValueAt(columnIndex);
+      String r = i.getValueAt(columnIndex);
+      if(showError) {
+        return r;
+      } else {
+        if(r.startsWith("/Err"))
+          return "";
+        else
+          return r;
+      }
     }
     
   }
