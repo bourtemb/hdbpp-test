@@ -57,7 +57,8 @@ public class TangoUtils {
     //======================================================================
     //======================================================================
     public static String getDefaultTangoHost() throws DevFailed {
-        return ApiUtil.get_db_obj().get_tango_host();
+        //return ApiUtil.get_db_obj().get_tango_host();
+        return new TangoUrl().getTangoHost();
     }
     //======================================================================
     //======================================================================
