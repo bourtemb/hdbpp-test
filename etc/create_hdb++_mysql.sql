@@ -76,6 +76,11 @@ INDEX(recv_time),
 INDEX(att_conf_id)
 ) ENGINE=MyISAM COMMENT='Attribute configuration parameters';
 
+CREATE TABLE IF NOT EXISTS att_error_desc
+(
+att_error_desc_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+error_desc VARCHAR(255) UNIQUE NOT NULL
+) ENGINE=MyISAM COMMENT='Error Description Table';
 
 CREATE TABLE IF NOT EXISTS att_scalar_devboolean_ro
 (
@@ -85,7 +90,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r TINYINT(1) UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Boolean ReadOnly Values Table';
 
@@ -98,7 +103,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r TINYINT(1) UNSIGNED DEFAULT NULL,
 value_w TINYINT(1) UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Boolean ReadWrite Values Table';
 
@@ -113,7 +118,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r TINYINT(1) UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Boolean ReadOnly Values Table';
 
@@ -131,7 +136,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w TINYINT(1) UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Boolean ReadWrite Values Table';
 
@@ -143,7 +148,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar UChar ReadOnly Values Table';
 
@@ -156,7 +161,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r TINYINT UNSIGNED DEFAULT NULL,
 value_w TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar UChar ReadWrite Values Table';
 
@@ -171,7 +176,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array UChar ReadOnly Values Table';
 
@@ -189,7 +194,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array UChar ReadWrite Values Table';
 
@@ -201,7 +206,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r SMALLINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Short ReadOnly Values Table';
 
@@ -214,7 +219,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r SMALLINT DEFAULT NULL,
 value_w SMALLINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Short ReadWrite Values Table';
 
@@ -229,7 +234,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r SMALLINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Short ReadOnly Values Table';
 
@@ -247,7 +252,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w SMALLINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Short ReadWrite Values Table';
 
@@ -259,7 +264,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r SMALLINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar UShort ReadOnly Values Table';
 
@@ -272,7 +277,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r SMALLINT UNSIGNED DEFAULT NULL,
 value_w SMALLINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar UShort ReadWrite Values Table';
 
@@ -287,7 +292,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r SMALLINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array UShort ReadOnly Values Table';
 
@@ -305,7 +310,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w SMALLINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array UShort ReadWrite Values Table';
 
@@ -317,7 +322,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r INT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Long ReadOnly Values Table';
 
@@ -330,7 +335,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r INT DEFAULT NULL,
 value_w INT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Long ReadWrite Values Table';
 
@@ -345,7 +350,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r INT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Long ReadOnly Values Table';
 
@@ -363,7 +368,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w INT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Long ReadWrite Values Table';
 
@@ -375,7 +380,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r INT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar ULong ReadOnly Values Table';
 
@@ -388,7 +393,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r INT UNSIGNED DEFAULT NULL,
 value_w INT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar ULong ReadWrite Values Table';
 
@@ -403,7 +408,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r INT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array ULong ReadOnly Values Table';
 
@@ -421,7 +426,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w INT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array ULong ReadWrite Values Table';
 
@@ -433,7 +438,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Long64 ReadOnly Values Table';
 
@@ -446,7 +451,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r BIGINT DEFAULT NULL,
 value_w BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Long64 ReadWrite Values Table';
 
@@ -461,7 +466,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Long64 ReadOnly Values Table';
 
@@ -479,7 +484,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w BIGINT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Long64 ReadWrite Values Table';
 
@@ -491,7 +496,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r BIGINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar ULong64 ReadOnly Values Table';
 
@@ -504,7 +509,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r BIGINT UNSIGNED DEFAULT NULL,
 value_w BIGINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar ULong64 ReadWrite Values Table';
 
@@ -519,7 +524,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r BIGINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array ULong64 ReadOnly Values Table';
 
@@ -537,7 +542,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w BIGINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array ULong64 ReadWrite Values Table';
 
@@ -549,7 +554,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r FLOAT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Float ReadOnly Values Table';
 
@@ -562,7 +567,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r FLOAT DEFAULT NULL,
 value_w FLOAT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Float ReadWrite Values Table';
 
@@ -577,7 +582,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r FLOAT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Float ReadOnly Values Table';
 
@@ -595,7 +600,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w FLOAT DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Float ReadWrite Values Table';
 
@@ -607,7 +612,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Double ReadOnly Values Table';
 
@@ -620,7 +625,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r DOUBLE DEFAULT NULL,
 value_w DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Double ReadWrite Values Table';
 
@@ -635,7 +640,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Double ReadOnly Values Table';
 
@@ -653,7 +658,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w DOUBLE DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Double ReadWrite Values Table';
 
@@ -665,7 +670,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar String ReadOnly Values Table';
 
@@ -678,7 +683,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r VARCHAR(16384) DEFAULT NULL,
 value_w VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar String ReadWrite Values Table';
 
@@ -693,7 +698,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array String ReadOnly Values Table';
 
@@ -711,7 +716,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w VARCHAR(16384) DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array String ReadWrite Values Table';
 
@@ -723,7 +728,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar State ReadOnly Values Table';
 
@@ -736,7 +741,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r TINYINT UNSIGNED DEFAULT NULL,
 value_w TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar State ReadWrite Values Table';
 
@@ -751,7 +756,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array State ReadOnly Values Table';
 
@@ -769,7 +774,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w TINYINT UNSIGNED DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array State ReadWrite Values Table';
 
@@ -781,7 +786,7 @@ recv_time TIMESTAMP(6) DEFAULT 0,
 insert_time TIMESTAMP(6) DEFAULT 0,
 value_r BLOB DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Encoded ReadOnly Values Table';
 
@@ -794,7 +799,7 @@ insert_time TIMESTAMP(6) DEFAULT 0,
 value_r BLOB DEFAULT NULL,
 value_w BLOB DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Scalar Encoded ReadWrite Values Table';
 
@@ -809,7 +814,7 @@ dim_x_r INT UNSIGNED NOT NULL,
 dim_y_r INT UNSIGNED NOT NULL DEFAULT 0,
 value_r BLOB DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Encoded ReadOnly Values Table';
 
@@ -827,7 +832,7 @@ dim_x_w INT UNSIGNED NOT NULL,
 dim_y_w INT UNSIGNED NOT NULL DEFAULT 0,
 value_w BLOB DEFAULT NULL,
 quality TINYINT(1) DEFAULT NULL,
-error_desc VARCHAR(255) DEFAULT NULL,
+att_error_desc_id INT UNSIGNED NULL DEFAULT NULL,
 INDEX att_conf_id_data_time (att_conf_id,data_time)
 ) ENGINE=MyISAM COMMENT='Array Encoded ReadWrite Values Table';
 
