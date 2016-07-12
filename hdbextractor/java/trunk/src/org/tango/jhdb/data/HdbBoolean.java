@@ -183,4 +183,28 @@ public class HdbBoolean extends HdbData {
     throw new HdbFailed("This datum is not an array");
   }
 
+  public long getValueAsLong() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    return (value)?1:0;
+  }
+
+  public long getWriteValueAsLong() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    if(hasWriteValue()) {
+      return (wvalue)?1:0;
+    } else {
+      throw new HdbFailed("This datum has no write value");
+    }
+  }
+
+  public long[] getValueAsLongArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an array");
+  }
+
+  public long[] getWriteValueAsLongArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an array");
+  }
+
 }

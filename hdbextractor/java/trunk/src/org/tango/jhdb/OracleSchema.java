@@ -419,8 +419,16 @@ public class OracleSchema extends HdbReader {
       AttributeInfo ai = a.get_info();
       ret.label = ai.label;
       ret.unit = ai.unit;
-      ret.standard_unit = ai.standard_unit;
-      ret.display_unit = ai.display_unit;
+      try {
+        ret.standard_unit = Double.parseDouble(ai.standard_unit);
+      } catch (NumberFormatException e) {
+        ret.standard_unit = 1.0;
+      }
+      try {
+        ret.display_unit = Double.parseDouble(ai.display_unit);
+      } catch (NumberFormatException e) {
+        ret.display_unit = 1.0;
+      }
       ret.format = ai.format;
       ret.description = ai.description;
 

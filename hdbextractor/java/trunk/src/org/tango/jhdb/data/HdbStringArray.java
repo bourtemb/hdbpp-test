@@ -181,4 +181,20 @@ public class HdbStringArray extends HdbData {
     throw new HdbFailed("This datum cannot be converted to double");
   }
 
+  public long getValueAsLong() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
+
+  public long getWriteValueAsLong() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
+
+  public long[] getValueAsLongArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
+
+  public long[] getWriteValueAsLongArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
+
 }

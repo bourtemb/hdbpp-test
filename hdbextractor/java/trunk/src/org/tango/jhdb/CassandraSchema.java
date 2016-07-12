@@ -399,8 +399,16 @@ public class CassandraSchema extends HdbReader {
         ret.insertTime = timeValue(rw.getDate(2), rw.getInt(3));
         ret.label = rw.getString(4);
         ret.unit = rw.getString(5);
-        ret.standard_unit = rw.getString(6);
-        ret.display_unit = rw.getString(7);
+        try {
+          ret.standard_unit = Double.parseDouble(rw.getString(6));
+        } catch (NumberFormatException e) {
+          ret.standard_unit = 1.0;
+        }
+        try {
+          ret.display_unit = Double.parseDouble(rw.getString(7));
+        } catch (NumberFormatException e) {
+          ret.display_unit = 1.0;
+        }
         ret.format = rw.getString(8);
         ret.archive_rel_change = rw.getString(9);
         ret.archive_abs_change = rw.getString(10);
@@ -447,8 +455,16 @@ public class CassandraSchema extends HdbReader {
         hd.insertTime = timeValue(rw.getDate(2), rw.getInt(3));
         hd.label = rw.getString(4);
         hd.unit = rw.getString(5);
-        hd.standard_unit = rw.getString(6);
-        hd.display_unit = rw.getString(7);
+        try {
+          hd.standard_unit = Double.parseDouble(rw.getString(6));
+        } catch (NumberFormatException e) {
+          hd.standard_unit = 1.0;
+        }
+        try {
+          hd.display_unit = Double.parseDouble(rw.getString(7));
+        } catch (NumberFormatException e) {
+          hd.display_unit = 1.0;
+        }
         hd.format = rw.getString(8);
         hd.archive_rel_change = rw.getString(9);
         hd.archive_abs_change = rw.getString(10);

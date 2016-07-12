@@ -187,6 +187,40 @@ public class HdbSigInfo {
   }
 
   /**
+   * Returns true if type is an integer type
+   * @param type Attribute type
+   */
+  public static boolean isIntegerType(int type) {
+
+    switch(type) {
+      case TYPE_ARRAY_LONG64_RO:
+      case TYPE_ARRAY_CHAR_RO:
+      case TYPE_ARRAY_LONG64_RW:
+      case TYPE_ARRAY_CHAR_RW:
+      case TYPE_ARRAY_UCHAR_RO:
+      case TYPE_ARRAY_UCHAR_RW:
+      case TYPE_ARRAY_SHORT_RO:
+      case TYPE_ARRAY_SHORT_RW:
+      case TYPE_ARRAY_USHORT_RO:
+      case TYPE_ARRAY_USHORT_RW:
+      case TYPE_ARRAY_LONG_RO:
+      case TYPE_ARRAY_LONG_RW:
+      case TYPE_ARRAY_ULONG_RO:
+      case TYPE_ARRAY_ULONG_RW:
+      case TYPE_ARRAY_STATE_RO:
+      case TYPE_ARRAY_STATE_RW:
+      case TYPE_ARRAY_BOOLEAN_RO:
+      case TYPE_ARRAY_BOOLEAN_RW:
+      case TYPE_ARRAY_ULONG64_RO:
+      case TYPE_ARRAY_ULONG64_RW:
+        return true;
+      default:
+        return false;
+    }
+
+  }
+
+  /**
    * Returns true if type is a string type
    * @param type Attribute type
    */

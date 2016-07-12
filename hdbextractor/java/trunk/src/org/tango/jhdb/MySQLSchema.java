@@ -314,8 +314,16 @@ public class MySQLSchema extends HdbReader {
         ret.insertTime = timeValue(rs.getTimestamp(2));
         ret.label = rs.getString(3);
         ret.unit = rs.getString(4);
-        ret.standard_unit = rs.getString(5);
-        ret.display_unit = rs.getString(6);
+        try {
+          ret.standard_unit = Double.parseDouble(rs.getString(5));
+        } catch (NumberFormatException e) {
+          ret.standard_unit = 1.0;
+        }
+        try {
+          ret.display_unit = Double.parseDouble( rs.getString(6));
+        } catch (NumberFormatException e) {
+          ret.display_unit = 1.0;
+        }
         ret.format = rs.getString(7);
         ret.archive_rel_change = rs.getString(8);
         ret.archive_abs_change = rs.getString(9);
@@ -364,8 +372,16 @@ public class MySQLSchema extends HdbReader {
         hd.insertTime = timeValue(rs.getTimestamp(2));
         hd.label = rs.getString(3);
         hd.unit = rs.getString(4);
-        hd.standard_unit = rs.getString(5);
-        hd.display_unit = rs.getString(6);
+        try {
+          hd.standard_unit = Double.parseDouble(rs.getString(5));
+        } catch (NumberFormatException e) {
+          hd.standard_unit = 1.0;
+        }
+        try {
+          hd.display_unit = Double.parseDouble( rs.getString(6));
+        } catch (NumberFormatException e) {
+          hd.display_unit = 1.0;
+        }
         hd.format = rs.getString(7);
         hd.archive_rel_change = rs.getString(8);
         hd.archive_abs_change = rs.getString(9);

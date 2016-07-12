@@ -211,4 +211,32 @@ public class HdbStateArray extends HdbData {
     return ret;
   }
 
+  public long getValueAsLong() throws HdbFailed {
+    throw new HdbFailed("This datum is not scalar");
+  }
+
+  public long getWriteValueAsLong() throws HdbFailed {
+    throw new HdbFailed("This datum is not scalar");
+  }
+
+  public long[] getValueAsLongArray() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    long[] ret = new long[value.length];
+    for(int i=0;i<value.length;i++)
+      ret[i] = (long)value[i];
+    return ret;
+  }
+
+  public long[] getWriteValueAsLongArray() throws HdbFailed {
+    if(hasFailed())
+      throw new HdbFailed(this.errorMessage);
+    if(!hasWriteValue())
+      throw new HdbFailed("This datum has no write value");
+    long[] ret = new long[wvalue.length];
+    for(int i=0;i<wvalue.length;i++)
+      ret[i] = (long)wvalue[i];
+    return ret;
+  }
+
 }

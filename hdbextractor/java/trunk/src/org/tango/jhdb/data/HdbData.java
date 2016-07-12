@@ -171,6 +171,30 @@ public abstract class HdbData {
   public abstract double[] getWriteValueAsDoubleArray() throws HdbFailed;
 
   /**
+   * Returns the value as long if it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract long getValueAsLong() throws HdbFailed;
+
+  /**
+   * Returns the value as long array it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract long[] getValueAsLongArray() throws HdbFailed;
+
+  /**
+   * Returns the write value as long if it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract long getWriteValueAsLong() throws HdbFailed;
+
+  /**
+   * Returns the write value as long array it can be converted.
+   * @throws HdbFailed In case of failure
+   */
+  public abstract long[] getWriteValueAsLongArray() throws HdbFailed;
+
+  /**
    * Parse value
    * @param value Value to be parsed
    */

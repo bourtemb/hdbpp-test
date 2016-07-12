@@ -182,5 +182,20 @@ public class HdbFloat extends HdbData {
   public double[] getWriteValueAsDoubleArray() throws HdbFailed {
     throw new HdbFailed("This datum is not an array");
   }
+  public long getValueAsLong() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
+
+  public long getWriteValueAsLong() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
+
+  public long[] getValueAsLongArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
+
+  public long[] getWriteValueAsLongArray() throws HdbFailed {
+    throw new HdbFailed("This datum is not an integer");
+  }
 
 }

@@ -11,8 +11,8 @@ public class HdbSigParam {
   public long   insertTime;
   public String label;
   public String unit;
-  public String display_unit;
-  public String standard_unit;
+  public double display_unit;
+  public double standard_unit;
   public String format;
   public String archive_rel_change;
   public String archive_abs_change;

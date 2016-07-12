@@ -32,6 +32,9 @@
 //-======================================================================
 package org.tango.jhdb.data;
 
+import org.tango.jhdb.HdbFailed;
+import org.tango.jhdb.HdbSigInfo;
+
 import java.util.ArrayList;
 
 /**
@@ -42,6 +45,7 @@ public class HdbDataSet {
   ArrayList<HdbData> data;
   String name;
   int type;
+  long invalidValue=Long.MIN_VALUE;
 
   /**
    * Construct an empty HdbDataSet
@@ -194,6 +198,110 @@ public class HdbDataSet {
     } else {
       return get(r-1);
     }
+
+  }
+
+
+  /** Returns all timestamp of this dataset as an array */
+  public long[] getDataTimeArray() {
+    long[] ret = new long[size()];
+    for(int i=0;i<size();i++)
+      ret[i] = get(i).getDataTime();
+    return ret;
+  }
+
+  /** Returns all read value of this dataset as a double array, for scalar and numerical type only.
+   * If a data has failed, Double.NaN is returned.
+   * @throws HdbFailed If the type cannot be converted or is not a scalar type
+   */
+  public double[] getValueAsDoubleArray() throws HdbFailed {
+
+    if(HdbSigInfo.isArrayType(getType()))
+      throw new HdbFailed("Not a scalar type ");
+    if(!HdbSigInfo.isNumericType(getType()))
+      throw new HdbFailed("Not a numerical type ");
+
+    double[] ret = new double[size()];
+    for(int i=0;i<size();i++)
+      if(get(i).hasFailed())
+        ret[i] = Double.NaN;
+      else
+        ret[i] = get(i).getValueAsDouble();
+    return ret;
+
+
+  }
+
+  /** Returns all write value of this dataset as a double array, for scalar and numerical type only.
+   * If a data has failed, Double.NaN is returned.
+   * @throws HdbFailed If the type cannot be converted or is not a scalar type
+   */
+  public double[] getWriteValueAsDoubleArray() throws HdbFailed {
+
+    if(HdbSigInfo.isArrayType(getType()))
+      throw new HdbFailed("Not a scalar type ");
+    if(!HdbSigInfo.isNumericType(getType()))
+      throw new HdbFailed("Not a numerical type ");
+
+    double[] ret = new double[size()];
+    for(int i=0;i<size();i++)
+      if(get(i).hasFailed())
+        ret[i] = Double.NaN;
+      else
+        ret[i] = get(i).getWriteValueAsDouble();
+    return ret;
+
+
+  }
+
+  /**
+   * Sets the value returned if a data has failed when calling getDataAsLongIntArray.
+   * Default is Long.MIN_VALUE.
+   * @param invalid Invalid value
+   */
+  public void setInvalidValueForInteger(long invalid) {
+    invalidValue = invalid;
+  }
+
+  /** Returns all read value of this dataset as a long array, for scalar and integer type only.
+   * If a data has failed, INVALID_VAL is returned see #setInvalidValueForInteger.
+   * @throws HdbFailed If the type cannot be converted or is not a scalar type
+   */
+  public long[] getValueAsLongArray() throws HdbFailed {
+
+    if(HdbSigInfo.isArrayType(getType()))
+      throw new HdbFailed("Not a scalar type ");
+    if(!HdbSigInfo.isIntegerType(getType()))
+      throw new HdbFailed("Not an integer type ");
+
+    long[] ret = new long[size()];
+    for(int i=0;i<size();i++)
+      if(get(i).hasFailed())
+        ret[i] = invalidValue;
+      else
+        ret[i] = get(i).getValueAsLong();
+    return ret;
+
+  }
+
+  /** Returns all write value of this dataset as a long array, for scalar and integer type only.
+   * If a data has failed, INVALID_VAL is returned see #setInvalidValueForInteger.
+   * @throws HdbFailed If the type cannot be converted or is not a scalar type
+   */
+  public long[] getWriteValueAsLongArray() throws HdbFailed {
+
+    if(HdbSigInfo.isArrayType(getType()))
+      throw new HdbFailed("Not a scalar type ");
+    if(!HdbSigInfo.isIntegerType(getType()))
+      throw new HdbFailed("Not an integer type ");
+
+    long[] ret = new long[size()];
+    for(int i=0;i<size();i++)
+      if(get(i).hasFailed())
+        ret[i] = invalidValue;
+      else
+        ret[i] = get(i).getWriteValueAsLong();
+    return ret;
 
   }
 
