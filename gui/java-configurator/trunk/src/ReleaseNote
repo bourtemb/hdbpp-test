@@ -17,6 +17,12 @@
 
 
 
+hdb_configurator-1.3a - 04/08/16:
+	Copy error message added in diagnostics.
+
+hdb_configurator-1.3 - 06/06/16:
+	Fix a problem on default TANGO_HOST
+
 hdb_configurator-1.2 - 27/05/16:
 	Fix a problem for DevFailed/NamedDevFailedList exception
 

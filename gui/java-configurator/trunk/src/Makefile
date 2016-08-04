@@ -18,7 +18,7 @@
 #-======================================================================
 
 MAJOR_RELEASE = 1
-MINOR_RELEASE = 2
+MINOR_RELEASE = 3a
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 
@@ -102,16 +102,20 @@ jar :	version img
 
 
 
-JAVA=java
-CLP=/segfs/tango/release/java/appli/Pogo.jar
+TANGO_HOME=/segfs/tango/release/java
+JPATH=$(TANGO_HOME)/appli/org.tango.pogo.jar
+UPDATE_CLASS=org.tango.pogo.pogo_gui.tools.UpdateRelease
 version:
 	@echo "-----------------------------------------"
 	@echo "	Patching Version"
 	@echo "-----------------------------------------"
-	cd $(PACKAGE_HOME)/common; upd_rev  -f SplashUtils.java  -r $(APPLI_VERS)
-	$(JAVA) -classpath $(CLP)  pogo.make_util.ReleaseNote2html -java  "$(PACKAGE).tools Release Note"   $(PACKAGE).common
-	mv ReleaseNote.java  $(PACKAGE_HOME)/common
-
+	java -classpath $(JPATH) \
+	    $(UPDATE_CLASS) \
+		-file      $(PACKAGE_HOME)/common/SplashUtils.java \
+	 	-release   $(APPLI_VERS) \
+		-title     "$(PACKAGE).tools Release Notes" \
+		-package   $(PACKAGE).common \
+		-note_path $(PACKAGE_HOME)/common
 
 OPERATION = /operation/dserver/java/appli
 install_op:
