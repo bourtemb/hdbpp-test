@@ -157,7 +157,7 @@ public class FaultyAttributesDialog extends JDialog {
     //===============================================================
     //===============================================================
     private void buildRecords() throws DevFailed {
-        faultyAttributes = new ArrayList<FaultyAttribute>();
+        faultyAttributes = new ArrayList<>();
 
         //  Build records depending on one/all subscribers
         if (subscriber!=null) {
@@ -182,7 +182,7 @@ public class FaultyAttributesDialog extends JDialog {
 
 
             //  Copy to filtered (no filter at start up)
-        filteredFaultyAttributes = new ArrayList<FaultyAttribute>();
+        filteredFaultyAttributes = new ArrayList<>();
         for (FaultyAttribute faultyAttribute : faultyAttributes) {
             filteredFaultyAttributes.add(faultyAttribute);
         }
@@ -283,16 +283,11 @@ public class FaultyAttributesDialog extends JDialog {
         selectedRow = row;
         table.repaint();
 
-        if (event.getClickCount() == 2) {
-            //JOptionPane.showMessageDialog(this, filteredFaultyAttributes.get(row).getInfo());
-        }
-        else {
-            int mask = event.getModifiers();
+        int mask = event.getModifiers();
 
-            //  Check button clicked
-            if ((mask & MouseEvent.BUTTON3_MASK) != 0) {
-                popupMenu.showMenu(event, filteredFaultyAttributes.get(row));
-            }
+        //  Check button clicked
+        if ((mask & MouseEvent.BUTTON3_MASK) != 0) {
+            popupMenu.showMenu(event, filteredFaultyAttributes.get(row));
         }
     }
 	//===============================================================
@@ -433,7 +428,7 @@ public class FaultyAttributesDialog extends JDialog {
     @SuppressWarnings("UnusedParameters")
     private void summaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_summaryItemActionPerformed
         //  Sort attributes by error type (message)
-        ArrayList<AttributeErrorMessage>    errorMessages = new ArrayList<AttributeErrorMessage>();
+        ArrayList<AttributeErrorMessage>    errorMessages = new ArrayList<>();
         for (FaultyAttribute faultyAttribute : faultyAttributes) {
             AttributeErrorMessage   attributeErrorMessage = null;
             for (AttributeErrorMessage errorMessage : errorMessages) {
@@ -476,7 +471,7 @@ public class FaultyAttributesDialog extends JDialog {
 	//===============================================================
     private void applyFilter() {
         String  filter = filterTextField.getText();
-        filteredFaultyAttributes = new ArrayList<FaultyAttribute>();
+        filteredFaultyAttributes = new ArrayList<>();
         for (FaultyAttribute faultyAttribute : faultyAttributes) {
             if (faultyAttribute.attributeName.contains(filter)) {
                 filteredFaultyAttributes.add(faultyAttribute);
@@ -558,10 +553,26 @@ public class FaultyAttributesDialog extends JDialog {
         }
         //===========================================================
         private void stopStorage() throws DevFailed {
-            // TODO add your handling code here:
             DeviceData  argIn = new DeviceData();
             argIn.insert(attributeName);
             subscriber.command_inout("AttributeStop", argIn);
+        }
+    }
+    //=========================================================================
+    //=========================================================================
+    private static final JTextField textField = new JTextField();
+    private void copyAsText(FaultyAttribute attribute, int item) {
+        // TODO add your handling code here:
+        if (attribute!=null) {
+            final String message;
+            if (item==COPY_MESSAGE)
+                message = attribute.faultDescription;
+            else
+                message = attribute.attributeName;
+            textField.setText(message);
+            textField.setSelectionStart(0);
+            textField.setSelectionEnd(message.length());
+            textField.copy();
         }
     }
     //=========================================================================
@@ -699,11 +710,15 @@ public class FaultyAttributesDialog extends JDialog {
     //======================================================
     private static final int STOP_STORAGE = 0;
     private static final int CONFIGURE    = 1;
+    private static final int COPY_NAME    = 2;
+    private static final int COPY_MESSAGE = 3;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
             "Stop Archiving",
             "Configure Polling/Events",
+            "Copy attribute name",
+            "Copy error message",
     };
     //=======================================================
     //=======================================================
@@ -740,6 +755,7 @@ public class FaultyAttributesDialog extends JDialog {
             //noinspection PointlessArithmeticExpression
             getComponent(OFFSET + STOP_STORAGE).setEnabled(!faultyAttribute.stopped);
             getComponent(OFFSET + CONFIGURE).setEnabled(faultyAttribute.useDefaultTangoHost);
+            getComponent(OFFSET + COPY_MESSAGE).setEnabled(selectedAttribute!=null);
             show(table, event.getX(), event.getY());
         }
         //======================================================
@@ -764,6 +780,12 @@ public class FaultyAttributesDialog extends JDialog {
                     break;
                 case CONFIGURE:
                     selectedAttribute.configureEvent();
+                    break;
+                case COPY_NAME:
+                    copyAsText(selectedAttribute, itemIndex);
+                    break;
+                case COPY_MESSAGE:
+                    copyAsText(selectedAttribute, itemIndex);
                     break;
             }
         }
