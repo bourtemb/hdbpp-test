@@ -115,7 +115,6 @@ class TableConfig {
         if (height<0)
             height = nbRows() * h + 10;
     }
-
     //==========================================================
     //==========================================================
     void setColWidth(int title_width, int[] col_width) {

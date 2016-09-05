@@ -112,8 +112,15 @@ public class DistributionDialog extends JDialog {
             attributeChartChart = new AttributeChart();
             attributesPanel.add(attributeChartChart, BorderLayout.CENTER);
             performancesChart = new PerformancesChart();
-            performencesPanel.add(performancesChart, BorderLayout.CENTER);
+            performancesPanel.add(performancesChart, BorderLayout.CENTER);
             buildTable();
+            if (resetsAtSameTime()) {
+                //  If resets could be considered at same time
+                //  Display statistics on events for all subscribers
+                displayGlobalStatistics();
+            }
+            else
+                globalPanel.setVisible(false);
 
             titleLabel.setText(attributeChartChart.attributeCount + " Attributes   distributed   in " +
                     subscriberMap.getLabelList().size() + " Subscribers");
@@ -130,7 +137,7 @@ public class DistributionDialog extends JDialog {
 
 	//===============================================================
 	//===============================================================
-    private static final String Space = "&nbsp;";
+    private static final String Space = "&nbsp;"; // used for toolTips
     private void buildTable() {
 
         DataTableModel model = new DataTableModel();
@@ -210,9 +217,10 @@ public class DistributionDialog extends JDialog {
     private void initComponents() {
 
         javax.swing.JPanel topPanel = new javax.swing.JPanel();
+        javax.swing.JPanel topTopPanel = new javax.swing.JPanel();
         titleLabel = new javax.swing.JLabel();
-        javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
-        javax.swing.JButton cancelBtn = new javax.swing.JButton();
+        globalPanel = new javax.swing.JPanel();
+        globalLabel = new javax.swing.JLabel();
         javax.swing.JTabbedPane jTabbedPane1 = new javax.swing.JTabbedPane();
         attributesPanel = new javax.swing.JPanel();
         javax.swing.JPanel jPanel1 = new javax.swing.JPanel();
@@ -221,7 +229,7 @@ public class DistributionDialog extends JDialog {
         javax.swing.JRadioButton OkButton = new javax.swing.JRadioButton();
         javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
         javax.swing.JRadioButton eventsButton = new javax.swing.JRadioButton();
-        performencesPanel = new javax.swing.JPanel();
+        performancesPanel = new javax.swing.JPanel();
         javax.swing.JPanel jPanel2 = new javax.swing.JPanel();
         javax.swing.JRadioButton processButton = new javax.swing.JRadioButton();
         javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
@@ -229,6 +237,8 @@ public class DistributionDialog extends JDialog {
         javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
         javax.swing.JRadioButton pendingButton = new javax.swing.JRadioButton();
         tablePanel = new javax.swing.JPanel();
+        javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
+        javax.swing.JButton cancelBtn = new javax.swing.JButton();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -236,21 +246,21 @@ public class DistributionDialog extends JDialog {
             }
         });
 
+        topPanel.setLayout(new java.awt.BorderLayout());
+
         titleLabel.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         titleLabel.setText("Attributes Distribution");
-        topPanel.add(titleLabel);
+        topTopPanel.add(titleLabel);
+
+        topPanel.add(topTopPanel, java.awt.BorderLayout.PAGE_START);
+
+        globalLabel.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        globalLabel.setText("jLabel5");
+        globalPanel.add(globalLabel);
+
+        topPanel.add(globalPanel, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(topPanel, java.awt.BorderLayout.NORTH);
-
-        cancelBtn.setText("Dismiss");
-        cancelBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelBtnActionPerformed(evt);
-            }
-        });
-        bottomPanel.add(cancelBtn);
-
-        getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
 
         attributesPanel.setLayout(new java.awt.BorderLayout());
 
@@ -291,7 +301,7 @@ public class DistributionDialog extends JDialog {
 
         jTabbedPane1.addTab("Attributes", attributesPanel);
 
-        performencesPanel.setLayout(new java.awt.BorderLayout());
+        performancesPanel.setLayout(new java.awt.BorderLayout());
 
         processButton.setSelected(true);
         processButton.setText("Process Time");
@@ -326,14 +336,24 @@ public class DistributionDialog extends JDialog {
         });
         jPanel2.add(pendingButton);
 
-        performencesPanel.add(jPanel2, java.awt.BorderLayout.NORTH);
+        performancesPanel.add(jPanel2, java.awt.BorderLayout.NORTH);
 
-        jTabbedPane1.addTab("Performances", performencesPanel);
+        jTabbedPane1.addTab("Performances", performancesPanel);
 
         tablePanel.setLayout(new java.awt.BorderLayout());
         jTabbedPane1.addTab("Table", tablePanel);
 
         getContentPane().add(jTabbedPane1, java.awt.BorderLayout.CENTER);
+
+        cancelBtn.setText("Dismiss");
+        cancelBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelBtnActionPerformed(evt);
+            }
+        });
+        bottomPanel.add(cancelBtn);
+
+        getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -407,11 +427,46 @@ public class DistributionDialog extends JDialog {
 			dispose();
 		}
 	}
+	//===============================================================
+	//===============================================================
+    private void displayGlobalStatistics() {
+        long nbEvents = 0;
+        for (Archiver archiver : archivers) {
+            nbEvents += archiver.totalEvents;
+        }
+        Archiver archiver = archivers.get(0);
+        double average = (double)nbEvents / (archiver.sinceReset/1000);
+        String statistics = Long.toString(nbEvents) +
+                "  events received during " + archiver.getResetDuration() +
+                "  ->  average = " + String.format("%.3f", average) + " ev/sec.";
+        globalLabel.setText(statistics);
+    }
+	//===============================================================
+	//===============================================================
+    private boolean resetsAtSameTime() {
+
+        //  Check delta time on reset
+        long maxTime = 0;
+        long minTime = System.currentTimeMillis();
+        for (Archiver archiver : archivers) {
+            if (archiver.resetTime>maxTime) maxTime = archiver.resetTime;
+            if (archiver.resetTime<minTime) minTime = archiver.resetTime;
+        }
+        long delta = maxTime - minTime;
+        System.out.println("Delta reset time = " + delta + " ms");
+        return delta<5000; //  < 5sec -> Could be considered as same time
+    }
+	//===============================================================
+	//===============================================================
+
+
 
 	//===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel attributesPanel;
-    private javax.swing.JPanel performencesPanel;
+    private javax.swing.JLabel globalLabel;
+    private javax.swing.JPanel globalPanel;
+    private javax.swing.JPanel performancesPanel;
     private javax.swing.JPanel tablePanel;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
@@ -493,6 +548,9 @@ public class DistributionDialog extends JDialog {
             getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
             getXAxis().setGridVisible(true);
             getXAxis().setSubGridVisible(true);
+            getXAxis().setAutoScale(false);
+            getXAxis().setMinimum(0);
+            //  Maxi will be set after to know archivers number
 
             //  Create Y1
             getY1Axis().setName(names[i++]);
@@ -581,7 +639,7 @@ public class DistributionDialog extends JDialog {
         private AttributeChart() throws DevFailed {
             setJLChartListener(this);
             buildAxises(axisNames);
-            int i=0;
+            int i =0;
             failedDataView = buildCurve(curveNames[i++], Color.red, getY1Axis());
             okDataView     = buildCurve(curveNames[i++], new Color(0x00aa00), getY1Axis());
             eventDataView  = buildCurve(curveNames[i],   new Color(0x0000aa), getY2Axis());
@@ -592,6 +650,7 @@ public class DistributionDialog extends JDialog {
                     chartMouseClicked(event);
                 }
             });
+            getXAxis().setMaximum(archivers.size()+0.6);
         }
         //===============================================================
         private void updateValues() throws DevFailed {
@@ -720,6 +779,7 @@ public class DistributionDialog extends JDialog {
             pendingDataView = buildCurve(curveNames[i],   new Color(0x0000aa), getY2Axis());
 
             updateValues();
+            getXAxis().setMaximum(archivers.size()+0.6);
         }
         //===============================================================
         private void updateValues() throws DevFailed {
@@ -959,6 +1019,7 @@ public class DistributionDialog extends JDialog {
     }
 
 
+
     //=========================================================================
     /**
      * Renderer to set cell color
@@ -1041,6 +1102,10 @@ public class DistributionDialog extends JDialog {
                     return valueSort(archiver2.attributeCount(), archiver1.attributeCount());
                 case EVENT_NUMBER:
                     return valueSort(archiver2.totalEvents, archiver1.totalEvents);
+                case STORE_TIME:
+                    return valueSort(archiver2.maxStore, archiver1.maxStore);
+               case MAX_PENDING:
+                    return valueSort(archiver2.pending, archiver1.pending);
                 case RESET_TIME:
                     return valueSort(archiver1.resetTime, archiver2.resetTime);
                 case RESET_DURATION:

@@ -37,10 +37,12 @@ package org.tango.hdb_configurator.diagnostics;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DeviceData;
+import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.hdb_configurator.common.*;
+import org.tango.hdb_configurator.configurator.ManageAttributes;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -67,26 +69,27 @@ import java.util.List;
 @SuppressWarnings("MagicConstant")
 public class FaultyAttributesDialog extends JDialog {
 
+    private Component parent;
     private JDialog thisDialog;
     private ArrayList<FaultyAttribute> filteredFaultyAttributes;
     private ArrayList<FaultyAttribute> faultyAttributes;
     private JTable table;
     private DataTableModel model;
-    private TablePopupMenu popupMenu = new TablePopupMenu();
+    private TablePopupMenu tablePopupMenu = new TablePopupMenu();
+    private HeaderPopupMenu headerPopupMenu = new HeaderPopupMenu();
     private Subscriber subscriber;
     private SubscriberMap subscriberMap;
-    private ImageIcon selectedIcon;
-    private ImageIcon unselectedIcon;
     private int selectedRow    = -1;
     private static List<String> defaultTangoHosts;
 
 
-    private static final int columnWidth[] = { 400, 500 };
+    private static final int columnWidth[] = { 400, 500, 60 };
     private static final  String[] columnNames = {
-            "Attribute Names", "Fault description" };
+            "Attribute Names", "Fault description", "Selection" };
 
     private static final int ATTRIBUTE_NAME    = 0;
     private static final int FAULT_DESCRIPTION = 1;
+    private static final int SELECTION = 2;
 
     private static final Color selectionBackground   = new Color(0xe0e0ff);
     private static final Color firstColumnBackground = new Color(0xe0e0e0);
@@ -98,6 +101,7 @@ public class FaultyAttributesDialog extends JDialog {
     public FaultyAttributesDialog(JFrame parent, SubscriberMap subscriberMap) throws DevFailed {
         super(parent, false);
         this.subscriberMap = subscriberMap;
+        this.parent = parent;
         initDialog();
     }
 	//===============================================================
@@ -108,6 +112,7 @@ public class FaultyAttributesDialog extends JDialog {
     public FaultyAttributesDialog(JFrame parent, Subscriber subscriber) throws DevFailed {
         super(parent, false);
         this.subscriber = subscriber;
+        this.parent = parent;
         initDialog();
     }
 	//===============================================================
@@ -118,6 +123,7 @@ public class FaultyAttributesDialog extends JDialog {
     public FaultyAttributesDialog(JDialog parent, Subscriber subscriber) throws DevFailed {
         super(parent, true);
         this.subscriber = subscriber;
+        this.parent = parent;
         initDialog();
     }
 	//===============================================================
@@ -125,12 +131,10 @@ public class FaultyAttributesDialog extends JDialog {
 	 *	Creates new form FaultyAttributesDialog for several subscribers
 	 */
 	//===============================================================
-    public void initDialog() throws DevFailed {
+    private void initDialog() throws DevFailed {
         thisDialog = this;
         SplashUtils.getInstance().startSplash();
         try {
-            selectedIcon   = Utils.getInstance().getIcon("selected.gif", 0.75);
-            unselectedIcon = Utils.getInstance().getIcon("unselected.gif", 0.75);
             defaultTangoHosts = TangoUtils.getDefaultTangoHostList();
             initComponents();
             buildRecords();
@@ -195,18 +199,16 @@ public class FaultyAttributesDialog extends JDialog {
         String[]    attributeNames =  {
                 "AttributeList",        //  Full list
                 "AttributeErrorList",   //  error list
-                "AttributeStoppedList",
         };
         List<String[]> list = ArchiverUtils.readStringAttributes(subscriber, attributeNames);
         String[]    attributeList = list.get(0);
         String[]    errorList     = list.get(1);
-        String[]    stoppedList   = list.get(2);
 
         //  And check faulty ones.
         for (int i=0 ; i<attributeList.length && i<errorList.length ; i++) {
             if (!errorList[i].isEmpty()) {
                 faultyAttributes.add(
-                        new FaultyAttribute(subscriber, attributeList[i], errorList[i], stoppedList));
+                        new FaultyAttribute(subscriber, attributeList[i], errorList[i]));
             }
         }
 
@@ -270,8 +272,17 @@ public class FaultyAttributesDialog extends JDialog {
     private void tableHeaderActionPerformed(MouseEvent event) {
         JTableHeader    tableHeader = (JTableHeader) event.getSource();
         selectedColumn = tableHeader.columnAtPoint(event.getPoint());
-        Collections.sort(filteredFaultyAttributes, new AttributeComparator());
-        model.fireTableDataChanged();
+        int mask = event.getModifiers();
+        if ((mask & MouseEvent.BUTTON1_MASK) != 0) {
+            Collections.sort(filteredFaultyAttributes, new AttributeComparator());
+            model.fireTableDataChanged();
+        }
+        else
+        if ((mask & MouseEvent.BUTTON3_MASK) != 0) {
+            if (selectedColumn==SELECTION) {
+                headerPopupMenu.showMenu(event);
+            }
+        }
     }
     //===============================================================
     //===============================================================
@@ -281,13 +292,21 @@ public class FaultyAttributesDialog extends JDialog {
         Point clickedPoint = new Point(event.getX(), event.getY());
         int row = table.rowAtPoint(clickedPoint);
         selectedRow = row;
-        table.repaint();
+        table.repaint();    //  To show selection
 
         int mask = event.getModifiers();
 
         //  Check button clicked
+        if ((mask & MouseEvent.BUTTON1_MASK) != 0) {
+            if (table.columnAtPoint(clickedPoint)==SELECTION) {
+                //  Toggle selection
+                FaultyAttribute attribute = filteredFaultyAttributes.get(row);
+                attribute.selected = !attribute.selected;
+            }
+        }
+        else
         if ((mask & MouseEvent.BUTTON3_MASK) != 0) {
-            popupMenu.showMenu(event, filteredFaultyAttributes.get(row));
+            tablePopupMenu.showMenu(event, filteredFaultyAttributes.get(row));
         }
     }
 	//===============================================================
@@ -310,6 +329,11 @@ public class FaultyAttributesDialog extends JDialog {
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem updateItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem dismissItem = new javax.swing.JMenuItem();
+        javax.swing.JMenu actionMenu = new javax.swing.JMenu();
+        javax.swing.JMenuItem stopArchivingMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem removeArchivingMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem selectAllMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem unSelectAllMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem summaryItem = new javax.swing.JMenuItem();
 
@@ -326,7 +350,6 @@ public class FaultyAttributesDialog extends JDialog {
         jLabel2.setText("            ");
         topPanel.add(jLabel2);
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         jLabel1.setText("Filter:   ");
         topPanel.add(jLabel1);
 
@@ -370,6 +393,49 @@ public class FaultyAttributesDialog extends JDialog {
 
         jMenuBar1.add(fileMenu);
 
+        actionMenu.setMnemonic('A');
+        actionMenu.setText("Action");
+
+        stopArchivingMenuItem.setMnemonic('S');
+        stopArchivingMenuItem.setText("Stop archiving on selected attributes");
+        stopArchivingMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stopArchivingMenuItemActionPerformed(evt);
+            }
+        });
+        actionMenu.add(stopArchivingMenuItem);
+
+        removeArchivingMenuItem.setMnemonic('S');
+        removeArchivingMenuItem.setText("Remove archiving on selected attributes");
+        removeArchivingMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeArchivingMenuItemActionPerformed(evt);
+            }
+        });
+        actionMenu.add(removeArchivingMenuItem);
+
+        selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
+        selectAllMenuItem.setMnemonic('S');
+        selectAllMenuItem.setText("Select all attributes");
+        selectAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectAllMenuItemActionPerformed(evt);
+            }
+        });
+        actionMenu.add(selectAllMenuItem);
+
+        unSelectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.event.InputEvent.CTRL_MASK));
+        unSelectAllMenuItem.setMnemonic('U');
+        unSelectAllMenuItem.setText("Un Select all attributes");
+        unSelectAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                unSelectAllMenuItemActionPerformed(evt);
+            }
+        });
+        actionMenu.add(unSelectAllMenuItem);
+
+        jMenuBar1.add(actionMenu);
+
         viewMenu.setText("View");
 
         summaryItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
@@ -398,6 +464,7 @@ public class FaultyAttributesDialog extends JDialog {
     //===============================================================
     @SuppressWarnings("UnusedParameters")
     private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
+        doClose();
     }//GEN-LAST:event_closeDialog
 
     //===============================================================
@@ -467,6 +534,30 @@ public class FaultyAttributesDialog extends JDialog {
             ErrorPane.showErrorMessage(this, "Update", e);
         }
     }//GEN-LAST:event_updateItemActionPerformed
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void stopArchivingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopArchivingMenuItemActionPerformed
+        stopSelectedAttributes();
+    }//GEN-LAST:event_stopArchivingMenuItemActionPerformed
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
+        setAttributeSelection(true);
+    }//GEN-LAST:event_selectAllMenuItemActionPerformed
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void unSelectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unSelectAllMenuItemActionPerformed
+        setAttributeSelection(false);
+    }//GEN-LAST:event_unSelectAllMenuItemActionPerformed
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void removeArchivingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeArchivingMenuItemActionPerformed
+        removeSelectedAttributes();
+    }//GEN-LAST:event_removeArchivingMenuItemActionPerformed
 	//===============================================================
 	//===============================================================
     private void applyFilter() {
@@ -485,9 +576,99 @@ public class FaultyAttributesDialog extends JDialog {
 	 */
 	//===============================================================
 	private void doClose() {
-        setVisible(false);
-        dispose();
+        if (parent==null)
+            System.exit(0);
+        else {
+            setVisible(false);
+            dispose();
+        }
 	}
+    //===============================================================
+    //===============================================================
+    private void stopSelectedAttributes() {
+        if (JOptionPane.showConfirmDialog(this,
+                "Stop archiving for selected attributes ?", "Confirm dialog",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)==JOptionPane.NO_OPTION)
+            return;
+
+        try {
+            SplashUtils.getInstance().startSplash();
+            SplashUtils.getInstance().setSplashProgress(5, "Removing attributes");
+            int nb = 0;
+            for (FaultyAttribute attribute : filteredFaultyAttributes) {
+                if (attribute.selected) {
+                    SplashUtils.getInstance().increaseSplashProgress(2,
+                            "Removing " + attribute.attributeName);
+                    attribute.stopStorage();
+                    nb++;
+                }
+            }
+            //  and then update
+            SplashUtils.getInstance().increaseSplashProgress(2, "Waiting.....");
+            new RefreshThread(nb).start();
+        } catch (DevFailed e) {
+            SplashUtils.getInstance().stopSplash();
+            ErrorPane.showErrorMessage(thisDialog, e.toString(), e);
+        }
+    }
+    //===============================================================
+    //===============================================================
+    private void removeSelectedAttributes() {
+        if (JOptionPane.showConfirmDialog(this,
+                "Remove archiving for selected attributes ?", "Confirm dialog",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)==JOptionPane.NO_OPTION)
+            return;
+
+        try {
+            SplashUtils.getInstance().startSplash();
+            SplashUtils.getInstance().setSplashProgress(5, "Removing attributes");
+            List<String> attributeList = new ArrayList<>();
+            for (FaultyAttribute attribute : filteredFaultyAttributes) {
+                if (attribute.selected) {
+                    SplashUtils.getInstance().increaseSplashProgress(2,
+                            "Removing " + attribute.attributeName);
+                    attribute.stopStorage();
+                    attributeList.add(attribute.attributeName);
+                }
+            }
+            ManageAttributes.removeAttributes(attributeList);
+            //  and then update
+            SplashUtils.getInstance().increaseSplashProgress(2, "Waiting.....");
+            new RefreshThread(attributeList.size()).start();
+        } catch (DevFailed e) {
+            SplashUtils.getInstance().stopSplash();
+            ErrorPane.showErrorMessage(thisDialog, e.toString(), e);
+        }
+    }
+    //===============================================================
+    //===============================================================
+    private void setAttributeSelection(boolean b) {
+        for (FaultyAttribute attribute : filteredFaultyAttributes) {
+            attribute.selected = b;
+        }
+        table.repaint();
+    }
+    //===============================================================
+    //===============================================================
+
+    //===============================================================
+    //===============================================================
+    public static void main(String[] args) {
+        try {
+            // ToDo
+            String  configuratorDeviceName = TangoUtils.getConfiguratorDeviceName();
+            DeviceProxy configuratorProxy = new DeviceProxy(configuratorDeviceName);
+
+            //  Get subscriber labels if any
+            SubscriberMap subscriberMap = new SubscriberMap(configuratorProxy);
+
+            new FaultyAttributesDialog((JFrame)null,
+                    subscriberMap.getSubscriberByLabel("Cassandra SR Vacuum Temperatures")).setVisible(true);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(new JFrame(), null, e);
+        }
+    }
     //===============================================================
     //===============================================================
 
@@ -504,22 +685,42 @@ public class FaultyAttributesDialog extends JDialog {
 
 
     //===============================================================
+    /** To refresh attributes list after a while */
+    //===============================================================
+    private class RefreshThread extends Thread {
+        private int nb;
+        private RefreshThread(int nb) { this.nb = nb;}
+        public void run() {
+            try {
+                long t = nb*50;
+                if (t<1000) t = 1000;
+                sleep(t);
+            } catch (InterruptedException e) {
+                System.err.println(e.toString());
+            }
+            updateItemActionPerformed(null);
+            SplashUtils.getInstance().stopSplash();
+        }
+    }
+    //===============================================================
+    //===============================================================
+
+    //===============================================================
     //===============================================================
     private class FaultyAttribute {
         String attributeName;
         String faultDescription;
         String shortFaultDescription;
-        boolean stopped;
         Subscriber subscriber;
+        boolean selected = true;
         /** if use another one, cannot configure with Jive */
         private boolean useDefaultTangoHost = false;
         //===========================================================
         FaultyAttribute(Subscriber subscriber,
-                String attributeName, String faultDescription, String[] stoppedList) {
+                String attributeName, String faultDescription) {
             this.subscriber = subscriber;
             this.attributeName = attributeName;
             this.faultDescription = faultDescription;
-            stopped = isStopped(attributeName, stoppedList);
             String tangoHost = TangoUtils.getOnlyTangoHost(attributeName);
             for (String defaultTangoHost : defaultTangoHosts) {
                 if (tangoHost.equals(defaultTangoHost))
@@ -539,13 +740,6 @@ public class FaultyAttributesDialog extends JDialog {
             }
         }
         //===========================================================
-        private boolean isStopped(String attributeName, String[] stoppedList) {
-            for (String stopped : stoppedList)
-                if (attributeName.equalsIgnoreCase(stopped))
-                    return true;
-            return false;
-        }
-        //===========================================================
         private void configureEvent() {
             String  deviceName = TangoUtils.getOnlyDeviceName(attributeName);
             deviceName = deviceName.substring(0, deviceName.lastIndexOf('/'));
@@ -557,27 +751,10 @@ public class FaultyAttributesDialog extends JDialog {
             argIn.insert(attributeName);
             subscriber.command_inout("AttributeStop", argIn);
         }
+        //===========================================================
     }
     //=========================================================================
     //=========================================================================
-    private static final JTextField textField = new JTextField();
-    private void copyAsText(FaultyAttribute attribute, int item) {
-        // TODO add your handling code here:
-        if (attribute!=null) {
-            final String message;
-            if (item==COPY_MESSAGE)
-                message = attribute.faultDescription;
-            else
-                message = attribute.attributeName;
-            textField.setText(message);
-            textField.setSelectionStart(0);
-            textField.setSelectionEnd(message.length());
-            textField.copy();
-        }
-    }
-    //=========================================================================
-    //=========================================================================
-
 
 
 
@@ -619,6 +796,9 @@ public class FaultyAttributesDialog extends JDialog {
         public Object getValueAt(int row, int column) {
             //  Value to display is returned by
             // LabelCellRenderer.getTableCellRendererComponent()
+            if (column==SELECTION) {
+                return filteredFaultyAttributes.get(row).selected;
+            }
             return "";
         }
         //==========================================================
@@ -633,8 +813,12 @@ public class FaultyAttributesDialog extends JDialog {
          */
         //==========================================================
         public Class getColumnClass(int column) {
-            if (isVisible())
-                return getValueAt(0, column).getClass();
+            if (isVisible()) {
+                if (column == SELECTION)
+                    return Boolean.class;
+                else
+                    return getValueAt(0, column).getClass();
+            }
             else
                 return null;
         }
@@ -674,10 +858,6 @@ public class FaultyAttributesDialog extends JDialog {
                     break;
                 case FAULT_DESCRIPTION:
                     setText(attribute.faultDescription);
-                    if (attribute.stopped)
-                        setIcon(unselectedIcon);
-                    else
-                        setIcon(selectedIcon);
                     setToolTipText(attribute.faultDescription);
                     break;
             }
@@ -705,16 +885,87 @@ public class FaultyAttributesDialog extends JDialog {
 
     //======================================================
     /**
-     * Popup menu class
+     * HeaderPopupMenu class
      */
     //======================================================
-    private static final int STOP_STORAGE = 0;
+    private static final int STOP_STORAGE     = 0;
+    private static final int REMOVE_ATTRIBUTE = 1;
+    private static final int SELECT_ALL       = 2;
+    //private static final int UN_SELECT_ALL  = 3;
+    private static final int OFFSET = 2;    //	Label And separator
+
+    private static String[] headerMenuLabels = {
+            "Stop Archiving for Selected Attributes",
+            "Remove Archiving for Selected Attributes",
+            "Select All",
+            "Un Select All",
+    };
+    //=======================================================
+    //=======================================================
+    private class HeaderPopupMenu extends JPopupMenu {
+        private JLabel title;
+        //======================================================
+        private HeaderPopupMenu() {
+            title = new JLabel();
+            title.setFont(new java.awt.Font("Dialog", Font.BOLD, 12));
+            add(title);
+            add(new JPopupMenu.Separator());
+
+            for (String menuLabel : headerMenuLabels) {
+                if (menuLabel == null)
+                    add(new Separator());
+                else {
+                    JMenuItem btn = new JMenuItem(menuLabel);
+                    btn.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent evt) {
+                            menuActionPerformed(evt);
+                        }
+                    });
+                    add(btn);
+                }
+            }
+        }
+        //======================================================
+        private void showMenu(MouseEvent event) {
+            title.setText("Selection");
+            show(table, event.getX(), event.getY());
+        }
+        //======================================================
+        private void menuActionPerformed(ActionEvent evt) {
+            //	Check component source
+            Object obj = evt.getSource();
+            int itemIndex = -1;
+            for (int i = 0; i < headerMenuLabels.length; i++)
+                if (getComponent(OFFSET + i) == obj)
+                    itemIndex = i;
+            switch (itemIndex) {
+                case STOP_STORAGE:
+                    stopSelectedAttributes();
+                    break;
+                case REMOVE_ATTRIBUTE:
+                    removeSelectedAttributes();
+                    break;
+                default:
+                    setAttributeSelection(itemIndex==SELECT_ALL);
+                    break;
+            }
+        }
+    }
+    //======================================================
+    //======================================================
+
+
+
+    //======================================================
+    /**
+     * TablePopupMenu class
+     */
+    //======================================================
     private static final int CONFIGURE    = 1;
     private static final int COPY_NAME    = 2;
     private static final int COPY_MESSAGE = 3;
-    private static final int OFFSET = 2;    //	Label And separator
 
-    private static String[] menuLabels = {
+    private static String[] tableMenuLabels = {
             "Stop Archiving",
             "Configure Polling/Events",
             "Copy attribute name",
@@ -732,7 +983,7 @@ public class FaultyAttributesDialog extends JDialog {
             add(title);
             add(new JPopupMenu.Separator());
 
-            for (String menuLabel : menuLabels) {
+            for (String menuLabel : tableMenuLabels) {
                 if (menuLabel == null)
                     add(new Separator());
                 else {
@@ -747,13 +998,11 @@ public class FaultyAttributesDialog extends JDialog {
             }
         }
         //======================================================
-        //======================================================
         private void showMenu(MouseEvent event, FaultyAttribute faultyAttribute) {
             title.setText(faultyAttribute.attributeName);
             selectedAttribute = faultyAttribute;
 
             //noinspection PointlessArithmeticExpression
-            getComponent(OFFSET + STOP_STORAGE).setEnabled(!faultyAttribute.stopped);
             getComponent(OFFSET + CONFIGURE).setEnabled(faultyAttribute.useDefaultTangoHost);
             getComponent(OFFSET + COPY_MESSAGE).setEnabled(selectedAttribute!=null);
             show(table, event.getX(), event.getY());
@@ -763,7 +1012,7 @@ public class FaultyAttributesDialog extends JDialog {
             //	Check component source
             Object obj = evt.getSource();
             int itemIndex = -1;
-            for (int i=0; i<menuLabels.length; i++)
+            for (int i=0; i< tableMenuLabels.length; i++)
                 if (getComponent(OFFSET + i) == obj)
                     itemIndex = i;
             switch (itemIndex){
@@ -771,8 +1020,7 @@ public class FaultyAttributesDialog extends JDialog {
                     try {
                         selectedAttribute.stopStorage();
                         //  and then update
-                        buildRecords();
-                        model.fireTableDataChanged();
+                        new RefreshThread(1).start();
                     }
                     catch (DevFailed e) {
                         ErrorPane.showErrorMessage(thisDialog, e.toString(), e);
@@ -782,10 +1030,14 @@ public class FaultyAttributesDialog extends JDialog {
                     selectedAttribute.configureEvent();
                     break;
                 case COPY_NAME:
-                    copyAsText(selectedAttribute, itemIndex);
+                    if (selectedAttribute!=null) {
+                        Utils.copyToClipboard(selectedAttribute.attributeName);
+                    }
                     break;
                 case COPY_MESSAGE:
-                    copyAsText(selectedAttribute, itemIndex);
+                    if (selectedAttribute!=null) {
+                        Utils.copyToClipboard(selectedAttribute.faultDescription);
+                    }
                     break;
             }
         }

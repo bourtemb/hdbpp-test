@@ -54,6 +54,7 @@ import java.util.Enumeration;
  * @author Pascal Verdier
  */
 //=======================================================
+@SuppressWarnings("WeakerAccess")
 class ScrolledScalarViewer extends JScrollPane implements IErrorListener,
                                                         INumberScalarListener,
                                                         IStringScalarListener,
@@ -237,7 +238,7 @@ class ScrolledScalarViewer extends JScrollPane implements IErrorListener,
                 } else
                     try {
                         sleep(2000);
-                    } catch (Exception e) {/** */}
+                    } catch (Exception e) {/* */}
             }
         }
     }
@@ -299,7 +300,7 @@ class ScrolledScalarViewer extends JScrollPane implements IErrorListener,
                 //	wait a bit
                 try {
                     sleep(2000);
-                } catch (Exception e) { /** Nothing */ }
+                } catch (Exception e) { /* Nothing */ }
             }
         }
         //===========================================================

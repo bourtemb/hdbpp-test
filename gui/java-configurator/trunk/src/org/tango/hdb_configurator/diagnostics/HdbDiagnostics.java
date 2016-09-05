@@ -252,6 +252,7 @@ public class HdbDiagnostics extends JFrame {
         javax.swing.JMenuItem distributionItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem frequencyTrendItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem attributeErrorsItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem serverInformationsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem viewerAtkErrorItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem viewerAtkDiagnosticsItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
@@ -294,6 +295,7 @@ public class HdbDiagnostics extends JFrame {
         viewMenu.setText("View");
 
         statisticsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        statisticsItem.setMnemonic('S');
         statisticsItem.setText("Statistics");
         statisticsItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -303,6 +305,7 @@ public class HdbDiagnostics extends JFrame {
         viewMenu.add(statisticsItem);
 
         distributionItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F3, 0));
+        distributionItem.setMnemonic('D');
         distributionItem.setText("Distribution");
         distributionItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -312,6 +315,7 @@ public class HdbDiagnostics extends JFrame {
         viewMenu.add(distributionItem);
 
         frequencyTrendItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
+        frequencyTrendItem.setMnemonic('F');
         frequencyTrendItem.setText("Frequency Trend");
         frequencyTrendItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -321,6 +325,7 @@ public class HdbDiagnostics extends JFrame {
         viewMenu.add(frequencyTrendItem);
 
         attributeErrorsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
+        attributeErrorsItem.setMnemonic('A');
         attributeErrorsItem.setText("Attribute Errors");
         attributeErrorsItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -329,6 +334,17 @@ public class HdbDiagnostics extends JFrame {
         });
         viewMenu.add(attributeErrorsItem);
 
+        serverInformationsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
+        serverInformationsItem.setMnemonic('I');
+        serverInformationsItem.setText("Server informations");
+        serverInformationsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                serverInformationsItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(serverInformationsItem);
+
+        viewerAtkErrorItem.setMnemonic('E');
         viewerAtkErrorItem.setText("ATK Viewer Errors");
         viewerAtkErrorItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -476,6 +492,14 @@ public class HdbDiagnostics extends JFrame {
         }
     }//GEN-LAST:event_frequencyTrendItemActionPerformed
 
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void serverInformationsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverInformationsItemActionPerformed
+        // TODO add your handling code here:
+        new ServerInfoTable(this, subscriberMap, configuratorProxy).setVisible(true);
+    }//GEN-LAST:event_serverInformationsItemActionPerformed
+
  	//=======================================================
 	//=======================================================
     private void showAttributes(Subscriber subscriber, int type) {
@@ -586,11 +610,12 @@ public class HdbDiagnostics extends JFrame {
     private static final int STOPPED_ATTRIBUTES = 3;
     private static final int PENDING_ATTRIBUTES = 4;
     private static final int RECORD_FREQUENCY   = 5;
-    private static final int FAILURE_FREQUENCY  = 6;
+    private static final int FAILURE_FREQUENCY  = 6; // not used for menu
+    private static final int COPY_DEVICE_NAME   = 6;
 
-    private static final int TEST_ARCHIVER      = 6;
-    private static final int TEST_CONFIGURATOR  = 7;
-    private static final int OFFSET = 2;    //	Label And separator
+    private static final int TEST_ARCHIVER      = 7;
+    private static final int TEST_CONFIGURATOR  = 8;
+    private static final int OFFSET = 3;    //	Label And separator
 
     private static String[] menuLabels = {
             "Faulty  Attributes",
@@ -599,18 +624,23 @@ public class HdbDiagnostics extends JFrame {
             "Stopped Attributes",
             "Pending Attributes",
             "Record Frequency",
+            "Copy device name",
+
             "Test  Archiver",
             "Test  Configurator",
     };
 
     private class SubscriberMenu extends JPopupMenu {
-        private JLabel title;
+        private JLabel subscriberLabel;
+        private JLabel subscriberDevice;
         private Subscriber  selectedSubscriber;
         //======================================================
         private SubscriberMenu() {
-            title = new JLabel();
-            title.setFont(new java.awt.Font("Dialog", Font.BOLD, 16));
-            add(title);
+            subscriberLabel = new JLabel();
+            subscriberLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 16));
+            add(subscriberLabel);
+            subscriberDevice = new JLabel();
+            add(subscriberDevice);
             add(new JPopupMenu.Separator());
 
             for (String menuLabel : menuLabels) {
@@ -630,8 +660,15 @@ public class HdbDiagnostics extends JFrame {
         //======================================================
         private void showMenu(MouseEvent event, String label, Subscriber subscriber) throws DevFailed {
 
-            title.setText(label);
+            subscriberLabel.setText(label);
             selectedSubscriber = subscriber;
+            String deviceName = subscriber.getName();
+            if (deviceName.equals(label))
+                subscriberDevice.setVisible(false);
+            else {
+                subscriberDevice.setVisible(true);
+                subscriberDevice.setText("(" + deviceName + ")");
+            }
             boolean expert = (event.getModifiers() & MouseEvent.CTRL_MASK)!=0;
 
             getComponent(OFFSET /*+ FAULTY_ATTRIBUTES*/).setVisible(!expert);
@@ -663,6 +700,10 @@ public class HdbDiagnostics extends JFrame {
                 case RECORD_FREQUENCY:
                     showAttributes(selectedSubscriber, itemIndex);
                     break;
+                case COPY_DEVICE_NAME:
+                    Utils.copyToClipboard(selectedSubscriber.getName());
+                    break;
+
                 case TEST_ARCHIVER:
                     testDevice(selectedSubscriber);
                     break;

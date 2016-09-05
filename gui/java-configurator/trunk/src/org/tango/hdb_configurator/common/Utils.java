@@ -407,6 +407,15 @@ public class Utils {
                 longest = line;
         return longest;
     }
+    //===============================================================
+    //===============================================================
+    private static final JTextField textField = new JTextField();
+    public static void copyToClipboard(final String message) {
+        textField.setText(message);
+        textField.setSelectionStart(0);
+        textField.setSelectionEnd(message.length());
+        textField.copy();
+    }
     //======================================================================
     //======================================================================
     public static void main(String[] args) {

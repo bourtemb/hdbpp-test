@@ -17,8 +17,16 @@
 
 
 
-hdb_configurator-1.3a - 04/08/16:
-	Copy error message added in diagnostics.
+hdb_configurator-1.5 - 05/09/16:
+	Server information table added.
+	Add global statistics on distribution frame.
+	Fix a small problem when sort statistics
+	Add a copy attribute name in statistics window.
+
+hdb_configurator-1.4 - 24/08/16:
+	Add a litle tool to manage Stat/Stop all attributes on specified subscribers.
+	Fix a small problem in distribution display.
+	Add a copy error message added in diagnostics.
 
 hdb_configurator-1.3 - 06/06/16:
 	Fix a problem on default TANGO_HOST

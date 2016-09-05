@@ -7,7 +7,7 @@
 #
 # $Author: verdier $
 #
-# $Version$
+# $Version: $
 #
 # $Log: Makefile,v $
 #
@@ -18,7 +18,7 @@
 #-======================================================================
 
 MAJOR_RELEASE = 1
-MINOR_RELEASE = 3a
+MINOR_RELEASE = 5
 APPLI_VERS	=	$(MAJOR_RELEASE).$(MINOR_RELEASE)
 TAG_VERS	=	Release_$(MAJOR_RELEASE)_$(MINOR_RELEASE)
 

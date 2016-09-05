@@ -295,10 +295,8 @@ public class StrategyPanel extends JPanel {
 			setOpaque(true);
 		}
 		//==========================================================
-		public Component getTableCellRendererComponent(
-				JTable table, Object value,
-				boolean isSelected, boolean hasFocus,
-				int row, int column) {
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus, int row, int column) {
 			setText(strategyList.get(row).getName());
 			return this;
 		}

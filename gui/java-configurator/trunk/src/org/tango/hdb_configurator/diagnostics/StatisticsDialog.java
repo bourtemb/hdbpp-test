@@ -910,6 +910,7 @@ public class StatisticsDialog extends JDialog {
     private static final int READ_HDB   = 1;
     private static final int CONFIGURE  = 2;
     private static final int TEST_EVENT = 3;
+    private static final int COPY_ATTR  = 4;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
@@ -917,6 +918,7 @@ public class StatisticsDialog extends JDialog {
             "Read attribute from HDB",
             "Configure Polling/Events",
             "Test Event",
+            "Copy attribute name",
     };
     //=======================================================
     //=======================================================
@@ -977,6 +979,11 @@ public class StatisticsDialog extends JDialog {
                     break;
                 case TEST_EVENT:
                     Utils.getTestEvents().add(selectedAttribute.name);
+                    break;
+                case COPY_ATTR:
+                    if (selectedAttribute!=null) {
+                        Utils.copyToClipboard(selectedAttribute.name);
+                    }
                     break;
             }
         }

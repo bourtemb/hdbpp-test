@@ -304,7 +304,7 @@ public class ManageAttributes {
     public static void removeAttributes(List<String> attributes) throws DevFailed {
         if (display) {
             SplashUtils.getInstance().startSplash();
-            SplashUtils.getInstance().setSplashProgress(10, "Adding attributes");
+            SplashUtils.getInstance().setSplashProgress(10, "Removing attributes");
         }
         int step = 90/attributes.size();
         if (step<1) step = 1;
