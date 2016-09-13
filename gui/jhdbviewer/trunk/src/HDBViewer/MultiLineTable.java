@@ -27,8 +27,8 @@ public class MultiLineTable extends JTable {
     tableModel.setColumnNames(colNames);
   }
 
-  public void add(String value,long time,int colIdx) {
-    tableModel.add(value, time, colIdx);
+  public void add(String value,int quality,long time,int colIdx) {
+    tableModel.add(value, quality, time, colIdx);
   }
   
   public void doMicroSec(boolean doMicro) {
@@ -38,6 +38,11 @@ public class MultiLineTable extends JTable {
   
   public void showError(boolean show) {
     tableModel.setShowError(show);
+    updateSize();
+  }
+  
+  public void showQuality(boolean show) {
+    tableModel.setShowQuality(show);
     updateSize();
   }
   

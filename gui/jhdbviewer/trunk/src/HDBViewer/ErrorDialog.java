@@ -46,7 +46,7 @@ public class ErrorDialog extends javax.swing.JFrame {
   }
   
   public void addError(String name,HdbData err) {    
-    table.add(name+"\n"+err.getErrorMessage(), err.getDataTime(), 1);
+    table.add(name+"\n"+err.getErrorMessage(), 1, err.getDataTime(), 1);
   }
   
   /**

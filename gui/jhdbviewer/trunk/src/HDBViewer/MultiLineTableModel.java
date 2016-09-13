@@ -16,6 +16,7 @@ import javax.swing.table.AbstractTableModel;
 
 class CellItem {
   int column;
+  int    quality;
   String value;
 }
 
@@ -25,7 +26,26 @@ class RowItem {
   ArrayList<CellItem> value;
   int nbError = 0;
   
-  String getValueAt(int column) {
+  public String qualityToStr(int quality) {
+
+    switch(quality) {
+      case 0:
+        return "VALID";
+      case 1:
+        return "INVALID";
+      case 2:
+        return "ALARM";
+      case 3:
+        return "CHANGING";
+      case 4:
+        return "WARNING";
+      default:
+        return "UNKNOWN QUALITY";
+    }
+
+  }
+
+  String getValueAt(int column,boolean addQuality) {
     
     boolean found=false;
     int i=0;
@@ -34,7 +54,10 @@ class RowItem {
       if(!found) i++;
     }
     if(found) {
-      return value.get(i).value;
+      String ret = value.get(i).value;
+      if(addQuality)
+        ret += "\n" + qualityToStr(value.get(i).quality);
+      return ret;
     } else {
       return "";
     }
@@ -54,6 +77,7 @@ public class MultiLineTableModel extends AbstractTableModel {
   private String[] colNames;
   private boolean doMicroSec = false;
   private boolean showError = true;
+  private boolean showQuality = false;
   
   public MultiLineTableModel() {
     data = new ArrayList<RowItem>();
@@ -77,6 +101,15 @@ public class MultiLineTableModel extends AbstractTableModel {
   
   public boolean isShowingError() {
     return showError;
+  }
+  
+  public void setShowQuality(boolean show) {
+    showQuality = show;
+    fireTableDataChanged();
+  }
+  
+  public boolean isShowingQuality() {
+    return showQuality;
   }
   
   public void setColumnNames(String[] names) {
@@ -119,12 +152,13 @@ public class MultiLineTableModel extends AbstractTableModel {
             
   }
   
-  public void add(String value,long time,int colIdx) {
+  public void add(String value,int quality,long time,int colIdx) {
     
     RowItem n = binarySearch(time);
     CellItem c = new CellItem();
     c.column = colIdx;
     c.value = value;
+    c.quality = quality;
     n.value.add(c);
     if(value.startsWith("/Err"))
       n.nbError++;
@@ -185,7 +219,7 @@ public class MultiLineTableModel extends AbstractTableModel {
       // Timestamp
       return Utils.formatTime(i.time,(doMicroSec?Utils.FORMAT_US:Utils.FORMAT_SEC));
     } else {
-      String r = i.getValueAt(columnIndex);
+      String r = i.getValueAt(columnIndex,showQuality);
       if(showError) {
         return r;
       } else {

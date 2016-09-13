@@ -55,6 +55,7 @@ public class TablePanel extends javax.swing.JPanel {
     tableBtnPanel = new javax.swing.JPanel();
     doMicroCheck = new javax.swing.JCheckBox();
     displayErrorCheck = new javax.swing.JCheckBox();
+    doQualityCheck = new javax.swing.JCheckBox();
     saveButton = new javax.swing.JButton();
     copyButton = new javax.swing.JButton();
 
@@ -83,6 +84,15 @@ public class TablePanel extends javax.swing.JPanel {
       }
     });
     tableBtnPanel.add(displayErrorCheck);
+
+    doQualityCheck.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    doQualityCheck.setText("Display quality");
+    doQualityCheck.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        doQualityCheckActionPerformed(evt);
+      }
+    });
+    tableBtnPanel.add(doQualityCheck);
 
     saveButton.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
     saveButton.setText("Save file");
@@ -138,11 +148,18 @@ public class TablePanel extends javax.swing.JPanel {
    
   }//GEN-LAST:event_displayErrorCheckActionPerformed
 
+  private void doQualityCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_doQualityCheckActionPerformed
+
+     table.showQuality(doQualityCheck.isSelected());
+     
+  }//GEN-LAST:event_doQualityCheckActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton copyButton;
   private javax.swing.JCheckBox displayErrorCheck;
   private javax.swing.JCheckBox doMicroCheck;
+  private javax.swing.JCheckBox doQualityCheck;
   private javax.swing.JButton saveButton;
   private javax.swing.JPanel tableBtnPanel;
   private javax.swing.JPanel tablePanel;

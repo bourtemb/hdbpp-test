@@ -37,7 +37,7 @@ import org.tango.jhdb.data.HdbStateArray;
 
 public class MainPanel extends javax.swing.JFrame implements IJLChartListener,HdbProgressListener {
 
-  static final String APP_RELEASE = "1.9";
+  static final String APP_RELEASE = "1.11";
     
   // Panels
   DockedPanel viewDockedPanel;
@@ -792,7 +792,7 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
               HdbSigParam p = hdb.getReader().getLastParam(sigIn[i].name);
               selection.get(i).unit = p.unit;
               try {
-                selection.get(i).A1 = Double.parseDouble(p.display_unit);
+                selection.get(i).A1 = p.display_unit;
               } catch (NumberFormatException e) {
                 infoDialog.addText("Warning: " + e.getMessage());                
               }
@@ -1036,25 +1036,36 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
           if(d.hasFailed()) {
             
             String err = "/Err"+d.getErrorMessage();
-            tablePanel.table.add(err,d.getDataTime(),colIdx);
-            if(isRW) tablePanel.table.add(err,d.getDataTime(),colIdx+1);  
+            tablePanel.table.add(err,1,d.getDataTime(),colIdx);
+            if(isRW) tablePanel.table.add(err,1,d.getDataTime(),colIdx+1);  
+            
+          } else if (d.isInvalid()) {
+            
+            String err = "/ErrATTR_INVALID";
+            tablePanel.table.add(err,1,d.getDataTime(),colIdx);
+            if(isRW) tablePanel.table.add(err,1,d.getDataTime(),colIdx+1);
             
           } else {
+            
             if(ai.isState()) {
               
               tablePanel.table.add("/State"+d.getValueAsString(),
+                                   d.getQualityFactor(),
                                    d.getDataTime(),colIdx);            
               if(isRW)
                 tablePanel.table.add("/State"+d.getWriteValueAsString(),
+                                     d.getQualityFactor(),
                                      d.getDataTime(),colIdx+1);
               
             } else {       
               
               tablePanel.table.add(d.getValueAsString(),
+                                   d.getQualityFactor(),
                                    d.getDataTime(),colIdx);
                 
               if(isRW)
                 tablePanel.table.add(d.getWriteValueAsString(),
+                                     d.getQualityFactor(),
                                      d.getDataTime(),colIdx+1);            
               
             }
@@ -1083,12 +1094,16 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
               HdbData d = results[i].get(j);
               if (d.hasFailed()) {                
                 String err = "/Err" + d.getErrorMessage();
-                tablePanel.table.add(err, d.getDataTime(), colIdx);
-                if(isRW) tablePanel.table.add(err, d.getDataTime(), colIdx+1);
+                tablePanel.table.add(err, 1, d.getDataTime(), colIdx);
+                if(isRW) tablePanel.table.add(err,1, d.getDataTime(), colIdx+1);
+              } else if (d.isInvalid()) {                
+                String err = "/ErrATTR_INVALID";
+                tablePanel.table.add(err, 1, d.getDataTime(), colIdx);
+                if(isRW) tablePanel.table.add(err,1, d.getDataTime(), colIdx+1);
               } else if (idx >= d.size()) {
                 String err = "/Err" + "Index out of bounds";
-                tablePanel.table.add(err, d.getDataTime(), colIdx);
-                if(isRW) tablePanel.table.add(err, d.getDataTime(), colIdx+1);
+                tablePanel.table.add(err, 1, d.getDataTime(), colIdx);
+                if(isRW) tablePanel.table.add(err,1, d.getDataTime(), colIdx+1);
               } else {
 
                 try {
@@ -1152,9 +1167,9 @@ public class MainPanel extends javax.swing.JFrame implements IJLChartListener,Hd
 
                   }
                   
-                  tablePanel.table.add(value, d.getDataTime(), colIdx);
+                  tablePanel.table.add(value,d.getQualityFactor(),d.getDataTime(), colIdx);
                   if(isRW) 
-                    tablePanel.table.add(valueW, d.getDataTime(), colIdx+1);
+                    tablePanel.table.add(valueW,d.getQualityFactor(),d.getDataTime(), colIdx+1);
 
                 } catch (HdbFailed e) {
                   // should not happen !!!
