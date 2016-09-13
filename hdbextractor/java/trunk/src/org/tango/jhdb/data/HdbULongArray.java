@@ -161,15 +161,19 @@ public class HdbULongArray extends HdbData {
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;
+    if(isInvalid())
+      return "ATTR_INVALID";
     return arrayValue(value);
   }
 
   public String getWriteValueAsString() {
     if(hasFailed())
       return errorMessage;
-    if(hasWriteValue())
+    if(hasWriteValue()) {
+      if(isInvalid())
+        return "ATTR_INVALID";
       return arrayValue(wvalue);
-    else
+    } else
       return "";
   }
 

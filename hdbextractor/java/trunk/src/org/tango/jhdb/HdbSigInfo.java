@@ -213,6 +213,26 @@ public class HdbSigInfo {
       case TYPE_ARRAY_BOOLEAN_RW:
       case TYPE_ARRAY_ULONG64_RO:
       case TYPE_ARRAY_ULONG64_RW:
+      case TYPE_SCALAR_LONG64_RO:
+      case TYPE_SCALAR_CHAR_RO:
+      case TYPE_SCALAR_LONG64_RW:
+      case TYPE_SCALAR_CHAR_RW:
+      case TYPE_SCALAR_UCHAR_RO:
+      case TYPE_SCALAR_UCHAR_RW:
+      case TYPE_SCALAR_SHORT_RO:
+      case TYPE_SCALAR_SHORT_RW:
+      case TYPE_SCALAR_USHORT_RO:
+      case TYPE_SCALAR_USHORT_RW:
+      case TYPE_SCALAR_LONG_RO:
+      case TYPE_SCALAR_LONG_RW:
+      case TYPE_SCALAR_ULONG_RO:
+      case TYPE_SCALAR_ULONG_RW:
+      case TYPE_SCALAR_STATE_RO:
+      case TYPE_SCALAR_STATE_RW:
+      case TYPE_SCALAR_BOOLEAN_RO:
+      case TYPE_SCALAR_BOOLEAN_RW:
+      case TYPE_SCALAR_ULONG64_RO:
+      case TYPE_SCALAR_ULONG64_RW:
         return true;
       default:
         return false;

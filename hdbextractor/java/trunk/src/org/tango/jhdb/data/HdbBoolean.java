@@ -147,21 +147,27 @@ public class HdbBoolean extends HdbData {
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;
+    if(isInvalid())
+      return "ATTR_INVALID";
     return Boolean.toString(value);
   }
 
   public String getWriteValueAsString() {
     if(hasFailed())
       return errorMessage;
-    if(hasWriteValue())
+    if(hasWriteValue()) {
+      if(isInvalid())
+        return "ATTR_INVALID";
       return Boolean.toString(wvalue);
-    else
+    } else
       return "";
   }
 
   public double getValueAsDouble() throws HdbFailed {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
+    if(isInvalid())
+      return Double.NaN;
     return (value)?1:0;
   }
 
@@ -169,6 +175,8 @@ public class HdbBoolean extends HdbData {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
     if(hasWriteValue()) {
+      if(isInvalid())
+        return Double.NaN;
       return (wvalue)?1:0;
     } else {
       throw new HdbFailed("This datum has no write value");

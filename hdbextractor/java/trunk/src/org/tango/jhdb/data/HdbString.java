@@ -128,15 +128,19 @@ public class HdbString extends HdbData {
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;
+    if(isInvalid())
+      return "ATTR_INVALID";
     return value;
   }
 
   public String getWriteValueAsString() {
     if(hasFailed())
       return errorMessage;
-    if(hasWriteValue())
+    if(hasWriteValue()) {
+      if(isInvalid())
+        return "ATTR_INVALID";
       return wvalue;
-    else
+    } else
       return "";
   }
 

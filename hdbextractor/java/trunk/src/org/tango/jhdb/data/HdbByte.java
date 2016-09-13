@@ -147,21 +147,27 @@ public class HdbByte extends HdbData {
   public String getValueAsString() {
     if(hasFailed())
       return errorMessage;
+    if(isInvalid())
+      return "ATTR_INVALID";
     return Byte.toString(value);
   }
 
   public String getWriteValueAsString() {
     if(hasFailed())
       return errorMessage;
-    if(hasWriteValue())
+    if(hasWriteValue()) {
+      if(isInvalid())
+        return "ATTR_INVALID";
       return Byte.toString(wvalue);
-    else
+    } else
       return "";
   }
 
   public double getValueAsDouble() throws HdbFailed {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
+    if(isInvalid())
+      return Double.NaN;
     return (double)value;
   }
 
@@ -169,6 +175,8 @@ public class HdbByte extends HdbData {
     if(hasFailed())
       throw new HdbFailed(this.errorMessage);
     if(hasWriteValue()) {
+      if(isInvalid())
+        return Double.NaN;
       return (double)wvalue;
     } else {
       throw new HdbFailed("This datum has no write value");

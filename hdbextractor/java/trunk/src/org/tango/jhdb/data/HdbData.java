@@ -260,6 +260,13 @@ public abstract class HdbData {
 
   }
 
+  /**
+   * Returns true if this value is ATTR_INVALID
+   */
+  public boolean isInvalid() {
+    return qualityFactor==1;
+  }
+
   public String qualitytoStr(int quality) {
 
     switch(quality) {
