@@ -43,6 +43,7 @@ import org.tango.hdb_configurator.common.SubscriberMap;
 import org.tango.hdb_configurator.common.TangoUtils;
 import org.tango.hdb_configurator.common.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -112,12 +113,19 @@ public class SubscriberCommand {
         } catch (DevFailed e) {
             code = "Date\tEvents Received\tNb Attributes\n";
         }
-        code += new Date().toString() + "\t" + totalEvents + "\t" + totalAttributes + "\n";
+        code += formatDate(System.currentTimeMillis()) +
+                "\t" + totalEvents + "\t" + totalAttributes + "\n";
         Utils.writeFile(fileName, code);
 
         if (!errorMessage.isEmpty()) {
             throw new Exception(errorMessage);
         }
+    }
+    //=======================================================
+    //=======================================================
+    public static String formatDate(long t) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy  HH:mm:ss");
+        return simpleDateFormat.format(new Date(t));
     }
     //===============================================================
     //===============================================================
