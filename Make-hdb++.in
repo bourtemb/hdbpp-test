@@ -1,6 +1,6 @@
-ELETTRA = 1
+ELETTRA = 0
 HDBMYSQL = 0
-HDB++MYSQL = 0
+HDB++MYSQL = 1
 HDB++CASSANDRA = 0
 LIB_DEBUG = 0
 
@@ -9,7 +9,7 @@ ifeq ($(LIB_DEBUG),1)
 endif
 
 ifeq ($(ELETTRA),1)
-  CXXFLAGS += -std=gnu++98 -D_USE_FERMI_DB_RW
+  CXXFLAGS += -std=gnu++0x -D_USE_FERMI_DB_RW
 else
   CXXFLAGS += -std=gnu++0x
 endif
@@ -43,6 +43,7 @@ endif
 
 
 
-OMNI_INC = /usr/local/omniorb-4.1.6/include
-TANGO_INC = /usr/local/tango-8.1.2.c/include/tango
+OMNI_INC = /usr/local/omniorb-4.2.1/include
+TANGO_INC = /usr/local/tango-9.2.2/include/tango
+ZEROMQ_INC = /usr/local/zeromq-4.0.7/include
 
